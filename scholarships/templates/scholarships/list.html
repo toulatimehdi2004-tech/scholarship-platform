@@ -1,0 +1,107 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>🎓 Scholarships</h2>
+    <span style="color: #7f8c8d;">{{ total_count }} scholarships found</span>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="card">
+    <form method="GET" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+        <div style="flex: 2; min-width: 200px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Search</label>
+            <input type="text" name="search" value="{{ search_query }}" placeholder="Search scholarships..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Type</label>
+            <select name="type" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">All Types</option>
+                {% for type_code, type_name in SCHOLARSHIP_TYPES %}
+                    <option value="{{ type_code }}" {% if selected_type == type_code %}selected{% endif %}>{{ type_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Level</label>
+            <select name="level" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">All Levels</option>
+                {% for level_code, level_name in LEVEL_CHOICES %}
+                    <option value="{{ level_code }}" {% if selected_level == level_code %}selected{% endif %}>{{ level_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Country</label>
+            <select name="country" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">All Countries</option>
+                {% for country in countries %}
+                    <option value="{{ country }}" {% if selected_country == country %}selected{% endif %}>{{ country }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn">Apply Filters</button>
+            <a href="{% url 'scholarship_list' %}" class="btn btn-danger" style="margin-left: 5px;">Clear</a>
+        </div>
+    </form>
+</div>
+
+<!-- Scholarship List -->
+{% if scholarships %}
+    <div style="display: grid; gap: 20px;">
+        {% for scholarship in scholarships %}
+            <div class="card" style="transition: transform 0.2s;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3><a href="{% url 'scholarship_detail' scholarship.id %}" style="color: #2c3e50; text-decoration: none;">{{ scholarship.title }}</a></h3>
+                        <p style="color: #7f8c8d; margin: 5px 0;">
+                            🏛️ {{ scholarship.university.name }}
+                            {% if scholarship.university.country %}
+                                • 📍 {{ scholarship.university.country }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background-color: #3498db; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">
+                            {{ scholarship.get_type_display }}
+                        </span>
+                        <br>
+                        <span style="background-color: #2ecc71; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; margin-top: 5px;">
+                            {{ scholarship.get_level_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <p style="margin: 10px 0; color: #555;">{{ scholarship.description|truncatewords:30 }}</p>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; font-size: 14px; color: #7f8c8d;">
+                    <span>💰 {{ scholarship.amount|default:"Varies" }} {{ scholarship.currency|default:"USD" }}</span>
+                    <span>📅 Deadline: {{ scholarship.application_deadline|date:"M d, Y" }}</span>
+                    {% if scholarship.days_until_deadline > 0 %}
+                        <span style="color: #e74c3c;">⏰ {{ scholarship.days_until_deadline }} days left</span>
+                    {% else %}
+                        <span style="color: #e74c3c;">⏰ Deadline passed</span>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'scholarship_detail' scholarship.id %}" class="btn">View Details</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination Info -->
+    <div style="text-align: center; margin-top: 20px; color: #7f8c8d;">
+        Showing {{ scholarships|length }} scholarships
+    </div>
+    
+{% else %}
+    <div class="card" style="text-align: center; padding: 60px 20px;">
+        <h3 style="color: #7f8c8d;">🔍 No scholarships found</h3>
+        <p style="color: #95a5a6;">Try adjusting your search or filters.</p>
+        <a href="{% url 'scholarship_list' %}" class="btn" style="margin-top: 15px;">Clear All Filters</a>
+    </div>
+{% endif %}
+{% endblock %}

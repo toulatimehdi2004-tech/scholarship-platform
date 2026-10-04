@@ -1,0 +1,128 @@
+{% extends 'ai_assistant/base.html' %}
+
+{% block ai_content %}
+<style>
+    .verify-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .stat-card .number {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .stat-card .label { font-size: 13px; color: #7f8c8d; }
+    .stat-card.active .number { color: #27ae60; }
+    .stat-card.expired .number { color: #e74c3c; }
+    .stat-card.verified .number { color: #3498db; }
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .log-table th {
+        background: #2c3e50;
+        color: white;
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 13px;
+    }
+    .log-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ecf0f1;
+        font-size: 13px;
+    }
+    .status-badge {
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-badge.active { background: #d4edda; color: #155724; }
+    .status-badge.broken { background: #f8d7da; color: #721c24; }
+    .status-badge.expired { background: #fff3cd; color: #856404; }
+    .status-badge.deactivated { background: #e2e3e5; color: #383d41; }
+    .status-badge.unreachable { background: #f8d7da; color: #721c24; }
+    .status-badge.redirected { background: #d1ecf1; color: #0c5460; }
+</style>
+
+<div class="verify-header">
+    <h2>Verification Dashboard</h2>
+    <form method="post" action="{% url 'run_verification' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn" onclick="return confirm('Run verification on all scholarships?')">
+            Run Verification Now
+        </button>
+    </form>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="number">{{ summary.total_scholarships }}</div>
+        <div class="label">Total Scholarships</div>
+    </div>
+    <div class="stat-card active">
+        <div class="number">{{ summary.active_scholarships }}</div>
+        <div class="label">Active</div>
+    </div>
+    <div class="stat-card expired">
+        <div class="number">{{ summary.expired_deadline_not_deactivated }}</div>
+        <div class="label">Expired (not deactivated)</div>
+    </div>
+    <div class="stat-card verified">
+        <div class="number">{{ summary.verified_last_24h }}</div>
+        <div class="label">Verified (24h)</div>
+    </div>
+</div>
+
+<h3 style="margin-bottom: 15px;">Recent Verification Logs</h3>
+
+{% if recent_logs %}
+<table class="log-table">
+    <thead>
+        <tr>
+            <th>Scholarship</th>
+            <th>Status</th>
+            <th>HTTP Code</th>
+            <th>Checked</th>
+            <th>Action Taken</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in recent_logs %}
+        <tr>
+            <td><strong>{{ log.scholarship.title|truncatechars:40 }}</strong><br>
+                <span style="color: #7f8c8d;">{{ log.scholarship.university.name }}</span>
+            </td>
+            <td><span class="status-badge {{ log.status }}">{{ log.get_status_display }}</span></td>
+            <td>{{ log.http_status_code|default:"-" }}</td>
+            <td>{{ log.checked_at|date:"M d, H:i" }}</td>
+            <td>{{ log.action_taken|default:"-"|truncatechars:50 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="text-align: center; padding: 40px; color: #7f8c8d;">
+    No verification logs yet. Click "Run Verification Now" to start.
+</p>
+{% endif %}
+{% endblock %}

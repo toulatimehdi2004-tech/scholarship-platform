@@ -1,0 +1,37 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div>
+    <a href="{% url 'document_list' %}" style="color: #3498db; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+        ← Back to Documents
+    </a>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; border: 2px solid #e74c3c;">
+    <h2 style="color: #e74c3c;">⚠️ Delete Document</h2>
+    <hr>
+    
+    <p style="font-size: 18px; margin: 20px 0;">Are you sure you want to delete:</p>
+    <h3 style="color: #2c3e50;">"{{ document.title }}"</h3>
+    
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p><strong>Type:</strong> {{ document.get_document_type_display }}</p>
+        <p><strong>Uploaded:</strong> {{ document.created_at|date:"M d, Y" }}</p>
+        <p><strong>File:</strong> {{ document.file_name }}</p>
+    </div>
+    
+    <p style="color: #e74c3c;">This action cannot be undone!</p>
+    
+    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" style="background-color: #e74c3c; padding: 12px 30px;">
+                🗑️ Yes, Delete
+            </button>
+        </form>
+        <a href="{% url 'document_detail' document.id %}" class="btn" style="padding: 12px 30px;">
+            ❌ Cancel
+        </a>
+    </div>
+</div>
+{% endblock %}

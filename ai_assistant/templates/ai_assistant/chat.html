@@ -1,0 +1,265 @@
+{% extends 'ai_assistant/base.html' %}
+
+{% block ai_content %}
+<style>
+    .chat-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .chat-header {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        color: white;
+        padding: 25px;
+        border-radius: 10px 10px 0 0;
+        text-align: center;
+    }
+    .chat-header h2 { margin-bottom: 5px; }
+    .chat-header p { opacity: 0.8; font-size: 14px; }
+    .chat-messages {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-top: none;
+        min-height: 400px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding: 20px;
+    }
+    .message {
+        margin-bottom: 15px;
+        display: flex;
+        gap: 10px;
+    }
+    .message.user { justify-content: flex-end; }
+    .message .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .message.user .avatar { background: #3498db; }
+    .message.assistant .avatar { background: #2c3e50; }
+    .message.system .avatar { background: #f39c12; }
+    .message .bubble {
+        max-width: 75%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+        white-space: pre-line;
+    }
+    .message.user .bubble {
+        background: #3498db;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+    .message.assistant .bubble {
+        background: #ecf0f1;
+        color: #2c3e50;
+        border-bottom-left-radius: 4px;
+    }
+    .chat-input {
+        display: flex;
+        gap: 10px;
+        padding: 15px;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+    }
+    .chat-input input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+    }
+    .chat-input input:focus { border-color: #3498db; }
+    .chat-input button {
+        padding: 12px 24px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .chat-input button:hover { background: #2980b9; }
+    .suggestions {
+        margin-top: 15px;
+    }
+    .suggestions h3 {
+        font-size: 14px;
+        color: #7f8c8d;
+        margin-bottom: 10px;
+    }
+    .suggestion-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .suggestion-chip {
+        padding: 8px 14px;
+        background: #ecf0f1;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: none;
+        color: #2c3e50;
+        transition: all 0.2s;
+    }
+    .suggestion-chip:hover {
+        background: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+    .typing-indicator {
+        display: none;
+        padding: 10px 15px;
+        font-style: italic;
+        color: #7f8c8d;
+        font-size: 13px;
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>AI Scholarship Assistant</h2>
+        <p>Ask me anything about scholarships, applications, documents, or deadlines</p>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        {% if not conversations %}
+        <div class="message assistant">
+            <div class="avatar">AI</div>
+            <div class="bubble">
+                Hi {{ user.first_name|default:user.username }}! I'm your AI scholarship assistant. I can help you with:
+
+- Finding scholarships that match your profile
+- Checking eligibility requirements
+- Preparing documents (transcripts, motivation letters, etc.)
+- Tracking your application progress
+- Deadline reminders and tips
+
+What would you like help with?
+            </div>
+        </div>
+        {% endif %}
+
+        {% for msg in conversations %}
+        <div class="message {{ msg.role }}">
+            <div class="avatar">{% if msg.role == 'user' %}You{% else %}AI{% endif %}</div>
+            <div class="bubble">{{ msg.message }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="typing-indicator" id="typingIndicator">AI is thinking...</div>
+    </div>
+
+    <form class="chat-input" id="chatForm" onsubmit="sendMessage(event)">
+        <input type="text" id="messageInput" placeholder="Ask about scholarships, deadlines, documents..." autocomplete="off">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#7f8c8d;white-space:nowrap;">
+            <input type="checkbox" id="useAi" style="width:16px;height:16px;"> AI
+        </label>
+        <button type="submit">Send</button>
+    </form>
+
+    {% if suggestions %}
+    <div class="suggestions">
+        <h3>Quick suggestions:</h3>
+        <div class="suggestion-chips">
+            {% for s in suggestions %}
+            <span class="suggestion-chip" onclick="useSuggestion('{{ s.message|escapejs }}')">
+                {{ s.title }}
+            </span>
+            {% endfor %}
+            <span class="suggestion-chip" onclick="useSuggestion('Find scholarships for me')">Find scholarships</span>
+            <span class="suggestion-chip" onclick="useSuggestion('Help with documents')">Document help</span>
+            <span class="suggestion-chip" onclick="useSuggestion('Check my deadlines')">My deadlines</span>
+            <span class="suggestion-chip" onclick="useSuggestion('Application tips')">Get tips</span>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function scrollToBottom() {
+    const chat = document.getElementById('chatMessages');
+    chat.scrollTop = chat.scrollHeight;
+}
+scrollToBottom();
+
+function useSuggestion(text) {
+    document.getElementById('messageInput').value = text;
+    document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+}
+
+async function sendMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    const chatMessages = document.getElementById('chatMessages');
+    const typing = document.getElementById('typingIndicator');
+
+    // Add user message
+    chatMessages.innerHTML += `
+        <div class="message user">
+            <div class="avatar">You</div>
+            <div class="bubble">${escapeHtml(message)}</div>
+        </div>
+    `;
+    input.value = '';
+    typing.style.display = 'block';
+    scrollToBottom();
+
+    try {
+        const useAi = document.getElementById('useAi').checked;
+        const response = await fetch('{% url "ai_chat_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                message: message,
+                session_id: '{{ session_id }}',
+                use_ai: useAi
+            })
+        });
+        const data = await response.json();
+        typing.style.display = 'none';
+
+        chatMessages.innerHTML += `
+            <div class="message assistant">
+                <div class="avatar">AI</div>
+                <div class="bubble">${escapeHtml(data.response)}</div>
+            </div>
+        `;
+    } catch (err) {
+        typing.style.display = 'none';
+        chatMessages.innerHTML += `
+            <div class="message system">
+                <div class="avatar">!</div>
+                <div class="bubble">Sorry, something went wrong. Please try again.</div>
+            </div>
+        `;
+    }
+    scrollToBottom();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}

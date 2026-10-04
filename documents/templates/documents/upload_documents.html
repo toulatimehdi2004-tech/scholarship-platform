@@ -1,0 +1,98 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div>
+    <a href="{% url 'document_list' %}" style="color: #3498db; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+        ← Back to Documents
+    </a>
+</div>
+
+<div class="card" style="max-width: 700px; margin: 0 auto;">
+    <h2>📤 Upload Document</h2>
+    <hr>
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 15px;">
+            <label for="title" style="display: block; font-weight: bold; margin-bottom: 5px;">Document Title:</label>
+            <input type="text" id="title" name="title" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" placeholder="e.g., My Passport, Transcript, etc.">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="document_type" style="display: block; font-weight: bold; margin-bottom: 5px;">Document Type:</label>
+            <select id="document_type" name="document_type" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                {% for type_code, type_name in document_types %}
+                    <option value="{{ type_code }}">{{ type_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="order_id" style="display: block; font-weight: bold; margin-bottom: 5px;">Related Order (Optional):</label>
+            <select id="order_id" name="order_id" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">No related order</option>
+                {% for order in orders %}
+                    <option value="{{ order.id }}">Order #{{ order.id }} - {{ order.service.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="file" style="display: block; font-weight: bold; margin-bottom: 5px;">Choose File:</label>
+            <div style="border: 2px dashed #ddd; padding: 40px; text-align: center; border-radius: 10px; transition: all 0.3s;" id="drop-zone">
+                <p style="font-size: 48px; margin: 0;">📁</p>
+                <p style="color: #7f8c8d;">Drag & drop your file here, or click to browse</p>
+                <p style="color: #95a5a6; font-size: 12px;">Supported: PDF, JPG, PNG, DOCX, TXT</p>
+                <input type="file" id="file" name="file" required style="display: none;" accept=".pdf,.jpg,.jpeg,.png,.docx,.txt">
+                <button type="button" class="btn" onclick="document.getElementById('file').click()" style="margin-top: 10px;">Browse Files</button>
+            </div>
+            <div id="file-name" style="margin-top: 10px; color: #2ecc71; display: none;">✅ File selected: <span id="file-name-text"></span></div>
+        </div>
+        
+        <button type="submit" class="btn" style="width: 100%; background-color: #2ecc71; padding: 15px; font-size: 18px;">
+            📤 Upload Document
+        </button>
+    </form>
+</div>
+
+<script>
+    // File input handling
+    document.getElementById('file').addEventListener('change', function() {
+        const fileName = this.files[0] ? this.files[0].name : '';
+        if (fileName) {
+            document.getElementById('file-name-text').textContent = fileName;
+            document.getElementById('file-name').style.display = 'block';
+            document.getElementById('drop-zone').style.borderColor = '#2ecc71';
+        }
+    });
+    
+    // Drag and drop handling
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#3498db';
+        this.style.backgroundColor = '#f0f8ff';
+    });
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        this.style.backgroundColor = 'transparent';
+    });
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        this.style.backgroundColor = 'transparent';
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            document.getElementById('file').files = e.dataTransfer.files;
+            document.getElementById('file-name-text').textContent = file.name;
+            document.getElementById('file-name').style.display = 'block';
+            this.style.borderColor = '#2ecc71';
+        }
+    });
+    dropZone.addEventListener('click', function() {
+        document.getElementById('file').click();
+    });
+</script>
+{% endblock %}

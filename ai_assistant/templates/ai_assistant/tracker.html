@@ -1,0 +1,116 @@
+{% extends 'ai_assistant/base.html' %}
+
+{% block ai_content %}
+<style>
+    .tracker-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .tracker-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-left: 4px solid #3498db;
+        transition: transform 0.2s;
+    }
+    .tracker-card:hover { transform: translateY(-2px); }
+    .tracker-card.urgent { border-left-color: #e74c3c; }
+    .tracker-card.on-track { border-left-color: #27ae60; }
+    .tracker-card h3 { margin-bottom: 8px; font-size: 16px; }
+    .tracker-card h3 a { text-decoration: none; color: #2c3e50; }
+    .tracker-card h3 a:hover { color: #3498db; }
+    .tracker-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 13px;
+        color: #7f8c8d;
+        margin-bottom: 10px;
+    }
+    .progress-bar {
+        background: #ecf0f1;
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .progress-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.5s;
+    }
+    .progress-fill.low { background: #e74c3c; }
+    .progress-fill.mid { background: #f39c12; }
+    .progress-fill.high { background: #27ae60; }
+    .step-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .step-badge.active { background: #3498db; color: white; }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+    }
+    .empty-state h3 { margin-bottom: 10px; color: #2c3e50; }
+</style>
+
+<div class="tracker-header">
+    <h2>Application Tracker</h2>
+    <span style="color: #7f8c8d;">{{ total_tracked }} total tracked</span>
+</div>
+
+{% if active_applications %}
+<h3 style="margin-bottom: 15px; color: #2c3e50;">Active Applications</h3>
+{% for tracker in active_applications %}
+<div class="tracker-card {% if tracker.days_until_deadline <= 7 %}urgent{% else %}on-track{% endif %}">
+    <h3><a href="{% url 'tracker_detail' tracker.id %}">{{ tracker.scholarship.title }}</a></h3>
+    <div class="tracker-meta">
+        <span>{{ tracker.scholarship.university.name }}</span>
+        <span>{{ tracker.scholarship.get_type_display }}</span>
+        <span>Deadline: {{ tracker.scholarship.application_deadline|date:"M d, Y" }}</span>
+    </div>
+    <div>
+        <span class="step-badge active">{{ tracker.get_current_step_display }}</span>
+        <span style="margin-left: 10px; font-size: 13px; color: #7f8c8d;">
+            {{ tracker.get_progress_percentage }}% complete
+        </span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill {% if tracker.get_progress_percentage < 30 %}low{% elif tracker.get_progress_percentage < 70 %}mid{% else %}high{% endif %}"
+             style="width: {{ tracker.get_progress_percentage }}%"></div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if completed_applications %}
+<h3 style="margin: 25px 0 15px; color: #2c3e50;">Completed</h3>
+{% for tracker in completed_applications %}
+<div class="tracker-card" style="border-left-color: #95a5a6;">
+    <h3><a href="{% url 'tracker_detail' tracker.id %}">{{ tracker.scholarship.title }}</a></h3>
+    <div class="tracker-meta">
+        <span>{{ tracker.scholarship.university.name }}</span>
+        <span class="step-badge {% if tracker.current_step == 'accepted' %}active{% endif %}"
+              style="{% if tracker.current_step == 'accepted' %}background:#27ae60{% elif tracker.current_step == 'rejected' %}background:#e74c3c{% else %}background:#3498db{% endif %}">
+            {{ tracker.get_current_step_display }}
+        </span>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if not active_applications and not completed_applications %}
+<div class="empty-state">
+    <h3>No tracked applications yet</h3>
+    <p>Start tracking a scholarship to get AI-guided step-by-step help.</p>
+    <a href="{% url 'scholarship_list' %}" class="btn" style="margin-top: 15px;">Browse Scholarships</a>
+</div>
+{% endif %}
+{% endblock %}

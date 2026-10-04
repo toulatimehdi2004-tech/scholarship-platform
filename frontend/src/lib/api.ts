@@ -1,0 +1,295 @@
+const API_BASE_URL = "http://localhost:8000/api";
+
+// ── Token helpers ──────────────────────────────────────────
+export function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("auth_token");
+}
+
+export function setToken(token: string) {
+  localStorage.setItem("auth_token", token);
+}
+
+export function clearToken() {
+  localStorage.removeItem("auth_token");
+}
+
+// ── Types ──────────────────────────────────────────────────
+export interface Scholarship {
+  id: number;
+  title: string;
+  university: number;
+  university_name: string;
+  university_city?: string | null;
+  university_country?: string | null;
+  type: string;
+  level: string;
+  amount: string;
+  currency: string;
+  duration: string;
+  application_deadline: string;
+  application_link?: string | null;
+  total_seats?: number | null;
+  seats_filled?: number | null;
+  is_active: boolean;
+  is_featured: boolean;
+  created_at: string;
+}
+
+export interface ScholarshipDetail {
+  id: number;
+  title: string;
+  description: string;
+  type: string;
+  level: string;
+  amount: string;
+  currency: string;
+  duration: string;
+  tuition_info?: string | null;
+  total_seats?: number | null;
+  seats_filled?: number | null;
+  seats_available?: number | null;
+  application_deadline: string;
+  start_date: string;
+  end_date: string;
+  eligibility_criteria: string;
+  required_education_level: string;
+  minimum_gpa: number;
+  required_fields_of_study: string;
+  application_fee: string;
+  application_link: string;
+  required_documents: string[];
+  application_instructions: string;
+  contact_email: string;
+  contact_phone: string;
+  language: string;
+  is_active: boolean;
+  is_featured: boolean;
+  view_count: number;
+  days_until_deadline: number;
+  created_at: string;
+  university: {
+    id: number;
+    name: string;
+    logo: string;
+    country: string;
+    city: string;
+    is_verified: boolean;
+  };
+}
+
+export interface University {
+  id: number;
+  name: string;
+  logo: string;
+  country: string;
+  city: string;
+  address?: string | null;
+  founding_year?: number | null;
+  motto?: string | null;
+  is_verified: boolean;
+}
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  student_profile?: {
+    id: number;
+    country: string;
+    education_level: string;
+    field_of_study: string;
+    is_premium: boolean;
+    payment_date: string | null;
+  } | null;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+  message: string;
+}
+
+export interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+  status: number;
+}
+
+// ── API fetcher ────────────────────────────────────────────
+export async function fetchApi<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+  try {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const token = getToken();
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(options.headers as Record<string, string>),
+    };
+    if (token) {
+      headers["Authorization"] = `Token ${token}`;
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      let errorMsg = "An error occurred";
+
+      if (data.detail) {
+        errorMsg = data.detail;
+      } else if (data.error) {
+        errorMsg = data.error;
+      } else if (typeof data === "object") {
+        const messages: string[] = [];
+        for (const [field, errors] of Object.entries(data)) {
+          if (Array.isArray(errors)) {
+            messages.push(`${field}: ${errors.join(", ")}`);
+          } else if (typeof errors === "string") {
+            messages.push(`${field}: ${errors}`);
+          }
+        }
+        if (messages.length > 0) {
+          errorMsg = messages.join(" | ");
+        }
+      }
+
+      return { error: errorMsg, status: response.status };
+    }
+
+    return { data, status: response.status };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Network error",
+      status: 0,
+    };
+  }
+}
+
+// ── Auth API ───────────────────────────────────────────────
+export async function registerUser(data: {
+  username: string;
+  email: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+}): Promise<ApiResponse<AuthResponse>> {
+  return fetchApi<AuthResponse>("/auth/register/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function loginUser(data: {
+  username: string;
+  password: string;
+}): Promise<ApiResponse<AuthResponse>> {
+  return fetchApi<AuthResponse>("/auth/login/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function logoutUser(): Promise<ApiResponse<{ message: string }>> {
+  return fetchApi<{ message: string }>("/auth/logout/", { method: "POST" });
+}
+
+export async function sendVerificationCode(email: string): Promise<ApiResponse<{ message: string }>> {
+  return fetchApi("/auth/send-code/", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function verifyEmailCode(email: string, code: string): Promise<ApiResponse<AuthResponse>> {
+  return fetchApi<AuthResponse>("/auth/verify-code/", {
+    method: "POST",
+    body: JSON.stringify({ email, code }),
+  });
+}
+
+export async function resendVerificationCode(): Promise<ApiResponse<{ message: string }>> {
+  return fetchApi("/auth/resend-code/", { method: "POST" });
+}
+
+export async function forgotPassword(email: string): Promise<ApiResponse<{ message: string }>> {
+  return fetchApi("/auth/forgot-password/", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(
+  email: string,
+  code: string,
+  newPassword: string
+): Promise<ApiResponse<{ message: string }>> {
+  return fetchApi("/auth/reset-password/", {
+    method: "POST",
+    body: JSON.stringify({ email, code, new_password: newPassword }),
+  });
+}
+
+export async function getCurrentUser(): Promise<ApiResponse<User>> {
+  return fetchApi<User>("/auth/user/");
+}
+
+export async function activatePremium(): Promise<ApiResponse<{ message: string; is_premium: boolean }>> {
+  return fetchApi("/auth/activate-premium/", { method: "POST" });
+}
+
+// ── Scholarships API ───────────────────────────────────────
+export async function getScholarships(
+  params?: Record<string, string>
+): Promise<ApiResponse<Scholarship[]>> {
+  const query = params ? "?" + new URLSearchParams(params).toString() : "";
+  return fetchApi<Scholarship[]>(`/scholarships/${query}`);
+}
+
+export async function getScholarship(
+  id: number
+): Promise<ApiResponse<ScholarshipDetail>> {
+  return fetchApi<ScholarshipDetail>(`/scholarships/${id}/`);
+}
+
+// ── Universities API ───────────────────────────────────────
+export async function getUniversities(): Promise<ApiResponse<University[]>> {
+  return fetchApi<University[]>("/universities/");
+}
+
+// ── AI Chat API ────────────────────────────────────────────
+export async function sendChatMessage(
+  message: string,
+  sessionId?: string,
+  language?: string
+): Promise<
+  ApiResponse<{
+    session_id: string;
+    response: string;
+    intent: string;
+    metadata: Record<string, unknown>;
+  }>
+> {
+  return fetchApi("/ai/chat/", {
+    method: "POST",
+    body: JSON.stringify({ message, session_id: sessionId, use_ai: true, language }),
+  });
+}
+
+// ── Applications API ───────────────────────────────────────
+export async function getApplications(): Promise<ApiResponse<unknown[]>> {
+  return fetchApi<unknown[]>("/applications/");
+}

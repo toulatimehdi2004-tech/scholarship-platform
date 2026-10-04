@@ -1,0 +1,40 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div>
+    <a href="{% url 'premium_plans' %}" style="color: #3498db; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+        ← Back to Plans
+    </a>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+    <h2>⭐ Confirm Upgrade</h2>
+    <hr>
+    
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+        <h3 style="color: #2c3e50;">{{ plan.name }}</h3>
+        <h2 style="color: #2c3e50; font-size: 48px;">
+            {{ plan.currency }} {{ plan.price }}
+        </h2>
+        <p style="color: #7f8c8d;">one-time payment</p>
+        <p style="color: #95a5a6; font-size: 14px;">{{ plan.duration_months }} months access</p>
+    </div>
+    
+    <h4>You'll get:</h4>
+    <ul style="text-align: left; list-style: none; padding: 0; max-width: 400px; margin: 0 auto;">
+        {% for feature in plan.features %}
+            <li style="padding: 8px 0; border-bottom: 1px solid #eee;">✅ {{ feature }}</li>
+        {% endfor %}
+    </ul>
+    
+    <hr>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <p style="color: #7f8c8d; font-size: 14px;">By clicking "Confirm Payment" you'll be upgraded to {{ plan.name }}.</p>
+        <button type="submit" class="btn" style="width: 100%; background-color: #2ecc71; padding: 15px; font-size: 18px; margin-top: 15px;">
+            💳 Confirm Payment {{ plan.currency }} {{ plan.price }}
+        </button>
+    </form>
+</div>
+{% endblock %}

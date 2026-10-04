@@ -1,0 +1,60 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome, {{ user.username }}!</h2>
+    <hr>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>Your Profile</h3>
+        <div>
+            {% if is_premium_active %}
+                <span class="premium-badge">⭐ {{ premium_display }} Active</span>
+            {% else %}
+                <span class="free-badge">Free Account</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Phone:</strong> {{ student.phone|default:"Not provided" }}</p>
+            <p><strong>Country:</strong> {{ student.country|default:"Not provided" }}</p>
+            <p><strong>City:</strong> {{ student.city|default:"Not provided" }}</p>
+        </div>
+        <div>
+            <p><strong>Education Level:</strong> {{ student.education_level|default:"Not provided" }}</p>
+            <p><strong>Field of Study:</strong> {{ student.field_of_study|default:"Not provided" }}</p>
+            <p><strong>GPA:</strong> {{ student.gpa|default:"Not provided" }}</p>
+            <p><strong>Account Created:</strong> {{ student.created_at|date:"M d, Y" }}</p>
+            <p><strong>Member Since:</strong> {{ student.created_at|timesince }} ago</p>
+        </div>
+    </div>
+    
+    {% if is_premium_active %}
+        <div style="margin-top: 20px; padding: 15px; background-color: #d4edda; border-radius: 5px;">
+            <p style="color: #155724;">✅ Your premium account is active until {{ student.premium_expiry_date|date:"M d, Y" }}</p>
+            <p style="color: #155724;">Plan: {{ premium_display }}</p>
+        </div>
+    {% else %}
+        <div style="margin-top: 20px; padding: 15px; background-color: #f8d7da; border-radius: 5px;">
+            <p style="color: #721c24;">You are on the free plan.  <a href="{% url 'premium_plans' %}" style="color: #721c24; font-weight: bold;">Upgrade to Premium</a>       </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>Your Saved Scholarships</h3>
+    <hr>
+    {% if student.saved_scholarships %}
+        <ul>
+            {% for scholarship in student.saved_scholarships %}
+                <li>{{ scholarship }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't saved any scholarships yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

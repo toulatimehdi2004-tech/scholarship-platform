@@ -1,0 +1,124 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div>
+    <!-- Back button -->
+    <a href="{% url 'service_detail' service.id %}" style="color: #3498db; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+        ← Back to Service Details
+    </a>
+</div>
+
+<div class="card" style="max-width: 700px; margin: 0 auto;">
+    <h2>📅 Book Service</h2>
+    <hr>
+    
+    <!-- Service Summary -->
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h3>{{ service.name }}</h3>
+        <p style="color: #7f8c8d;">🏢 {{ service.provider.business_name }}</p>
+        <p><strong>Price:</strong> {{ service.currency }} {{ service.price }}</p>
+        <p><strong>Category:</strong> {{ service.category.name }}</p>
+        {% if service.delivery_time %}
+            <p><strong>Delivery Time:</strong> {{ service.delivery_time }}</p>
+        {% endif %}
+    </div>
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 15px;">
+            <label for="quantity" style="display: block; font-weight: bold; margin-bottom: 5px;">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" value="1" min="1" max="10" style="width: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="notes" style="display: block; font-weight: bold; margin-bottom: 5px;">Additional Notes (Optional):</label>
+            <textarea id="notes" name="notes" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" placeholder="Any special requirements or details..."></textarea>
+        </div>
+        
+        <!-- Document Upload Section -->
+        <div style="margin-bottom: 20px; border: 2px solid #3498db; border-radius: 10px; padding: 20px;">
+            <h4 style="margin-bottom: 10px;">📄 Upload Documents</h4>
+            <p style="color: #7f8c8d; font-size: 14px; margin-bottom: 15px;">Upload any documents the provider may need (Passport, Transcript, etc.)</p>
+            
+            <div style="border: 2px dashed #ddd; padding: 30px; text-align: center; border-radius: 10px; transition: all 0.3s;" id="drop-zone">
+                <p style="font-size: 32px; margin: 0;">📁</p>
+                <p style="color: #7f8c8d;">Drag & drop files here, or click to browse</p>
+                <p style="color: #95a5a6; font-size: 12px;">Supported: PDF, JPG, PNG</p>
+                <input type="file" id="documents" name="documents" multiple style="display: none;" accept=".pdf,.jpg,.jpeg,.png">
+                <button type="button" class="btn" onclick="document.getElementById('documents').click()" style="margin-top: 10px;">Browse Files</button>
+            </div>
+            <div id="file-list" style="margin-top: 10px;"></div>
+        </div>
+        
+        <!-- Price Summary -->
+        <div style="background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+            <h4>💰 Order Summary</h4>
+            <p><strong>Price per unit:</strong> {{ service.currency }} {{ service.price }}</p>
+            <p><strong>Commission:</strong> {{ service.category.default_commission }}%</p>
+            <p><strong>Total:</strong> <span id="total-price" style="font-size: 18px; color: #2ecc71;">{{ service.currency }} {{ service.price }}</span></p>
+        </div>
+        
+        <button type="submit" class="btn" style="width: 100%; background-color: #2ecc71; padding: 15px; font-size: 18px;">
+            ✅ Confirm Booking
+        </button>
+    </form>
+</div>
+
+<script>
+    // Update total price when quantity changes
+    document.getElementById('quantity').addEventListener('change', function() {
+        const quantity = parseInt(this.value) || 1;
+        const price = {{ service.price }};
+        const total = price * quantity;
+        document.getElementById('total-price').textContent = '{{ service.currency }} ' + total.toFixed(2);
+    });
+    
+    // File input handling
+    document.getElementById('documents').addEventListener('change', function() {
+        const fileList = document.getElementById('file-list');
+        fileList.innerHTML = '';
+        if (this.files.length > 0) {
+            for (let i = 0; i < this.files.length; i++) {
+                const file = this.files[i];
+                const div = document.createElement('div');
+                div.style.cssText = 'background-color: #e8f4fd; padding: 8px 12px; border-radius: 5px; margin-top: 5px; display: flex; justify-content: space-between;';
+                div.innerHTML = `
+                    <span>📄 ${file.name}</span>
+                    <span style="color: #7f8c8d; font-size: 12px;">${(file.size / 1024).toFixed(1)} KB</span>
+                `;
+                fileList.appendChild(div);
+            }
+            document.getElementById('drop-zone').style.borderColor = '#2ecc71';
+        }
+    });
+    
+    // Drag and drop handling
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#3498db';
+        this.style.backgroundColor = '#f0f8ff';
+    });
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        this.style.backgroundColor = 'transparent';
+    });
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        this.style.backgroundColor = 'transparent';
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            document.getElementById('documents').files = e.dataTransfer.files;
+            // Trigger change event
+            const event = new Event('change');
+            document.getElementById('documents').dispatchEvent(event);
+        }
+    });
+    dropZone.addEventListener('click', function() {
+        document.getElementById('documents').click();
+    });
+</script>
+{% endblock %}

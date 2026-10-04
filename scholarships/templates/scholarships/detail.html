@@ -1,0 +1,144 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div>
+    <!-- Back button -->
+    <a href="{% url 'scholarship_list' %}" style="color: #3498db; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+        ← Back to Scholarships
+    </a>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <h2 style="color: #2c3e50;">{{ scholarship.title }}</h2>
+            <h4 style="color: #7f8c8d; margin-top: 5px;">🏛️ {{ scholarship.university.name }}</h4>
+        </div>
+        <div style="text-align: right;">
+            <span style="background-color: #3498db; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px;">
+                {{ scholarship.get_type_display }}
+            </span>
+            <br>
+            <span style="background-color: #2ecc71; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; display: inline-block; margin-top: 5px;">
+                {{ scholarship.get_level_display }}
+            </span>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- Quick Info -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+        <div>
+            <strong>💰 Amount</strong>
+            <p>{{ scholarship.amount|default:"Varies" }} {{ scholarship.currency|default:"USD" }}</p>
+        </div>
+        <div>
+            <strong>📅 Deadline</strong>
+            <p>{{ scholarship.application_deadline|date:"M d, Y" }}</p>
+            {% if days_left > 0 %}
+                <p style="color: #e74c3c; font-size: 14px;">⏰ {{ days_left }} days left</p>
+            {% else %}
+                <p style="color: #e74c3c; font-size: 14px;">⏰ Deadline passed</p>
+            {% endif %}
+        </div>
+        <div>
+            <strong>📍 Location</strong>
+            <p>{{ scholarship.university.city }}, {{ scholarship.university.country }}</p>
+        </div>
+        <div>
+            <strong>📚 Duration</strong>
+            <p>{{ scholarship.duration|default:"Not specified" }}</p>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- Description -->
+    <h3>📝 Description</h3>
+    <p style="line-height: 1.6; color: #555;">{{ scholarship.description }}</p>
+    
+    <hr>
+    
+    <!-- Eligibility -->
+    <h3>✅ Eligibility Criteria</h3>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+        <p style="line-height: 1.6; color: #555;">{{ scholarship.eligibility_criteria|linebreaks }}</p>
+        {% if scholarship.minimum_gpa %}
+            <p><strong>Minimum GPA:</strong> {{ scholarship.minimum_gpa }}</p>
+        {% endif %}
+        {% if scholarship.required_education_level %}
+            <p><strong>Education Level:</strong> {{ scholarship.required_education_level }}</p>
+        {% endif %}
+    </div>
+    
+    <hr>
+    
+    <!-- Application Info -->
+    <h3>📄 Application Information</h3>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+        {% if scholarship.application_fee > 0 %}
+            <p><strong>Application Fee:</strong> ${{ scholarship.application_fee }}</p>
+        {% else %}
+            <p><strong>Application Fee:</strong> Free</p>
+        {% endif %}
+        
+        {% if scholarship.application_instructions %}
+            <p><strong>Instructions:</strong> {{ scholarship.application_instructions }}</p>
+        {% endif %}
+        
+        {% if scholarship.required_documents %}
+            <p><strong>Required Documents:</strong></p>
+            <ul>
+                {% for doc in scholarship.required_documents %}
+                    <li>{{ doc }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    
+    <hr>
+    
+    <!-- Contact -->
+    <h3>📞 Contact Information</h3>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+        {% if scholarship.contact_email %}
+            <p><strong>Email:</strong> {{ scholarship.contact_email }}</p>
+        {% endif %}
+        {% if scholarship.contact_phone %}
+            <p><strong>Phone:</strong> {{ scholarship.contact_phone }}</p>
+        {% endif %}
+        {% if scholarship.application_link %}
+            <p><strong>Apply Here:</strong> <a href="{{ scholarship.application_link }}" target="_blank" style="color: #3498db;">{{ scholarship.application_link }}</a></p>
+        {% endif %}
+    </div>
+    
+    <hr>
+    
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px;">
+        {% if user.is_authenticated %}
+            <a href="{% url 'save_scholarship' scholarship.id %}" class="btn {% if is_saved %}btn-danger{% else %}btn{% endif %}">
+                {% if is_saved %}
+                    ❌ Unsave Scholarship
+                {% else %}
+                    💾 Save Scholarship
+                {% endif %}
+            </a>
+        {% else %}
+            <p style="color: #7f8c8d;">Login to save this scholarship.</p>
+        {% endif %}
+        
+        {% if scholarship.application_link %}
+            <a href="{{ scholarship.application_link }}" target="_blank" class="btn" style="background-color: #2ecc71;">
+                Apply Now →
+            </a>
+        {% endif %}
+    </div>
+    
+    <!-- View Count -->
+    <div style="margin-top: 20px; color: #95a5a6; font-size: 12px;">
+        👁️ {{ scholarship.view_count }} views
+    </div>
+</div>
+{% endblock %}

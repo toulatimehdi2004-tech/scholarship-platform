@@ -1,0 +1,15 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; border: 3px solid #f39c12;">
+    <div style="font-size: 80px; margin-bottom: 20px;">⏳</div>
+    <h2 style="color: #f39c12;">Payment Cancelled</h2>
+    <p style="color: #2c3e50; font-size: 18px;">Your payment was cancelled. No charges were made.</p>
+    <hr>
+    <p style="color: #7f8c8d;">You can try again anytime.</p>
+    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+        <a href="{% url 'premium_plans' %}" class="btn" style="background-color: #3498db;">View Plans</a>
+        <a href="{% url 'profile' %}" class="btn" style="background-color: #95a5a6;">Go to Profile</a>
+    </div>
+</div>
+{% endblock %}

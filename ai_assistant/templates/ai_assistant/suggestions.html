@@ -1,0 +1,106 @@
+{% extends 'ai_assistant/base.html' %}
+
+{% block ai_content %}
+<style>
+    .suggestion-card {
+        background: white;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+        transition: opacity 0.3s;
+    }
+    .suggestion-card.read { opacity: 0.7; }
+    .suggestion-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    .suggestion-icon.deadline { background: #fde8e8; }
+    .suggestion-icon.new { background: #e8f5e9; }
+    .suggestion-icon.tip { background: #e3f2fd; }
+    .suggestion-icon.warning { background: #fff3e0; }
+    .suggestion-icon.recommendation { background: #f3e5f5; }
+    .suggestion-content { flex: 1; }
+    .suggestion-content h4 { margin-bottom: 4px; font-size: 15px; }
+    .suggestion-content p { font-size: 13px; color: #7f8c8d; margin-bottom: 8px; }
+    .suggestion-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .suggestion-actions a, .suggestion-actions button {
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-view { background: #3498db; color: white; }
+    .btn-dismiss { background: #ecf0f1; color: #7f8c8d; }
+    .unread-badge {
+        display: inline-block;
+        background: #e74c3c;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+        margin-left: 10px;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+    }
+</style>
+
+<h2>AI Alerts & Suggestions
+    {% if unread_count %}
+    <span class="unread-badge">{{ unread_count }} new</span>
+    {% endif %}
+</h2>
+<p style="color: #7f8c8d; margin-bottom: 20px;">Personalized alerts and recommendations from the AI assistant.</p>
+
+{% if suggestions %}
+{% for s in suggestions %}
+<div class="suggestion-card {% if s.is_read %}read{% endif %}">
+    <div class="suggestion-icon {{ s.suggestion_type }}">
+        {% if s.suggestion_type == 'deadline_approaching' %}⏰
+        {% elif s.suggestion_type == 'new_scholarship' %}🎓
+        {% elif s.suggestion_type == 'document_reminder' %}📄
+        {% elif s.suggestion_type == 'tip' %}💡
+        {% elif s.suggestion_type == 'warning' %}⚠️
+        {% elif s.suggestion_type == 'recommendation' %}⭐
+        {% else %}📌{% endif %}
+    </div>
+    <div class="suggestion-content">
+        <h4>{{ s.title }}</h4>
+        <p>{{ s.message }}</p>
+        <div class="suggestion-actions">
+            {% if s.related_scholarship %}
+            <a href="{% url 'scholarship_detail' s.related_scholarship.id %}" class="btn-view">View Scholarship</a>
+            {% endif %}
+            <form method="post" action="{% url 'dismiss_suggestion' s.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-dismiss">Dismiss</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state">
+    <h3>No alerts right now</h3>
+    <p>Save scholarships and complete your profile to receive personalized alerts.</p>
+    <a href="{% url 'scholarship_list' %}" class="btn" style="margin-top: 15px;">Browse Scholarships</a>
+</div>
+{% endif %}
+{% endblock %}

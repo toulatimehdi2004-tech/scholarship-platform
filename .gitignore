@@ -1,0 +1,53 @@
+# Python Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# Environment Variables & Secrets (CRITICAL: Do NOT commit)
+.env
+.env.*
+!.env.example
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Django
+*.sqlite3
+*.sqlite3-journal
+/media/
+/student_documents/
+staticfiles/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js / Frontend builds and dependencies
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/*.tsbuildinfo
+
+# OS & Temporary files
+.DS_Store
+Thumbs.db
+_tmp*
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo

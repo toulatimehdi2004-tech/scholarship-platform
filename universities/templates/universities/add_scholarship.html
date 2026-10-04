@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Scholarship - University Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        nav {
+            background-color: #2c3e50;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        nav .brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .card .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav .brand {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">🏛️ University Portal</div>
+        <div>
+            <a href="{% url 'university_dashboard' %}">📊 Dashboard</a>
+            <a href="{% url 'manage_scholarships' %}">🎓 Scholarships</a>
+            <a href="{% url 'view_applications' %}">📋 Applications</a>
+            <a href="{% url 'university_profile' %}">⚙️ Profile</a>
+            <a href="{% url 'university_logout' %}" style="color: #e74c3c;">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <h2>➕ Add New Scholarship</h2>
+            <p class="subtitle">Fill in the details below to create a new scholarship opportunity.</p>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="title">Scholarship Title</label>
+                    <input type="text" id="title" name="title" required placeholder="e.g., International Excellence Scholarship 2026">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" required placeholder="Describe the scholarship in detail..."></textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label for="type">Scholarship Type</label>
+                        <select id="type" name="type" required>
+                            <option value="full">Full Scholarship</option>
+                            <option value="partial">Partial Scholarship</option>
+                            <option value="tuition">Tuition Fee Waiver</option>
+                            <option value="living">Living Stipend</option>
+                            <option value="research">Research Grant</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="level">Education Level</label>
+                        <select id="level" name="level" required>
+                            <option value="bachelor">Bachelor</option>
+                            <option value="master">Master</option>
+                            <option value="phd">PhD</option>
+                            <option value="postdoc">Postdoctoral</option>
+                            <option value="exchange">Exchange Program</option>
+                            <option value="summer">Summer School</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label for="amount">Amount (USD)</label>
+                        <input type="number" id="amount" name="amount" step="0.01" placeholder="e.g., 10000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duration">Duration</label>
+                        <input type="text" id="duration" name="duration" placeholder="e.g., 1 year, 4 years">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="application_deadline">Application Deadline</label>
+                    <input type="datetime-local" id="application_deadline" name="application_deadline" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="eligibility_criteria">Eligibility Criteria</label>
+                    <textarea id="eligibility_criteria" name="eligibility_criteria" required placeholder="List all eligibility requirements..."></textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label for="minimum_gpa">Minimum GPA (Optional)</label>
+                        <input type="number" id="minimum_gpa" name="minimum_gpa" step="0.01" min="0" max="4.0" placeholder="e.g., 3.5">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="application_fee">Application Fee (USD)</label>
+                        <input type="number" id="application_fee" name="application_fee" step="0.01" value="0" placeholder="0">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="application_link">Application Link (Optional)</label>
+                    <input type="url" id="application_link" name="application_link" placeholder="https://university.edu/apply">
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label for="contact_email">Contact Email</label>
+                        <input type="email" id="contact_email" name="contact_email" placeholder="scholarships@university.edu">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contact_phone">Contact Phone (Optional)</label>
+                        <input type="text" id="contact_phone" name="contact_phone" placeholder="+86 10 1234 5678">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-success">✅ Create Scholarship</button>
+                    <a href="{% url 'manage_scholarships' %}" class="btn btn-danger">❌ Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

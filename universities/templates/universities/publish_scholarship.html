@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publish Scholarship - University Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        nav {
+            background-color: #2c3e50;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        nav .brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .card .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .card .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .scholarship-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .scholarship-info h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .scholarship-info p {
+            color: #555;
+            margin: 5px 0;
+        }
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav .brand {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">🏛️ University Portal</div>
+        <div>
+            <a href="{% url 'university_dashboard' %}">📊 Dashboard</a>
+            <a href="{% url 'manage_scholarships' %}">🎓 Scholarships</a>
+            <a href="{% url 'view_applications' %}">📋 Applications</a>
+            <a href="{% url 'university_profile' %}">⚙️ Profile</a>
+            <a href="{% url 'university_logout' %}" style="color: #e74c3c;">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="icon">📢</div>
+            <h2>Publish Scholarship</h2>
+            <p class="subtitle">Are you sure you want to publish this scholarship?</p>
+            
+            <div class="scholarship-info">
+                <h3>{{ scholarship.title }}</h3>
+                <p><strong>Type:</strong> {{ scholarship.get_type_display }}</p>
+                <p><strong>Level:</strong> {{ scholarship.get_level_display }}</p>
+                <p><strong>Deadline:</strong> {{ scholarship.application_deadline|date:"M d, Y" }}</p>
+                <p><strong>Current Status:</strong> {{ scholarship.get_status_display }}</p>
+            </div>
+            
+            <p style="color: #e67e22; font-size: 14px;">
+                ⚠️ Once published, this scholarship will be visible to all students on the platform.
+            </p>
+            
+            <div class="actions">
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">✅ Confirm Publish</button>
+                </form>
+                <a href="{% url 'manage_scholarships' %}" class="btn btn-danger">❌ Cancel</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

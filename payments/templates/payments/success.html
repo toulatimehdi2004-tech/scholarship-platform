@@ -1,0 +1,16 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto; text-align: center; border: 3px solid #2ecc71;">
+    <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+    <h2 style="color: #2ecc71;">Payment Successful!</h2>
+    <p style="color: #2c3e50; font-size: 18px;">Congratulations! You're now a Premium member!</p>
+    <hr>
+    <p style="color: #7f8c8d;">You now have access to all premium features.</p>
+    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+        <a href="{% url 'profile' %}" class="btn" style="background-color: #3498db;">Go to Profile</a>
+        <a href="{% url 'scholarship_list' %}" class="btn" style="background-color: #2ecc71;">Browse Scholarships</a>
+        <a href="{% url 'service_list' %}" class="btn" style="background-color: #9b59b6;">Browse Services</a>
+    </div>
+</div>
+{% endblock %}

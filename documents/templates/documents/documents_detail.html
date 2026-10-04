@@ -1,0 +1,123 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div>
+    <a href="{% url 'document_list' %}" style="color: #3498db; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+        ← Back to Documents
+    </a>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <h2>{{ document.title }}</h2>
+            <p style="color: #7f8c8d; margin-top: 5px;">
+                📁 {{ document.get_document_type_display }}
+                {% if document.order %}
+                    • Order #{{ document.order.id }}
+                {% endif %}
+            </p>
+        </div>
+        <div style="text-align: right;">
+            <span style="
+                background-color: 
+                {% if document.status == 'completed' %}#2ecc71
+                {% elif document.status == 'processing' %}#f39c12
+                {% elif document.status == 'error' %}#e74c3c
+                {% else %}#95a5a6{% endif %};
+                color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px;
+            ">
+                {{ document.get_status_display }}
+            </span>
+            <br>
+            {% if document.is_verified %}
+                <span style="color: #2ecc71; display: inline-block; margin-top: 5px;">✅ Verified</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- Document Info -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+        <div>
+            <strong>📅 Uploaded</strong>
+            <p>{{ document.created_at|date:"M d, Y" }}</p>
+        </div>
+        <div>
+            <strong>📦 File Size</strong>
+            <p>{{ document.file_size|filesizeformat }}</p>
+        </div>
+        <div>
+            <strong>📄 File Type</strong>
+            <p>{{ document.get_file_extension|upper }}</p>
+        </div>
+        <div>
+            <strong>🔍 OCR Status</strong>
+            <p>{% if has_scan %}✅ Completed{% else %}⏳ Not scanned{% endif %}</p>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- File Preview -->
+    <h3>📄 Document Preview</h3>
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 10px 0; text-align: center;">
+        {% if document.is_image %}
+            <img src="{{ document.file.url }}" alt="{{ document.title }}" style="max-width: 100%; max-height: 400px; border-radius: 5px;">
+        {% elif document.is_pdf %}
+            <p style="color: #7f8c8d;">📄 PDF Document</p>
+            <a href="{{ document.file.url }}" target="_blank" class="btn">View PDF</a>
+        {% else %}
+            <p style="color: #7f8c8d;">📄 {{ document.file_name }}</p>
+            <a href="{{ document.file.url }}" target="_blank" class="btn">Download</a>
+        {% endif %}
+    </div>
+    
+    <!-- Actions -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0;">
+        <a href="{{ document.file.url }}" target="_blank" class="btn">📥 Download</a>
+        
+        {% if not has_scan and ocr_available %}
+            <a href="{% url 'scan_document' document.id %}" class="btn" style="background-color: #9b59b6;">🔍 Scan with OCR</a>
+        {% endif %}
+        
+        <button onclick="document.getElementById('delete-form').submit()" class="btn btn-danger" style="background-color: #e74c3c;">🗑️ Delete</button>
+    </div>
+    
+    <!-- Delete Form -->
+    <form id="delete-form" method="POST" action="{% url 'delete_document' document.id %}" style="display: none;">
+        {% csrf_token %}
+    </form>
+    
+    <!-- OCR Results -->
+    {% if has_scan %}
+        <hr>
+        <h3>🔍 OCR Extracted Text</h3>
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; max-height: 300px; overflow-y: auto;">
+            <pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; color: #555;">{{ document.scan_result.full_text|default:"No text extracted" }}</pre>
+        </div>
+        
+        {% if document.scan_result.extracted_entities %}
+            <h4>📊 Extracted Information</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                {% if document.scan_result.name %}
+                    <div><strong>Name:</strong> {{ document.scan_result.name }}</div>
+                {% endif %}
+                {% if document.scan_result.nationality %}
+                    <div><strong>Nationality:</strong> {{ document.scan_result.nationality }}</div>
+                {% endif %}
+                {% if document.scan_result.document_number %}
+                    <div><strong>Document #:</strong> {{ document.scan_result.document_number }}</div>
+                {% endif %}
+                {% if document.scan_result.date_of_birth %}
+                    <div><strong>Date of Birth:</strong> {{ document.scan_result.date_of_birth }}</div>
+                {% endif %}
+                {% if document.scan_result.expiry_date %}
+                    <div><strong>Expiry Date:</strong> {{ document.scan_result.expiry_date }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<style>
+    .ai-nav {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+    .ai-nav a {
+        padding: 10px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        background: #ecf0f1;
+        color: #2c3e50;
+        transition: all 0.2s;
+    }
+    .ai-nav a:hover, .ai-nav a.active {
+        background: #3498db;
+        color: white;
+    }
+    .ai-nav a.active { background: #2c3e50; }
+</style>
+
+<div class="ai-nav">
+    <a href="{% url 'ai_chat' %}" class="{% if request.resolver_match.url_name == 'ai_chat' %}active{% endif %}">AI Chat</a>
+    <a href="{% url 'application_tracker' %}" class="{% if request.resolver_match.url_name == 'application_tracker' %}active{% endif %}">Tracker</a>
+    <a href="{% url 'my_matches' %}" class="{% if request.resolver_match.url_name == 'my_matches' %}active{% endif %}">My Matches</a>
+    <a href="{% url 'ai_suggestions' %}" class="{% if request.resolver_match.url_name == 'ai_suggestions' %}active{% endif %}">Alerts</a>
+    {% if user.is_staff %}
+    <a href="{% url 'verification_dashboard' %}" class="{% if request.resolver_match.url_name == 'verification_dashboard' %}active{% endif %}">Verification</a>
+    {% endif %}
+</div>
+
+{% block ai_content %}{% endblock %}
+{% endblock %}

@@ -1,0 +1,595 @@
+[
+ {
+  "name": "CDUT",
+  "photos": [
+   {
+    "name": "成都理工大学校门",
+    "description": "Main gate of Chengdu University of Technology",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/%E6%88%90%E9%83%BD%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E6%A0%A1%E9%97%A8.jpg/1920px-%E6%88%90%E9%83%BD%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E6%A0%A1%E9%97%A8.jpg"
+   },
+   {
+    "name": "成都理工大学水上图书馆",
+    "description": "The waterside library of Chengdu University of Technology",
+    "category": "academic",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/%E6%88%90%E9%83%BD%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E6%B0%B4%E4%B8%8A%E5%9B%BE%E4%B9%A6%E9%A6%86.jpg/1920px-%E6%88%90%E9%83%BD%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E6%B0%B4%E4%B8%8A%E5%9B%BE%E4%B9%A6%E9%A6%86.jpg"
+   },
+   {
+    "name": "成都理工大学校训雕塑",
+    "description": "Sculpture of the university motto on campus",
+    "category": "culture",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/93/%E6%88%90%E9%83%BD%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E6%A0%A1%E8%AE%AD%E9%9B%95%E5%A1%91.jpg/1920px-%E6%88%90%E9%83%BD%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E6%A0%A1%E8%AE%AD%E9%9B%95%E5%A1%91.jpg"
+   }
+  ]
+ },
+ {
+  "name": "SUFE",
+  "photos": [
+   {
+    "name": "武东路100号大门",
+    "description": "Main gate at 100 Wudong Road, Shanghai University of Finance and Economics",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/20260607_%E8%B4%A2%E7%BB%8F%E5%A4%A7%E5%AD%A6_%E6%AD%A6%E4%B8%9C%E8%B7%AF100%E5%8F%B7%E5%A4%A7%E9%97%A8.jpg/960px-20260607_%E8%B4%A2%E7%BB%8F%E5%A4%A7%E5%AD%A6_%E6%AD%A6%E4%B8%9C%E8%B7%AF100%E5%8F%B7%E5%A4%A7%E9%97%A8.jpg"
+   },
+   {
+    "name": "上海财经大学出版社",
+    "description": "Booth of the Shanghai University of Finance and Economics Press",
+    "category": "culture",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/%E4%B8%8A%E6%B5%B7%E8%B4%A2%E7%BB%8F%E5%A4%A7%E5%AD%A6%E5%87%BA%E7%89%88%E7%A4%BE_20240820.jpg/960px-%E4%B8%8A%E6%B5%B7%E8%B4%A2%E7%BB%8F%E5%A4%A7%E5%AD%A6%E5%87%BA%E7%89%88%E7%A4%BE_20240820.jpg"
+   }
+  ]
+ },
+ {
+  "name": "NEFU",
+  "photos": [
+   {
+    "name": "Northeast Forestry University Gate",
+    "description": "Gate of Northeast Forestry University in Harbin",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Northeast_Forestry_University_Gate.JPG/960px-Northeast_Forestry_University_Gate.JPG"
+   },
+   {
+    "name": "Gate of NEFU",
+    "description": "Campus gate of Northeast Forestry University",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Gate_of_NEFU.JPG/1920px-Gate_of_NEFU.JPG"
+   }
+  ]
+ },
+ {
+  "name": "HLJU",
+  "photos": [
+   {
+    "name": "黑龙江大学",
+    "description": "Campus view of Heilongjiang University",
+    "category": "academic",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/%E9%BB%91%E9%BE%99%E6%B1%9F%E5%A4%A7%E5%AD%A6_-_panoramio.jpg/960px-%E9%BB%91%E9%BE%99%E6%B1%9F%E5%A4%A7%E5%AD%A6_-_panoramio.jpg"
+   },
+   {
+    "name": "二号楼和联通广场",
+    "description": "Building No. 2 and Liantong Square on the Heilongjiang University campus",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/%E5%B7%A1%E9%81%93%E5%B7%A5%E5%87%BA%E5%93%81_photo_by_Xundaogong%E2%80%94%E2%80%94%E4%BA%8C%E5%8F%B7%E6%A5%BC%E5%92%8C%E8%81%94%E9%80%9A%E5%B9%BF%E5%9C%BA_-_panoramio.jpg/1920px-%E5%B7%A1%E9%81%93%E5%B7%A5%E5%87%BA%E5%93%81_photo_by_Xundaogong%E2%80%94%E2%80%94%E4%BA%8C%E5%8F%B7%E6%A5%BC%E5%92%8C%E8%81%94%E9%80%9A%E5%B9%BF%E5%9C%BA_-_panoramio.jpg"
+   },
+   {
+    "name": "B区篮球场",
+    "description": "Basketball courts in Zone B of Heilongjiang University",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/%E5%B7%A1%E9%81%93%E5%B7%A5%E5%87%BA%E5%93%81_photo_by_Xundaogong%E2%80%94%E2%80%94B%E5%8C%BA%E7%AF%AE%E7%90%83%E5%9C%BA_-_panoramio.jpg/960px-%E5%B7%A1%E9%81%93%E5%B7%A5%E5%87%BA%E5%93%81_photo_by_Xundaogong%E2%80%94%E2%80%94B%E5%8C%BA%E7%AF%AE%E7%90%83%E5%9C%BA_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "HEU",
+  "photos": [
+   {
+    "name": "Monument of School Name at East 2 Gate",
+    "description": "School-name monument at the East 2 Gate of Harbin Engineering University",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/Harbin_Engineering_University_-_Monument_of_School_Name_at_East_2_Gate.jpg/1920px-Harbin_Engineering_University_-_Monument_of_School_Name_at_East_2_Gate.jpg"
+   },
+   {
+    "name": "启航活动中心",
+    "description": "Qihang Activity Center at Harbin Engineering University",
+    "category": "culture",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/%E5%90%AF%E8%88%AA%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83_-_panoramio.jpg/1920px-%E5%90%AF%E8%88%AA%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83_-_panoramio.jpg"
+   },
+   {
+    "name": "哈尔滨工程大学体育场",
+    "description": "Stadium of Harbin Engineering University",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/%E5%93%88%E5%B0%94%E6%BB%A8%E5%B7%A5%E7%A8%8B%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E5%9C%BA_-_panoramio.jpg/960px-%E5%93%88%E5%B0%94%E6%BB%A8%E5%B7%A5%E7%A8%8B%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E5%9C%BA_-_panoramio.jpg"
+   },
+   {
+    "name": "红旗大街正面",
+    "description": "Campus frontage of Harbin Engineering University facing Hongqi Street",
+    "category": "academic",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/%E5%B7%A1%E9%81%93%E5%B7%A5%E5%87%BA%E5%93%81_photo_by_xundaogong_%E5%93%88%E5%B0%94%E6%BB%A8%E5%B7%A5%E7%A8%8B%E5%A4%A7%E5%AD%A6_%E7%BA%A2%E6%97%97%E5%A4%A7%E8%A1%97%E6%AD%A3%E9%9D%A2_-_panoramio.jpg/960px-%E5%B7%A1%E9%81%93%E5%B7%A5%E5%87%BA%E5%93%81_photo_by_xundaogong_%E5%93%88%E5%B0%94%E6%BB%A8%E5%B7%A5%E7%A8%8B%E5%A4%A7%E5%AD%A6_%E7%BA%A2%E6%97%97%E5%A4%A7%E8%A1%97%E6%AD%A3%E9%9D%A2_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "NPU",
+  "photos": [
+   {
+    "name": "Chang'an Campus Gate",
+    "description": "Chang'an Campus gate of Northwestern Polytechnical University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Northwestern_Polytechnical_University_Chang'an_Campus_Gate.jpg/960px-Northwestern_Polytechnical_University_Chang'an_Campus_Gate.jpg"
+   },
+   {
+    "name": "碑林 西北工业大学友谊校区东门",
+    "description": "East Gate of the Youyi Campus of Northwestern Polytechnical University in Beilin, Xi'an",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/%E7%A2%91%E6%9E%97_%E8%A5%BF%E5%8C%97%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6%E5%8F%8B%E8%B0%8A%E6%A0%A1%E5%8C%BA%E4%B8%9C%E9%97%A8.jpg/1920px-%E7%A2%91%E6%9E%97_%E8%A5%BF%E5%8C%97%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6%E5%8F%8B%E8%B0%8A%E6%A0%A1%E5%8C%BA%E4%B8%9C%E9%97%A8.jpg"
+   }
+  ]
+ },
+ {
+  "name": "NWAFU",
+  "photos": [
+   {
+    "name": "西北农林科技大学本部门口",
+    "description": "Main gate entrance of Northwest A&F University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/%E8%A5%BF%E5%8C%97%E5%86%9C%E6%9E%97%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%E6%9C%AC%E9%83%A8%E9%97%A8%E5%8F%A3_-_panoramio.jpg/960px-%E8%A5%BF%E5%8C%97%E5%86%9C%E6%9E%97%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%E6%9C%AC%E9%83%A8%E9%97%A8%E5%8F%A3_-_panoramio.jpg"
+   },
+   {
+    "name": "西农校区南门",
+    "description": "South Gate of the Xinong Campus of Northwest A&F University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/%E8%A5%BF%E5%8C%97%E5%86%9C%E6%9E%97%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%E8%A5%BF%E5%86%9C%E6%A0%A1%E5%8C%BA%E5%8D%97%E9%97%A8_-_panoramio.jpg/960px-%E8%A5%BF%E5%8C%97%E5%86%9C%E6%9E%97%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%A6%E8%A5%BF%E5%86%9C%E6%A0%A1%E5%8C%BA%E5%8D%97%E9%97%A8_-_panoramio.jpg"
+   },
+   {
+    "name": "Indoor Stadium of NWAFU",
+    "description": "Indoor stadium of Northwest A&F University",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Indoor_Stadium_of_NWAFU.jpg/960px-Indoor_Stadium_of_NWAFU.jpg"
+   },
+   {
+    "name": "校园小径",
+    "description": "Tree-lined campus path at Northwest A&F University",
+    "category": "nature",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/%E6%A0%A1%E5%9B%AD%E5%B0%8F%E5%BE%84_campus_road_-_panoramio.jpg/960px-%E6%A0%A1%E5%9B%AD%E5%B0%8F%E5%BE%84_campus_road_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Tianjin University",
+  "photos": [
+   {
+    "name": "天津大学东门",
+    "description": "East Gate of Tianjin University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/%E5%A4%A9%E6%B4%A5%E5%A4%A7%E5%AD%A6%E4%B8%9C%E9%97%A8_20260420_120059.jpg/960px-%E5%A4%A9%E6%B4%A5%E5%A4%A7%E5%AD%A6%E4%B8%9C%E9%97%A8_20260420_120059.jpg"
+   },
+   {
+    "name": "Student Center, Old campus",
+    "description": "Student Center on the old campus of Tianjin University",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Student_Center%2C_Tianjin_University%2C_Old_campus.jpg/960px-Student_Center%2C_Tianjin_University%2C_Old_campus.jpg"
+   },
+   {
+    "name": "Qingnian Lake",
+    "description": "Qingnian Lake on the Tianjin University campus",
+    "category": "nature",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Qingnian_Lake_of_Tianjin_University_2015-08-04.jpg/1920px-Qingnian_Lake_of_Tianjin_University_2015-08-04.jpg"
+   },
+   {
+    "name": "天津大学卫津路校区",
+    "description": "Weijin Road campus of Tianjin University",
+    "category": "academic",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/%E5%A4%A9%E6%B4%A5%E5%A4%A7%E5%AD%A6%E5%8D%AB%E6%B4%A5%E8%B7%AF%E6%A0%A1%E5%8C%BA.jpg/960px-%E5%A4%A9%E6%B4%A5%E5%A4%A7%E5%AD%A6%E5%8D%AB%E6%B4%A5%E8%B7%AF%E6%A0%A1%E5%8C%BA.jpg"
+   }
+  ]
+ },
+ {
+  "name": "TMU",
+  "photos": [
+   {
+    "name": "天津医科大学大门",
+    "description": "Main gate of Tianjin Medical University",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/%E5%A4%A9%E6%B4%A5%E5%8C%BB%E7%A7%91%E5%A4%A7%E5%AD%A6%E5%A4%A7%E9%97%A8.jpg/1920px-%E5%A4%A9%E6%B4%A5%E5%8C%BB%E7%A7%91%E5%A4%A7%E5%AD%A6%E5%A4%A7%E9%97%A8.jpg"
+   },
+   {
+    "name": "天津医科大学校园",
+    "description": "Campus of Tianjin Medical University in June 2014",
+    "category": "academic",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/2014%E5%B9%B46%E6%9C%88%E5%A4%A9%E6%B4%A5%E5%8C%BB%E7%A7%91%E5%A4%A7%E5%AD%A6%E6%A0%A1%E5%9B%AD.jpg/960px-2014%E5%B9%B46%E6%9C%88%E5%A4%A9%E6%B4%A5%E5%8C%BB%E7%A7%91%E5%A4%A7%E5%AD%A6%E6%A0%A1%E5%9B%AD.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Central South University",
+  "photos": [
+   {
+    "name": "湘雅医学院老校区 食堂边 道路 1",
+    "description": "Road beside the canteen of the old Xiangya Medical College campus",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/%E4%B8%AD%E5%8D%97%E5%A4%A7%E5%AD%A6%E6%B9%98%E9%9B%85%E5%8C%BB%E5%AD%A6%E9%99%A2%E8%80%81%E6%A0%A1%E5%8C%BA_%E9%A3%9F%E5%A0%82%E8%BE%B9_%E9%81%93%E8%B7%AF_1.jpg/960px-%E4%B8%AD%E5%8D%97%E5%A4%A7%E5%AD%A6%E6%B9%98%E9%9B%85%E5%8C%BB%E5%AD%A6%E9%99%A2%E8%80%81%E6%A0%A1%E5%8C%BA_%E9%A3%9F%E5%A0%82%E8%BE%B9_%E9%81%93%E8%B7%AF_1.jpg"
+   },
+   {
+    "name": "湘雅医学院老校区 食堂边 道路 2",
+    "description": "Street scene next to the canteen on the old Xiangya campus of Central South University",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/%E4%B8%AD%E5%8D%97%E5%A4%A7%E5%AD%A6%E6%B9%98%E9%9B%85%E5%8C%BB%E5%AD%A6%E9%99%A2%E8%80%81%E6%A0%A1%E5%8C%BA_%E9%A3%9F%E5%A0%82%E8%BE%B9_%E9%81%93%E8%B7%AF_2.jpg/960px-%E4%B8%AD%E5%8D%97%E5%A4%A7%E5%AD%A6%E6%B9%98%E9%9B%85%E5%8C%BB%E5%AD%A6%E9%99%A2%E8%80%81%E6%A0%A1%E5%8C%BA_%E9%A3%9F%E5%A0%82%E8%BE%B9_%E9%81%93%E8%B7%AF_2.jpg"
+   },
+   {
+    "name": "观云池",
+    "description": "Guanyun Pond on the campus of Central South University",
+    "category": "nature",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/%E4%B8%AD%E5%8D%97%E5%A4%A7%E5%AD%A6%E8%A7%82%E4%BA%91%E6%B1%A0_-_panoramio.jpg/1920px-%E4%B8%AD%E5%8D%97%E5%A4%A7%E5%AD%A6%E8%A7%82%E4%BA%91%E6%B1%A0_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Hunan University",
+  "photos": [
+   {
+    "name": "The Fifth Canteen",
+    "description": "The Fifth Canteen of Hunan University",
+    "category": "dining",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/The_Fifth_Canteen_of_Hunan_University.jpg/960px-The_Fifth_Canteen_of_Hunan_University.jpg"
+   },
+   {
+    "name": "湖南大學第七學生宿舍",
+    "description": "Seventh student dormitory of Hunan University",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/%E6%B9%96%E5%8D%97%E5%A4%A7%E5%AD%B8%E7%AC%AC%E4%B8%83%E5%AD%B8%E7%94%9F%E5%AE%BF%E8%88%8D.jpg/960px-%E6%B9%96%E5%8D%97%E5%A4%A7%E5%AD%B8%E7%AC%AC%E4%B8%83%E5%AD%B8%E7%94%9F%E5%AE%BF%E8%88%8D.jpg"
+   },
+   {
+    "name": "Hunan University Stadium",
+    "description": "Stadium of Hunan University",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Hunan_University_Stadium.JPG/960px-Hunan_University_Stadium.JPG"
+   },
+   {
+    "name": "爱晚亭",
+    "description": "Aiwan Pavilion on the Hunan University campus",
+    "category": "culture",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/%E6%B9%96%E5%8D%97%E5%A4%A7%E5%AD%A6-%E7%88%B1%E6%99%9A%E4%BA%AD_-_panoramio.jpg/960px-%E6%B9%96%E5%8D%97%E5%A4%A7%E5%AD%A6-%E7%88%B1%E6%99%9A%E4%BA%AD_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "NUDT",
+  "photos": [
+   {
+    "name": "National University of Defense Technology 1",
+    "description": "Campus scene of the National University of Defense Technology in Changsha",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/National_University_of_Defense_Technology1.jpg/1920px-National_University_of_Defense_Technology1.jpg"
+   },
+   {
+    "name": "National University of Defense Technology 4",
+    "description": "Campus view of the National University of Defense Technology in Changsha",
+    "category": "academic",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/National_University_of_Defense_Technology4.jpg/960px-National_University_of_Defense_Technology4.jpg"
+   },
+   {
+    "name": "国防科大外国语学院",
+    "description": "College of Foreign Languages at the National University of Defense Technology",
+    "category": "academic",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/%E5%9B%BD%E9%98%B2%E7%A7%91%E5%A4%A7%E5%A4%96%E5%9B%BD%E8%AF%AD%E5%AD%A6%E9%99%A2.jpg/960px-%E5%9B%BD%E9%98%B2%E7%A7%91%E5%A4%A7%E5%A4%96%E5%9B%BD%E8%AF%AD%E5%AD%A6%E9%99%A2.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Jilin University",
+  "photos": [
+   {
+    "name": "前卫校区之东门",
+    "description": "East Gate of the Qianwei Campus of Jilin University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/%E6%9C%9D%E9%98%B3_%E5%90%89%E6%9E%97%E5%A4%A7%E5%AD%A6%E5%89%8D%E5%8D%AB%E6%A0%A1%E5%8C%BA%E4%B9%8B%E4%B8%9C%E9%97%A8.jpg/960px-%E6%9C%9D%E9%98%B3_%E5%90%89%E6%9E%97%E5%A4%A7%E5%AD%A6%E5%89%8D%E5%8D%AB%E6%A0%A1%E5%8C%BA%E4%B9%8B%E4%B8%9C%E9%97%A8.jpg"
+   },
+   {
+    "name": "第八学生宿舍（八舍）",
+    "description": "Former eighth student dormitory (Bashe) of Jilin University",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/%E5%8E%9F%E5%90%89%E6%9E%97%E5%A4%A7%E5%AD%A6%E7%AC%AC%E5%85%AB%E5%AD%A6%E7%94%9F%E5%AE%BF%E8%88%8D%EF%BC%88%E5%85%AB%E8%88%8D%EF%BC%89_-_panoramio.jpg/960px-%E5%8E%9F%E5%90%89%E6%9E%97%E5%A4%A7%E5%AD%A6%E7%AC%AC%E5%85%AB%E5%AD%A6%E7%94%9F%E5%AE%BF%E8%88%8D%EF%BC%88%E5%85%AB%E8%88%8D%EF%BC%89_-_panoramio.jpg"
+   },
+   {
+    "name": "中心校区新食堂一楼鱼香肉丝",
+    "description": "Yuxiang shredded pork served at the new canteen, Central Campus of Jilin University",
+    "category": "dining",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/%E5%90%89%E6%9E%97%E5%A4%A7%E5%AD%A6%E4%B8%AD%E5%BF%83%E6%A0%A1%E5%8C%BA%E6%96%B0%E9%A3%9F%E5%A0%82%E4%B8%80%E6%A5%BC%E5%9B%9B%E5%B7%9D%E9%A3%8E%E5%91%B3%E9%B1%BC%E9%A6%99%E8%82%89%E4%B8%9D.jpg/960px-%E5%90%89%E6%9E%97%E5%A4%A7%E5%AD%A6%E4%B8%AD%E5%BF%83%E6%A0%A1%E5%8C%BA%E6%96%B0%E9%A3%9F%E5%A0%82%E4%B8%80%E6%A5%BC%E5%9B%9B%E5%B7%9D%E9%A3%8E%E5%91%B3%E9%B1%BC%E9%A6%99%E8%82%89%E4%B8%9D.jpg"
+   },
+   {
+    "name": "南湖校区体育馆",
+    "description": "Gymnasium of the Nanhu Campus of Jilin University",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/%E5%90%89%E6%9E%97%E5%A4%A7%E5%AD%A6%E5%8D%97%E6%B9%96%E6%A0%A1%E5%8C%BA%E4%BD%93%E8%82%B2%E9%A6%86.jpg/960px-%E5%90%89%E6%9E%97%E5%A4%A7%E5%AD%A6%E5%8D%97%E6%B9%96%E6%A0%A1%E5%8C%BA%E4%BD%93%E8%82%B2%E9%A6%86.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Dalian University of Technology",
+  "photos": [
+   {
+    "name": "South Gate",
+    "description": "South Gate of Dalian University of Technology",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/Dalian_University_of_Technology_-_South_Gate.jpg/1920px-Dalian_University_of_Technology_-_South_Gate.jpg"
+   },
+   {
+    "name": "学生生活区入口",
+    "description": "Entrance to the student living area of Dalian University of Technology (2002)",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/2002%E5%B9%B4%E5%A4%A7%E5%B7%A5%E5%AD%A6%E7%94%9F%E7%94%9F%E6%B4%BB%E5%8C%BA%E5%85%A5%E5%8F%A3_entrance_-_panoramio.jpg/960px-2002%E5%B9%B4%E5%A4%A7%E5%B7%A5%E5%AD%A6%E7%94%9F%E7%94%9F%E6%B4%BB%E5%8C%BA%E5%85%A5%E5%8F%A3_entrance_-_panoramio.jpg"
+   },
+   {
+    "name": "无线电系男生宿舍",
+    "description": "Men's dormitory of the Radio Engineering Department (2002)",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/2002%E5%B9%B4%E5%A4%A7%E8%BF%9E%E5%B7%A5%E5%AD%A6%E9%99%A2%E6%97%A0%E7%BA%BF%E7%94%B5%E7%B3%BB%E7%94%B7%E7%94%9F%E5%AE%BF%E8%88%8D_-_panoramio.jpg/960px-2002%E5%B9%B4%E5%A4%A7%E8%BF%9E%E5%B7%A5%E5%AD%A6%E9%99%A2%E6%97%A0%E7%BA%BF%E7%94%B5%E7%B3%BB%E7%94%B7%E7%94%9F%E5%AE%BF%E8%88%8D_-_panoramio.jpg"
+   },
+   {
+    "name": "DUT residences",
+    "description": "Student residences at Dalian University of Technology",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/DUT_residences.jpg/960px-DUT_residences.jpg"
+   }
+  ]
+ },
+ {
+  "name": "DMU",
+  "photos": [
+   {
+    "name": "Dalian Maritime Univ-New Gate",
+    "description": "New Gate of Dalian Maritime University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Dalian_Maritime_Univ-New_Gate.jpg/960px-Dalian_Maritime_Univ-New_Gate.jpg"
+   },
+   {
+    "name": "Dalian Maritime Univ-Old Gate",
+    "description": "Old Gate of Dalian Maritime University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Dalian_Maritime_Univ-Old_Gate.jpg/960px-Dalian_Maritime_Univ-Old_Gate.jpg"
+   },
+   {
+    "name": "Swimming Pool",
+    "description": "Swimming pool of Dalian Maritime University",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Dalian_Maritime_University_-_Swimming_Pool_1.jpg/960px-Dalian_Maritime_University_-_Swimming_Pool_1.jpg"
+   },
+   {
+    "name": "大连海事大学池塘",
+    "description": "Pond on the Dalian Maritime University campus",
+    "category": "nature",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/%E5%A4%A7%E8%BF%9E%E6%B5%B7%E4%BA%8B%E5%A4%A7%E5%AD%A6%E6%B1%A0%E5%A1%98.jpg/1920px-%E5%A4%A7%E8%BF%9E%E6%B5%B7%E4%BA%8B%E5%A4%A7%E5%AD%A6%E6%B1%A0%E5%A1%98.jpg"
+   }
+  ]
+ },
+ {
+  "name": "OUC",
+  "photos": [
+   {
+    "name": "大学生活动中心&体育馆",
+    "description": "Student Activity Center and Gymnasium at Ocean University of China, Laoshan Campus",
+    "category": "culture",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6%EF%BC%88%E5%B4%82%E5%B1%B1%E6%A0%A1%E5%8C%BA%EF%BC%89%E5%A4%A7%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83%26%E4%BD%93%E8%82%B2%E9%A6%86.jpg/960px-%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6%EF%BC%88%E5%B4%82%E5%B1%B1%E6%A0%A1%E5%8C%BA%EF%BC%89%E5%A4%A7%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83%26%E4%BD%93%E8%82%B2%E9%A6%86.jpg"
+   },
+   {
+    "name": "崂山校区体育馆",
+    "description": "Gymnasium at Ocean University of China, Laoshan Campus",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6%EF%BC%88%E5%B4%82%E5%B1%B1%E6%A0%A1%E5%8C%BA%EF%BC%89%E4%BD%93%E8%82%B2%E9%A6%86.jpg/960px-%E4%B8%AD%E5%9B%BD%E6%B5%B7%E6%B4%8B%E5%A4%A7%E5%AD%A6%EF%BC%88%E5%B4%82%E5%B1%B1%E6%A0%A1%E5%8C%BA%EF%BC%89%E4%BD%93%E8%82%B2%E9%A6%86.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Qingdao University",
+  "photos": [
+   {
+    "name": "青岛大学正门",
+    "description": "Main entrance of Qingdao University",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Qingdao_University_Main_Entrance_%E9%9D%92%E5%B2%9B%E5%A4%A7%E5%AD%A6%E6%AD%A3%E9%97%A8%E5%9B%BE%E7%89%87.jpg/1920px-Qingdao_University_Main_Entrance_%E9%9D%92%E5%B2%9B%E5%A4%A7%E5%AD%A6%E6%AD%A3%E9%97%A8%E5%9B%BE%E7%89%87.jpg"
+   },
+   {
+    "name": "青岛大学体育馆",
+    "description": "Gymnasium of Qingdao University",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/%E9%9D%92%E5%B2%9B%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E9%A6%86.jpg/1920px-%E9%9D%92%E5%B2%9B%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E9%A6%86.jpg"
+   },
+   {
+    "name": "Qingdao University",
+    "description": "Campus view of Qingdao University",
+    "category": "academic",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Qingdao_University.jpg/960px-Qingdao_University.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Yunnan University",
+  "photos": [
+   {
+    "name": "东陆园北门",
+    "description": "North Gate of the Donglu Campus of Yunnan University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/%E4%BA%91%E5%8D%97%E5%A4%A7%E5%AD%A6%E4%B8%9C%E9%99%86%E6%A0%A1%E5%8C%BA_-_%E4%B8%9C%E9%99%86%E5%9B%AD%E5%8C%97%E9%97%A8_-_2025-05-17.jpg/960px-%E4%BA%91%E5%8D%97%E5%A4%A7%E5%AD%A6%E4%B8%9C%E9%99%86%E6%A0%A1%E5%8C%BA_-_%E4%B8%9C%E9%99%86%E5%9B%AD%E5%8C%97%E9%97%A8_-_2025-05-17.jpg"
+   },
+   {
+    "name": "云南大学体育场",
+    "description": "Stadium of Yunnan University",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/%E4%BA%91%E5%8D%97%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E5%9C%BA_(8512729414).jpg/960px-%E4%BA%91%E5%8D%97%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E5%9C%BA_(8512729414).jpg"
+   },
+   {
+    "name": "云南大学",
+    "description": "Campus view of Yunnan University",
+    "category": "nature",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/%E4%BA%91%E5%8D%97%E5%A4%A7%E5%AD%A6_-_panoramio.jpg/960px-%E4%BA%91%E5%8D%97%E5%A4%A7%E5%AD%A6_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "KMUST",
+  "photos": [
+   {
+    "name": "莲华校区 学生一食堂",
+    "description": "Student Canteen No. 1 of the Lianhua Campus, Kunming University of Science and Technology",
+    "category": "dining",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/%E6%98%86%E6%98%8E%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E8%8E%B2%E5%8D%8E%E6%A0%A1%E5%8C%BA_-_%E5%AD%A6%E7%94%9F%E4%B8%80%E9%A3%9F%E5%A0%82_-_2025-05-17.jpg/960px-%E6%98%86%E6%98%8E%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E8%8E%B2%E5%8D%8E%E6%A0%A1%E5%8C%BA_-_%E5%AD%A6%E7%94%9F%E4%B8%80%E9%A3%9F%E5%A0%82_-_2025-05-17.jpg"
+   },
+   {
+    "name": "Main gate, Chenggong Campus",
+    "description": "Main gate of Kunming University of Science and Technology, Chenggong Campus",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/The_main_gate_of_Kunming_University_of_Science_and_Technology_(Chenggong_Campus).jpg/960px-The_main_gate_of_Kunming_University_of_Science_and_Technology_(Chenggong_Campus).jpg"
+   },
+   {
+    "name": "莲华校区",
+    "description": "Lianhua Campus of Kunming University of Science and Technology",
+    "category": "academic",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/%E6%98%86%E6%98%8E%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E8%8E%B2%E5%8D%8E%E6%A0%A1%E5%8C%BA_-_2025-05-17_01.jpg/1920px-%E6%98%86%E6%98%8E%E7%90%86%E5%B7%A5%E5%A4%A7%E5%AD%A6%E8%8E%B2%E5%8D%8E%E6%A0%A1%E5%8C%BA_-_2025-05-17_01.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Chongqing University",
+  "photos": [
+   {
+    "name": "重庆大学大校门",
+    "description": "Main gate of Chongqing University",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/%E9%87%8D%E5%BA%86%E5%A4%A7%E5%AD%A6%E5%A4%A7%E6%A0%A1%E9%97%A8.png/960px-%E9%87%8D%E5%BA%86%E5%A4%A7%E5%AD%A6%E5%A4%A7%E6%A0%A1%E9%97%A8.png"
+   },
+   {
+    "name": "重庆大学学生一舍",
+    "description": "Student Dormitory No. 1 of Chongqing University",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/%E9%87%8D%E5%BA%86%E5%A4%A7%E5%AD%A6%E5%AD%A6%E7%94%9F%E4%B8%80%E8%88%8D.jpg/960px-%E9%87%8D%E5%BA%86%E5%A4%A7%E5%AD%A6%E5%AD%A6%E7%94%9F%E4%B8%80%E8%88%8D.jpg"
+   },
+   {
+    "name": "重庆大学团结广场",
+    "description": "Tuanjie Square on the Chongqing University campus",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/%E9%87%8D%E5%BA%86%E5%A4%A7%E5%AD%A6%E5%9B%A2%E7%BB%93%E5%B9%BF%E5%9C%BA.jpg/960px-%E9%87%8D%E5%BA%86%E5%A4%A7%E5%AD%A6%E5%9B%A2%E7%BB%93%E5%B9%BF%E5%9C%BA.jpg"
+   },
+   {
+    "name": "重庆大学民主湖",
+    "description": "Democracy Lake at Chongqing University",
+    "category": "nature",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/%E9%87%8D%E5%BA%86%E5%A4%A7%E5%AD%A6%E6%B0%91%E4%B8%BB%E6%B9%96_Democracy_Lake_in_Chongqing_University.jpg/960px-%E9%87%8D%E5%BA%86%E5%A4%A7%E5%AD%A6%E6%B0%91%E4%B8%BB%E6%B9%96_Democracy_Lake_in_Chongqing_University.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Southwest University",
+  "photos": [
+   {
+    "name": "西南大学校门（北碚）",
+    "description": "Main gate of Southwest University in Beibei, Chongqing",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/%E8%A5%BF%E5%8D%97%E5%A4%A7%E5%AD%A6%E6%A0%A1%E9%97%A8%EF%BC%88%E5%8C%97%E7%A2%9A%EF%BC%89.jpg/1920px-%E8%A5%BF%E5%8D%97%E5%A4%A7%E5%AD%A6%E6%A0%A1%E9%97%A8%EF%BC%88%E5%8C%97%E7%A2%9A%EF%BC%89.jpg"
+   },
+   {
+    "name": "Mao Zedong statue at the entrance",
+    "description": "Statue of Mao Zedong at the entrance of Southwest University",
+    "category": "culture",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Mao_Zedong_statue_at_the_entrance_to_Southwest_University.JPG/1920px-Mao_Zedong_statue_at_the_entrance_to_Southwest_University.JPG"
+   },
+   {
+    "name": "Swu liyuan",
+    "description": "Liyuan student area of Southwest University",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Swu_liyuan.JPG/960px-Swu_liyuan.JPG"
+   }
+  ]
+ },
+ {
+  "name": "USTC",
+  "photos": [
+   {
+    "name": "中国科学技术大学西校区北门 01",
+    "description": "North Gate of the West Campus of the University of Science and Technology of China",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/%E4%B8%AD%E5%9B%BD%E7%A7%91%E5%AD%A6%E6%8A%80%E6%9C%AF%E5%A4%A7%E5%AD%A6%E8%A5%BF%E6%A0%A1%E5%8C%BA%E5%8C%97%E9%97%A8_01.jpg/960px-%E4%B8%AD%E5%9B%BD%E7%A7%91%E5%AD%A6%E6%8A%80%E6%9C%AF%E5%A4%A7%E5%AD%A6%E8%A5%BF%E6%A0%A1%E5%8C%BA%E5%8C%97%E9%97%A8_01.jpg"
+   },
+   {
+    "name": "Students eating at the college canteen",
+    "description": "Students eating at a college canteen of USTC in Hefei",
+    "category": "dining",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Students_eating_at_the_college_canteen%2C_University_of_Science_and_Technology_of_China%2C_Hefei.jpg/960px-Students_eating_at_the_college_canteen%2C_University_of_Science_and_Technology_of_China%2C_Hefei.jpg"
+   },
+   {
+    "name": "中科大南区足球场",
+    "description": "Football pitch in the South District of USTC",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/%E4%B8%AD%E7%A7%91%E5%A4%A7%E5%8D%97%E5%8C%BA%E8%B6%B3%E7%90%83%E5%9C%BA_-_panoramio.jpg/960px-%E4%B8%AD%E7%A7%91%E5%A4%A7%E5%8D%97%E5%8C%BA%E8%B6%B3%E7%90%83%E5%9C%BA_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "HFUT",
+  "photos": [
+   {
+    "name": "翡翠湖校区宿舍楼",
+    "description": "Dormitory building of the Feicuihu Campus, Hefei University of Technology",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/%E5%90%88%E8%82%A5%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6%E7%BF%A1%E7%BF%A0%E6%B9%96%E6%A0%A1%E5%8C%BA%E5%AE%BF%E8%88%8D%E6%A5%BC_-_panoramio.jpg/960px-%E5%90%88%E8%82%A5%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6%E7%BF%A1%E7%BF%A0%E6%B9%96%E6%A0%A1%E5%8C%BA%E5%AE%BF%E8%88%8D%E6%A5%BC_-_panoramio.jpg"
+   },
+   {
+    "name": "翡翠湖校区体育馆",
+    "description": "Gymnasium of the Feicuihu Campus, Hefei University of Technology",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/%E5%90%88%E8%82%A5%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6%E7%BF%A1%E7%BF%A0%E6%B9%96%E6%A0%A1%E5%8C%BA%E4%BD%93%E8%82%B2%E9%A6%86_-_panoramio.jpg/960px-%E5%90%88%E8%82%A5%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6%E7%BF%A1%E7%BF%A0%E6%B9%96%E6%A0%A1%E5%8C%BA%E4%BD%93%E8%82%B2%E9%A6%86_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Lanzhou University",
+  "photos": [
+   {
+    "name": "兰州大学大门",
+    "description": "Main gate of Lanzhou University",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/%E5%85%B0%E5%B7%9E%E5%A4%A7%E5%AD%A6%E5%A4%A7%E9%97%A8_-_panoramio.jpg/1920px-%E5%85%B0%E5%B7%9E%E5%A4%A7%E5%AD%A6%E5%A4%A7%E9%97%A8_-_panoramio.jpg"
+   },
+   {
+    "name": "门前的天水路（往南看）",
+    "description": "Tianshui Road in front of Lanzhou University, looking south",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/%E5%85%B0%E5%B7%9E%E5%A4%A7%E5%AD%A6%E9%97%A8%E5%89%8D%E7%9A%84%E5%A4%A9%E6%B0%B4%E8%B7%AF%EF%BC%88%E5%BE%80%E5%8D%97%E7%9C%8B%EF%BC%89_-_panoramio.jpg/960px-%E5%85%B0%E5%B7%9E%E5%A4%A7%E5%AD%A6%E9%97%A8%E5%89%8D%E7%9A%84%E5%A4%A9%E6%B0%B4%E8%B7%AF%EF%BC%88%E5%BE%80%E5%8D%97%E7%9C%8B%EF%BC%89_-_panoramio.jpg"
+   },
+   {
+    "name": "Lanzhou University Staff Housing",
+    "description": "Staff housing of Lanzhou University",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Lanzhou_University_Staff_Housing.jpg/960px-Lanzhou_University_Staff_Housing.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Soochow University",
+  "photos": [
+   {
+    "name": "独墅湖校区二期学生活动处与食堂",
+    "description": "Student activity office and canteen at Soochow University's Dushuhu Campus Phase II",
+    "category": "dining",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/%E8%8B%8F%E5%B7%9E%E5%A4%A7%E5%AD%A6%E7%8B%AC%E5%A2%85%E6%B9%96%E6%A0%A1%E5%8C%BA%E4%BA%8C%E6%9C%9F%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E5%A4%84%E4%B8%8E%E9%A3%9F%E5%A0%82.jpg/960px-%E8%8B%8F%E5%B7%9E%E5%A4%A7%E5%AD%A6%E7%8B%AC%E5%A2%85%E6%B9%96%E6%A0%A1%E5%8C%BA%E4%BA%8C%E6%9C%9F%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E5%A4%84%E4%B8%8E%E9%A3%9F%E5%A0%82.jpg"
+   },
+   {
+    "name": "东吴大学牌坊（北面）",
+    "description": "Historic gate (paifang) of Soochow University at its original Suzhou site, north side",
+    "category": "gate",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/%E4%B8%9C%E5%90%B4%E5%A4%A7%E5%AD%A6%E6%A0%A1%E9%97%A8%E5%9C%A8%E8%8B%8F%E5%B7%9E%E6%97%A7%E5%9D%80%EF%BC%88%E4%B8%9C%E5%90%B4%E5%A4%A7%E5%AD%A6%E7%89%8C%E5%9D%8A%EF%BC%89%EF%BC%88%E5%8C%97%E9%9D%A2%EF%BC%89.jpg/960px-%E4%B8%9C%E5%90%B4%E5%A4%A7%E5%AD%A6%E6%A0%A1%E9%97%A8%E5%9C%A8%E8%8B%8F%E5%B7%9E%E6%97%A7%E5%9D%80%EF%BC%88%E4%B8%9C%E5%90%B4%E5%A4%A7%E5%AD%A6%E7%89%8C%E5%9D%8A%EF%BC%89%EF%BC%88%E5%8C%97%E9%9D%A2%EF%BC%89.jpg"
+   },
+   {
+    "name": "2021年毕业典礼",
+    "description": "2021 graduation ceremony of Soochow University",
+    "category": "life",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/%E8%8B%8F%E5%B7%9E%E5%A4%A7%E5%AD%A62021%E5%B9%B4%E6%AF%95%E4%B8%9A%E5%85%B8%E7%A4%BC.jpg/960px-%E8%8B%8F%E5%B7%9E%E5%A4%A7%E5%AD%A62021%E5%B9%B4%E6%AF%95%E4%B8%9A%E5%85%B8%E7%A4%BC.jpg"
+   },
+   {
+    "name": "东校区体育场",
+    "description": "Stadium of Soochow University's East Campus",
+    "category": "sports",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/%E8%8B%8F%E5%B7%9E%E5%A4%A7%E5%AD%A6%E4%B8%9C%E6%A0%A1%E5%8C%BA%E4%BD%93%E8%82%B2%E5%9C%BA.jpg/960px-%E8%8B%8F%E5%B7%9E%E5%A4%A7%E5%AD%A6%E4%B8%9C%E6%A0%A1%E5%8C%BA%E4%BD%93%E8%82%B2%E5%9C%BA.jpg"
+   }
+  ]
+ }
+]

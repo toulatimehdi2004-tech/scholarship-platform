@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Detail - Provider Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        nav {
+            background-color: #2c3e50;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        nav .brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+        }
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .card .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row .label {
+            font-weight: bold;
+            width: 180px;
+            color: #555;
+        }
+        .info-row .value {
+            flex: 1;
+            color: #333;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+        }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-confirmed { background-color: #dbeafe; color: #1e40af; }
+        .status-in_progress { background-color: #dbeafe; color: #1e40af; }
+        .status-completed { background-color: #d1fae5; color: #065f46; }
+        .status-cancelled { background-color: #fee2e2; color: #991b1b; }
+        .status-refunded { background-color: #f3e8ff; color: #6b21a8; }
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .highlight {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav .brand {
+                margin-bottom: 10px;
+            }
+            .info-row {
+                flex-direction: column;
+            }
+            .info-row .label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">🛠️ Provider Portal</div>
+        <div>
+            <a href="{% url 'provider_dashboard' %}">📊 Dashboard</a>
+            <a href="{% url 'provider_services' %}">🛠️ Services</a>
+            <a href="{% url 'provider_orders' %}">📋 Orders</a>
+            <a href="{% url 'provider_earnings' %}">💰 Earnings</a>
+            <a href="{% url 'provider_profile' %}">⚙️ Profile</a>
+            <a href="{% url 'provider_logout' %}" style="color: #e74c3c;">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <a href="{% url 'provider_orders' %}" class="back-link">← Back to Orders</a>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+                <div>
+                    <h2>Order #{{ order.id }}</h2>
+                    <p class="subtitle">Placed on {{ order.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+                <div>
+                    <span class="status-badge status-{{ order.status }}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <hr style="margin: 20px 0;">
+            
+            <h3>📋 Service Information</h3>
+            <div class="info-row">
+                <span class="label">Service:</span>
+                <span class="value">{{ order.service.name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Category:</span>
+                <span class="value">{{ order.service.category.name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Quantity:</span>
+                <span class="value">{{ order.quantity }}</span>
+            </div>
+            
+            <h3 style="margin-top: 20px;">👤 Student Information</h3>
+            <div class="info-row">
+                <span class="label">Username:</span>
+                <span class="value">{{ order.student.user.username }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ order.student.user.email }}</span>
+            </div>
+            {% if order.notes %}
+                <div class="info-row">
+                    <span class="label">Notes:</span>
+                    <span class="value">{{ order.notes }}</span>
+                </div>
+            {% endif %}
+            
+            <h3 style="margin-top: 20px;">💰 Payment Details</h3>
+            <div class="highlight">
+                <div class="info-row">
+                    <span class="label">Total Amount:</span>
+                    <span class="value">{{ order.currency }} {{ order.total_amount }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Platform Commission:</span>
+                    <span class="value" style="color: #e74c3c;">- {{ order.currency }} {{ order.commission_amount }}</span>
+                </div>
+                <div class="info-row" style="border-bottom: none;">
+                    <span class="label">Your Payout:</span>
+                    <span class="value" style="color: #2ecc71; font-weight: bold; font-size: 18px;">{{ order.currency }} {{ order.provider_payout }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Status -->
+        <div class="card">
+            <h3>📝 Update Order Status</h3>
+            <form method="POST" action="{% url 'provider_update_order_status' order.id %}">
+                {% csrf_token %}
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; margin-top: 15px;">
+                    <select name="status" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-width: 180px;">
+                        {% for status_code, status_name in status_choices %}
+                            <option value="{{ status_code }}" {% if order.status == status_code %}selected{% endif %}>
+                                {{ status_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-warning">Update Status</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <h3>⚡ Quick Actions</h3>
+            <div class="actions">
+                <form method="POST" action="{% url 'provider_update_order_status' order.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="confirmed">
+                    <button type="submit" class="btn">✅ Confirm Order</button>
+                </form>
+                <form method="POST" action="{% url 'provider_update_order_status' order.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="in_progress">
+                    <button type="submit" class="btn btn-warning">🔄 Start Work</button>
+                </form>
+                <form method="POST" action="{% url 'provider_update_order_status' order.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="completed">
+                    <button type="submit" class="btn btn-success">✅ Mark Complete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

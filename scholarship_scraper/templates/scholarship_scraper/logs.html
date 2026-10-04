@@ -1,0 +1,69 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<style>
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .log-table th {
+        background: #2c3e50;
+        color: white;
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 13px;
+    }
+    .log-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ecf0f1;
+        font-size: 13px;
+    }
+    .status-badge {
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-badge.success { background: #d4edda; color: #155724; }
+    .status-badge.partial { background: #fff3cd; color: #856404; }
+    .status-badge.failed { background: #f8d7da; color: #721c24; }
+</style>
+
+<h2>Scraper Logs</h2>
+<p style="color: #7f8c8d; margin-bottom: 20px;">Recent scraping run history.</p>
+
+{% if logs %}
+<table class="log-table">
+    <thead>
+        <tr>
+            <th>Source</th>
+            <th>Status</th>
+            <th>Found</th>
+            <th>Created</th>
+            <th>Skipped</th>
+            <th>Duration</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td><strong>{{ log.source_name }}</strong></td>
+            <td><span class="status-badge {{ log.status }}">{{ log.get_status_display }}</span></td>
+            <td>{{ log.scholarships_found }}</td>
+            <td>{{ log.scholarships_created }}</td>
+            <td>{{ log.scholarships_skipped }}</td>
+            <td>{{ log.duration_seconds }}s</td>
+            <td>{{ log.started_at|date:"M d, H:i" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="text-align: center; padding: 40px; color: #7f8c8d;">No scraping logs yet.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provider Profile - Provider Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        nav {
+            background-color: #2c3e50;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        nav .brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+        }
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .card .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row .label {
+            font-weight: bold;
+            width: 180px;
+            color: #555;
+        }
+        .info-row .value {
+            flex: 1;
+            color: #333;
+        }
+        .verified {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        .not-verified {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav .brand {
+                margin-bottom: 10px;
+            }
+            .info-row {
+                flex-direction: column;
+            }
+            .info-row .label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">🛠️ Provider Portal</div>
+        <div>
+            <a href="{% url 'provider_dashboard' %}">📊 Dashboard</a>
+            <a href="{% url 'provider_services' %}">🛠️ Services</a>
+            <a href="{% url 'provider_orders' %}">📋 Orders</a>
+            <a href="{% url 'provider_earnings' %}">💰 Earnings</a>
+            <a href="{% url 'provider_profile' %}">⚙️ Profile</a>
+            <a href="{% url 'provider_logout' %}" style="color: #e74c3c;">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+                <div>
+                    <h2>🛠️ {{ provider.business_name }}</h2>
+                    <p class="subtitle">
+                        {% if provider.is_verified %}
+                            <span class="verified">✅ Verified Provider</span>
+                        {% else %}
+                            <span class="not-verified">⏳ Pending Verification</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'provider_edit_profile' %}" class="btn btn-warning">✏️ Edit Profile</a>
+            </div>
+            
+            <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ provider.user.email }}</span>
+            </div>
+            {% if provider.phone %}
+                <div class="info-row">
+                    <span class="label">Phone:</span>
+                    <span class="value">{{ provider.phone }}</span>
+                </div>
+            {% endif %}
+            {% if provider.website %}
+                <div class="info-row">
+                    <span class="label">Website:</span>
+                    <span class="value"><a href="{{ provider.website }}" target="_blank">{{ provider.website }}</a></span>
+                </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="label">Location:</span>
+                <span class="value">{{ provider.city }}{% if provider.city and provider.country %}, {% endif %}{{ provider.country }}</span>
+            </div>
+            {% if provider.address %}
+                <div class="info-row">
+                    <span class="label">Address:</span>
+                    <span class="value">{{ provider.address }}</span>
+                </div>
+            {% endif %}
+            {% if provider.business_description %}
+                <div class="info-row">
+                    <span class="label">Description:</span>
+                    <span class="value">{{ provider.business_description }}</span>
+                </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="label">Joined:</span>
+                <span class="value">{{ provider.created_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Rating:</span>
+                <span class="value">⭐ {{ provider.average_rating|floatformat:1 }} ({{ provider.total_reviews }} reviews)</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

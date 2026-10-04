@@ -1,0 +1,560 @@
+[
+ {
+  "name": "Tsinghua University",
+  "photos": [
+   {
+    "name": "West Gate (西校门)",
+    "description": "The ornate western entrance to Tsinghua's Beijing campus, at the head of the willow-lined avenue leading in from Haidian.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/West_gate_of_Tsinghua_University_%28May_2017%29.jpg/1920px-West_gate_of_Tsinghua_University_%28May_2017%29.jpg"
+   },
+   {
+    "name": "Old Gate (老校门)",
+    "description": "The white marble ceremonial gate that has become the emblem of Tsinghua University, standing on the main campus approach.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/The_Old_Gate_is_a_symbol_of_Tsinghua_University.jpg/1920px-The_Old_Gate_is_a_symbol_of_Tsinghua_University.jpg"
+   },
+   {
+    "name": "Beiyuan Canteen (北园食堂)",
+    "description": "A busy campus canteen where students queue for affordable northern-style meals between lectures.",
+    "category": "dining",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/%E6%B8%85%E8%8F%AF%E5%A4%A7%E5%AD%B8%E9%A3%9F%E5%A0%82_%E5%8C%97%E5%9C%92.jpg/1920px-%E6%B8%85%E8%8F%AF%E5%A4%A7%E5%AD%B8%E9%A3%9F%E5%A0%82_%E5%8C%97%E5%9C%92.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Peking University",
+  "photos": [
+   {
+    "name": "Peking University Gymnasium",
+    "description": "The campus gymnasium used for PE classes, indoor sport and student clubs on the Beijing campus.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Peking_University_Gymnasium.jpg/1920px-Peking_University_Gymnasium.jpg"
+   },
+   {
+    "name": "Dormitory Building 7 (七号楼宿舍)",
+    "description": "A student residence hall photographed by a resident who claimed it was better than a five-star hotel.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Beida%2C_Bejing_Daxue%2C_Peking_University%2C_Dorm_Building_7_%28It_was_better_than_a_Five-Star_hotel%5E%29_-_panoramio.jpg/1920px-Beida%2C_Bejing_Daxue%2C_Peking_University%2C_Dorm_Building_7_%28It_was_better_than_a_Five-Star_hotel%5E%29_-_panoramio.jpg"
+   },
+   {
+    "name": "Khoo Teck Puat Sports Complex",
+    "description": "PKU's sports complex of pools and courts, built with a donation from Singapore's Khoo Teck Puat Hospital foundation.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Khoo_Teck_Puat_Sports_Complex%2C_PKU_%2820231203164550%29.jpg/1920px-Khoo_Teck_Puat_Sports_Complex%2C_PKU_%2820231203164550%29.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Fudan University",
+  "photos": [
+   {
+    "name": "Jiangwan Campus Gate (江湾校区校门)",
+    "description": "The entrance gate of Fudan's Jiangwan campus in Shanghai's Yangpu district.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/201704_Gate_of_Fudan_University_Jiangwan_Campus.jpg/1920px-201704_Gate_of_Fudan_University_Jiangwan_Campus.jpg"
+   },
+   {
+    "name": "Handan Campus at Dusk (邯郸校区黄昏)",
+    "description": "Evening light over the compact downtown Handan campus, where students move between teaching blocks and residences.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/%E5%A4%8D%E6%97%A6%E5%A4%A7%E5%AD%A6%E9%82%AF%E9%83%B8%E6%A0%A1%E5%8C%BA%E9%BB%84%E6%98%8F.jpg/1920px-%E5%A4%8D%E6%97%A6%E5%A4%A7%E5%AD%A6%E9%82%AF%E9%83%B8%E6%A0%A1%E5%8C%BA%E9%BB%84%E6%98%8F.jpg"
+   },
+   {
+    "name": "Jiangwan Campus (江湾校区)",
+    "description": "A campus view of Fudan's newer Jiangwan site, with its low academic buildings and landscaped grounds.",
+    "category": "academic",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Fudan_University_Jiangwan_Campus.jpg/1920px-Fudan_University_Jiangwan_Campus.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Shanghai Jiao Tong University",
+  "photos": [
+   {
+    "name": "Minhang South Gate (交大南门)",
+    "description": "The southern gateway to the sprawling Minhang campus, the main daily entrance for students and staff.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/%E4%BA%A4%E5%A4%A7%E5%8D%97%E9%97%A8_-_South_Gate_of_SJTU_-_2011.12_-_panoramio.jpg/1920px-%E4%BA%A4%E5%A4%A7%E5%8D%97%E9%97%A8_-_South_Gate_of_SJTU_-_2011.12_-_panoramio.jpg"
+   },
+   {
+    "name": "Minhang East Gate (交大东门)",
+    "description": "The eastern entrance of the Minhang campus, opening onto the streets of Shanghai's southwest suburbs.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/%E4%BA%A4%E5%A4%A7%E4%B8%9C%E9%97%A8_-_East_Gate_of_SJTU_-_2011.12_-_panoramio.jpg/1920px-%E4%BA%A4%E5%A4%A7%E4%B8%9C%E9%97%A8_-_East_Gate_of_SJTU_-_2011.12_-_panoramio.jpg"
+   },
+   {
+    "name": "Postgraduates' Dormitory Buildings (研究生楼)",
+    "description": "The residence halls where SJTU's postgraduates live on the Minhang campus.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/%E7%A0%94%E7%A9%B6%E7%94%9F%E6%A5%BC_-_Postgraduates%27_Dormitory_Buildings_-_2010.12_-_panoramio.jpg/1920px-%E7%A0%94%E7%A9%B6%E7%94%9F%E6%A5%BC_-_Postgraduates%27_Dormitory_Buildings_-_2010.12_-_panoramio.jpg"
+   },
+   {
+    "name": "Campus Gymnasium (体育馆)",
+    "description": "The university gymnasium, a familiar venue for PE classes, matches and student sports events.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/%E9%AB%94%E8%82%B2%E9%A4%A8_-_panoramio_-_George_Wenn.jpg/1920px-%E9%AB%94%E8%82%B2%E9%A4%A8_-_panoramio_-_George_Wenn.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Zhejiang University",
+  "photos": [
+   {
+    "name": "International Campus Canteen (国际校区食堂)",
+    "description": "The indoor canteen of ZJU's International Campus, where students eat between classes.",
+    "category": "dining",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/CanteenIZJU.png/1920px-CanteenIZJU.png"
+   },
+   {
+    "name": "Student Activity Centre, Zijingang (紫金港学生活动中心)",
+    "description": "The student activity centre on Zijingang campus, hub of clubs, performances and campus events.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/%E6%B5%99%E6%B1%9F%E5%A4%A7%E5%AD%A6%E6%A0%A1%E5%9B%AD%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83_-_panoramio.jpg/1920px-%E6%B5%99%E6%B1%9F%E5%A4%A7%E5%AD%A6%E6%A0%A1%E5%9B%AD%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83_-_panoramio.jpg"
+   },
+   {
+    "name": "Xixi Campus Dormitories (西溪校区宿舍)",
+    "description": "Student dormitory blocks of the life-science school at ZJU's central Xixi campus in Hangzhou.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/20250502_Jiaogong_Sushe%2C_Shengming_Kexue_Xueyuan%2C_Xixi_Xiaoqu%2C_Zhejiang_Daxue.jpg/1920px-20250502_Jiaogong_Sushe%2C_Shengming_Kexue_Xueyuan%2C_Xixi_Xiaoqu%2C_Zhejiang_Daxue.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Nanjing University",
+  "photos": [
+   {
+    "name": "Student Canteen (学生餐厅)",
+    "description": "A student restaurant on campus, one of the everyday dining rooms of Nanjing University.",
+    "category": "dining",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/%E5%AD%A6%E7%94%9F%E9%A4%90%E5%8E%85_-_panoramio.jpg/1920px-%E5%AD%A6%E7%94%9F%E9%A4%90%E5%8E%85_-_panoramio.jpg"
+   },
+   {
+    "name": "Student Dormitory (宿舍)",
+    "description": "A residence hall on the Nanjing University campus, home to generations of undergraduates.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/%E5%AE%BF%E8%88%8D_-_panoramio_-_zhanyoun.jpg/1920px-%E5%AE%BF%E8%88%8D_-_panoramio_-_zhanyoun.jpg"
+   },
+   {
+    "name": "Student Activity Centre (学生活动中心)",
+    "description": "The student activity centre on the Xianlin campus, used for clubs, societies and campus gatherings.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/93/%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83_-_panoramio.jpg/1920px-%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Wuhan University",
+  "photos": [
+   {
+    "name": "Main Entrance Gate (正门)",
+    "description": "The main gate of the Luojia campus, where students pass daily beneath Wuhan University's old trees.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Wuda_entrance_gate.jpg/1920px-Wuda_entrance_gate.jpg"
+   },
+   {
+    "name": "Yingyuan Dormitory, Block 3 (樱园三舍)",
+    "description": "Part of the Yingyuan residence halls climbing Luojia Hill, below the cherry terraces.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Wuhan_University_-_Yingyuan_dormitory_%283rd%29.jpg/1920px-Wuhan_University_-_Yingyuan_dormitory_%283rd%29.jpg"
+   },
+   {
+    "name": "Dormitory Gate (宿舍区大门)",
+    "description": "The gateway into a student residence area of the campus, watched over by campus guards day and night.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Wuhan_University_Dormitory_Gate.jpg/1920px-Wuhan_University_Dormitory_Gate.jpg"
+   }
+  ]
+ },
+ {
+  "name": "HUST",
+  "photos": [
+   {
+    "name": "Campus Gate (校门)",
+    "description": "One of the main entrances to HUST's forested campus in Wuhan's Wuchang district.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/HUST%E6%A0%A1%E9%97%A8.jpg/1920px-HUST%E6%A0%A1%E9%97%A8.jpg"
+   },
+   {
+    "name": "Dormitories and Bicycle Stands (宿舍与自行车)",
+    "description": "Residence halls and the bicycle stands that crowd the paths between them, a daily scene of campus life at HUST.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/HUST_dorm_and_bicycles_4128.jpg/1920px-HUST_dorm_and_bicycles_4128.jpg"
+   },
+   {
+    "name": "East Campus Gate (东校门)",
+    "description": "A further gateway onto the tree-lined HUST campus, busy with students at class change.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/HUST_gate_01.jpg/1920px-HUST_gate_01.jpg"
+   },
+   {
+    "name": "Eastern Zone Cafeteria and Student Services Centre (东区食堂)",
+    "description": "The cafeteria and student services centre of HUST's eastern zone, where meals, errands and student life meet.",
+    "category": "dining",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Huazhong_University_of_Science_and_Technology_-_eastern_zone_-_cafeteria_and_student_services_center_-_P1040921.JPG/1920px-Huazhong_University_of_Science_and_Technology_-_eastern_zone_-_cafeteria_and_student_services_center_-_P1040921.JPG"
+   }
+  ]
+ },
+ {
+  "name": "Sun Yat-sen University",
+  "photos": [
+   {
+    "name": "North Gate (北门)",
+    "description": "The northern entrance to the Guangzhou South Campus, used daily by students coming from the city.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/%E4%B8%AD%E5%B1%B1%E5%A4%A7%E5%AD%A6%E5%8C%97%E9%97%A8_-_North_Gate_of_Sun_Yat-sen_University_-_2015.12_-_panoramio.jpg/1920px-%E4%B8%AD%E5%B1%B1%E5%A4%A7%E5%AD%A6%E5%8C%97%E9%97%A8_-_North_Gate_of_Sun_Yat-sen_University_-_2015.12_-_panoramio.jpg"
+   },
+   {
+    "name": "Avenue of Trees (林荫道)",
+    "description": "A tall-canopied avenue through the South Campus, shaded by the old trees that define the grounds in Guangzhou.",
+    "category": "nature",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Avenue_of_Trees_%286343575879%29.jpg/1920px-Avenue_of_Trees_%286343575879%29.jpg"
+   },
+   {
+    "name": "Mother and Child Sculpture (母子雕塑)",
+    "description": "A campus sculpture titled Mother and Child, one of the artworks dotted along the South Campus walkways.",
+    "category": "culture",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Mother_and_Child%2C_%E4%B8%AD%E5%B1%B1%E5%A4%A7%E5%AD%A6_%284868505368%29.jpg/1920px-Mother_and_Child%2C_%E4%B8%AD%E5%B1%B1%E5%A4%A7%E5%AD%A6_%284868505368%29.jpg"
+   }
+  ]
+ },
+ {
+  "name": "HIT",
+  "photos": [
+   {
+    "name": "Northwest Gate Name Wall (西北门校名墙)",
+    "description": "The wall carrying the university's name at HIT's northwest gate, a familiar meeting point on the Harbin campus.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/%E5%93%88%E5%B0%94%E6%BB%A8%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6%E8%A5%BF%E5%8C%97%E9%97%A8%E6%A0%A1%E5%90%8D%E5%A2%99.jpg/1920px-%E5%93%88%E5%B0%94%E6%BB%A8%E5%B7%A5%E4%B8%9A%E5%A4%A7%E5%AD%A6%E8%A5%BF%E5%8C%97%E9%97%A8%E6%A0%A1%E5%90%8D%E5%A2%99.jpg"
+   },
+   {
+    "name": "Nanyuan Canteen (南苑餐厅)",
+    "description": "The Nanyuan dining hall, one of the canteens feeding students through Harbin's long winters.",
+    "category": "dining",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/%E5%8D%97%E8%8B%91%E9%A4%90%E5%8E%85_-_panoramio.jpg/1920px-%E5%8D%97%E8%8B%91%E9%A4%90%E5%8E%85_-_panoramio.jpg"
+   },
+   {
+    "name": "Campus Stadium (体育场)",
+    "description": "The campus athletics stadium where students train, hold sports days and run in the cold northern air.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/%E5%93%88%E5%B7%A5%E5%A4%A7%E4%BD%93%E8%82%B2%E5%9C%BA_-_panoramio.jpg/1920px-%E5%93%88%E5%B7%A5%E5%A4%A7%E4%BD%93%E8%82%B2%E5%9C%BA_-_panoramio.jpg"
+   },
+   {
+    "name": "A16 Student Apartment (A16公寓)",
+    "description": "A student apartment block on the HIT campus, home to residents during the Harbin terms.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fa/%E5%93%88%E5%B7%A5%E5%A4%A7A16%E5%85%AC%E5%AF%93_-_panoramio.jpg/1920px-%E5%93%88%E5%B7%A5%E5%A4%A7A16%E5%85%AC%E5%AF%93_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Xi'an Jiaotong University",
+  "photos": [
+   {
+    "name": "East District Dormitory No. 3 (东区3号楼)",
+    "description": "A dormitory building in the East District of the Xingqing campus, where students live and study.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/XJTU_East-3_Dorm_Building.jpg/1920px-XJTU_East-3_Dorm_Building.jpg"
+   },
+   {
+    "name": "Siyuan Student Activity Centre (思源活动中心)",
+    "description": "The Siyuan student activity centre, venue for the national Challenge Cup and countless campus events.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/%E7%AC%AC14%E5%B1%8A%E6%8C%91%E6%88%98%E6%9D%AF%E4%BA%8E%E8%A5%BF%E4%BA%A4%E6%80%9D%E6%BA%90%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83.jpg/1920px-%E7%AC%AC14%E5%B1%8A%E6%8C%91%E6%88%98%E6%9D%AF%E4%BA%8E%E8%A5%BF%E4%BA%A4%E6%80%9D%E6%BA%90%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83.jpg"
+   },
+   {
+    "name": "Golden Sycamore Festival (金色梧桐节)",
+    "description": "The campus festival celebrating the golden plane trees of the Xingqing campus, a favourite autumn gathering.",
+    "category": "culture",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/%E8%A5%BF%E5%AE%89%E4%BA%A4%E9%80%9A%E5%A4%A7%E5%AD%A6%E9%87%91%E8%89%B2%E6%A2%A7%E6%A1%90%E8%8A%82_02.jpg/1920px-%E8%A5%BF%E5%AE%89%E4%BA%A4%E9%80%9A%E5%A4%A7%E5%AD%A6%E9%87%91%E8%89%B2%E6%A2%A7%E6%A1%90%E8%8A%82_02.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Sichuan University",
+  "photos": [
+   {
+    "name": "North Gate (北门)",
+    "description": "The northern gate of the campus in Chengdu, the everyday entrance beside the university's main grounds.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/North_gate_of_SCU.png/1920px-North_gate_of_SCU.png"
+   },
+   {
+    "name": "Sports Centre (体育中心)",
+    "description": "The university sports centre, used for PE teaching, competitions and student fitness.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/%E5%9B%9B%E5%B7%9D%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E4%B8%AD%E5%BF%83.jpg/1920px-%E5%9B%9B%E5%B7%9D%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E4%B8%AD%E5%BF%83.jpg"
+   },
+   {
+    "name": "Campus Entrance in 1991 (1991年校门)",
+    "description": "The university entrance as it appeared in 1991, a snapshot of Chengdu campus life thirty years ago.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/Chengdu_1991_Sichuan_University_Entrance_%2810564829693%29.jpg/1920px-Chengdu_1991_Sichuan_University_Entrance_%2810564829693%29.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Beijing Normal University",
+  "photos": [
+   {
+    "name": "Qiu Jiduan Gymnasium (邱季端体育馆)",
+    "description": "BNU's large campus gymnasium, used for sports teaching, matches and university ceremonies.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/%E5%8C%97%E5%B8%88%E5%A4%A7%E9%82%B1%E5%AD%A3%E7%AB%AF%E4%BD%93%E8%82%B2%E9%A6%86.jpg/1920px-%E5%8C%97%E5%B8%88%E5%A4%A7%E9%82%B1%E5%AD%A3%E7%AB%AF%E4%BD%93%E8%82%B2%E9%A6%86.jpg"
+   },
+   {
+    "name": "Student Dormitory (寝室楼)",
+    "description": "A residence tower on the compact downtown Haidian campus, where BNU students live during term.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/%E5%8C%97%E5%B8%88%E5%A4%A7%E5%AF%9D%E5%AE%A4%E6%A5%BC.jpg/1920px-%E5%8C%97%E5%B8%88%E5%A4%A7%E5%AF%9D%E5%AE%A4%E6%A5%BC.jpg"
+   },
+   {
+    "name": "West Sports Field (西操场)",
+    "description": "The outdoor playing field on campus, used for running, football and morning exercise.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/%E5%8C%97%E5%B8%88%E5%A4%A7%E8%A5%BF%E6%93%8D%E5%9C%BA.jpg/1920px-%E5%8C%97%E5%B8%88%E5%A4%A7%E8%A5%BF%E6%93%8D%E5%9C%BA.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Tongji University",
+  "photos": [
+   {
+    "name": "Siping Road Pedestrian Underpass (四平路人行通道)",
+    "description": "The pedestrian tunnel entrance beneath Siping Road on the Tongji campus.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/20221124_Tunnel_Entrance_in_Tongji_University.jpg/1920px-20221124_Tunnel_Entrance_in_Tongji_University.jpg"
+   },
+   {
+    "name": "Graffiti Wall behind Xueyuan Canteen (学苑食堂涂鸦墙)",
+    "description": "Street-art graffiti on the wall behind the Xueyuan canteen, a small gallery of student expression.",
+    "category": "culture",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Graffiti_art_show_%E6%B6%82%E9%B8%A6%E5%B1%95%E7%A4%BA%E7%9A%84%E8%89%BA%E6%9C%AF_-_panoramio.jpg/1920px-Graffiti_art_show_%E6%B6%82%E9%B8%A6%E5%B1%95%E7%A4%BA%E7%9A%84%E8%89%BA%E6%9C%AF_-_panoramio.jpg"
+   },
+   {
+    "name": "Campus River Landscape (校园河道景观)",
+    "description": "The landscaped watercourse crossing the Siping campus, a quiet green corridor between teaching blocks.",
+    "category": "nature",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Tongji_University_artificial_river_landscape.jpg/1920px-Tongji_University_artificial_river_landscape.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Southeast University",
+  "photos": [
+   {
+    "name": "Yilin Canteen, Dingjiaqiao Campus (丁家桥怡兰餐厅)",
+    "description": "The student canteen at the Dingjiaqiao campus, serving meals to medical and science students.",
+    "category": "dining",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Yilin_Canteen_in_Southeast_University_Dingjiaqiao_Campus.jpg/1920px-Yilin_Canteen_in_Southeast_University_Dingjiaqiao_Campus.jpg"
+   },
+   {
+    "name": "Peach Garden Canteen, Jiulonghu Campus (九龙湖桃园餐厅)",
+    "description": "The new canteen of the Peach Garden residences on the Jiulonghu campus in Nanjing's Jiangning district.",
+    "category": "dining",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/New_canteen_of_peach_yard_in_southeast_university_jiulonghu_campus.jpg/1920px-New_canteen_of_peach_yard_in_southeast_university_jiulonghu_campus.jpg"
+   },
+   {
+    "name": "Gymnasium (体育馆)",
+    "description": "The university gymnasium, home to PE lessons, indoor competitions and student sport.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Southeast_University_Gymnasium_03_2010-11.jpg/1920px-Southeast_University_Gymnasium_03_2010-11.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Shandong University",
+  "photos": [
+   {
+    "name": "Central Campus Gymnasium (中心校区体育馆)",
+    "description": "The gymnasium of the central campus in Jinan, used for sport teaching and university events.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/%E5%B1%B1%E4%B8%9C%E5%A4%A7%E5%AD%A6%EF%BC%88%E4%B8%AD%E5%BF%83%E6%A0%A1%E5%8C%BA%EF%BC%89%E4%BD%93%E8%82%B2%E9%A6%86.jpg/1920px-%E5%B1%B1%E4%B8%9C%E5%A4%A7%E5%AD%A6%EF%BC%88%E4%B8%AD%E5%BF%83%E6%A0%A1%E5%8C%BA%EF%BC%89%E4%BD%93%E8%82%B2%E9%A6%86.jpg"
+   },
+   {
+    "name": "Foreign Student Dormitory Pond (留学生宿舍水池)",
+    "description": "The water feature beside the foreign student residence on the central campus, a quiet corner of student life.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Sdu_foreign_student_dorm_pond_2011_07_30.jpg/1920px-Sdu_foreign_student_dorm_pond_2011_07_30.jpg"
+   },
+   {
+    "name": "Foreign Student Apartments (留学生公寓)",
+    "description": "The apartment block housing SDU's international students in Jinan.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Shandong_university_foreign_students_apt_2009_07.jpg/1920px-Shandong_university_foreign_students_apt_2009_07.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Beihang University",
+  "photos": [
+   {
+    "name": "Shahe Campus South Gate (沙河校区南门)",
+    "description": "The southern entrance to Beihang's newer Shahe campus north of central Beijing.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/South_Gate_of_BUAA_Shahe_Campus.jpg/1920px-South_Gate_of_BUAA_Shahe_Campus.jpg"
+   },
+   {
+    "name": "Shahe Campus Street View (沙河校区街景)",
+    "description": "A street on the Shahe campus, with students cycling between residences and teaching buildings.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/84/Street_view_of_Beihang_University_Shahe_Campus.jpg/1920px-Street_view_of_Beihang_University_Shahe_Campus.jpg"
+   },
+   {
+    "name": "Xueyuan Road Campus East Gate (学院路校区东门)",
+    "description": "The eastern gate of the historic Xueyuan Road campus on Beijing's academic corridor.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/%E5%8C%97%E4%BA%AC%E8%88%AA%E7%A9%BA%E8%88%AA%E5%A4%A9%E5%A4%A7%E5%AD%A6%E4%B8%9C%E9%97%A8_BUAA.jpg/1920px-%E5%8C%97%E4%BA%AC%E8%88%AA%E7%A9%BA%E8%88%AA%E5%A4%A9%E5%A4%A7%E5%AD%A6%E4%B8%9C%E9%97%A8_BUAA.jpg"
+   },
+   {
+    "name": "LuYuan Residence Area (潞园)",
+    "description": "A green residential corner of campus where students live between classes and labs.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/BUAA_LuYuan.jpg/1920px-BUAA_LuYuan.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Xiamen University",
+  "photos": [
+   {
+    "name": "Student Activity Centre (学生活动中心)",
+    "description": "The student activity centre on the Siming campus, hub of clubs, performances and campus events.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/%E5%8E%A6%E9%97%A8%E5%A4%A7%E5%AD%A6%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83.jpg/1920px-%E5%8E%A6%E9%97%A8%E5%A4%A7%E5%AD%A6%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83.jpg"
+   },
+   {
+    "name": "Student Dormitory Area (学生宿舍区)",
+    "description": "The residence halls of the seaside Siming campus, where most XMU students live and study.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/%E5%8E%A6%E9%97%A8%E5%A4%A7%E5%AD%A6%E5%AD%A6%E7%94%9F%E5%AE%BF%E8%88%8D%E5%8C%BA_-_panoramio.jpg/1920px-%E5%8E%A6%E9%97%A8%E5%A4%A7%E5%AD%A6%E5%AD%A6%E7%94%9F%E5%AE%BF%E8%88%8D%E5%8C%BA_-_panoramio.jpg"
+   },
+   {
+    "name": "Daxue Road Market (大学路菜市场)",
+    "description": "The street market on Daxue Road beside campus, where students and locals shop for food and small goods.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/%E5%A4%A7%E5%AD%A6%E8%B7%AF%E8%8F%9C%E5%B8%82%E5%9C%BA_market_-_panoramio.jpg/1920px-%E5%A4%A7%E5%AD%A6%E8%B7%AF%E8%8F%9C%E5%B8%82%E5%9C%BA_market_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Nankai University",
+  "photos": [
+   {
+    "name": "SACONKU Student Activity Centre (学生活动中心)",
+    "description": "The SACONKU student activity centre, the social and cultural hub of the Nankai campus in Tianjin.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/%E5%8D%97%E5%BC%80%E5%A4%A7%E5%AD%A6%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83%EF%BC%88SACONKU%EF%BC%89_-_panoramio.jpg/1920px-%E5%8D%97%E5%BC%80%E5%A4%A7%E5%AD%A6%E5%AD%A6%E7%94%9F%E6%B4%BB%E5%8A%A8%E4%B8%AD%E5%BF%83%EF%BC%88SACONKU%EF%BC%89_-_panoramio.jpg"
+   },
+   {
+    "name": "Campus Dormitory (宿舍楼)",
+    "description": "A student residence hall on the Balitai campus, home to generations of Nankai students.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/%E5%8D%97%E5%BC%80%E5%A4%A7%E5%AD%A6%E5%AE%BF%E8%88%8D%E6%A5%BC_-_panoramio.jpg/1920px-%E5%8D%97%E5%BC%80%E5%A4%A7%E5%AD%A6%E5%AE%BF%E8%88%8D%E6%A5%BC_-_panoramio.jpg"
+   },
+   {
+    "name": "University Gymnasium (体育馆)",
+    "description": "The campus gymnasium associated with Nankai's 90th anniversary, used for sport and university gatherings.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/%E5%8D%97%E5%BC%80%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E9%A6%86%2890%E5%B9%B4%E6%A0%A1%E5%BA%86%29_-_panoramio.jpg/1920px-%E5%8D%97%E5%BC%80%E5%A4%A7%E5%AD%A6%E4%BD%93%E8%82%B2%E9%A6%86%2890%E5%B9%B4%E6%A0%A1%E5%BA%86%29_-_panoramio.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Beijing Institute of Technology",
+  "photos": [
+   {
+    "name": "Dormitory Building (宿舍楼)",
+    "description": "A student residence hall on BIT's campus, photographed with campus greenery in front.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Dormitory_building_at_Beijing_Institute_of_Technology_%2829666949104%29.jpg/1920px-Dormitory_building_at_Beijing_Institute_of_Technology_%2829666949104%29.jpg"
+   },
+   {
+    "name": "Campus Stadium (体育场)",
+    "description": "The outdoor stadium of the university, where students run, train and hold sports meetings.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/Stadium_of_Beijing_Institute_of_Technology.jpg/1920px-Stadium_of_Beijing_Institute_of_Technology.jpg"
+   }
+  ]
+ },
+ {
+  "name": "China Agricultural University",
+  "photos": [
+   {
+    "name": "East Campus South Gate (东校区南门)",
+    "description": "The southern entrance to CAU's East Campus in Beijing, the busiest daily gateway for students.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/South_gate_of_CAU_East_Campus_%2820250317115615%29.jpg/1920px-South_gate_of_CAU_East_Campus_%2820250317115615%29.jpg"
+   },
+   {
+    "name": "West Campus Gate (西校区校门)",
+    "description": "The gateway to CAU's West Campus in Haidian, site of the university's historic core.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Gate_of_CAU_West_Campus_%2820171107160839%29.jpg/1920px-Gate_of_CAU_West_Campus_%2820171107160839%29.jpg"
+   }
+  ]
+ },
+ {
+  "name": "UCAS",
+  "photos": [
+   {
+    "name": "Ocean College Student Apartments (海洋学院学生公寓)",
+    "description": "Student apartments of UCAS's Ocean College, where graduate students live during the term.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/%E4%B8%AD%E5%9B%BD%E7%A7%91%E5%AD%A6%E9%99%A2%E5%A4%A7%E5%AD%A6%E6%B5%B7%E6%B4%8B%E5%AD%A6%E9%99%A2%E2%80%94%E2%80%94%E5%AD%A6%E7%94%9F%E5%85%AC%E5%AF%93.jpg/1920px-%E4%B8%AD%E5%9B%BD%E7%A7%91%E5%AD%A6%E9%99%A2%E5%A4%A7%E5%AD%A6%E6%B5%B7%E6%B4%8B%E5%AD%A6%E9%99%A2%E2%80%94%E2%80%94%E5%AD%A6%E7%94%9F%E5%85%AC%E5%AF%93.jpg"
+   },
+   {
+    "name": "Yuquanlu Teaching Building at Night (玉泉路校区教学楼夜景)",
+    "description": "The teaching building of the Yuquanlu campus lit up after dark, when evening classes and study continue.",
+    "category": "academic",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/%E7%8E%89%E6%B3%89%E8%B7%AF%E6%A0%A1%E5%8C%BA%E6%95%99%E5%AD%A6%E6%A5%BC%E5%A4%9C%E6%99%AF.jpg/1920px-%E7%8E%89%E6%B3%89%E8%B7%AF%E6%A0%A1%E5%8C%BA%E6%95%99%E5%AD%A6%E6%A5%BC%E5%A4%9C%E6%99%AF.jpg"
+   }
+  ]
+ },
+ {
+  "name": "BFSU",
+  "photos": [
+   {
+    "name": "West Gate, East Campus (东校区西门)",
+    "description": "The western gateway of BFSU's East Campus, a daily entry point for students and staff.",
+    "category": "gate",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/West_gate_of_BFSU_East_Campus_%2820180125141551%29.jpg/1920px-West_gate_of_BFSU_East_Campus_%2820180125141551%29.jpg"
+   },
+   {
+    "name": "Beiwai Gymnasium (体育馆)",
+    "description": "The campus gymnasium of the Beijing Foreign Studies University grounds, used for sport and student events.",
+    "category": "sports",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Gym_of_Beiwai.JPG/1920px-Gym_of_Beiwai.JPG"
+   },
+   {
+    "name": "West Campus Grounds (西校区)",
+    "description": "The leafy West Campus, where BFSU's language schools and libraries are based.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/BFSU_West_Campus_%2820220624091811%29.jpg/1920px-BFSU_West_Campus_%2820220624091811%29.jpg"
+   }
+  ]
+ },
+ {
+  "name": "Beijing Language and Culture University",
+  "photos": [
+   {
+    "name": "Campus Dining Hall (学生食堂)",
+    "description": "The dining hall of BLCU, where China's international language students eat together between classes.",
+    "category": "dining",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Blcu_mensa.jpg/1920px-Blcu_mensa.jpg"
+   },
+   {
+    "name": "Campus Street (校园街道)",
+    "description": "A street through the BLCU campus, lined with teaching blocks and willows in Beijing's university district.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Blcu_strasse.jpg/1920px-Blcu_strasse.jpg"
+   },
+   {
+    "name": "International Students on Campus (校园留学生)",
+    "description": "Students crossing the campus of Beijing Language and Culture University, the country's main school for learners of Chinese.",
+    "category": "life",
+    "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Yuyendaxue_campus_students.jpg/1920px-Yuyendaxue_campus_students.jpg"
+   }
+  ]
+ }
+]

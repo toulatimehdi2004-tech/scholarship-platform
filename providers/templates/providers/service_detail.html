@@ -1,0 +1,92 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div>
+    <!-- Back button -->
+    <a href="{% url 'service_list' %}" style="color: #3498db; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+        ← Back to Services
+    </a>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <h2 style="color: #2c3e50;">{{ service.name }}</h2>
+            <h4 style="color: #7f8c8d; margin-top: 5px;">🏢 {{ service.provider.business_name }}</h4>
+            {% if service.provider.is_verified %}
+                <span style="color: #2ecc71;">✓ Verified Provider</span>
+            {% endif %}
+        </div>
+        <div style="text-align: right;">
+            <span style="background-color: #3498db; color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px;">
+                {{ service.category.name }}
+            </span>
+            <br>
+            <span style="background-color: #2ecc71; color: white; padding: 5px 15px; border-radius: 20px; font-size: 18px; display: inline-block; margin-top: 5px;">
+                {{ service.currency }} {{ service.price }}
+            </span>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- Quick Info -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+        {% if service.delivery_time %}
+            <div>
+                <strong>⏱️ Delivery Time</strong>
+                <p>{{ service.delivery_time }}</p>
+            </div>
+        {% endif %}
+        <div>
+            <strong>💰 Platform Commission</strong>
+            <p>{{ commission_rate }}% ({{ commission_amount }} {{ service.currency }})</p>
+        </div>
+        <div>
+            <strong>💵 Provider Gets</strong>
+            <p>{{ provider_payout }} {{ service.currency }}</p>
+        </div>
+        <div>
+            <strong>📋 Service Type</strong>
+            <p>
+                {% if service.is_online %}🖥️ Online{% endif %}
+                {% if service.is_onsite %}📍 Onsite{% endif %}
+                {% if not service.is_online and not service.is_onsite %}Both{% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- Description -->
+    <h3>📝 Service Description</h3>
+    <p style="line-height: 1.6; color: #555;">{{ service.description }}</p>
+    
+    <hr>
+    
+    <!-- Provider Info -->
+    <h3>🏢 About the Provider</h3>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+        <p><strong>Business Name:</strong> {{ service.provider.business_name }}</p>
+        {% if service.provider.business_description %}
+            <p>{{ service.provider.business_description }}</p>
+        {% endif %}
+        {% if service.provider.country %}
+            <p><strong>Location:</strong> {{ service.provider.country }}</p>
+        {% endif %}
+        {% if service.provider.website %}
+            <p><strong>Website:</strong> <a href="{{ service.provider.website }}" target="_blank">{{ service.provider.website }}</a></p>
+        {% endif %}
+        <p><strong>Rating:</strong> ⭐ {{ service.provider.average_rating|floatformat:1 }} ({{ service.provider.total_reviews }} reviews)</p>
+    </div>
+    
+    <hr>
+    
+    <!-- Book Now Button -->
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{% url 'book_service' service.id %}" class="btn" style="background-color: #2ecc71; padding: 15px 40px; font-size: 18px;">
+            📅 Book This Service
+        </a>
+    </div>
+</div>
+{% endblock %}

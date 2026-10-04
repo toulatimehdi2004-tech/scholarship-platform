@@ -1,0 +1,94 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>🛠️ Services for Students</h2>
+    <span style="color: #7f8c8d;">{{ total_count }} services found</span>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="card">
+    <form method="GET" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+        <div style="flex: 2; min-width: 200px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Search</label>
+            <input type="text" name="search" value="{{ search_query }}" placeholder="Search services..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Category</label>
+            <select name="category" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category|stringformat:"s" == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }} ({{ category.default_commission }}% commission)
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn">Apply Filters</button>
+            <a href="{% url 'service_list' %}" class="btn btn-danger" style="margin-left: 5px;">Clear</a>
+        </div>
+    </form>
+</div>
+
+<!-- Service List -->
+{% if services %}
+    <div style="display: grid; gap: 20px;">
+        {% for service in services %}
+            <div class="card" style="transition: transform 0.2s;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3><a href="{% url 'service_detail' service.id %}" style="color: #2c3e50; text-decoration: none;">{{ service.name }}</a></h3>
+                        <p style="color: #7f8c8d; margin: 5px 0;">
+                            🏢 {{ service.provider.business_name }}
+                            {% if service.provider.is_verified %}
+                                <span style="color: #2ecc71;">✓ Verified</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background-color: #3498db; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">
+                            {{ service.category.name }}
+                        </span>
+                        <br>
+                        <span style="background-color: #2ecc71; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; margin-top: 5px;">
+                            {{ service.currency }} {{ service.price }}
+                        </span>
+                    </div>
+                </div>
+                
+                <p style="margin: 10px 0; color: #555;">{{ service.description|truncatewords:25 }}</p>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; font-size: 14px; color: #7f8c8d;">
+                    {% if service.delivery_time %}
+                        <span>⏱️ {{ service.delivery_time }}</span>
+                    {% endif %}
+                    {% if service.is_online %}
+                        <span style="color: #2ecc71;">🖥️ Online</span>
+                    {% endif %}
+                    {% if service.is_onsite %}
+                        <span style="color: #3498db;">📍 Onsite</span>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'service_detail' service.id %}" class="btn">View Details</a>
+                    <a href="{% url 'book_service' service.id %}" class="btn" style="background-color: #2ecc71; margin-left: 5px;">Book Now</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination Info -->
+    <div style="text-align: center; margin-top: 20px; color: #7f8c8d;">
+        Showing {{ services|length }} services
+    </div>
+    
+{% else %}
+    <div class="card" style="text-align: center; padding: 60px 20px;">
+        <h3 style="color: #7f8c8d;">🔍 No services found</h3>
+        <p style="color: #95a5a6;">Try adjusting your search or filters.</p>
+        <a href="{% url 'service_list' %}" class="btn" style="margin-top: 15px;">Clear All Filters</a>
+    </div>
+{% endif %}
+{% endblock %}

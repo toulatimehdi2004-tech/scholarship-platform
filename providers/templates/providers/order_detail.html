@@ -1,0 +1,84 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div>
+    <!-- Back button -->
+    <a href="{% url 'my_orders' %}" style="color: #3498db; text-decoration: none; display: inline-block; margin-bottom: 20px;">
+        ← Back to My Orders
+    </a>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <h2>Order #{{ order.id }}</h2>
+            <p style="color: #7f8c8d;">Placed on {{ order.created_at|date:"M d, Y" }}</p>
+        </div>
+        <div>
+            <span style="
+                background-color: 
+                {% if order.status == 'completed' %}#2ecc71
+                {% elif order.status == 'cancelled' %}#e74c3c
+                {% elif order.status == 'in_progress' %}#f39c12
+                {% elif order.status == 'confirmed' %}#3498db
+                {% else %}#95a5a6{% endif %};
+                color: white; padding: 8px 20px; border-radius: 20px; font-size: 16px;
+            ">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- Service Information -->
+    <h3>📋 Service Details</h3>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+        <p><strong>Service:</strong> {{ order.service.name }}</p>
+        <p><strong>Provider:</strong> {{ order.service.provider.business_name }}</p>
+        <p><strong>Category:</strong> {{ order.service.category.name }}</p>
+        {% if order.service.delivery_time %}
+            <p><strong>Delivery Time:</strong> {{ order.service.delivery_time }}</p>
+        {% endif %}
+    </div>
+    
+    <!-- Order Information -->
+    <h3>💰 Order Information</h3>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+        <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+        <p><strong>Price per unit:</strong> {{ order.currency }} {{ order.service.price }}</p>
+        <p><strong>Total Amount:</strong> {{ order.currency }} {{ order.total_amount }}</p>
+        <p><strong>Commission:</strong> {{ order.currency }} {{ order.commission_amount }}</p>
+        <p><strong>Provider receives:</strong> {{ order.currency }} {{ order.provider_payout }}</p>
+        {% if order.notes %}
+            <p><strong>Notes:</strong> {{ order.notes }}</p>
+        {% endif %}
+    </div>
+    
+    <!-- Status Timeline -->
+    <h3>📅 Order Timeline</h3>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+        <p><strong>Order Created:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+        {% if order.status == 'confirmed' or order.status == 'in_progress' or order.status == 'completed' %}
+            <p><strong>Order Confirmed:</strong> {{ order.updated_at|date:"M d, Y H:i" }}</p>
+        {% endif %}
+        {% if order.status == 'in_progress' or order.status == 'completed' %}
+            <p><strong>Work Started:</strong> {{ order.updated_at|date:"M d, Y H:i" }}</p>
+        {% endif %}
+        {% if order.status == 'completed' %}
+            <p><strong>Completed:</strong> {{ order.updated_at|date:"M d, Y H:i" }}</p>
+        {% endif %}
+        {% if order.status == 'cancelled' %}
+            <p><strong>Cancelled:</strong> {{ order.updated_at|date:"M d, Y H:i" }}</p>
+        {% endif %}
+    </div>
+    
+    <!-- Contact Provider -->
+    <div style="margin-top: 20px; padding: 15px; background-color: #e8f4fd; border-radius: 5px;">
+        <h4>📞 Need Help?</h4>
+        <p>Contact the provider directly if you have questions about your order.</p>
+        <p style="color: #7f8c8d; font-size: 14px;">Provider: {{ order.service.provider.business_name }}</p>
+        <a href="#" class="btn" style="background-color: #2ecc71; margin-top: 10px;">Send Message</a>
+    </div>
+</div>
+{% endblock %}

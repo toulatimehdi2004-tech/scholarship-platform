@@ -1,0 +1,76 @@
+{% extends 'ai_assistant/base.html' %}
+
+{% block ai_content %}
+<style>
+    .completion-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        max-width: 500px;
+        margin: 0 auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+    .completion-ring {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: white;
+    }
+    .completion-ring.low { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    .completion-ring.mid { background: linear-gradient(135deg, #f39c12, #e67e22); }
+    .completion-ring.high { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+    .missing-list {
+        text-align: left;
+        margin: 20px 0;
+    }
+    .missing-item {
+        padding: 12px 15px;
+        background: #fff3cd;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .missing-item .label { color: #856404; }
+</style>
+
+<div class="completion-card">
+    <div class="completion-ring {% if completion_score < 50 %}low{% elif completion_score < 80 %}mid{% else %}high{% endif %}">
+        {{ completion_score }}%
+    </div>
+    <h2>Profile Completion</h2>
+    <p style="color: #7f8c8d; margin: 10px 0 20px;">
+        Complete your profile to get better AI-matched scholarships.
+    </p>
+
+    {% if missing_fields %}
+    <div class="missing-list">
+        {% for field in missing_fields %}
+        <div class="missing-item">
+            <span class="label">
+                {% if field == 'education_level' %}Education Level
+                {% elif field == 'field_of_study' %}Field of Study
+                {% elif field == 'country' %}Country
+                {% elif field == 'gpa' %}GPA
+                {% else %}{{ field }}{% endif %}
+            </span>
+            <span style="color: #e74c3c;">Missing</span>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="{% url 'profile' %}" class="btn">Complete Profile</a>
+    {% else %}
+    <p style="color: #27ae60; font-weight: 600;">Your profile is complete!</p>
+    <a href="{% url 'refresh_matches' %}" class="btn" style="margin-top: 10px;">Get Matched Scholarships</a>
+    {% endif %}
+</div>
+{% endblock %}

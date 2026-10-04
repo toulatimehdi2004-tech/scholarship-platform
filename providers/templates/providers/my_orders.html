@@ -1,0 +1,59 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>📋 My Orders</h2>
+    <span style="color: #7f8c8d;">{{ total_orders }} orders</span>
+</div>
+
+{% if orders %}
+    <div style="display: grid; gap: 20px;">
+        {% for order in orders %}
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h3><a href="{% url 'order_detail' order.id %}" style="color: #2c3e50; text-decoration: none;">Order #{{ order.id }}</a></h3>
+                        <p style="color: #7f8c8d; margin: 5px 0;">
+                            {{ order.service.name }} - {{ order.service.provider.business_name }}
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="
+                            background-color: 
+                            {% if order.status == 'completed' %}#2ecc71
+                            {% elif order.status == 'cancelled' %}#e74c3c
+                            {% elif order.status == 'in_progress' %}#f39c12
+                            {% elif order.status == 'confirmed' %}#3498db
+                            {% else %}#95a5a6{% endif %};
+                            color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;
+                        ">
+                            {{ order.get_status_display }}
+                        </span>
+                        <br>
+                        <span style="color: #2ecc71; font-weight: bold; display: inline-block; margin-top: 5px;">
+                            {{ order.currency }} {{ order.total_amount }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; font-size: 14px; color: #7f8c8d;">
+                    <span>📅 Ordered: {{ order.created_at|date:"M d, Y" }}</span>
+                    <span>📦 Quantity: {{ order.quantity }}</span>
+                    <span>💰 Commission: {{ order.currency }} {{ order.commission_amount }}</span>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'order_detail' order.id %}" class="btn">View Order Details</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+{% else %}
+    <div class="card" style="text-align: center; padding: 60px 20px;">
+        <h3 style="color: #7f8c8d;">📭 No orders yet</h3>
+        <p style="color: #95a5a6;">You haven't booked any services yet.</p>
+        <a href="{% url 'service_list' %}" class="btn" style="margin-top: 15px;">Browse Services</a>
+    </div>
+{% endif %}
+{% endblock %}

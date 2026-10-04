@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Profile - Scholarship Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        nav {
+            background-color: #2c3e50;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        nav .brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+        }
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .card .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row .label {
+            font-weight: bold;
+            width: 150px;
+            color: #555;
+        }
+        .info-row .value {
+            flex: 1;
+            color: #333;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .stat-item .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-item .label {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .verified {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        .not-verified {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav .brand {
+                margin-bottom: 10px;
+            }
+            .info-row {
+                flex-direction: column;
+            }
+            .info-row .label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">🏛️ University Portal</div>
+        <div>
+            <a href="{% url 'university_dashboard' %}">📊 Dashboard</a>
+            <a href="{% url 'manage_scholarships' %}">🎓 Scholarships</a>
+            <a href="{% url 'view_applications' %}">📋 Applications</a>
+            <a href="{% url 'university_profile' %}">⚙️ Profile</a>
+            <a href="{% url 'university_logout' %}" style="color: #e74c3c;">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+                <div>
+                    <h2>🏛️ {{ university.name }}</h2>
+                    <p class="subtitle">
+                        {% if university.is_verified %}
+                            <span class="verified">✅ Verified University</span>
+                        {% else %}
+                            <span class="not-verified">⏳ Pending Verification</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'edit_university_profile' %}" class="btn btn-warning">✏️ Edit Profile</a>
+            </div>
+            
+            <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ university.user.email }}</span>
+            </div>
+            {% if university.website %}
+                <div class="info-row">
+                    <span class="label">Website:</span>
+                    <span class="value"><a href="{{ university.website }}" target="_blank">{{ university.website }}</a></span>
+                </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="label">Location:</span>
+                <span class="value">{{ university.city }}{% if university.city and university.country %}, {% endif %}{{ university.country }}</span>
+            </div>
+            {% if university.address %}
+                <div class="info-row">
+                    <span class="label">Address:</span>
+                    <span class="value">{{ university.address }}</span>
+                </div>
+            {% endif %}
+            {% if university.contact_phone %}
+                <div class="info-row">
+                    <span class="label">Phone:</span>
+                    <span class="value">{{ university.contact_phone }}</span>
+                </div>
+            {% endif %}
+            {% if university.description %}
+                <div class="info-row">
+                    <span class="label">Description:</span>
+                    <span class="value">{{ university.description }}</span>
+                </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="label">Joined:</span>
+                <span class="value">{{ university.created_at|date:"M d, Y" }}</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📊 Statistics</h3>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="number">{{ university.total_scholarships }}</div>
+                    <div class="label">📚 Scholarships</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">{{ university.total_applications }}</div>
+                    <div class="label">📋 Applications</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">{{ university.total_enrollments }}</div>
+                    <div class="label">🎓 Enrollments</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

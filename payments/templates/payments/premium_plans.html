@@ -1,0 +1,43 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="header" style="text-align: center; margin-bottom: 30px;">
+    <h2>🚀 Upgrade Your Experience</h2>
+    <p style="color: #7f8c8d;">Choose the plan that fits your needs</p>
+</div>
+
+{% if has_premium %}
+    <div class="card" style="background-color: #d4edda; border: 2px solid #2ecc71;">
+        <h3 style="color: #155724;">✅ You're already a Premium member!</h3>
+        <p style="color: #155724;">Plan: {{ current_plan|title }}</p>
+        <p style="color: #155724;">Active until: {{ student.premium_expiry_date|date:"M d, Y" }}</p>
+        <a href="{% url 'profile' %}" class="btn" style="background-color: #2ecc71; margin-top: 10px;">Go to Profile</a>
+    </div>
+{% else %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 20px;">
+        {% for plan in plans %}
+            <div class="card" style="text-align: center; {% if forloop.first %}border: 3px solid #3498db;{% endif %}">
+                <h3 style="color: #2c3e50;">{{ plan.name }}</h3>
+                <h2 style="color: #2c3e50; font-size: 48px;">
+                    {{ plan.currency }} {{ plan.price }}
+                </h2>
+                <p style="color: #7f8c8d;">one-time payment</p>
+                <p style="color: #95a5a6; font-size: 14px;">{{ plan.duration_months }} months access</p>
+                <hr>
+                <ul style="text-align: left; list-style: none; padding: 0;">
+                    {% for feature in plan.features %}
+                        <li style="padding: 8px 0; border-bottom: 1px solid #eee;">✅ {{ feature }}</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'upgrade_premium' plan.plan_type %}" class="btn" style="width: 100%; margin-top: 20px; {% if forloop.first %}background-color: #3498db;{% else %}background-color: #9b59b6;{% endif %}">
+                    Upgrade to {{ plan.name }}
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 30px;">
+    <p style="color: #95a5a6; font-size: 14px;">All plans include 12-month access. No recurring charges.</p>
+</div>
+{% endblock %}

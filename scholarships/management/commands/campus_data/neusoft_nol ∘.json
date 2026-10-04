@@ -1,0 +1,71 @@
+{
+ "address": "No.1 Neusoft Avenue, Qingchengshan Town, Dujiangyan City, Chengdu, Sichuan 611844, China",
+ "admission_url": "https://io.nsu.edu.cn/2026/85FC41F9-FDFD-4673-8D68-BAE13EF53696.html",
+ "city": "Chengdu",
+ "country": "China",
+ "description": "Chengdu Neusoft University is a private undergraduate university founded by Neusoft Holdings in 2003, located at the foot of Mount Qingcheng in Dujiangyan, Chengdu. Specializing in IT, software engineering, digital media, business management and health technology, it enrolls over 20,000 students across 30 undergraduate programs using the industry-integrated TOPCARES talent model. As Sichuan's first independent private本科 university to host full-time international students, it blends enterprise-partnered applied education with a scenic UNESCO-heritage campus.",
+ "founding_year": 2003,
+ "latitude": 30.89095,
+ "longitude": 103.5873,
+ "motto": "To Learn and to Apply (精勤博学，学以致用)",
+ "name": "Chengdu Neusoft University",
+ "scholarships": [
+  {
+   "amount": "Partial tuition fee waiver",
+   "application_deadline": null,
+   "application_instructions": "Apply together with program admission by email to admission@nsu.edu.cn; contact the School of International Education for criteria and procedures.",
+   "duration": "1 academic year, renewable on merit",
+   "eligibility_criteria": "Outstanding enrolled international undergraduate or language-training students with good conduct, attendance and academic performance.",
+   "level": "bachelor",
+   "required_documents": [],
+   "title": "CNU Principal Scholarship for International Students",
+   "type": "partial"
+  },
+  {
+   "amount": "Tuition and living support per Chengdu municipal award standards (varies by year)",
+   "application_deadline": null,
+   "application_instructions": "Selected and nominated by the School of International Education each autumn; awardees公示 on the university notice board. Contact: C5-304, Tel 028-64888035.",
+   "duration": "1 academic year",
+   "eligibility_criteria": "Full-time international students at CNU, normally from Belt and Road countries, with good conduct and academic standing.",
+   "level": "bachelor",
+   "required_documents": [],
+   "title": "Chengdu Belt and Road Government Scholarship for International Students",
+   "type": "partial"
+  },
+  {
+   "amount": "Tuition and living support per Chengdu municipal award standards (varies by year)",
+   "application_deadline": null,
+   "application_instructions": "Selected and nominated by the School of International Education each autumn; awardees公示 on the university notice board. Contact: C5-304, Tel 028-64888035.",
+   "duration": "1 academic year",
+   "eligibility_criteria": "Full-time international students at CNU from Chengdu's international sister cities / friendly-exchange countries with good conduct and grades.",
+   "level": "bachelor",
+   "required_documents": [],
+   "title": "Chengdu International Sister Cities Government Scholarship for International Students",
+   "type": "partial"
+  },
+  {
+   "amount": "10000 RMB per person per year",
+   "application_deadline": null,
+   "application_instructions": "Annual university-wide selection across Neusoft campuses each academic year; awarded to the most outstanding students.",
+   "duration": "1 academic year",
+   "eligibility_criteria": "Full-time undergraduate students of Chengdu Neusoft University with excellent grades and all-round moral, intellectual and physical development.",
+   "level": "bachelor",
+   "required_documents": [],
+   "title": "Huatian Scholarship",
+   "type": "partial"
+  },
+  {
+   "amount": "First prize 5000 RMB, Second prize 2000 RMB, Third prize 1000 RMB per person per year",
+   "application_deadline": null,
+   "application_instructions": "Annual selection by the university; about 30% of students receive some form of award or grant each year.",
+   "duration": "1 academic year",
+   "eligibility_criteria": "Full-time undergraduate students with excellent academic performance and comprehensive quality.",
+   "level": "bachelor",
+   "required_documents": [],
+   "title": "Neusoft Ruixin (Neusoft Education) Scholarship",
+   "type": "partial"
+  }
+ ],
+ "tagline": "Code Your Future Beneath Mount Qingcheng",
+ "website": "http://en.nsu.edu.cn/"
+}
