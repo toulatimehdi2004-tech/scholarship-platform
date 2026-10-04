@@ -37,6 +37,7 @@ jobs:
         working-directory: ./frontend
         env:
           NEXT_PUBLIC_BASE_PATH: /scholarship-platform
+          NEXT_PUBLIC_API_URL: https://asus-applying-mercy-vacation.trycloudflare.com/api
         run: npm run build
 
       - name: Upload Pages artifact
