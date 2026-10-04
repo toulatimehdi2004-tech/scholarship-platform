@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: scholarship-backend
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn scholarship_backend.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: "False"

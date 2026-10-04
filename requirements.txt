@@ -1,4 +1,4 @@
-﻿annotated-types==0.8.0
+annotated-types==0.8.0
 anyio==4.15.1
 asgiref==3.12.1
 beautifulsoup4==4.15.0
@@ -35,3 +35,6 @@ typing-inspection==0.4.4
 typing_extensions==4.16.0
 tzdata==2026.3
 urllib3==2.7.0
+gunicorn>=21.2.0
+whitenoise>=6.6.0
+
