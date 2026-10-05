@@ -37,7 +37,7 @@ jobs:
         working-directory: ./frontend
         env:
           NEXT_PUBLIC_BASE_PATH: /scholarship-platform
-          NEXT_PUBLIC_API_URL: https://gather-drinking-but-advertisements.trycloudflare.com/api
+          NEXT_PUBLIC_API_URL: https://proofing-harmless-mulled.ngrok-free.dev/api
         run: npm run build
 
       - name: Upload Pages artifact

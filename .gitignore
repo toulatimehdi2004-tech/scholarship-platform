@@ -45,6 +45,9 @@ frontend/*.tsbuildinfo
 .DS_Store
 Thumbs.db
 _tmp*
+ngrok.exe
+*.zip
+cloudflared.exe
 
 # IDE & Editor files
 .vscode/
