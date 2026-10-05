@@ -5,6 +5,7 @@ import { Search, Sparkles, Target, Bell, ArrowRight, BadgeCheck, Scale, PenLine,
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { fetchApi } from "@/lib/api";
 
 const FALLBACK_STATS = [
   { label: "Scholarships", value: 368, suffix: "+" },
@@ -87,14 +88,13 @@ export default function HomePage() {
   const [stats, setStats] = useState(FALLBACK_STATS);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/stats/")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (d) {
+    fetchApi<{ scholarships: number; universities: number; cities: number }>("/stats/")
+      .then((res) => {
+        if (res.data) {
           setStats([
-            { label: "Scholarships", value: d.scholarships, suffix: "+" },
-            { label: "Universities", value: d.universities, suffix: "+" },
-            { label: "Cities", value: d.cities, suffix: "+" },
+            { label: "Scholarships", value: res.data.scholarships, suffix: "+" },
+            { label: "Universities", value: res.data.universities, suffix: "+" },
+            { label: "Cities", value: res.data.cities, suffix: "+" },
           ]);
         }
       })
