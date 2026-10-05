@@ -1,4 +1,30 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+
+export function getApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    // 1. Check query parameter ?api=...
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryApi = urlParams.get("api");
+    if (queryApi) {
+      const clean = queryApi.replace(/\/+$/, "");
+      const full = clean.endsWith("/api") ? clean : `${clean}/api`;
+      localStorage.setItem("custom_api_url", full);
+      return full;
+    }
+    // 2. Check localStorage
+    const saved = localStorage.getItem("custom_api_url");
+    if (saved) return saved;
+  }
+  return DEFAULT_API_URL;
+}
+
+export function setCustomApiUrl(url: string) {
+  if (typeof window !== "undefined") {
+    const clean = url.trim().replace(/\/+$/, "");
+    const full = clean.endsWith("/api") ? clean : `${clean}/api`;
+    localStorage.setItem("custom_api_url", full);
+  }
+}
 
 // ── Token helpers ──────────────────────────────────────────
 export function getToken(): string | null {
@@ -129,7 +155,7 @@ export async function fetchApi<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
-    const url = `${API_BASE_URL}${endpoint}`;
+    const url = `${getApiBaseUrl()}${endpoint}`;
     const token = getToken();
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
