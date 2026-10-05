@@ -1,4 +1,5 @@
-const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const DEFAULT_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://proofing-harmless-mulled.ngrok-free.dev/api";
 
 export function getApiBaseUrl(): string {
   if (typeof window !== "undefined") {
@@ -11,9 +12,15 @@ export function getApiBaseUrl(): string {
       localStorage.setItem("custom_api_url", full);
       return full;
     }
-    // 2. Check localStorage
+    // 2. Check localStorage (purge any expired cloudflare urls)
     const saved = localStorage.getItem("custom_api_url");
-    if (saved) return saved;
+    if (saved) {
+      if (saved.includes("trycloudflare.com")) {
+        localStorage.removeItem("custom_api_url");
+      } else {
+        return saved;
+      }
+    }
   }
   return DEFAULT_API_URL;
 }
