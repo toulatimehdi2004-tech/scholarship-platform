@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { Search, MapPin, GraduationCap, CheckCircle2, X } from "lucide-react";
+import { Search, MapPin, GraduationCap, CheckCircle2, X, ArrowLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchApi, type University } from "@/lib/api";
@@ -26,6 +26,41 @@ export default function UniversitiesPage() {
     }
     load();
   }, []);
+
+  // Sync city selection from URL and support browser Back button
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const cityParam = params.get("city");
+      if (cityParam) {
+        setSelectedCity(cityParam);
+      }
+    } catch {}
+
+    const onPopState = () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const cityParam = params.get("city") || "All Cities";
+        setSelectedCity(cityParam);
+      } catch {}
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const handleSelectCity = (city: string) => {
+    setSelectedCity(city);
+    try {
+      const url = new URL(window.location.href);
+      if (city !== "All Cities") {
+        url.searchParams.set("city", city);
+        window.history.pushState({ city }, "", url.toString());
+      } else {
+        url.searchParams.delete("city");
+        window.history.pushState({ city: "All Cities" }, "", url.toString());
+      }
+    } catch {}
+  };
 
   const cities = useMemo(() => {
     const counts = new Map<string, number>();
@@ -72,7 +107,7 @@ export default function UniversitiesPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="glass rounded-2xl p-2 mb-6 flex items-center gap-2"
+          className="glass rounded-2xl p-2 mb-4 flex items-center gap-2"
         >
           <Search className="w-5 h-5 text-text-muted ml-3" />
           <input
@@ -92,13 +127,66 @@ export default function UniversitiesPage() {
           )}
         </motion.div>
 
+        {/* Mobile & Quick City Chips Bar (Always visible on phone & desktop) */}
+        <div className="mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
+          <button
+            onClick={() => handleSelectCity("All Cities")}
+            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 ${
+              selectedCity === "All Cities"
+                ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                : "glass text-text-secondary hover:text-text-primary hover:bg-white/10"
+            }`}
+          >
+            <MapPin className="w-3.5 h-3.5" />
+            <span>{t("uni.allCities")}</span>
+            <span className="text-xs opacity-75">({all.length})</span>
+          </button>
+          {cities.map(([city, count]) => (
+            <button
+              key={city}
+              onClick={() => handleSelectCity(city === selectedCity ? "All Cities" : city)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 ${
+                selectedCity === city
+                  ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                  : "glass text-text-secondary hover:text-text-primary hover:bg-white/10"
+              }`}
+            >
+              <span>{city}</span>
+              <span className="text-xs opacity-75">({count})</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Active City Banner & One-Click Return to All Cities */}
+        {selectedCity !== "All Cities" && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-wrap items-center justify-between gap-3 mb-6 p-4 rounded-2xl glass border border-cyan/20 glow-cyan-sm"
+          >
+            <button
+              onClick={() => handleSelectCity("All Cities")}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan/15 hover:bg-cyan/25 text-cyan text-sm font-semibold transition-all group"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <span>← {t("uni.allCities")} ({all.length})</span>
+            </button>
+            <div className="text-sm text-text-secondary flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-cyan" />
+              <span>
+                {t("sch.city")}: <strong className="text-cyan font-bold">{selectedCity}</strong> ({filtered.length} {t("nav.universities")})
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
+          {/* Filters Sidebar (Desktop) */}
           <motion.aside
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="glass rounded-2xl p-6 lg:w-72 flex-shrink-0 h-fit"
+            className="hidden lg:block glass rounded-2xl p-6 lg:w-72 flex-shrink-0 h-fit"
           >
             <div className="flex items-center gap-2 mb-6">
               <MapPin className="w-5 h-5 text-cyan" />
@@ -107,7 +195,7 @@ export default function UniversitiesPage() {
               </h3>
               {selectedCity !== "All Cities" && (
                 <button
-                  onClick={() => setSelectedCity("All Cities")}
+                  onClick={() => handleSelectCity("All Cities")}
                   className="ml-auto text-xs text-text-muted hover:text-red-400 transition-colors"
                 >
                   {t("sch.clearAll")}
@@ -116,7 +204,7 @@ export default function UniversitiesPage() {
             </div>
             <div className="space-y-2 max-h-[60vh] overflow-y-auto">
               <button
-                onClick={() => setSelectedCity("All Cities")}
+                onClick={() => handleSelectCity("All Cities")}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${
                   selectedCity === "All Cities"
                     ? "bg-cyan/10 text-cyan border border-cyan/20"
@@ -130,7 +218,7 @@ export default function UniversitiesPage() {
                 <button
                   key={city}
                   onClick={() =>
-                    setSelectedCity(city === selectedCity ? "All Cities" : city)
+                    handleSelectCity(city === selectedCity ? "All Cities" : city)
                   }
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${
                     selectedCity === city

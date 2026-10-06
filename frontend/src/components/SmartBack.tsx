@@ -20,7 +20,8 @@ export default function SmartBack({
     try {
       const prev = sessionStorage.getItem('prev-path');
       const cur = window.location.pathname;
-      if (prev && prev !== cur) {
+      // If previous page is valid and not root homepage when a section fallback exists
+      if (prev && prev !== cur && !(prev === '/' && fallback && fallback !== '/')) {
         router.back();
         return;
       }

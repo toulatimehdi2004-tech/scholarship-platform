@@ -67,22 +67,41 @@ export default function ScholarshipsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
+  // Sync city & uni selection from URL and support browser Back button
   useEffect(() => {
     try {
-      const v = sessionStorage.getItem("sch-selected-uni");
-      if (v) setSelectedUni(Number(v));
+      const params = new URLSearchParams(window.location.search);
+      const cityParam = params.get("city");
+      if (cityParam) setSelectedCity(cityParam);
+      const uniParam = params.get("uni");
+      if (uniParam) setSelectedUni(Number(uniParam));
     } catch {}
+
+    const onPopState = () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const cityParam = params.get("city") || "All Cities";
+        setSelectedCity(cityParam);
+        const uniParam = params.get("uni");
+        setSelectedUni(uniParam ? Number(uniParam) : null);
+      } catch {}
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  useEffect(() => {
+  const handleSelectCity = (city: string) => {
+    setSelectedCity(city);
     try {
-      if (selectedUni !== null) {
-        sessionStorage.setItem("sch-selected-uni", String(selectedUni));
+      const url = new URL(window.location.href);
+      if (city !== "All Cities") {
+        url.searchParams.set("city", city);
       } else {
-        sessionStorage.removeItem("sch-selected-uni");
+        url.searchParams.delete("city");
       }
+      window.history.pushState({ city }, "", url.toString());
     } catch {}
-  }, [selectedUni]);
+  };
 
   useEffect(() => {
     async function loadScholarships() {
@@ -193,8 +212,21 @@ export default function ScholarshipsPage() {
 
   const selectUni = (id: number) => {
     setSelectedUni(id);
-    setSelectedCity("All Cities");
     setSearchQuery("");
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("uni", String(id));
+      window.history.pushState({ uni: id }, "", url.toString());
+    } catch {}
+  };
+
+  const backToUnis = () => {
+    setSelectedUni(null);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("uni");
+      window.history.pushState({ uni: null }, "", url.toString());
+    } catch {}
   };
 
   const activeFilters =
@@ -205,7 +237,7 @@ export default function ScholarshipsPage() {
   const clearFilters = () => {
     setSelectedLevel("All Levels");
     setSelectedType("All Types");
-    setSelectedCity("All Cities");
+    handleSelectCity("All Cities");
     setSearchQuery("");
   };
 
@@ -288,6 +320,61 @@ export default function ScholarshipsPage() {
           </button>
         </motion.div>
 
+        {/* Mobile & Quick City Chips Bar (Always visible on mobile & desktop when selecting a university) */}
+        {selectedUni === null && (
+          <div className="mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
+            <button
+              onClick={() => handleSelectCity("All Cities")}
+              className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 ${
+                selectedCity === "All Cities"
+                  ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                  : "glass text-text-secondary hover:text-text-primary hover:bg-white/10"
+              }`}
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              <span>{t("uni.allCities")}</span>
+              <span className="text-xs opacity-75">({universities.length})</span>
+            </button>
+            {cities.map(([city, count]) => (
+              <button
+                key={city}
+                onClick={() => handleSelectCity(city === selectedCity ? "All Cities" : city)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 ${
+                  selectedCity === city
+                    ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                    : "glass text-text-secondary hover:text-text-primary hover:bg-white/10"
+                }`}
+              >
+                <span>{city}</span>
+                <span className="text-xs opacity-75">({count})</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Active City Banner & One-Click Return to All Cities */}
+        {selectedUni === null && selectedCity !== "All Cities" && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-wrap items-center justify-between gap-3 mb-6 p-4 rounded-2xl glass border border-cyan/20 glow-cyan-sm"
+          >
+            <button
+              onClick={() => handleSelectCity("All Cities")}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan/15 hover:bg-cyan/25 text-cyan text-sm font-semibold transition-all group"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <span>← {t("uni.allCities")} ({universities.length})</span>
+            </button>
+            <div className="text-sm text-text-secondary flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-cyan" />
+              <span>
+                {t("sch.city")}: <strong className="text-cyan font-bold">{selectedCity}</strong> ({filteredUnis.length} {t("nav.universities")})
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Step 2 header */}
         {selectedUni !== null && selectedUniEntry && (
           <motion.div
@@ -296,11 +383,11 @@ export default function ScholarshipsPage() {
             className="mb-6"
           >
             <button
-              onClick={() => setSelectedUni(null)}
-              className="flex items-center gap-2 text-text-muted hover:text-cyan transition-colors mb-3"
+              onClick={backToUnis}
+              className="flex items-center gap-2 text-text-muted hover:text-cyan transition-colors mb-3 group"
             >
-              <ArrowLeft className="w-4 h-4" />
-              {t("sch.backToUnis")}
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <span>← {t("sch.backToUnis")}</span>
             </button>
             <h2 className="text-2xl font-bold text-text-primary">
               {t("sch.availableAt", { name: selectedUniEntry.name })}
@@ -354,7 +441,7 @@ export default function ScholarshipsPage() {
                   </label>
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     <button
-                      onClick={() => setSelectedCity("All Cities")}
+                      onClick={() => handleSelectCity("All Cities")}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${
                         selectedCity === "All Cities"
                           ? "bg-cyan/10 text-cyan border border-cyan/20"
@@ -369,7 +456,7 @@ export default function ScholarshipsPage() {
                     {cities.map(([city, count]) => (
                       <button
                         key={city}
-                        onClick={() => setSelectedCity(city)}
+                        onClick={() => handleSelectCity(city)}
                         className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${
                           selectedCity === city
                             ? "bg-cyan/10 text-cyan border border-cyan/20"
