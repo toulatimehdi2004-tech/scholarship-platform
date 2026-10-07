@@ -141,6 +141,9 @@ export default function UniversityClient() {
                     {t("ud.verified")}
                   </span>
                 )}
+                <span className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-emerald-500/20 to-cyan/20 text-cyan border border-cyan/30 px-2.5 py-1 rounded-full font-semibold">
+                  🥽 3D VR Console Available
+                </span>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary mb-4">
                 <span className="flex items-center gap-1">

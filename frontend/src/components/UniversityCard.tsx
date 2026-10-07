@@ -38,6 +38,9 @@ export default function UniversityCard({
                 {t("com.verified")}
               </span>
             )}
+            <span className="flex items-center gap-1 text-[10px] font-semibold bg-cyan/15 text-cyan border border-cyan/30 px-2 py-0.5 rounded-full flex-shrink-0">
+              🥽 3D VR Tour
+            </span>
           </div>
           <p className="text-xs text-text-muted flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5 text-cyan flex-shrink-0" />

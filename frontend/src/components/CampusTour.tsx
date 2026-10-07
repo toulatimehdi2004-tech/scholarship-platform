@@ -14,7 +14,10 @@ import {
   ImageOff,
   Maximize2,
   X,
+  Glasses,
+  Sparkles,
 } from "lucide-react";
+import VRConsoleTour from "./VRConsoleTour";
 
 export interface Landmark {
   id: number;
@@ -60,7 +63,7 @@ export default function CampusTour({
   const [index, setIndex] = useState(0);
   const [cat, setCat] = useState("all");
   const [lightbox, setLightbox] = useState(false);
-  const [mode, setMode] = useState<"tour" | "map" | "street">("tour");
+  const [mode, setMode] = useState<"tour" | "vr" | "map" | "street">("tour");
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [imgError, setImgError] = useState(false);
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -143,13 +146,31 @@ export default function CampusTour({
             <button
               onClick={() => setMode("tour")}
               className={
-                "px-3 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 " +
+                "px-3 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 cursor-pointer " +
                 (mode === "tour"
                   ? "bg-cyan/20 text-cyan border border-cyan/40"
                   : "text-text-muted hover:text-text-primary border border-transparent")
               }
             >
               <Footprints className="w-4 h-4" /> {t("tour.tour")}
+            </button>
+          )}
+          {withImages.length > 0 && (
+            <button
+              onClick={() => setMode("vr")}
+              className={
+                "px-3.5 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer " +
+                (mode === "vr"
+                  ? "bg-gradient-to-r from-emerald-500 to-cyan text-slate-950 shadow-lg shadow-cyan/30"
+                  : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20")
+              }
+              title="Step into 3D Virtual Reality Walkthrough"
+            >
+              <Glasses className="w-4 h-4 text-current" />
+              <span>{t("tour.vr") || "3D VR Console"}</span>
+              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-black/40 text-emerald-300">
+                3D
+              </span>
             </button>
           )}
           <button
@@ -189,6 +210,35 @@ export default function CampusTour({
 
       {/* Content */}
       <div className="p-6 sm:p-8">
+        {/* Interactive 3D VR Banner Invite */}
+        {withImages.length > 0 && mode === "tour" && (
+          <div className="mb-4 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-cyan-950/30 to-slate-900/50 border border-cyan/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-cyan/5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-500/25">
+                <Glasses className="w-5 h-5 text-slate-950" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <span>3D VR Console Tour Available</span>
+                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Virtual Reality
+                  </span>
+                </h4>
+                <p className="text-xs text-text-secondary">
+                  Feel like you're wearing a VR console walking through {name}: 360° pan, footsteps sound FX, holographic waypoints & AI voice guide.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setMode("vr")}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan hover:opacity-90 text-slate-950 font-bold text-xs flex items-center gap-1.5 flex-shrink-0 shadow-md shadow-emerald-500/30 active:scale-95 transition-all cursor-pointer"
+            >
+              <Glasses className="w-4 h-4" />
+              <span>Launch 3D VR Walk</span>
+            </button>
+          </div>
+        )}
+
         {/* Category filter chips */}
         {mode === "tour" && withImages.length > 0 && availableCats.length > 1 && (
           <div className="flex flex-wrap gap-2 mb-4">
@@ -277,6 +327,19 @@ export default function CampusTour({
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
+                  {/* VR Mode Quick Launch Badge on Hero Image */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMode("vr");
+                    }}
+                    className="absolute top-4 right-4 z-10 px-3.5 py-1.5 rounded-full bg-slate-950/85 hover:bg-slate-900 backdrop-blur-md border border-cyan/50 text-cyan hover:text-white font-mono text-xs font-bold flex items-center gap-1.5 shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    title="Launch 3D VR Walkthrough"
+                  >
+                    <Glasses className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Enter 3D VR</span>
+                  </button>
+
                   {/* Landmark info */}
                   <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
                     <div className="flex items-center gap-2 mb-1.5">
@@ -352,6 +415,25 @@ export default function CampusTour({
                   ))}
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {mode === "vr" && withImages.length > 0 && (
+            <motion.div
+              key="vr"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="rounded-3xl overflow-hidden"
+            >
+              <VRConsoleTour
+                universityName={name}
+                latitude={latitude}
+                longitude={longitude}
+                landmarks={withImages}
+                initialIndex={index}
+                onClose={() => setMode("tour")}
+              />
             </motion.div>
           )}
 
