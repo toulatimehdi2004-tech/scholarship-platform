@@ -281,7 +281,7 @@ export default function UniversityPortalPage() {
                   </span>
                 )}
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-text-primary">
                 {selectedUni?.name}
               </h2>
               <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5">
@@ -317,7 +317,7 @@ export default function UniversityPortalPage() {
             <p className="text-xs text-text-muted mb-1 flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5 text-cyan" /> Total Applicants
             </p>
-            <p className="text-2xl font-black text-white">{applicants.length}</p>
+            <p className="text-2xl font-black text-text-primary">{applicants.length}</p>
           </div>
           <div className="glass rounded-2xl p-4 border border-amber-500/20">
             <p className="text-xs text-amber-300 mb-1 flex items-center gap-1.5">
@@ -444,7 +444,7 @@ export default function UniversityPortalPage() {
           ) : filteredApplicants.length === 0 ? (
             <div className="glass rounded-2xl p-12 text-center">
               <Users className="w-12 h-12 text-text-muted mx-auto mb-3" />
-              <h4 className="text-base font-bold text-white mb-1">No applicants match criteria</h4>
+              <h4 className="text-base font-bold text-text-primary mb-1">No applicants match criteria</h4>
               <p className="text-xs text-text-muted">Try clearing your filters or search terms.</p>
             </div>
           ) : (
@@ -475,9 +475,9 @@ export default function UniversityPortalPage() {
                               .toUpperCase()}
                           </div>
                           <div>
-                            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
                               <span>{app.student_name}</span>
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/80 font-normal">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-text-secondary font-normal">
                                 📍 {app.student_country}
                               </span>
                             </h3>
@@ -578,7 +578,7 @@ export default function UniversityPortalPage() {
         >
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
             <div>
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <h3 className="text-xl font-bold text-text-primary flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-amber-400" />
                 <span>Modify {selectedUni?.name} Information</span>
               </h3>
@@ -696,7 +696,7 @@ export default function UniversityPortalPage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="btn-gradient px-6 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                className="btn-gradient px-6 py-2.5 rounded-xl text-xs font-bold text-text-primary flex items-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
                 <span>{isSaving ? "Saving Changes..." : "Save School Information"}</span>
@@ -710,7 +710,7 @@ export default function UniversityPortalPage() {
       {activeTab === "scholarships" && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="glass rounded-3xl p-6 sm:p-8 mb-6 border border-border-glass">
-            <h3 className="text-lg font-bold text-white mb-2">
+            <h3 className="text-lg font-bold text-text-primary mb-2">
               Scholarship Quotas for {selectedUni?.name}
             </h3>
             <p className="text-xs text-text-muted mb-6">
@@ -752,7 +752,7 @@ export default function UniversityPortalPage() {
                     <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold mr-2">
                       {sch.type}
                     </span>
-                    <h4 className="text-sm font-bold text-white mt-1 mb-1">
+                    <h4 className="text-sm font-bold text-text-primary mt-1 mb-1">
                       {sch.title}
                     </h4>
                     <p className="text-xs text-text-secondary">{sch.coverage}</p>
@@ -789,7 +789,7 @@ export default function UniversityPortalPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Country Demographics */}
             <div className="glass rounded-3xl p-6 sm:p-8 border border-border-glass">
-              <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+              <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
                 <Globe className="w-5 h-5 text-cyan" />
                 <span>Top Applicant Nationalities</span>
               </h3>
@@ -807,7 +807,7 @@ export default function UniversityPortalPage() {
                 ].map((demo, idx) => (
                   <div key={idx}>
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-semibold text-white">{demo.country}</span>
+                      <span className="font-semibold text-text-primary">{demo.country}</span>
                       <span className="text-text-muted font-mono">
                         {demo.applicants} ({demo.share}%)
                       </span>
@@ -825,7 +825,7 @@ export default function UniversityPortalPage() {
 
             {/* Program & Academic Level Distribution */}
             <div className="glass rounded-3xl p-6 sm:p-8 border border-border-glass">
-              <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+              <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
                 <GraduationCap className="w-5 h-5 text-purple" />
                 <span>Degree Target Breakdown</span>
               </h3>
@@ -841,7 +841,7 @@ export default function UniversityPortalPage() {
                 ].map((deg, idx) => (
                   <div key={idx}>
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-semibold text-white">{deg.level}</span>
+                      <span className="font-semibold text-text-primary">{deg.level}</span>
                       <span className="text-text-muted font-mono">
                         {deg.count} ({deg.share}%)
                       </span>
@@ -880,7 +880,7 @@ export default function UniversityPortalPage() {
             >
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
                 <div>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-bold text-text-primary">
                     {selectedApplicant.student_name}
                   </h3>
                   <p className="text-xs text-text-muted">
@@ -889,7 +889,7 @@ export default function UniversityPortalPage() {
                 </div>
                 <button
                   onClick={() => setSelectedApplicant(null)}
-                  className="p-1 rounded-lg hover:bg-white/10 text-white/60 hover:text-white"
+                  className="p-1 rounded-lg hover:bg-white/10 text-text-muted hover:text-white"
                 >
                   ✕
                 </button>
@@ -898,7 +898,7 @@ export default function UniversityPortalPage() {
               <div className="space-y-4 text-xs">
                 <div className="p-3 rounded-xl bg-white/5">
                   <span className="text-text-muted block mb-0.5">Applied Scholarship:</span>
-                  <p className="font-bold text-white">{selectedApplicant.scholarship_title}</p>
+                  <p className="font-bold text-text-primary">{selectedApplicant.scholarship_title}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -910,7 +910,7 @@ export default function UniversityPortalPage() {
                   </div>
                   <div className="p-3 rounded-xl bg-white/5">
                     <span className="text-text-muted block mb-0.5">Education Level:</span>
-                    <p className="font-bold text-white">
+                    <p className="font-bold text-text-primary">
                       {selectedApplicant.student_education_level}
                     </p>
                   </div>
@@ -937,7 +937,7 @@ export default function UniversityPortalPage() {
                 {selectedApplicant.notes && (
                   <div>
                     <span className="text-text-muted block mb-1">Applicant Statement / Notes:</span>
-                    <p className="p-3 rounded-xl bg-white/5 text-white/80 italic leading-relaxed">
+                    <p className="p-3 rounded-xl bg-white/5 text-text-secondary italic leading-relaxed">
                       "{selectedApplicant.notes}"
                     </p>
                   </div>

@@ -196,7 +196,7 @@ export default function ProviderPortalPage() {
                   <ShieldCheck className="w-3 h-3" /> Certified Sworn Bureau
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-text-primary">
                 Sworn Arabic • French • English to Chinese Translation
               </h2>
               <p className="text-xs text-text-muted mt-0.5">
@@ -206,7 +206,7 @@ export default function ProviderPortalPage() {
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white/80">
+            <span className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-text-secondary">
               ⭐ 4.9 Rating (128 Reviews)
             </span>
             <span className="px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold">
@@ -221,7 +221,7 @@ export default function ProviderPortalPage() {
             <p className="text-xs text-text-muted mb-1 flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-cyan" /> Total Orders
             </p>
-            <p className="text-2xl font-black text-white">{orders.length}</p>
+            <p className="text-2xl font-black text-text-primary">{orders.length}</p>
           </div>
           <div className="glass rounded-2xl p-4 border border-amber-500/20">
             <p className="text-xs text-amber-300 mb-1 flex items-center gap-1.5">
@@ -331,7 +331,7 @@ export default function ProviderPortalPage() {
           ) : filteredOrders.length === 0 ? (
             <div className="glass rounded-2xl p-12 text-center">
               <FileCheck2 className="w-12 h-12 text-text-muted mx-auto mb-3" />
-              <h4 className="text-base font-bold text-white mb-1">No orders found</h4>
+              <h4 className="text-base font-bold text-text-primary mb-1">No orders found</h4>
               <p className="text-xs text-text-muted">No student document orders match current filter.</p>
             </div>
           ) : (
@@ -361,7 +361,7 @@ export default function ProviderPortalPage() {
                               • {ord.requested_date || "Oct 2026"}
                             </span>
                           </div>
-                          <h3 className="text-base font-bold text-white">
+                          <h3 className="text-base font-bold text-text-primary">
                             {ord.service_name}
                           </h3>
                         </div>
@@ -386,7 +386,7 @@ export default function ProviderPortalPage() {
                             {ord.student_name[0] || "S"}
                           </div>
                           <div>
-                            <p className="font-bold text-white">{ord.student_name}</p>
+                            <p className="font-bold text-text-primary">{ord.student_name}</p>
                             <p className="text-[11px] text-text-muted">📍 {ord.student_country}</p>
                           </div>
                         </div>
@@ -497,7 +497,7 @@ export default function ProviderPortalPage() {
                   <span className="text-xs font-mono text-purple font-bold">
                     Order #{selectedOrder.id} • {selectedOrder.student_name}
                   </span>
-                  <h3 className="text-lg font-bold text-white">Source Document Inspection</h3>
+                  <h3 className="text-lg font-bold text-text-primary">Source Document Inspection</h3>
                 </div>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-white/10 text-white">
                   {selectedOrder.student_country}
@@ -529,7 +529,7 @@ export default function ProviderPortalPage() {
 
             {/* Right: Translation Certificate & Delivery Form */}
             <div className="glass rounded-3xl p-6 sm:p-8 border border-purple/30">
-              <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
                 <span>Certification & Delivery Desk</span>
               </h3>
@@ -543,7 +543,7 @@ export default function ProviderPortalPage() {
                     Target Language Certification
                   </label>
                   <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
-                    <span className="font-bold text-white">Mandarin Chinese (简体中文)</span>
+                    <span className="font-bold text-text-primary">Mandarin Chinese (简体中文)</span>
                     <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
                       Standard HSK 6
                     </span>
@@ -563,7 +563,7 @@ export default function ProviderPortalPage() {
 
                 <div className="p-4 rounded-2xl border-2 border-dashed border-purple/40 bg-purple/5 text-center">
                   <Upload className="w-8 h-8 text-purple mx-auto mb-2" />
-                  <p className="font-bold text-white">Upload Certified Translation (PDF)</p>
+                  <p className="font-bold text-text-primary">Upload Certified Translation (PDF)</p>
                   <p className="text-[11px] text-text-muted mt-0.5">
                     Drag & drop stamped Chinese translation with red seal
                   </p>
@@ -579,7 +579,7 @@ export default function ProviderPortalPage() {
                 <button
                   type="button"
                   onClick={() => handleDeliverTranslation(selectedOrder)}
-                  className="w-full btn-gradient py-3 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2 shadow-lg shadow-purple/20 active:scale-95 transition-all cursor-pointer mt-4"
+                  className="w-full btn-gradient py-3 rounded-xl text-xs font-bold text-text-primary flex items-center justify-center gap-2 shadow-lg shadow-purple/20 active:scale-95 transition-all cursor-pointer mt-4"
                 >
                   <Send className="w-4 h-4" />
                   <span>Certify & Mark Order Completed</span>
@@ -594,7 +594,7 @@ export default function ProviderPortalPage() {
       {activeTab === "services" && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="glass rounded-3xl p-6 sm:p-8 max-w-4xl border border-border-glass">
-            <h3 className="text-lg font-bold text-white mb-2">
+            <h3 className="text-lg font-bold text-text-primary mb-2">
               Official Translation & Verification Services Catalog
             </h3>
             <p className="text-xs text-text-muted mb-6">
@@ -640,7 +640,7 @@ export default function ProviderPortalPage() {
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 mr-2">
                       Active Service
                     </span>
-                    <h4 className="text-sm font-bold text-white mt-1 mb-0.5">{srv.name}</h4>
+                    <h4 className="text-sm font-bold text-text-primary mt-1 mb-0.5">{srv.name}</h4>
                     <p className="text-xs text-text-muted">{srv.desc}</p>
                     <p className="text-[11px] text-text-secondary mt-1">
                       Turnaround time: <strong>{srv.turnaround}</strong>
@@ -678,7 +678,7 @@ export default function ProviderPortalPage() {
               onClick={(e) => e.stopPropagation()}
               className="glass rounded-3xl p-6 sm:p-8 max-w-md w-full border border-purple/40 shadow-2xl"
             >
-              <h3 className="text-lg font-bold text-white mb-2">
+              <h3 className="text-lg font-bold text-text-primary mb-2">
                 Deliver Certified Translation
               </h3>
               <p className="text-xs text-text-muted mb-4">
@@ -716,7 +716,7 @@ export default function ProviderPortalPage() {
                     <button
                       type="button"
                       onClick={() => handleDeliverTranslation(deliveryOrder)}
-                      className="btn-gradient px-5 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-purple/20"
+                      className="btn-gradient px-5 py-2.5 rounded-xl text-xs font-bold text-text-primary flex items-center gap-2 shadow-lg shadow-purple/20"
                     >
                       <Send className="w-4 h-4" />
                       <span>Confirm Delivery</span>

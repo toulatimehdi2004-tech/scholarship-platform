@@ -10,13 +10,12 @@ import {
   ShieldCheck,
   CheckCircle2,
   Globe2,
-  Languages,
-  Compass,
-  FileText,
-  Users,
-  Award,
+  Sun,
+  Moon,
 } from "lucide-react";
 import Logo from "./Logo";
+import { useTheme } from "@/lib/ThemeContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export type PortalRole = "student" | "university" | "provider";
 
@@ -29,6 +28,8 @@ export default function PortalChooser({
   onSelectRole,
   currentRole,
 }: PortalChooserProps) {
+  const { theme, toggle } = useTheme();
+
   const portals = [
     {
       id: "student" as PortalRole,
@@ -36,11 +37,22 @@ export default function PortalChooser({
       titleFr: "Étudiant & Candidat",
       titleAr: "طالب وباحث عن منحة",
       badge: "Study in China • 100+ Universities",
-      badgeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
       icon: GraduationCap,
-      gradient: "from-emerald-500 via-teal-500 to-cyan",
-      borderColor: "border-emerald-500/40 hover:border-emerald-400",
-      glowColor: "shadow-emerald-500/20",
+      // Card Themes
+      cardClass:
+        "bg-gradient-to-b from-emerald-50 via-white to-emerald-50/90 dark:from-emerald-950/85 dark:via-slate-900/90 dark:to-slate-950 border-2 border-emerald-500 shadow-xl shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/30 hover:border-emerald-400",
+      badgeClass:
+        "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 font-bold",
+      iconBoxClass:
+        "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30",
+      titleClass:
+        "text-emerald-950 dark:text-white font-black group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors",
+      subClass: "text-emerald-700 dark:text-emerald-300/90 font-medium italic",
+      descClass: "text-slate-700 dark:text-emerald-100/85",
+      checkClass: "text-emerald-600 dark:text-emerald-400",
+      featTextClass: "text-slate-800 dark:text-white/90 font-medium",
+      btnClass:
+        "bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-black shadow-lg shadow-emerald-600/30",
       description:
         "Discover 400+ full and partial CSC scholarships, explore campus grounds in 3D VR, get matched by AI, and track your applications.",
       features: [
@@ -57,11 +69,22 @@ export default function PortalChooser({
       titleFr: "Université & Admissions",
       titleAr: "جامعة وإدارة القبول",
       badge: "Faculty Desk • Campus Editor",
-      badgeColor: "bg-amber-500/15 text-amber-300 border-amber-500/30",
       icon: Building2,
-      gradient: "from-amber-400 via-orange-500 to-yellow-500",
-      borderColor: "border-amber-500/40 hover:border-amber-400",
-      glowColor: "shadow-amber-500/20",
+      // Card Themes
+      cardClass:
+        "bg-gradient-to-b from-amber-50 via-white to-amber-50/90 dark:from-amber-950/85 dark:via-slate-900/90 dark:to-slate-950 border-2 border-amber-500 shadow-xl shadow-amber-500/20 hover:shadow-2xl hover:shadow-amber-500/30 hover:border-amber-400",
+      badgeClass:
+        "bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/40 font-bold",
+      iconBoxClass:
+        "bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/30",
+      titleClass:
+        "text-amber-950 dark:text-white font-black group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors",
+      subClass: "text-amber-700 dark:text-amber-300/90 font-medium italic",
+      descClass: "text-slate-700 dark:text-amber-100/85",
+      checkClass: "text-amber-600 dark:text-amber-400",
+      featTextClass: "text-slate-800 dark:text-white/90 font-medium",
+      btnClass:
+        "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black shadow-lg shadow-amber-500/30",
       description:
         "Review international applicants applying through our platform, evaluate dossiers, modify university campus info, and adjust scholarship quotas.",
       features: [
@@ -78,11 +101,22 @@ export default function PortalChooser({
       titleFr: "Prestataire Agréé (Traduction)",
       titleAr: "مترجم محلف وتصديق وثائق",
       badge: "Sworn Translators • Legalization",
-      badgeColor: "bg-purple/20 text-purple border-purple/40",
       icon: FileCheck2,
-      gradient: "from-purple via-pink-500 to-red-500",
-      borderColor: "border-purple/40 hover:border-purple",
-      glowColor: "shadow-purple/20",
+      // Card Themes
+      cardClass:
+        "bg-gradient-to-b from-rose-50 via-white to-rose-50/90 dark:from-rose-950/85 dark:via-slate-900/90 dark:to-slate-950 border-2 border-red-500 shadow-xl shadow-red-500/20 hover:shadow-2xl hover:shadow-red-500/30 hover:border-red-400",
+      badgeClass:
+        "bg-rose-500/15 text-rose-900 dark:text-rose-300 border border-rose-500/40 font-bold",
+      iconBoxClass:
+        "bg-gradient-to-br from-rose-600 via-red-600 to-pink-600 text-white shadow-lg shadow-rose-600/30",
+      titleClass:
+        "text-rose-950 dark:text-white font-black group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors",
+      subClass: "text-rose-700 dark:text-rose-300/90 font-medium italic",
+      descClass: "text-slate-700 dark:text-rose-100/85",
+      checkClass: "text-rose-600 dark:text-rose-400",
+      featTextClass: "text-slate-800 dark:text-white/90 font-medium",
+      btnClass:
+        "bg-gradient-to-r from-rose-600 via-red-600 to-pink-600 hover:from-rose-500 hover:to-red-500 text-white font-black shadow-lg shadow-rose-600/30",
       description:
         "Manage student document translation orders, inspect uploaded diplomas & transcripts, deliver certified sworn translations, and set service rates.",
       features: [
@@ -96,9 +130,21 @@ export default function PortalChooser({
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden bg-slate-950">
-      {/* Background radial ambient glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-emerald-600/15 via-cyan/10 to-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden bg-slate-50 dark:bg-[#050e09] transition-colors duration-300">
+      {/* Top Controls: Language & Theme Switcher */}
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+        <LanguageSwitcher />
+        <button
+          onClick={toggle}
+          className="p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 shadow-sm hover:scale-105 transition-all cursor-pointer"
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-emerald-700" />}
+        </button>
+      </div>
+
+      {/* Radial ambient glow in background */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-emerald-500/10 via-cyan/10 to-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl w-full mx-auto relative z-10 text-center">
         {/* Emblem & Brand Header */}
@@ -109,21 +155,21 @@ export default function PortalChooser({
           className="flex flex-col items-center mb-8"
         >
           <div className="mb-3 hover:scale-105 transition-transform duration-300">
-            <Logo size={64} />
+            <Logo size={68} />
           </div>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-xs font-bold tracking-wide uppercase mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 font-mono text-xs font-bold tracking-wide uppercase mb-3 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             Moroccan Scholar Global Platform
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-950 dark:text-white tracking-tight mb-3">
             Choose Your Platform Portal
           </h1>
-          <p className="text-sm sm:text-base text-white/70 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-white/70 max-w-2xl mx-auto">
             Select your role to access tailored tools, real-time pipelines, and personalized workspaces.
           </p>
         </motion.div>
 
-        {/* 3 Portal Cards Grid */}
+        {/* 3 Portal Cards Grid with vibrant edge-matching colors */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-10 text-left">
           {portals.map((p, idx) => {
             const Icon = p.icon;
@@ -136,16 +182,14 @@ export default function PortalChooser({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.12 }}
                 onClick={() => onSelectRole(p.id)}
-                className={`group rounded-3xl p-6 sm:p-7 glass border transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden hover:-translate-y-1.5 shadow-xl hover:${p.glowColor} ${
-                  isCurrent
-                    ? `${p.borderColor} ring-2 ring-emerald-400/50`
-                    : `${p.borderColor}`
+                className={`group rounded-3xl p-6 sm:p-7 transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden hover:-translate-y-2 ${p.cardClass} ${
+                  isCurrent ? "ring-4 ring-emerald-400" : ""
                 }`}
               >
-                {/* Top Badge & Corner Glow */}
+                {/* Top Badge & Active Indicator */}
                 <div className="flex items-center justify-between gap-2 mb-5">
                   <span
-                    className={`text-[10px] sm:text-xs font-mono uppercase font-bold px-3 py-1 rounded-full border ${p.badgeColor}`}
+                    className={`text-[10px] sm:text-xs font-mono uppercase px-3 py-1 rounded-full ${p.badgeClass}`}
                   >
                     {p.badge}
                   </span>
@@ -159,31 +203,31 @@ export default function PortalChooser({
                 {/* Role Icon & Title */}
                 <div>
                   <div
-                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${p.gradient} flex items-center justify-center mb-5 text-slate-950 shadow-lg group-hover:scale-110 transition-transform`}
+                    className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${p.iconBoxClass} group-hover:scale-110 transition-transform`}
                   >
                     <Icon className="w-7 h-7" />
                   </div>
 
-                  <h3 className="text-xl sm:text-2xl font-black text-white mb-1 tracking-tight group-hover:text-emerald-300 transition-colors">
+                  <h3 className={`text-xl sm:text-2xl mb-1 tracking-tight ${p.titleClass}`}>
                     {p.title}
                   </h3>
-                  <p className="text-xs text-white/50 mb-3 italic">
+                  <p className={`text-xs mb-3 ${p.subClass}`}>
                     {p.titleFr} • {p.titleAr}
                   </p>
 
-                  <p className="text-xs sm:text-sm text-white/75 leading-relaxed mb-6">
+                  <p className={`text-xs sm:text-sm leading-relaxed mb-6 ${p.descClass}`}>
                     {p.description}
                   </p>
 
                   {/* Bullet Highlights */}
-                  <div className="space-y-2 mb-6 pt-4 border-t border-white/10">
+                  <div className="space-y-2.5 mb-6 pt-4 border-t border-slate-200/80 dark:border-white/10">
                     {p.features.map((feat, fIdx) => (
                       <div
                         key={fIdx}
-                        className="flex items-start gap-2 text-xs text-white/80"
+                        className="flex items-start gap-2 text-xs"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                        <span>{feat}</span>
+                        <CheckCircle2 className={`w-4 h-4 flex-shrink-0 mt-0.5 ${p.checkClass}`} />
+                        <span className={p.featTextClass}>{feat}</span>
                       </div>
                     ))}
                   </div>
@@ -196,7 +240,7 @@ export default function PortalChooser({
                     e.stopPropagation();
                     onSelectRole(p.id);
                   }}
-                  className={`w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer bg-gradient-to-r ${p.gradient} text-slate-950 hover:opacity-95`}
+                  className={`w-full py-3.5 px-4 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer hover:brightness-110 ${p.btnClass}`}
                 >
                   <span>{p.buttonText}</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -211,15 +255,15 @@ export default function PortalChooser({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/60"
+          className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600 dark:text-white/60"
         >
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span className="flex items-center gap-1.5 font-medium">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             Seamless role switching available in navigation header anytime
           </span>
           <span>•</span>
-          <span className="flex items-center gap-1.5">
-            <Globe2 className="w-4 h-4 text-cyan" />
+          <span className="flex items-center gap-1.5 font-medium">
+            <Globe2 className="w-4 h-4 text-teal-600 dark:text-cyan" />
             Full bilingual support: English, Français, العربية
           </span>
         </motion.div>
