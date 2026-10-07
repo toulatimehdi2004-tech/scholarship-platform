@@ -13,10 +13,13 @@ import {
   CheckCircle2,
   ArrowLeft,
   ChevronRight,
+  Crown,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import ScholarshipCard from "@/components/ScholarshipCard";
+import AuthGateModal from "@/components/AuthGateModal";
+import LifetimePassModal from "@/components/LifetimePassModal";
 import {
   fetchApi,
   getCurrentUser,
@@ -26,6 +29,8 @@ import {
   type User,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+
+const FREE_TRIAL_LIMIT = 7;
 
 const levelValues = ["All Levels", "bachelor", "master", "phd", "other"];
 const levelLabelKeys: Record<string, string> = {
@@ -66,6 +71,8 @@ export default function ScholarshipsPage() {
   const [selectedUni, setSelectedUni] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [showAuthGate, setShowAuthGate] = useState(false);
+  const [showLifetimeModal, setShowLifetimeModal] = useState(false);
 
   // Sync city & uni selection from URL and support browser Back button
   useEffect(() => {
@@ -122,6 +129,8 @@ export default function ScholarshipsPage() {
       }
       if (userRes.data) {
         setUser(userRes.data);
+      } else if (!getToken()) {
+        setShowAuthGate(true);
       }
       setLoading(false);
     }
@@ -211,6 +220,10 @@ export default function ScholarshipsPage() {
   }, [allScholarships, selectedUni, searchQuery, selectedLevel, selectedType]);
 
   const selectUni = (id: number) => {
+    if (!getToken()) {
+      setShowAuthGate(true);
+      return;
+    }
     setSelectedUni(id);
     setSearchQuery("");
     try {
@@ -523,13 +536,36 @@ export default function ScholarshipsPage() {
           <div className="flex-1">
             {selectedUni === null ? (
               <>
-                <p className="text-sm text-text-muted mb-4">
-                  {t("com.showing")}{" "}
-                  <span className="text-text-primary font-medium">
-                    {filteredUnis.length}
-                  </span>{" "}
-                  {t("com.of")} {universities.length} {t("uni.exploreB")}
-                </p>
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <p className="text-sm text-text-muted">
+                    {t("com.showing")}{" "}
+                    <span className="text-text-primary font-medium">
+                      {user?.student_profile?.is_premium
+                        ? filteredUnis.length
+                        : Math.min(filteredUnis.length, FREE_TRIAL_LIMIT)}
+                    </span>{" "}
+                    {t("com.of")} {universities.length} {t("uni.exploreB")}
+                    {!user?.student_profile?.is_premium && (
+                      <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        <Lock className="w-3 h-3" /> Free Trial ({FREE_TRIAL_LIMIT} Universities)
+                      </span>
+                    )}
+                  </p>
+
+                  {!user?.student_profile?.is_premium && (
+                    <button
+                      onClick={() => {
+                        if (!user) setShowAuthGate(true);
+                        else setShowLifetimeModal(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-purple/20 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-all"
+                    >
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Unlock All 100+ ($29 One-Time)</span>
+                    </button>
+                  )}
+                </div>
+
                 {loading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[...Array(6)].map((_, i) => (
@@ -558,54 +594,182 @@ export default function ScholarshipsPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {filteredUnis.map((u, i) => (
-                      <motion.button
-                        key={u.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: Math.min(i, 8) * 0.04 }}
-                        onClick={() => selectUni(u.id)}
-                        className="glass rounded-2xl p-6 card-hover group text-left h-full flex flex-col"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center flex-shrink-0">
-                            <GraduationCap className="w-6 h-6 text-white" />
+                  <div>
+                    {/* Unlocked / Free Trial Universities */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {(user?.student_profile?.is_premium
+                        ? filteredUnis
+                        : filteredUnis.slice(0, FREE_TRIAL_LIMIT)
+                      ).map((u, i) => (
+                        <motion.button
+                          key={u.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: Math.min(i, 8) * 0.04 }}
+                          onClick={() => selectUni(u.id)}
+                          className="glass rounded-2xl p-6 card-hover group text-left h-full flex flex-col"
+                        >
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center flex-shrink-0">
+                              <GraduationCap className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base font-semibold text-text-primary group-hover:text-cyan transition-colors line-clamp-1">
+                                {u.name}
+                              </h3>
+                              <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3" />
+                                {u.city}
+                              </p>
+                            </div>
+                            {u.verified && (
+                              <span className="flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full flex-shrink-0">
+                                <CheckCircle2 className="w-3 h-3" />
+                                {t("com.verified")}
+                              </span>
+                            )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-base font-semibold text-text-primary group-hover:text-cyan transition-colors line-clamp-1">
-                              {u.name}
-                            </h3>
-                            <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5">
-                              <MapPin className="w-3 h-3" />
-                              {u.city}
-                            </p>
-                          </div>
-                          {u.verified && (
-                            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full flex-shrink-0">
-                              <CheckCircle2 className="w-3 h-3" />
-                              {t("com.verified")}
-                            </span>
-                          )}
+                          <span className="mt-auto flex items-center justify-between text-sm font-medium text-cyan group-hover:text-purple transition-colors">
+                            {u.count} {t("uni.scholarships")}
+                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </span>
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    {/* Foggy Locked Section for Free Trial Users */}
+                    {!user?.student_profile?.is_premium && filteredUnis.length > FREE_TRIAL_LIMIT && (
+                      <div className="relative mt-8 pt-4">
+                        {/* Blurred foggy background preview */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 filter blur-md opacity-30 select-none pointer-events-none">
+                          {filteredUnis.slice(FREE_TRIAL_LIMIT, FREE_TRIAL_LIMIT + 6).map((u, i) => (
+                            <div
+                              key={u.id}
+                              className="glass rounded-2xl p-6 text-left h-full flex flex-col"
+                            >
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center flex-shrink-0">
+                                  <GraduationCap className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-base font-semibold text-text-primary line-clamp-1">
+                                    {u.name}
+                                  </h3>
+                                  <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5">
+                                    <MapPin className="w-3 h-3" />
+                                    {u.city}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="mt-auto flex items-center justify-between text-sm font-medium text-cyan">
+                                {u.count} {t("uni.scholarships")}
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                        <span className="mt-auto flex items-center justify-between text-sm font-medium text-cyan group-hover:text-purple transition-colors">
-                          {u.count} {t("uni.scholarships")}
-                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                      </motion.button>
-                    ))}
+
+                        {/* Imposing VIP Upgrade Box Overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4">
+                          <div className="glass rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-amber-500/40 shadow-2xl shadow-amber-500/20 text-center bg-slate-950/90 backdrop-blur-xl">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-purple flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/30">
+                              <Crown className="w-7 h-7 text-white" />
+                            </div>
+                            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2">
+                              One-Time Payment • No Subscriptions
+                            </span>
+                            <h3 className="text-xl sm:text-2xl font-extrabold text-text-primary mb-2">
+                              Unlock All 100+ Universities & 400+ Scholarships
+                            </h3>
+                            <p className="text-xs sm:text-sm text-text-secondary mb-5 max-w-md mx-auto leading-relaxed">
+                              You are viewing the <strong className="text-cyan">7 Free Trial Universities</strong>.
+                              Upgrade once to unlock all <strong className="text-text-primary">100+ Universities</strong> (Chengdu, Beijing, Guangzhou, Shanghai, Wuhan, Xi'an) and <strong className="text-text-primary">400+ Full & Partial Scholarships</strong>.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+                              <div className="text-center sm:text-left">
+                                <div className="flex items-baseline justify-center sm:justify-start gap-1">
+                                  <span className="text-3xl font-black text-text-primary">$29</span>
+                                  <span className="text-xs text-text-muted line-through">$99</span>
+                                  <span className="text-xs font-bold text-amber-300 ml-1">Pay Once</span>
+                                </div>
+                                <p className="text-[11px] text-text-muted">Lifetime access, never pay again</p>
+                              </div>
+
+                              <button
+                                onClick={() => {
+                                  if (!user) setShowAuthGate(true);
+                                  else setShowLifetimeModal(true);
+                                }}
+                                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white font-extrabold text-sm shadow-xl shadow-amber-500/25 hover:opacity-95 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                              >
+                                <Crown className="w-4 h-4 text-amber-200" />
+                                <span>Unlock Lifetime Access ($29)</span>
+                              </button>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-text-muted pt-3 border-t border-white/10">
+                              <span className="flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> 100+ Universities
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-cyan" /> 400+ Scholarships
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-purple" /> Full & Partial Funding
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </>
             ) : (
               <>
-                <p className="text-sm text-text-muted mb-4">
-                  {t("com.showing")}{" "}
-                  <span className="text-text-primary font-medium">
-                    {uniScholarships.length}
-                  </span>{" "}
-                  {t("com.of")} {t("uni.scholarships")}
-                </p>
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <p className="text-sm text-text-muted">
+                    {t("com.showing")}{" "}
+                    <span className="text-text-primary font-medium">
+                      {uniScholarships.length}
+                    </span>{" "}
+                    {t("com.of")} {t("uni.scholarships")}
+                  </p>
+
+                  {!user?.student_profile?.is_premium && (
+                    <button
+                      onClick={() => {
+                        if (!user) setShowAuthGate(true);
+                        else setShowLifetimeModal(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-purple/20 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-all"
+                    >
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Unlock All 400+ Scholarships ($29)</span>
+                    </button>
+                  )}
+                </div>
+
+                {!user?.student_profile?.is_premium && (
+                  <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple/10 to-cyan/10 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-purple flex items-center justify-center flex-shrink-0">
+                        <Lock className="w-4 h-4 text-white" />
+                      </div>
+                      <p className="text-xs sm:text-sm text-text-secondary">
+                        Viewing <strong className="text-text-primary">{selectedUniEntry?.name}</strong>. Unlock all <strong className="text-text-primary">100+ Universities</strong> and <strong className="text-text-primary">400+ Scholarships</strong> with the Scholar Lifetime VIP Pass.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowLifetimeModal(true)}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-purple text-white text-xs font-bold hover:opacity-90 transition-opacity flex-shrink-0 flex items-center gap-1.5"
+                    >
+                      <Crown className="w-3.5 h-3.5" />
+                      <span>$29 Pay Once</span>
+                    </button>
+                  </div>
+                )}
+
                 {loading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[...Array(4)].map((_, i) => (
@@ -649,6 +813,19 @@ export default function ScholarshipsPage() {
           </div>
         </div>
       </div>
+
+      {/* Auth & Lifetime Modals */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => setShowAuthGate(false)}
+        title="Sign In to Discover Scholarships"
+        subtitle="Explore 100+ Chinese Universities & 400+ Full & Partial Scholarships"
+      />
+
+      <LifetimePassModal
+        isOpen={showLifetimeModal}
+        onClose={() => setShowLifetimeModal(false)}
+      />
     </div>
   );
 }

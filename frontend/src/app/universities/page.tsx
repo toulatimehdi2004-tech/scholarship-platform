@@ -1,12 +1,16 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { Search, MapPin, GraduationCap, CheckCircle2, X, ArrowLeft } from "lucide-react";
+import { Search, MapPin, GraduationCap, CheckCircle2, X, ArrowLeft, Crown, Lock, Sparkles, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchApi, type University } from "@/lib/api";
+import { fetchApi, getCurrentUser, getToken, type University, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import UniversityCard from "@/components/UniversityCard";
+import AuthGateModal from "@/components/AuthGateModal";
+import LifetimePassModal from "@/components/LifetimePassModal";
+
+const FREE_TRIAL_LIMIT = 7;
 
 export default function UniversitiesPage() {
   const { t } = useLang();
@@ -14,13 +18,25 @@ export default function UniversitiesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("All Cities");
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuthGate, setShowAuthGate] = useState(false);
+  const [showLifetimeModal, setShowLifetimeModal] = useState(false);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const res = await fetchApi<University[]>("/universities/");
+      const [res, userRes] = await Promise.all([
+        fetchApi<University[]>("/universities/"),
+        getToken() ? getCurrentUser() : Promise.resolve({ data: null }),
+      ]);
       if (res.data) {
         setAll(Array.isArray(res.data) ? res.data : (res.data as any).results ?? []);
+      }
+      if (userRes.data) {
+        setUser(userRes.data);
+      } else if (!getToken()) {
+        // Impose sign in modal if not logged in
+        setShowAuthGate(true);
       }
       setLoading(false);
     }
@@ -235,11 +251,35 @@ export default function UniversitiesPage() {
 
           {/* Results */}
           <div className="flex-1">
-            <p className="text-sm text-text-muted mb-4">
-              {t("com.showing")}{" "}
-              <span className="text-text-primary font-medium">{filtered.length}</span>{" "}
-              {t("com.of")} {all.length}
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <p className="text-sm text-text-muted">
+                {t("com.showing")}{" "}
+                <span className="text-text-primary font-medium">
+                  {user?.student_profile?.is_premium
+                    ? filtered.length
+                    : Math.min(filtered.length, FREE_TRIAL_LIMIT)}
+                </span>{" "}
+                {t("com.of")} {all.length} {t("nav.universities")}
+                {!user?.student_profile?.is_premium && (
+                  <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                    <Lock className="w-3 h-3" /> Free Trial (7 Universities)
+                  </span>
+                )}
+              </p>
+
+              {!user?.student_profile?.is_premium && (
+                <button
+                  onClick={() => {
+                    if (!user) setShowAuthGate(true);
+                    else setShowLifetimeModal(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-purple/20 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-all"
+                >
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Unlock All 100+ ($29 One-Time)</span>
+                </button>
+              )}
+            </div>
 
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -256,15 +296,99 @@ export default function UniversitiesPage() {
                 <p className="text-text-muted text-sm">{t("uni.noResSub")}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filtered.map((u, i) => (
-                  <UniversityCard key={u.id} university={u} index={i} />
-                ))}
+              <div>
+                {/* 1. Unlocked Universities (First 7 on free trial, all on VIP) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {(user?.student_profile?.is_premium
+                    ? filtered
+                    : filtered.slice(0, FREE_TRIAL_LIMIT)
+                  ).map((u, i) => (
+                    <UniversityCard key={u.id} university={u} index={i} />
+                  ))}
+                </div>
+
+                {/* 2. Foggy Locked Section for Free Trial Users */}
+                {!user?.student_profile?.is_premium && filtered.length > FREE_TRIAL_LIMIT && (
+                  <div className="relative mt-8 pt-4">
+                    {/* Blurred foggy background preview */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 filter blur-md opacity-30 select-none pointer-events-none">
+                      {filtered.slice(FREE_TRIAL_LIMIT, FREE_TRIAL_LIMIT + 6).map((u, i) => (
+                        <UniversityCard key={u.id} university={u} index={i} />
+                      ))}
+                    </div>
+
+                    {/* Imposing VIP Upgrade Box Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4">
+                      <div className="glass rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-amber-500/40 shadow-2xl shadow-amber-500/20 text-center bg-slate-950/90 backdrop-blur-xl">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-purple flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/30">
+                          <Crown className="w-7 h-7 text-white" />
+                        </div>
+                        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2">
+                          One-Time Payment • No Subscriptions
+                        </span>
+                        <h3 className="text-xl sm:text-2xl font-extrabold text-text-primary mb-2">
+                          Unlock All 100+ Universities & 400+ Scholarships
+                        </h3>
+                        <p className="text-xs sm:text-sm text-text-secondary mb-5 max-w-md mx-auto leading-relaxed">
+                          You are viewing the <strong className="text-cyan">7 Free Trial Universities</strong>.
+                          Upgrade once to unlock all <strong className="text-text-primary">100+ Universities</strong> (Beijing, Chengdu, Guangzhou, Shanghai, Wuhan, Shenzhen) and <strong className="text-text-primary">400+ Full & Partial Scholarships</strong>.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+                          <div className="text-center sm:text-left">
+                            <div className="flex items-baseline justify-center sm:justify-start gap-1">
+                              <span className="text-3xl font-black text-text-primary">$29</span>
+                              <span className="text-xs text-text-muted line-through">$99</span>
+                              <span className="text-xs font-bold text-amber-300 ml-1">Pay Once</span>
+                            </div>
+                            <p className="text-[11px] text-text-muted">Lifetime access, never pay again</p>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              if (!user) setShowAuthGate(true);
+                              else setShowLifetimeModal(true);
+                            }}
+                            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white font-extrabold text-sm shadow-xl shadow-amber-500/25 hover:opacity-95 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                          >
+                            <Crown className="w-4 h-4 text-amber-200" />
+                            <span>Unlock Lifetime Access ($29)</span>
+                          </button>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-text-muted pt-3 border-t border-white/10">
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> 100+ Universities
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-cyan" /> 400+ Scholarships
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-purple" /> Full & Partial Funding
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Auth & Lifetime Modals */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => setShowAuthGate(false)}
+        title="Sign In to Discover Universities"
+        subtitle="Access 100+ Top Chinese Universities and start your free trial"
+      />
+
+      <LifetimePassModal
+        isOpen={showLifetimeModal}
+        onClose={() => setShowLifetimeModal(false)}
+      />
     </div>
   );
 }

@@ -5,12 +5,13 @@ import { Search, Sparkles, Target, Bell, ArrowRight, BadgeCheck, Scale, PenLine,
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { fetchApi } from "@/lib/api";
+import { fetchApi, getToken } from "@/lib/api";
+import AuthGateModal from "@/components/AuthGateModal";
 
 const FALLBACK_STATS = [
-  { label: "Scholarships", value: 368, suffix: "+" },
-  { label: "Universities", value: 79, suffix: "+" },
-  { label: "Cities", value: 23, suffix: "+" },
+  { label: "Scholarships", value: 401, suffix: "+" },
+  { label: "Universities", value: 102, suffix: "+" },
+  { label: "Cities", value: 24, suffix: "+" },
 ];
 
 const features = [
@@ -86,6 +87,17 @@ export default function HomePage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [stats, setStats] = useState(FALLBACK_STATS);
+  const [showAuthGate, setShowAuthGate] = useState(false);
+
+  // Impose login modal on visitors as the first experience
+  useEffect(() => {
+    if (!getToken()) {
+      const timer = setTimeout(() => {
+        setShowAuthGate(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   useEffect(() => {
     fetchApi<{ scholarships: number; universities: number; cities: number }>("/stats/")
@@ -101,7 +113,19 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
+  function handleDiscover() {
+    if (!getToken()) {
+      setShowAuthGate(true);
+      return;
+    }
+    router.push("/scholarships");
+  }
+
   function doSearch() {
+    if (!getToken()) {
+      setShowAuthGate(true);
+      return;
+    }
     try {
       sessionStorage.setItem("home-query", query.trim());
     } catch {}
@@ -174,20 +198,23 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 1.0 }}
             className="flex flex-wrap justify-center gap-4"
           >
-            <Link
-              href="/scholarships"
-              className="btn-gradient px-8 py-4 rounded-xl text-base flex items-center gap-2"
+            <button
+              onClick={handleDiscover}
+              className="btn-gradient px-8 py-4 rounded-xl text-base flex items-center gap-2 cursor-pointer shadow-lg shadow-cyan/20"
             >
-              <span>Browse Scholarships</span>
+              <span>Discover Scholarships</span>
               <ArrowRight className="w-4 h-4 relative z-10" />
-            </Link>
-            <Link
-              href="/ai-chat"
-              className="glass px-8 py-4 rounded-xl text-base font-semibold text-text-primary hover:bg-white/10 transition-all flex items-center gap-2"
+            </button>
+            <button
+              onClick={() => {
+                if (!getToken()) setShowAuthGate(true);
+                else router.push("/ai-chat");
+              }}
+              className="glass px-8 py-4 rounded-xl text-base font-semibold text-text-primary hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-purple" />
               Try AI Assistant
-            </Link>
+            </button>
           </motion.div>
         </div>
       </section>
@@ -352,18 +379,21 @@ export default function HomePage() {
             in China.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/auth/register"
-              className="btn-gradient px-8 py-4 rounded-xl text-base"
+            <button
+              onClick={() => {
+                if (!getToken()) setShowAuthGate(true);
+                else router.push("/scholarships");
+              }}
+              className="btn-gradient px-8 py-4 rounded-xl text-base cursor-pointer shadow-lg shadow-purple/20"
             >
               <span>Create Free Account</span>
-            </Link>
-            <Link
-              href="/scholarships"
-              className="glass px-8 py-4 rounded-xl text-base font-semibold text-text-primary hover:bg-white/10 transition-all"
+            </button>
+            <button
+              onClick={handleDiscover}
+              className="glass px-8 py-4 rounded-xl text-base font-semibold text-text-primary hover:bg-white/10 transition-all cursor-pointer"
             >
               Explore Scholarships
-            </Link>
+            </button>
           </div>
         </motion.div>
       </section>
@@ -384,6 +414,15 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Foggy Auth Gate Modal */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => setShowAuthGate(false)}
+        title="Welcome to ChinaScholar"
+        subtitle="Sign in to explore 100+ Chinese Universities & 400+ Full & Partial Scholarships"
+        onSuccess={() => router.push("/scholarships")}
+      />
     </div>
   );
 }
