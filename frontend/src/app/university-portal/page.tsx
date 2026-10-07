@@ -30,6 +30,7 @@ import {
 import Link from "next/link";
 import { fetchApi, getApiBaseUrl, getToken } from "@/lib/api";
 import SmartBack from "@/components/SmartBack";
+import AuthGateModal from "@/components/AuthGateModal";
 
 interface Applicant {
   id: number;
@@ -88,10 +89,15 @@ export default function UniversityPortalPage() {
   });
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showAuthGate, setShowAuthGate] = useState(false);
 
-  // Load universities and applicants on mount
+  // Load universities and applicants on mount with auth enforcement
   useEffect(() => {
-    loadData();
+    if (!getToken()) {
+      setShowAuthGate(true);
+    } else {
+      loadData();
+    }
   }, []);
 
   async function loadData() {
@@ -787,34 +793,35 @@ export default function UniversityPortalPage() {
       {activeTab === "analytics" && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Country Demographics */}
+            {/* Moroccan Regional Demographics */}
             <div className="glass rounded-3xl p-6 sm:p-8 border border-border-glass">
               <h3 className="text-base font-bold text-text-primary mb-2 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-cyan" />
-                <span>Top Applicant Nationalities</span>
+                <Globe className="w-5 h-5 text-emerald-500" />
+                <span>Moroccan Regional Breakdown (Maroc 🇲🇦)</span>
               </h3>
               <p className="text-xs text-text-muted mb-6">
-                Breakdown of international candidates applying to Chinese universities on Moroccan Scholar.
+                Origin regions of Moroccan students applying to Chinese universities on Moroccan Scholar.
               </p>
 
               <div className="space-y-4">
                 {[
-                  { country: "Morocco 🇲🇦", share: 45, applicants: "11 Students" },
-                  { country: "Algeria 🇩🇿", share: 18, applicants: "4 Students" },
-                  { country: "Egypt 🇪🇬", share: 14, applicants: "3 Students" },
-                  { country: "France 🇫🇷", share: 12, applicants: "3 Students" },
-                  { country: "Pakistan 🇵🇰", share: 11, applicants: "3 Students" },
+                  { region: "Casablanca-Settat 🇲🇦", share: 38, applicants: "11 Students" },
+                  { region: "Rabat-Salé-Kénitra 🇲🇦", share: 24, applicants: "7 Students" },
+                  { region: "Fès-Meknès 🇲🇦", share: 14, applicants: "4 Students" },
+                  { region: "Tanger-Tétouan-Al Hoceïma 🇲🇦", share: 10, applicants: "3 Students" },
+                  { region: "Marrakech-Safi 🇲🇦", share: 8, applicants: "2 Students" },
+                  { region: "Souss-Massa (Agadir) 🇲🇦", share: 6, applicants: "2 Students" },
                 ].map((demo, idx) => (
                   <div key={idx}>
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-semibold text-text-primary">{demo.country}</span>
+                      <span className="font-semibold text-text-primary">{demo.region}</span>
                       <span className="text-text-muted font-mono">
                         {demo.applicants} ({demo.share}%)
                       </span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-emerald-500 to-cyan rounded-full"
+                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full"
                         style={{ width: `${demo.share}%` }}
                       />
                     </div>
@@ -969,6 +976,18 @@ export default function UniversityPortalPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Imposed Auth Gate for University Admissions */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => {}}
+        canClose={false}
+        role="university"
+        onSuccess={() => {
+          setShowAuthGate(false);
+          loadData();
+        }}
+      />
     </div>
   );
 }

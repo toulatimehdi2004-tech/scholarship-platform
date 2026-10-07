@@ -578,13 +578,18 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Foggy Auth Gate Modal */}
+      {/* Imposed Auth Gate Modal for Moroccan Students */}
       <AuthGateModal
         isOpen={showAuthGate}
         onClose={() => setShowAuthGate(false)}
-        title="Welcome to ChinaScholar"
-        subtitle="Sign in to explore 100+ Chinese Universities & 400+ Full & Partial Scholarships"
-        onSuccess={() => router.push("/scholarships")}
+        role="student"
+        canClose={false}
+        title="Moroccan Scholar • Student Access"
+        subtitle="Sign in or create an account to explore 100+ Chinese Universities & 400+ Scholarships for Moroccans"
+        onSuccess={() => {
+          setShowAuthGate(false);
+          router.push("/scholarships");
+        }}
       />
     </div>
   );

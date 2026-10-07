@@ -23,7 +23,8 @@ import {
   Calendar,
 } from "lucide-react";
 import Link from "next/link";
-import { fetchApi, getApiBaseUrl } from "@/lib/api";
+import { fetchApi, getApiBaseUrl, getToken } from "@/lib/api";
+import AuthGateModal from "@/components/AuthGateModal";
 
 interface OrderDocument {
   id: number;
@@ -67,9 +68,14 @@ export default function ProviderPortalPage() {
   const [deliveryOrder, setDeliveryOrder] = useState<ServiceOrder | null>(null);
   const [deliveryNote, setDeliveryNote] = useState("");
   const [deliveredSuccess, setDeliveredSuccess] = useState(false);
+  const [showAuthGate, setShowAuthGate] = useState(false);
 
   useEffect(() => {
-    loadOrders();
+    if (!getToken()) {
+      setShowAuthGate(true);
+    } else {
+      loadOrders();
+    }
   }, []);
 
   async function loadOrders() {
@@ -728,6 +734,18 @@ export default function ProviderPortalPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Imposed Auth Gate for Service Providers */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => {}}
+        canClose={false}
+        role="provider"
+        onSuccess={() => {
+          setShowAuthGate(false);
+          loadOrders();
+        }}
+      />
     </div>
   );
 }

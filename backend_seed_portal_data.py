@@ -107,7 +107,11 @@ s3, _ = Service.objects.get_or_create(
     }
 )
 
-# 3. Create Sample International Students
+# Clean up any non-Moroccan test accounts
+non_moroccan = ["lucas_moreau", "tariq_husseini", "ali_raza", "omar_mansouri"]
+User.objects.filter(username__in=non_moroccan).delete()
+
+# 3. Create Sample Moroccan Students Only (Moroccan Scholar Platform)
 students_data = [
     {
         "username": "yassine_benali",
@@ -117,7 +121,7 @@ students_data = [
         "country": "Morocco",
         "city": "Casablanca",
         "gpa": Decimal("3.88"),
-        "education_level": "Bachelor Graduate",
+        "education_level": "Bachelor Graduate (Univ Hassan II)",
         "field_of_study": "Computer Science & AI",
     },
     {
@@ -128,29 +132,29 @@ students_data = [
         "country": "Morocco",
         "city": "Rabat",
         "gpa": Decimal("3.94"),
-        "education_level": "Master Student",
+        "education_level": "Master Student (Univ Mohammed V)",
         "field_of_study": "Data Science & Bioinformatics",
     },
     {
-        "username": "lucas_moreau",
-        "first_name": "Lucas",
-        "last_name": "Moreau",
-        "email": "lucas.moreau@sorbonne.fr",
-        "country": "France",
-        "city": "Paris",
-        "gpa": Decimal("3.76"),
-        "education_level": "Bachelor Graduate",
+        "username": "mehdi_berrada",
+        "first_name": "Mehdi",
+        "last_name": "Berrada",
+        "email": "mehdi.berrada@gmail.com",
+        "country": "Morocco",
+        "city": "Tangier",
+        "gpa": Decimal("3.85"),
+        "education_level": "Bachelor Graduate (Univ Abdelmalek Essaadi)",
         "field_of_study": "International Economics & Trade",
     },
     {
-        "username": "tariq_husseini",
-        "first_name": "Tariq",
-        "last_name": "Al-Husseini",
-        "email": "tariq.husseini@cairo.edu.eg",
-        "country": "Egypt",
-        "city": "Cairo",
+        "username": "othmane_alami",
+        "first_name": "Othmane",
+        "last_name": "El Alami",
+        "email": "othmane.alami@gmail.com",
+        "country": "Morocco",
+        "city": "Agadir",
         "gpa": Decimal("3.82"),
-        "education_level": "Master Graduate",
+        "education_level": "Master Graduate (Univ Ibn Zohr)",
         "field_of_study": "Civil & Structural Engineering",
     },
     {
@@ -161,18 +165,18 @@ students_data = [
         "country": "Morocco",
         "city": "Fes",
         "gpa": Decimal("3.91"),
-        "education_level": "Master Graduate",
+        "education_level": "Master Graduate (Univ Sidi Mohamed Ben Abdellah)",
         "field_of_study": "Biomedical Sciences & Pharmacology",
     },
     {
-        "username": "ali_raza",
-        "first_name": "Ali",
-        "last_name": "Raza",
-        "email": "ali.raza@nust.edu.pk",
-        "country": "Pakistan",
-        "city": "Islamabad",
+        "username": "hamza_bouzid",
+        "first_name": "Hamza",
+        "last_name": "Bouzid",
+        "email": "hamza.bouzid@gmail.com",
+        "country": "Morocco",
+        "city": "Oujda",
         "gpa": Decimal("3.80"),
-        "education_level": "Bachelor Graduate",
+        "education_level": "Bachelor Graduate (Univ Mohammed I)",
         "field_of_study": "Electrical & Electronic Engineering",
     },
     {
@@ -183,19 +187,41 @@ students_data = [
         "country": "Morocco",
         "city": "Marrakech",
         "gpa": Decimal("3.72"),
-        "education_level": "High School Graduate",
+        "education_level": "Baccalauréat SM (Lycée Ibn Sina Marrakech)",
         "field_of_study": "Clinical Medicine (MBBS)",
     },
     {
-        "username": "omar_mansouri",
-        "first_name": "Omar",
-        "last_name": "Mansouri",
-        "email": "omar.mansouri@yahoo.fr",
-        "country": "Algeria",
-        "city": "Algiers",
-        "gpa": Decimal("3.68"),
-        "education_level": "Master Graduate",
+        "username": "hiba_tazi",
+        "first_name": "Hiba",
+        "last_name": "Tazi",
+        "email": "hiba.tazi@gmail.com",
+        "country": "Morocco",
+        "city": "Kenitra",
+        "gpa": Decimal("3.89"),
+        "education_level": "Master Graduate (Univ Ibn Tofail)",
         "field_of_study": "Renewable Energy & Mechanical Eng",
+    },
+    {
+        "username": "nouhaila_senhaji",
+        "first_name": "Nouhaila",
+        "last_name": "Senhaji",
+        "email": "nouhaila.senhaji@gmail.com",
+        "country": "Morocco",
+        "city": "Tetouan",
+        "gpa": Decimal("3.77"),
+        "education_level": "Bachelor Graduate (ENS Tetouan)",
+        "field_of_study": "Software Engineering & Cloud Computing",
+    },
+    {
+        "username": "anass_benjelloun",
+        "first_name": "Anass",
+        "last_name": "Benjelloun",
+        "email": "anass.benjelloun@gmail.com",
+        "country": "Morocco",
+        "city": "Meknes",
+        "gpa": Decimal("3.93"),
+        "education_level": "CPGE Math-Sup (Lycée Moulay Ismail Meknes)",
+        "field_of_study": "Applied Mathematics & Quantum Computing",
     },
 ]
 
@@ -289,24 +315,24 @@ order_data = [
         "file_name": "Amina_Chraibi_Bachelor_Degree.pdf",
     },
     {
-        "student": created_students[2][1], # Lucas
+        "student": created_students[2][1], # Mehdi Berrada (Tangier, Morocco)
         "service": s1,
         "status": "completed",
-        "notes": "Translated from French to Mandarin. Delivered to student.",
-        "file_name": "Lucas_Moreau_Diplome_Sorbonne.pdf",
+        "notes": "Translated French licence transcript to Mandarin. Official red seal delivered to student.",
+        "file_name": "Mehdi_Berrada_Licence_Economie.pdf",
     },
     {
-        "student": created_students[3][1], # Tariq
+        "student": created_students[3][1], # Othmane El Alami (Agadir, Morocco)
         "service": s3,
         "status": "in_progress",
-        "notes": "Motivation Letter translation into Chinese for Silk Road Scholarship.",
-        "file_name": "Tariq_Husseini_SOP_Letter.pdf",
+        "notes": "Motivation Letter & CV translation into Chinese for Silk Road Engineering Scholarship.",
+        "file_name": "Othmane_Alami_SOP_Letter.pdf",
     },
     {
-        "student": created_students[4][1], # Fatima Zahra
+        "student": created_students[4][1], # Fatima Zahra Idrissi (Fes, Morocco)
         "service": s2,
         "status": "pending",
-        "notes": "Pharmacology Master degree notarization check.",
+        "notes": "Pharmacology Master degree notarization and Embassy legalization check.",
         "file_name": "Fatima_Idrissi_Pharmacy_Certificate.pdf",
     },
 ]
