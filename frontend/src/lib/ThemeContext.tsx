@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
 export type Theme = 'dark' | 'light';
-export type ColorTheme = 'cyber' | 'aurora' | 'cosmic' | 'solar';
+export type ColorTheme = 'morocco' | 'royal-gold' | 'sahara' | 'mediterranean';
 
 export interface ColorThemeOption {
   id: ColorTheme;
@@ -14,10 +14,10 @@ export interface ColorThemeOption {
 }
 
 export const COLOR_THEMES: ColorThemeOption[] = [
-  { id: 'cyber', name: 'Cyber Cyan', icon: '⚡', primary: '#06b6d4', secondary: '#8b5cf6' },
-  { id: 'aurora', name: 'Aurora Emerald', icon: '🌿', primary: '#10b981', secondary: '#06b6d4' },
-  { id: 'cosmic', name: 'Cosmic Orchid', icon: '🌌', primary: '#ec4899', secondary: '#8b5cf6' },
-  { id: 'solar', name: 'Solar Amber', icon: '☀️', primary: '#f59e0b', secondary: '#ef4444' },
+  { id: 'morocco', name: 'Moroccan Scholar (Emerald & Ruby)', icon: '🇲🇦', primary: '#059669', secondary: '#c2171a' },
+  { id: 'royal-gold', name: 'Imperial Gold & Emerald', icon: '👑', primary: '#f59e0b', secondary: '#059669' },
+  { id: 'sahara', name: 'Sahara Crimson & Amber', icon: '☀️', primary: '#c2171a', secondary: '#f59e0b' },
+  { id: 'mediterranean', name: 'Atlas Sky & Jade', icon: '🌊', primary: '#0ea5e9', secondary: '#10b981' },
 ];
 
 interface ThemeContextType {
@@ -31,14 +31,14 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'dark',
   toggle: () => {},
-  colorTheme: 'cyber',
+  colorTheme: 'morocco',
   setColorTheme: () => {},
   cycleColorTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark');
-  const [colorTheme, setColorThemeState] = useState<ColorTheme>('cyber');
+  const [colorTheme, setColorThemeState] = useState<ColorTheme>('morocco');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -50,11 +50,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
 
     const savedColor = localStorage.getItem('colorTheme') as ColorTheme;
-    if (savedColor && ['cyber', 'aurora', 'cosmic', 'solar'].includes(savedColor)) {
+    if (savedColor && ['morocco', 'royal-gold', 'sahara', 'mediterranean'].includes(savedColor)) {
       setColorThemeState(savedColor);
       document.documentElement.setAttribute('data-color-theme', savedColor);
     } else {
-      document.documentElement.setAttribute('data-color-theme', 'cyber');
+      document.documentElement.setAttribute('data-color-theme', 'morocco');
     }
   }, []);
 
@@ -72,7 +72,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const cycleColorTheme = () => {
-    const ids: ColorTheme[] = ['cyber', 'aurora', 'cosmic', 'solar'];
+    const ids: ColorTheme[] = ['morocco', 'royal-gold', 'sahara', 'mediterranean'];
     const nextIdx = (ids.indexOf(colorTheme) + 1) % ids.length;
     setColorTheme(ids[nextIdx]);
   };

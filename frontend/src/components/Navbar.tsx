@@ -25,7 +25,7 @@ export default function Navbar() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const { theme, toggle, colorTheme, setColorTheme } = useTheme();
+  const { theme, toggle, colorTheme, setColorTheme, cycleColorTheme } = useTheme();
   const { t } = useLang();
   const [user, setUser] = useState<User | null>(null);
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
@@ -204,11 +204,7 @@ export default function Navbar() {
 
             <div className="flex md:hidden items-center gap-2">
               <button
-                onClick={() => {
-                  const ids = ["cyber", "aurora", "cosmic", "solar"] as const;
-                  const next = ids[(ids.indexOf(colorTheme as any) + 1) % ids.length];
-                  setColorTheme(next);
-                }}
+                onClick={cycleColorTheme}
                 className="p-2 rounded-lg hover:bg-white/5 transition-all text-text-secondary"
                 title="Cycle Color Palette"
               >

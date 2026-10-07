@@ -20,7 +20,7 @@ export default function AnimatedBackground() {
       <div
         className="fixed inset-0 transition-opacity duration-500 hidden md:block"
         style={{
-          background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(6, 182, 212, 0.08), transparent 70%)`,
+          background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(5, 150, 105, 0.1), transparent 70%)`,
         }}
       />
 
