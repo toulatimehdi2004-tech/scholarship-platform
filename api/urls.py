@@ -9,6 +9,7 @@ router.register(r'universities', views.UniversityViewSet, basename='university')
 router.register(r'applications', views.ApplicationTrackerViewSet, basename='application')
 router.register(r'suggestions', views.AISuggestionViewSet, basename='suggestion')
 router.register(r'documents', views.DocumentViewSet, basename='document')
+router.register(r'service-orders', views.ServiceOrderViewSet, basename='service-order')
 
 urlpatterns = [
     # Auth

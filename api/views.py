@@ -29,6 +29,7 @@ from .serializers import (
     ApplicationTrackerSerializer, ScholarshipMatchSerializer,
     AISuggestionSerializer, AIConversationSerializer,
     AIChatRequestSerializer, DocumentSerializer,
+    ServiceOrderSerializer,
 )
 
 
@@ -379,16 +380,17 @@ class ScholarshipViewSet(viewsets.ReadOnlyModelViewSet):
 
 # ── Universities ─────────────────────────────────────────────
 
-class UniversityViewSet(viewsets.ReadOnlyModelViewSet):
+class UniversityViewSet(viewsets.ModelViewSet):
     """
-    GET  /api/universities/           – list
-    GET  /api/universities/{id}/      – detail
+    GET   /api/universities/           – list
+    GET   /api/universities/{id}/      – detail
+    PATCH /api/universities/{id}/      – update school information
     """
     permission_classes = [AllowAny]
     queryset = University.objects.all()
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
+        if self.action in ['retrieve', 'update', 'partial_update']:
             return UniversityDetailSerializer
         return UniversityListSerializer
 
@@ -398,14 +400,42 @@ class UniversityViewSet(viewsets.ReadOnlyModelViewSet):
 class ApplicationTrackerViewSet(viewsets.ModelViewSet):
     """
     CRUD /api/applications/
+    Supports query parameters:
+      ?university=<id>   – get all applications for a specific university
+      ?all=true          – get all applications across platform (admissions officer view)
     """
     serializer_class = ApplicationTrackerSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
-        return ApplicationTracker.objects.filter(
-            student=self.request.user
-        ).select_related('scholarship')
+        qs = ApplicationTracker.objects.all().select_related('scholarship', 'scholarship__university', 'student')
+        uni_id = self.request.query_params.get('university')
+        if uni_id:
+            return qs.filter(scholarship__university_id=uni_id)
+        if self.request.query_params.get('all') == 'true':
+            return qs
+        if self.request.user.is_authenticated:
+            return qs.filter(student=self.request.user)
+        return qs
+
+
+# ── Service Provider Orders Desk ─────────────────────────────
+
+class ServiceOrderViewSet(viewsets.ModelViewSet):
+    """
+    CRUD /api/service-orders/
+    Service Provider Desk for translations, notarizations, legalization
+    """
+    serializer_class = ServiceOrderSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        from providers.models import ServiceOrder
+        qs = ServiceOrder.objects.all().select_related('service', 'student', 'provider').prefetch_related('documents')
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        return qs.order_by('-created_at')
 
 
 # ── Scholarship Matches ──────────────────────────────────────

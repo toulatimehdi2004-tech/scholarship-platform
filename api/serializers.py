@@ -138,14 +138,27 @@ class ScholarshipDetailSerializer(serializers.ModelSerializer):
 
 class ApplicationTrackerSerializer(serializers.ModelSerializer):
     scholarship_title = serializers.CharField(source='scholarship.title', read_only=True)
+    university_name = serializers.CharField(source='scholarship.university.name', read_only=True)
+    university_id = serializers.IntegerField(source='scholarship.university.id', read_only=True)
+    scholarship_level = serializers.CharField(source='scholarship.level', read_only=True)
+    scholarship_type = serializers.CharField(source='scholarship.type', read_only=True)
+    student_username = serializers.CharField(source='student.username', read_only=True)
+    student_email = serializers.CharField(source='student.email', read_only=True)
+    student_name = serializers.SerializerMethodField()
+    student_country = serializers.SerializerMethodField()
+    student_gpa = serializers.SerializerMethodField()
+    student_education_level = serializers.SerializerMethodField()
     progress_percentage = serializers.SerializerMethodField()
     next_step = serializers.SerializerMethodField()
 
     class Meta:
         model = ApplicationTracker
         fields = [
-            'id', 'scholarship', 'scholarship_title', 'current_step',
+            'id', 'scholarship', 'scholarship_title', 'university_name', 'university_id',
+            'scholarship_level', 'scholarship_type', 'current_step',
             'checklist', 'ai_recommendations', 'notes',
+            'student_username', 'student_email', 'student_name', 'student_country',
+            'student_gpa', 'student_education_level',
             'deadline_reminder_sent', 'last_ai_check',
             'progress_percentage', 'next_step',
             'created_at', 'updated_at',
@@ -153,11 +166,68 @@ class ApplicationTrackerSerializer(serializers.ModelSerializer):
         read_only_fields = ['ai_recommendations', 'deadline_reminder_sent',
                             'last_ai_check']
 
+    def get_student_name(self, obj):
+        full = f"{obj.student.first_name} {obj.student.last_name}".strip()
+        return full or obj.student.username
+
+    def get_student_country(self, obj):
+        if hasattr(obj.student, 'student_profile'):
+            return obj.student.student_profile.country or 'International'
+        return 'International'
+
+    def get_student_gpa(self, obj):
+        if hasattr(obj.student, 'student_profile') and obj.student.student_profile.gpa:
+            return float(obj.student.student_profile.gpa)
+        return None
+
+    def get_student_education_level(self, obj):
+        if hasattr(obj.student, 'student_profile'):
+            return obj.student.student_profile.education_level or 'Undergraduate'
+        return 'Undergraduate'
+
     def get_progress_percentage(self, obj):
         return obj.get_progress_percentage()
 
     def get_next_step(self, obj):
         return obj.get_next_step()
+
+
+class ServiceOrderSerializer(serializers.ModelSerializer):
+    service_name = serializers.CharField(source='service.name', read_only=True)
+    provider_name = serializers.CharField(source='provider.business_name', read_only=True)
+    student_username = serializers.CharField(source='student.user.username', read_only=True)
+    student_name = serializers.SerializerMethodField()
+    student_country = serializers.SerializerMethodField()
+    documents = serializers.SerializerMethodField()
+
+    class Meta:
+        from providers.models import ServiceOrder
+        model = ServiceOrder
+        fields = '__all__'
+
+    def get_student_name(self, obj):
+        full = f"{obj.student.user.first_name} {obj.student.user.last_name}".strip()
+        return full or obj.student.user.username
+
+    def get_student_country(self, obj):
+        return obj.student.country or 'Morocco'
+
+    def get_documents(self, obj):
+        docs = []
+        for d in obj.documents.all():
+            url = None
+            if d.file:
+                request = self.context.get('request')
+                url = request.build_absolute_uri(d.file.url) if request else d.file.url
+            docs.append({
+                'id': d.id,
+                'title': d.title,
+                'file_name': d.file_name,
+                'file_url': url,
+                'file_size': d.file_size,
+                'status': d.status,
+            })
+        return docs
 
 
 class ScholarshipMatchSerializer(serializers.ModelSerializer):

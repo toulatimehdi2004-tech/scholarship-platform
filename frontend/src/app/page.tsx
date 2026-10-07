@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { fetchApi, getToken } from "@/lib/api";
 import AuthGateModal from "@/components/AuthGateModal";
+import PortalChooser, { type PortalRole } from "@/components/PortalChooser";
 
 const FALLBACK_STATS = [
   { label: "Scholarships", value: 401, suffix: "+" },
@@ -103,6 +104,26 @@ export default function HomePage() {
   const [query, setQuery] = useState("");
   const [stats, setStats] = useState(FALLBACK_STATS);
   const [showAuthGate, setShowAuthGate] = useState(false);
+  const [portalRole, setPortalRole] = useState<PortalRole | null>(null);
+  const [hasCheckedRole, setHasCheckedRole] = useState(false);
+
+  // Check stored role on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("portal_role") as PortalRole | null;
+      setPortalRole(saved);
+      setHasCheckedRole(true);
+    }
+  }, []);
+
+  // Redirect if non-student role
+  useEffect(() => {
+    if (portalRole === "university") {
+      router.push("/university-portal");
+    } else if (portalRole === "provider") {
+      router.push("/provider-portal");
+    }
+  }, [portalRole, router]);
 
   // Impose login modal on visitors as the first experience
   useEffect(() => {
@@ -128,6 +149,18 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
+  function handleSelectRole(role: PortalRole) {
+    try {
+      localStorage.setItem("portal_role", role);
+    } catch {}
+    setPortalRole(role);
+    if (role === "university") {
+      router.push("/university-portal");
+    } else if (role === "provider") {
+      router.push("/provider-portal");
+    }
+  }
+
   function handleDiscover() {
     if (!getToken()) {
       setShowAuthGate(true);
@@ -147,8 +180,31 @@ export default function HomePage() {
     router.push("/scholarships");
   }
 
+  // FIRST EVER EXPERIENCE: If role is not selected yet, show Role Choosing Screen!
+  if (hasCheckedRole && !portalRole) {
+    return <PortalChooser onSelectRole={handleSelectRole} currentRole={portalRole} />;
+  }
+
   return (
     <div className="min-h-screen">
+      {/* Active Portal Banner with quick role switch */}
+      <div className="bg-emerald-950/60 border-b border-emerald-500/20 py-2 px-4 text-center text-xs text-emerald-300 font-medium flex items-center justify-center gap-2">
+        <span className="flex items-center gap-1.5 font-bold">
+          🎓 Portal: <span>Student & Candidate Workspace</span>
+        </span>
+        <span className="opacity-40">•</span>
+        <button
+          onClick={() => {
+            try {
+              localStorage.removeItem("portal_role");
+            } catch {}
+            setPortalRole(null);
+          }}
+          className="text-white hover:text-cyan underline font-bold cursor-pointer"
+        >
+          ⇄ Switch Role (University / Provider)
+        </button>
+      </div>
       <section className="relative min-h-[92vh] flex items-center justify-center px-4 bg-grid py-12">
         <div className="max-w-5xl mx-auto text-center">
           <motion.div
