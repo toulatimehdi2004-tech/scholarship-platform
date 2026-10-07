@@ -218,6 +218,7 @@ class DocumentScanSerializer(serializers.ModelSerializer):
 class DocumentSerializer(serializers.ModelSerializer):
     scan_result = DocumentScanSerializer(read_only=True)
     file_url = serializers.SerializerMethodField()
+    title = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Document

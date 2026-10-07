@@ -178,29 +178,107 @@ export async function fetchApi<T>(
       headers,
     });
 
-    const data = await response.json();
+    let data: any = null;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      data = await response.json().catch(() => null);
+    } else {
+      const text = await response.text().catch(() => "");
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = text;
+      }
+    }
 
     if (!response.ok) {
       let errorMsg = "An error occurred";
 
-      if (data.detail) {
-        errorMsg = data.detail;
-      } else if (data.error) {
-        errorMsg = data.error;
-      } else if (typeof data === "object") {
-        const messages: string[] = [];
-        for (const [field, errors] of Object.entries(data)) {
-          if (Array.isArray(errors)) {
-            messages.push(`${field}: ${errors.join(", ")}`);
-          } else if (typeof errors === "string") {
-            messages.push(`${field}: ${errors}`);
+      if (data && typeof data === "object") {
+        if (data.detail) {
+          errorMsg = data.detail;
+        } else if (data.error) {
+          errorMsg = data.error;
+        } else {
+          const messages: string[] = [];
+          for (const [field, errors] of Object.entries(data)) {
+            if (Array.isArray(errors)) {
+              messages.push(`${field}: ${errors.join(", ")}`);
+            } else if (typeof errors === "string") {
+              messages.push(`${field}: ${errors}`);
+            }
           }
-        }
-        if (messages.length > 0) {
-          errorMsg = messages.join(" | ");
+          if (messages.length > 0) {
+            errorMsg = messages.join(" | ");
+          }
         }
       }
 
+      return { error: errorMsg, status: response.status };
+    }
+
+    return { data, status: response.status };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Network error",
+      status: 0,
+    };
+  }
+}
+
+export async function uploadApi<T>(
+  endpoint: string,
+  formData: FormData
+): Promise<ApiResponse<T>> {
+  try {
+    const clean = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    const url = `${getApiBaseUrl()}${clean}`;
+    const token = getToken();
+    const headers: Record<string, string> = {
+      "ngrok-skip-browser-warning": "true",
+    };
+    if (token) {
+      headers["Authorization"] = `Token ${token}`;
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    let data: any = null;
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      data = await response.json().catch(() => null);
+    } else {
+      const text = await response.text().catch(() => "");
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = text;
+      }
+    }
+
+    if (!response.ok) {
+      let errorMsg = "Upload failed";
+      if (data && typeof data === "object") {
+        if (data.detail) errorMsg = data.detail;
+        else if (data.error) errorMsg = data.error;
+        else {
+          const messages: string[] = [];
+          for (const [field, errors] of Object.entries(data)) {
+            if (Array.isArray(errors)) {
+              messages.push(`${field}: ${errors.join(", ")}`);
+            } else if (typeof errors === "string") {
+              messages.push(`${field}: ${errors}`);
+            }
+          }
+          if (messages.length > 0) errorMsg = messages.join(" | ");
+        }
+      } else if (typeof data === "string" && data) {
+        errorMsg = data;
+      }
       return { error: errorMsg, status: response.status };
     }
 

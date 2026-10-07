@@ -11,10 +11,11 @@ import {
   AlertCircle,
   Eye,
   X,
+  Loader2,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { fetchApi, getToken } from "@/lib/api";
+import { fetchApi, uploadApi, getToken, getApiBaseUrl } from "@/lib/api";
 
 interface DocumentItem {
   id: number;
@@ -53,6 +54,9 @@ export default function DocumentsPage() {
   const [uploading, setUploading] = useState(false);
   const [selectedType, setSelectedType] = useState("passport");
   const [title, setTitle] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,42 +79,81 @@ export default function DocumentsPage() {
     setLoading(false);
   }
 
-  async function handleUpload(file: File | null) {
-    if (!file || !title.trim()) return;
+  function onFileChosen(file: File | null) {
+    if (!file) return;
+    setUploadError(null);
+    setUploadSuccess(null);
+    setSelectedFile(file);
+    if (!title.trim()) {
+      const cleanName = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[_-]/g, " ")
+        .trim();
+      const formatted = cleanName ? cleanName.charAt(0).toUpperCase() + cleanName.slice(1) : "";
+      setTitle(formatted || docTypes.find((d) => d.value === selectedType)?.label || "Document");
+    }
+  }
+
+  async function handleUpload(fileToUpload?: File | null) {
+    const file = fileToUpload || selectedFile;
+    if (!file) {
+      setUploadError("Please select a file to upload.");
+      return;
+    }
 
     setUploading(true);
+    setUploadError(null);
+    setUploadSuccess(null);
+
+    const docTitle =
+      title.trim() ||
+      file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ").trim() ||
+      "Document";
+
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("title", title.trim());
+    formData.append("title", docTitle);
     formData.append("document_type", selectedType);
 
     try {
-      const token = getToken();
-      const res = await fetch("http://localhost:8000/api/documents/", {
-        method: "POST",
-        headers: { Authorization: "Token " + token },
-        body: formData,
-      });
+      const res = await uploadApi<DocumentItem>("/documents/", formData);
 
-      if (res.ok) {
+      if (res.data) {
+        setUploadSuccess(`Document "${docTitle}" uploaded successfully!`);
         setTitle("");
-        setShowUpload(false);
-        loadDocuments();
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        if (cameraInputRef.current) cameraInputRef.current.value = "";
+        await loadDocuments();
+        setTimeout(() => {
+          setShowUpload(false);
+          setUploadSuccess(null);
+        }, 1200);
+      } else {
+        setUploadError(res.error || "Upload failed. Please check your file and try again.");
       }
-    } catch (err) {
-      console.error("Upload failed:", err);
+    } catch (err: any) {
+      setUploadError(err.message || "Upload failed. Please check your connection.");
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   }
 
   async function deleteDocument(id: number) {
     if (!confirm("Delete this document?")) return;
-    const token = getToken();
-    await fetch("http://localhost:8000/api/documents/" + id + "/", {
-      method: "DELETE",
-      headers: { Authorization: "Token " + token },
-    });
-    loadDocuments();
+    try {
+      await fetchApi("/documents/" + id + "/", { method: "DELETE" });
+      loadDocuments();
+    } catch (err) {
+      console.error("Failed to delete document:", err);
+    }
+  }
+
+  function getFullFileUrl(url: string | null | undefined): string {
+    if (!url) return "#";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    const base = getApiBaseUrl().replace(/\/api\/?$/, "");
+    return `${base}${url.startsWith("/") ? url : "/" + url}`;
   }
 
   function formatSize(bytes: number) {
@@ -172,12 +215,31 @@ export default function DocumentsPage() {
                 Upload Document
               </h3>
               <button
-                onClick={() => setShowUpload(false)}
+                onClick={() => {
+                  setShowUpload(false);
+                  setSelectedFile(null);
+                  setUploadError(null);
+                  setUploadSuccess(null);
+                }}
                 className="text-text-muted hover:text-text-primary"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {uploadError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                <span>{uploadError}</span>
+              </div>
+            )}
+
+            {uploadSuccess && (
+              <div className="mb-4 p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>{uploadSuccess}</span>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
@@ -188,7 +250,7 @@ export default function DocumentsPage() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., My Passport"
+                  placeholder="e.g., My Passport (auto-filled if empty)"
                   className="w-full glass rounded-xl py-3 px-4 text-text-primary placeholder:text-text-muted outline-none input-glow"
                 />
               </div>
@@ -210,48 +272,96 @@ export default function DocumentsPage() {
               </div>
             </div>
 
-            <div
-              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const file = e.dataTransfer.files?.[0];
-                if (file) handleUpload(file);
-              }}
-              onClick={() => fileInputRef.current?.click()}
-              className="rounded-xl border-2 border-dashed border-border-glass hover:border-cyan/40 bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer p-10 flex flex-col items-center gap-3"
-            >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan/20 to-purple/20 flex items-center justify-center">
-                <Upload className="w-8 h-8 text-cyan" />
+            {selectedFile ? (
+              <div className="rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5 p-6 mb-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-text-primary truncate">
+                      {selectedFile.name}
+                    </p>
+                    <p className="text-xs text-text-muted">
+                      {formatSize(selectedFile.size)} • Ready to upload
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      if (fileInputRef.current) fileInputRef.current.value = "";
+                    }}
+                    className="px-3 py-2 rounded-xl text-xs text-text-muted hover:text-red-400 hover:bg-white/5 transition-all"
+                  >
+                    Change
+                  </button>
+                  <button
+                    type="button"
+                    disabled={uploading}
+                    onClick={() => handleUpload(selectedFile)}
+                    className="btn-gradient px-5 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-cyan/20 active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer disabled:opacity-50"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        <span>Upload Now</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-sm text-text-primary font-medium">
-                  {uploading ? "Uploading..." : "Drop files here or click to browse"}
-                </p>
-                <p className="text-xs text-text-muted mt-1">
-                  PDF, JPG, PNG, DOC — Max 10MB
-                </p>
-              </div>
-              <button
-                onClick={(e) => {
+            ) : (
+              <div
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
-                  cameraInputRef.current?.click();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) onFileChosen(file);
                 }}
-                disabled={!title.trim() || uploading}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-text-secondary hover:text-purple hover:bg-purple/10 transition-all mt-1"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-xl border-2 border-dashed border-border-glass hover:border-cyan/40 bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer p-8 sm:p-10 flex flex-col items-center gap-3 text-center"
               >
-                <Camera className="w-3.5 h-3.5" />
-                Or scan with camera
-              </button>
-            </div>
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500/20 via-cyan/20 to-purple/20 flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-cyan" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">
+                    Drop files here or click to browse
+                  </p>
+                  <p className="text-xs text-text-muted mt-1">
+                    PDF, JPG, PNG, DOC, DOCX — Max 10MB
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    cameraInputRef.current?.click();
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-text-secondary hover:text-purple hover:bg-purple/10 transition-all border border-border-glass mt-1"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  Or scan with camera
+                </button>
+              </div>
+            )}
 
             <input
               ref={fileInputRef}
               type="file"
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
               className="hidden"
-              onChange={(e) => handleUpload(e.target.files?.[0] || null)}
+              onChange={(e) => onFileChosen(e.target.files?.[0] || null)}
             />
             <input
               ref={cameraInputRef}
@@ -259,7 +369,7 @@ export default function DocumentsPage() {
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => handleUpload(e.target.files?.[0] || null)}
+              onChange={(e) => onFileChosen(e.target.files?.[0] || null)}
             />
           </motion.div>
         )}
@@ -359,10 +469,10 @@ export default function DocumentsPage() {
                 <div className="flex gap-2 pt-3 border-t border-border-glass">
                   {doc.file_url && (
                     <a
-                      href={doc.file_url}
+                      href={getFullFileUrl(doc.file_url)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs text-cyan hover:bg-cyan/10 transition-all"
+                      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs text-cyan hover:bg-cyan/10 transition-all cursor-pointer"
                     >
                       <Eye className="w-3 h-3" />
                       View
@@ -406,7 +516,7 @@ export default function DocumentsPage() {
               </div>
               {previewDoc.file_url && (
                 <iframe
-                  src={previewDoc.file_url}
+                  src={getFullFileUrl(previewDoc.file_url)}
                   className="w-full h-96 rounded-lg"
                   title="Document preview"
                 />

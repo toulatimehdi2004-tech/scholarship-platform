@@ -9,6 +9,7 @@ from django.utils import timezone
 from rest_framework import viewsets, status, generics
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
@@ -871,6 +872,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
     """
     serializer_class = DocumentSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         return Document.objects.filter(
@@ -880,7 +882,13 @@ class DocumentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         from students.models import Student
         student, _ = Student.objects.get_or_create(user=self.request.user)
-        doc = serializer.save(student=student)
+        uploaded_file = self.request.FILES.get('file')
+        title = serializer.validated_data.get('title')
+        if not title and uploaded_file:
+            title = uploaded_file.name.rsplit('.', 1)[0].replace('_', ' ').replace('-', ' ').title()
+        elif not title:
+            title = 'Uploaded Document'
+        doc = serializer.save(student=student, title=title)
         if doc.file:
             doc.file_name = doc.file.name.split('/')[-1]
             doc.file_size = doc.file.size
