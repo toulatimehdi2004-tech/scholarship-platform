@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { MapPin, GraduationCap, CheckCircle2 } from "lucide-react";
+import { MapPin, GraduationCap, CheckCircle2, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { University } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
@@ -23,44 +23,51 @@ export default function UniversityCard({
 
   const inner = (
     <>
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center flex-shrink-0">
+      <div className="flex items-start gap-3.5 mb-3.5">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan via-blue to-purple flex items-center justify-center flex-shrink-0 shadow-md shadow-cyan/20 group-hover:scale-105 transition-transform">
           <GraduationCap className="w-6 h-6 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-text-primary group-hover:text-cyan transition-colors line-clamp-1">
-            {university.name}
-          </h3>
-          <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5">
-            <MapPin className="w-3 h-3" />
-            {university.city}, {university.country}
+          <div className="flex items-center gap-1.5 flex-wrap mb-1">
+            <h3 className="text-base font-bold text-text-primary group-hover:text-cyan transition-colors line-clamp-1 tracking-tight">
+              {university.name}
+            </h3>
+            {university.is_verified && (
+              <span className="flex items-center gap-1 text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 px-2 py-0.5 rounded-full flex-shrink-0">
+                <CheckCircle2 className="w-3 h-3" />
+                {t("com.verified")}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-text-muted flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5 text-cyan flex-shrink-0" />
+            <span>{university.city || "China"}{university.country ? `, ${university.country}` : ""}</span>
           </p>
         </div>
-        {university.is_verified && (
-          <span className="flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full flex-shrink-0">
-            <CheckCircle2 className="w-3 h-3" />
-            {t("com.verified")}
-          </span>
-        )}
       </div>
+
       {university.motto && (
-        <p className="text-xs text-text-muted italic line-clamp-1 mb-3">
+        <p className="text-xs text-text-muted italic line-clamp-1 mb-3.5 pl-1 border-l-2 border-cyan/40">
           “{university.motto}”
         </p>
       )}
-      <span className="mt-auto text-sm font-medium text-cyan group-hover:text-purple transition-colors">
-        {selectable
-          ? selected
-            ? "✓ " + university.name
-            : t("exp.viewScholarships")
-          : t("uni.viewDetails") + " →"}
-      </span>
+
+      <div className="mt-auto pt-3 border-t border-border-glass flex items-center justify-between text-xs font-semibold text-cyan group-hover:text-purple transition-colors">
+        <span>
+          {selectable
+            ? selected
+              ? "✓ " + university.name
+              : t("exp.viewScholarships")
+            : t("uni.viewDetails")}
+        </span>
+        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      </div>
     </>
   );
 
   const cls =
-    "glass rounded-2xl p-6 card-hover group h-full flex flex-col cursor-pointer transition-all " +
-    (selected ? "border-cyan/50 shadow-[0_0_18px_rgba(6,182,212,0.3)]" : "");
+    "glass rounded-2xl p-6 card-hover group h-full flex flex-col cursor-pointer transition-all border border-border-glass relative overflow-hidden " +
+    (selected ? "border-cyan shadow-[0_0_24px_rgba(6,182,212,0.35)]" : "");
 
   if (selectable) {
     return (

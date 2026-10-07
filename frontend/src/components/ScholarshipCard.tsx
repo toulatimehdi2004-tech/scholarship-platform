@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, Clock, GraduationCap, BookOpen, Scale } from "lucide-react";
+import { MapPin, Clock, GraduationCap, BookOpen, Scale, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import type { Scholarship } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
@@ -30,11 +30,11 @@ export default function ScholarshipCard({
   }
 
   const typeColors: Record<string, string> = {
-    full: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    partial: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    living: "bg-blue/20 text-blue border-blue/30",
-    research: "bg-purple/20 text-purple border-purple/30",
-    tuition: "bg-cyan/20 text-cyan border-cyan/30",
+    full: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-sm shadow-emerald-500/10",
+    partial: "bg-cyan/15 text-cyan border-cyan/30 shadow-sm shadow-cyan/10",
+    living: "bg-blue/15 text-blue border-blue/30",
+    research: "bg-purple/15 text-purple border-purple/30",
+    tuition: "bg-amber-500/15 text-amber-400 border-amber-500/30",
   };
 
   const typeLabels: Record<string, string> = {
@@ -56,14 +56,14 @@ export default function ScholarshipCard({
   };
 
   const levelColors: Record<string, string> = {
-    bachelor: "bg-blue/20 text-blue",
-    master: "bg-purple/20 text-purple",
-    phd: "bg-cyan/20 text-cyan",
-    other: "bg-amber-500/20 text-amber-400",
+    bachelor: "bg-blue/15 text-blue border border-blue/25",
+    master: "bg-purple/15 text-purple border border-purple/25",
+    phd: "bg-cyan/15 text-cyan border border-cyan/25",
+    other: "bg-amber-500/15 text-amber-400 border border-amber-500/25",
   };
 
   const badgeClass =
-    typeColors[scholarship.type] || "bg-cyan/20 text-cyan border-cyan/30";
+    typeColors[scholarship.type] || "bg-cyan/15 text-cyan border-cyan/30";
 
   const deadline = scholarship.application_deadline
     ? new Date(scholarship.application_deadline).toLocaleDateString("en-US", {
@@ -76,7 +76,7 @@ export default function ScholarshipCard({
   const levelLabel =
     levelLabels[scholarship.level] || scholarship.level || "All Levels";
   const levelColor =
-    levelColors[scholarship.level] || "bg-white/10 text-text-muted";
+    levelColors[scholarship.level] || "bg-white/10 text-text-muted border border-white/10";
 
   const isLanguage = scholarship.level === "other";
 
@@ -85,40 +85,45 @@ export default function ScholarshipCard({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: index * 0.05 }}
-        className="glass rounded-2xl p-6 card-hover cursor-pointer group h-full"
+        transition={{ duration: 0.4, delay: index * 0.04 }}
+        className="glass rounded-2xl p-6 card-hover cursor-pointer group h-full flex flex-col border border-border-glass relative overflow-hidden"
         onClick={() => setShowModal(true)}
       >
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-3.5">
           <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold border ${badgeClass}`}
+            className={`px-3 py-1 rounded-full text-xs font-bold border ${badgeClass} uppercase tracking-wider`}
           >
             {typeLabels[scholarship.type] || scholarship.type}
           </span>
-          <span className="text-xs text-text-muted flex items-center gap-1">
-            <Clock className="w-3 h-3" />
+          <span className="text-xs text-text-muted flex items-center gap-1 font-medium">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
             {deadline}
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-3 text-sm text-text-muted">
-          <span className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-2 mb-2 text-xs text-text-secondary font-medium">
+          <span className="flex items-center gap-1.5">
             {isLanguage ? (
-              <BookOpen className="w-4 h-4 text-amber-400" />
+              <BookOpen className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
             ) : (
-              <GraduationCap className="w-4 h-4 text-purple" />
+              <GraduationCap className="w-3.5 h-3.5 text-cyan flex-shrink-0" />
             )}
-            {scholarship.university_name || "Unknown University"}
+            <span className="line-clamp-1">{scholarship.university_name || "Unknown University"}</span>
           </span>
+          {scholarship.university_city && (
+            <span className="flex items-center gap-1 text-text-muted">
+              • <MapPin className="w-3 h-3 text-cyan" /> {scholarship.university_city}
+            </span>
+          )}
         </div>
 
-        <h3 className="text-base font-bold text-text-primary group-hover:text-cyan transition-colors leading-snug line-clamp-2 mb-4">
+        <h3 className="text-base font-bold text-text-primary group-hover:text-cyan transition-colors leading-snug line-clamp-2 mb-4 tracking-tight">
           {scholarship.title}
         </h3>
 
-        <div className="flex items-center justify-between pt-4 border-t border-border-glass mt-auto">
+        <div className="flex items-center justify-between pt-3.5 border-t border-border-glass mt-auto">
           <span
-            className={`text-xs font-medium px-2 py-1 rounded ${levelColor}`}
+            className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${levelColor}`}
           >
             {levelLabel}
           </span>
@@ -134,12 +139,15 @@ export default function ScholarshipCard({
               className={
                 "p-1.5 rounded-lg transition-all " +
                 (inCompare
-                  ? "text-cyan bg-cyan/15"
+                  ? "text-cyan bg-cyan/15 ring-1 ring-cyan/30"
                   : "text-text-muted hover:text-cyan hover:bg-white/5")
               }
             >
               <Scale className="w-4 h-4" />
             </button>
+            <span className="p-1 rounded-lg text-text-muted group-hover:text-cyan group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all">
+              <ArrowUpRight className="w-4 h-4" />
+            </span>
           </div>
         </div>
       </motion.div>

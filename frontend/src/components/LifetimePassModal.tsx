@@ -78,7 +78,7 @@ export default function LifetimePassModal({
 
           {/* Badge */}
           <div className="text-center mb-6">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-3">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-3 animate-shimmer">
               <Crown className="w-3.5 h-3.5 text-amber-400" />
               One-Time Payment • No Subscriptions
             </span>

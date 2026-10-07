@@ -1,7 +1,22 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, Sparkles, Target, Bell, ArrowRight, BadgeCheck, Scale, PenLine, Plane } from "lucide-react";
+import {
+  Search,
+  Sparkles,
+  Target,
+  Bell,
+  ArrowRight,
+  BadgeCheck,
+  Scale,
+  PenLine,
+  Plane,
+  MapPin,
+  GraduationCap,
+  Building2,
+  CheckCircle2,
+  Flame,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
@@ -76,7 +91,7 @@ function AnimatedCounter({ target, suffix }: { target: number; suffix: string })
   }, [inView, target]);
 
   return (
-    <span ref={ref} className="text-4xl sm:text-5xl font-bold gradient-text">
+    <span ref={ref} className="text-4xl sm:text-5xl font-black gradient-text tracking-tight">
       {count}
       {suffix}
     </span>
@@ -134,15 +149,19 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <section className="relative min-h-[90vh] flex items-center justify-center px-4 bg-grid">
+      <section className="relative min-h-[92vh] flex items-center justify-center px-4 bg-grid py-12">
         <div className="max-w-5xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <span className="inline-block px-4 py-2 rounded-full glass text-sm text-cyan mb-6 font-medium">
-              AI-Powered Scholarship Platform
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs sm:text-sm text-cyan font-bold border border-cyan/30 shadow-lg shadow-cyan/15 animate-shimmer mb-6">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan" />
+              </span>
+              <span>Next-Gen AI Matching • 102 Universities Verified</span>
             </span>
           </motion.div>
 
@@ -150,45 +169,69 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6"
+            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight mb-6 tracking-tight"
           >
             <span className="text-text-primary">Discover Your Future</span>
             <br />
-            <span className="gradient-text">in China</span>
+            <span className="gradient-text drop-shadow-[0_0_40px_rgba(6,182,212,0.35)]">
+              in China
+            </span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto mb-10"
+            className="text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             Find, apply, and track scholarships at top Chinese universities.
-            Powered by AI to match you with the perfect opportunity.
+            Powered by AI to match you with the perfect full and partial funding opportunity.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="max-w-xl mx-auto mb-12"
+            className="max-w-xl mx-auto mb-8"
           >
-            <div className="glass rounded-2xl p-2 flex items-center gap-2 glow-cyan-sm">
-              <Search className="w-5 h-5 text-text-muted ml-3" />
+            <div className="glass rounded-2xl p-2 flex items-center gap-2 glow-cyan-sm border border-cyan/30 focus-within:border-cyan focus-within:shadow-[0_0_35px_rgba(6,182,212,0.35)] transition-all">
+              <Search className="w-5 h-5 text-cyan ml-3 flex-shrink-0" />
               <input
                 type="text"
                 placeholder="Search scholarships by name, university, or field..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && doSearch()}
-                className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted outline-none py-3 px-2"
+                className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted outline-none py-3 px-2 text-sm sm:text-base"
               />
               <button
                 onClick={doSearch}
-                className="btn-gradient px-6 py-3 rounded-xl text-sm"
+                className="btn-gradient px-6 py-3 rounded-xl text-sm font-bold flex-shrink-0 cursor-pointer"
               >
                 <span>Search</span>
               </button>
+            </div>
+
+            {/* Quick interactive search suggestions */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs text-text-muted">
+              <span className="flex items-center gap-1 font-semibold text-text-secondary">
+                <Flame className="w-3.5 h-3.5 text-amber-400" /> Hot:
+              </span>
+              {["Chengdu", "Beijing", "Guangzhou", "Full Scholarship", "Computer Science", "Medicine"].map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => {
+                    setQuery(tag);
+                    try {
+                      sessionStorage.setItem("home-query", tag);
+                    } catch {}
+                    router.push("/scholarships");
+                  }}
+                  className="px-2.5 py-1 rounded-lg glass text-text-secondary hover:text-cyan hover:border-cyan/40 transition-all cursor-pointer"
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
           </motion.div>
 
@@ -200,7 +243,7 @@ export default function HomePage() {
           >
             <button
               onClick={handleDiscover}
-              className="btn-gradient px-8 py-4 rounded-xl text-base flex items-center gap-2 cursor-pointer shadow-lg shadow-cyan/20"
+              className="btn-gradient px-8 py-4 rounded-xl text-base flex items-center gap-2 cursor-pointer shadow-lg shadow-cyan/20 transform hover:scale-105 transition-transform"
             >
               <span>Discover Scholarships</span>
               <ArrowRight className="w-4 h-4 relative z-10" />
@@ -216,9 +259,55 @@ export default function HomePage() {
               Try AI Assistant
             </button>
           </motion.div>
+
+          {/* Top Cities Showcase Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.2 }}
+            className="mt-14 pt-8 border-t border-border-glass max-w-4xl mx-auto"
+          >
+            <div className="flex items-center justify-between mb-4 px-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-cyan" /> Explore Academic Hubs
+              </span>
+              <Link
+                href="/universities"
+                className="text-xs font-semibold text-cyan hover:text-purple transition-colors flex items-center gap-1"
+              >
+                View all 24 cities →
+              </Link>
+            </div>
+            <div className="flex items-center justify-center flex-wrap gap-2.5">
+              {[
+                { city: "Beijing", count: "18 Unis" },
+                { city: "Guangzhou", count: "10 Unis" },
+                { city: "Chengdu", count: "9 Unis" },
+                { city: "Shanghai", count: "8 Unis" },
+                { city: "Wuhan", count: "8 Unis" },
+                { city: "Nanjing", count: "8 Unis" },
+                { city: "Xi'an", count: "5 Unis" },
+                { city: "Shenzhen", count: "3 Unis" },
+              ].map((c) => (
+                <button
+                  key={c.city}
+                  onClick={() => router.push(`/scholarships/?city=${c.city}`)}
+                  className="px-3.5 py-2 rounded-xl glass hover:bg-white/10 hover:border-cyan/40 transition-all flex items-center gap-2 group cursor-pointer"
+                >
+                  <span className="text-xs font-bold text-text-primary group-hover:text-cyan transition-colors">
+                    {c.city}
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan/15 text-cyan font-semibold">
+                    {c.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </section>
 
+      {/* Stats Counter Section */}
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
@@ -229,18 +318,31 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="text-center glass rounded-2xl p-8 card-hover"
+                className="text-center glass rounded-3xl p-8 card-hover relative overflow-hidden group"
               >
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan/20 to-purple/20 border border-cyan/30 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-cyan/10">
+                  {i === 0 ? (
+                    <GraduationCap className="w-6 h-6 text-cyan" />
+                  ) : i === 1 ? (
+                    <Building2 className="w-6 h-6 text-purple" />
+                  ) : (
+                    <MapPin className="w-6 h-6 text-emerald-400" />
+                  )}
+                </div>
                 <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                <p className="text-text-secondary mt-2 text-sm font-medium">
+                <p className="text-text-secondary mt-2 text-sm font-semibold">
                   {stat.label}
                 </p>
+                <div className="mt-3 inline-flex items-center gap-1 text-[11px] text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                  <CheckCircle2 className="w-3 h-3" /> 100% Live Database
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Features Section */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -250,10 +352,10 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
               Everything You Need
             </h2>
-            <p className="text-text-secondary max-w-xl mx-auto">
+            <p className="text-text-secondary max-w-xl mx-auto text-base">
               From discovery to application, we provide the tools to make your
               scholarship journey seamless.
             </p>
@@ -267,14 +369,14 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="glass rounded-2xl p-8 card-hover group"
+                className="glass rounded-3xl p-8 card-hover group"
               >
                 <div
-                  className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:${feature.glowClass} transition-all duration-300`}
+                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:${feature.glowClass} transition-all duration-300 shadow-lg`}
                 >
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-text-primary mb-3">
+                <h3 className="text-xl font-bold text-text-primary mb-3">
                   {feature.title}
                 </h3>
                 <p className="text-text-secondary text-sm leading-relaxed">
@@ -286,6 +388,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Student Tools Section */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -295,7 +398,7 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
               Free <span className="gradient-text">Student Tools</span>
             </h2>
             <p className="text-text-secondary max-w-xl mx-auto">
@@ -343,14 +446,14 @@ export default function HomePage() {
               >
                 <Link
                   href={tool.href}
-                  className="glass rounded-2xl p-6 card-hover group block h-full"
+                  className="glass rounded-2xl p-6 card-hover group block h-full border border-border-glass"
                 >
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4`}
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4 shadow-md`}
                   >
                     <tool.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2 group-hover:text-cyan transition-colors">
+                  <h3 className="text-lg font-bold text-text-primary mb-2 group-hover:text-cyan transition-colors">
                     {tool.title}
                   </h3>
                   <p className="text-text-secondary text-sm leading-relaxed">
@@ -363,19 +466,20 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* CTA Section */}
       <section className="py-20 px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto text-center glass rounded-3xl p-12 sm:p-16 glow-purple"
+          className="max-w-4xl mx-auto text-center glass rounded-3xl p-12 sm:p-16 glow-purple border border-purple/30 relative overflow-hidden"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-text-secondary mb-8 max-w-lg mx-auto">
-            Join thousands of students who have found their perfect scholarship
+          <p className="text-text-secondary mb-8 max-w-lg mx-auto text-base">
+            Join thousands of students who have found their perfect full and partial scholarship
             in China.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -384,7 +488,7 @@ export default function HomePage() {
                 if (!getToken()) setShowAuthGate(true);
                 else router.push("/scholarships");
               }}
-              className="btn-gradient px-8 py-4 rounded-xl text-base cursor-pointer shadow-lg shadow-purple/20"
+              className="btn-gradient px-8 py-4 rounded-xl text-base cursor-pointer shadow-lg shadow-purple/20 transform hover:scale-105 transition-transform"
             >
               <span>Create Free Account</span>
             </button>
@@ -404,6 +508,9 @@ export default function HomePage() {
           <div className="flex gap-6">
             <Link href="/scholarships" className="hover:text-cyan transition-colors">
               Scholarships
+            </Link>
+            <Link href="/universities" className="hover:text-cyan transition-colors">
+              Universities
             </Link>
             <Link href="/ai-chat" className="hover:text-cyan transition-colors">
               AI Chat
