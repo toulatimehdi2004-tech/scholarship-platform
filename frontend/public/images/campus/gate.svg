@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="60%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="gateGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <linearGradient id="roofGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#064e3b"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#skyGrad)"/>
+  <!-- Stars / Particles -->
+  <circle cx="150" cy="80" r="1.5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="320" cy="50" r="2" fill="#ffffff" opacity="0.8"/>
+  <circle cx="680" cy="90" r="1.5" fill="#ffffff" opacity="0.5"/>
+  <circle cx="520" cy="70" r="2" fill="#38bdf8" opacity="0.7"/>
+  <!-- Mountain silhouette -->
+  <path d="M0 340 L160 270 L340 330 L520 250 L680 320 L800 280 L800 500 L0 500 Z" fill="#0b1329" opacity="0.7"/>
+  <!-- Ground / Plaza -->
+  <path d="M0 380 L800 380 L800 500 L0 500 Z" fill="#0f172a"/>
+  <!-- Plaza Tiles / Lighting -->
+  <polygon points="100,500 700,500 550,380 250,380" fill="#1e293b" opacity="0.5"/>
+  <!-- University Gate Arch Columns -->
+  <!-- Left Pillar -->
+  <rect x="230" y="240" width="38" height="150" rx="4" fill="url(#gateGrad)"/>
+  <rect x="220" y="380" width="58" height="15" rx="3" fill="#cbd5e1"/>
+  <rect x="225" y="232" width="48" height="12" rx="2" fill="url(#goldGrad)"/>
+  <!-- Right Pillar -->
+  <rect x="532" y="240" width="38" height="150" rx="4" fill="url(#gateGrad)"/>
+  <rect x="522" y="380" width="58" height="15" rx="3" fill="#cbd5e1"/>
+  <rect x="527" y="232" width="48" height="12" rx="2" fill="url(#goldGrad)"/>
+  <!-- Inner Left Pillar -->
+  <rect x="330" y="260" width="28" height="130" rx="3" fill="url(#gateGrad)"/>
+  <rect x="325" y="252" width="38" height="10" rx="2" fill="url(#goldGrad)"/>
+  <!-- Inner Right Pillar -->
+  <rect x="442" y="260" width="28" height="130" rx="3" fill="url(#gateGrad)"/>
+  <rect x="437" y="252" width="38" height="10" rx="2" fill="url(#goldGrad)"/>
+  <!-- Central Arch Beam -->
+  <rect x="210" y="215" width="380" height="24" rx="4" fill="url(#gateGrad)"/>
+  <!-- Traditional Curved Roof / Eaves -->
+  <path d="M180 220 Q400 170 620 220 L600 190 Q400 150 200 190 Z" fill="url(#roofGrad)"/>
+  <path d="M230 190 Q400 145 570 190 L550 165 Q400 130 250 165 Z" fill="url(#roofGrad)"/>
+  <!-- Central Plaque -->
+  <rect x="350" y="185" width="100" height="26" rx="4" fill="#0f172a" stroke="url(#goldGrad)" stroke-width="2"/>
+  <text x="400" y="203" font-family="sans-serif" font-size="12" font-weight="bold" fill="#f59e0b" text-anchor="middle">UNIVERSITY</text>
+  <!-- Foreground Trees -->
+  <ellipse cx="140" cy="380" rx="45" ry="70" fill="#065f46" opacity="0.8"/>
+  <ellipse cx="660" cy="380" rx="45" ry="70" fill="#065f46" opacity="0.8"/>
+  <!-- Atmosphere glow -->
+  <circle cx="400" cy="220" r="160" fill="#059669" opacity="0.12"/>
+</svg>

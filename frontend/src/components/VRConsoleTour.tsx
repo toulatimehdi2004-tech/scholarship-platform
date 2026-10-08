@@ -22,6 +22,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import type { Landmark } from "./CampusTour";
+import { getCampusImageUrl, getCampusFallback } from "@/lib/campusImages";
 
 interface VRConsoleTourProps {
   universityName: string;
@@ -258,15 +259,21 @@ export default function VRConsoleTour({
       >
         {current?.image_url ? (
           <img
-            src={current.image_url}
+            src={getCampusImageUrl(current.image_url, current.category, currentIndex)}
             alt={current.name}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = getCampusFallback(current.category, currentIndex);
+            }}
             className="w-[140%] h-[140%] max-w-none object-cover transition-opacity duration-300"
             draggable={false}
           />
         ) : (
-          <div className="w-full h-full bg-slate-900 flex items-center justify-center text-text-muted">
-            No image available
-          </div>
+          <img
+            src={getCampusFallback(current?.category, currentIndex)}
+            alt={current?.name || "Campus Landmark"}
+            className="w-[140%] h-[140%] max-w-none object-cover transition-opacity duration-300"
+            draggable={false}
+          />
         )}
       </div>
 

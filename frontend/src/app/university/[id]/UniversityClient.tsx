@@ -21,6 +21,7 @@ import AutoText from "@/components/AutoText";
 import SmartBack from "@/components/SmartBack";
 import { fetchApi, type Scholarship, getToken } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import { getUniversityCoverImage } from "@/lib/campusImages";
 
 interface UniversityDetail {
   id: number;
@@ -119,17 +120,33 @@ export default function UniversityClient() {
           <SmartBack fallback="/universities" label={t("ud.back")} />
         </motion.div>
 
-        {/* University Header */}
+        {/* University Header with Campus Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="glass rounded-3xl p-8 sm:p-10 mb-8"
+          className="glass rounded-3xl overflow-hidden mb-8 border border-border-glass shadow-xl"
         >
-          <div className="flex flex-col sm:flex-row items-start gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center flex-shrink-0">
-              <GraduationCap className="w-10 h-10 text-white" />
+          {/* Panoramic Campus Cover Header */}
+          <div className="relative h-44 sm:h-56 w-full overflow-hidden bg-slate-900">
+            <img
+              src={getUniversityCoverImage(university.id)}
+              alt={university.name}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-950/80 text-cyan border border-cyan/40 backdrop-blur-md shadow-lg flex items-center gap-1.5">
+                🥽 3D VR Console Available
+              </span>
             </div>
+          </div>
+
+          <div className="p-6 sm:p-8 -mt-10 relative z-10">
+            <div className="flex flex-col sm:flex-row items-start gap-5">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center flex-shrink-0 shadow-xl border-2 border-white/20">
+                <GraduationCap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+              </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
@@ -173,6 +190,7 @@ export default function UniversityClient() {
                 </p>
               )}
             </div>
+          </div>
           </div>
         </motion.div>
 

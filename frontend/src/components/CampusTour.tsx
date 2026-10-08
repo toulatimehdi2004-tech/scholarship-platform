@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import VRConsoleTour from "./VRConsoleTour";
+import { getCampusImageUrl, getCampusFallback } from "@/lib/campusImages";
 
 export interface Landmark {
   id: number;
@@ -27,6 +28,41 @@ export interface Landmark {
   category?: string;
   order: number;
 }
+
+const DEFAULT_LANDMARKS: Landmark[] = [
+  {
+    id: 9901,
+    name: "Main Campus Grand Gate (正门牌坊)",
+    description: "Ceremonial arch gate welcoming international and domestic scholars with iconic campus calligraphy.",
+    image_url: "/images/campus/gate-1.jpg",
+    category: "gate",
+    order: 1,
+  },
+  {
+    id: 9902,
+    name: "Central University Library (中央图书馆)",
+    description: "Multi-floor research library with thousands of academic collections, digital resources and study commons.",
+    image_url: "/images/campus/library-1.jpg",
+    category: "academic",
+    order: 2,
+  },
+  {
+    id: 9903,
+    name: "Scenic Lotus Lake & Garden Promenade (校园湖景)",
+    description: "Serene campus water garden with lotus flowers, weeping willows, and quiet stone pathways.",
+    image_url: "/images/campus/lake-1.jpg",
+    category: "nature",
+    order: 3,
+  },
+  {
+    id: 9904,
+    name: "Science & Technology Innovation Complex (科技实验大楼)",
+    description: "State-of-the-art engineering laboratories and modern international research centres.",
+    image_url: "/images/campus/tower-1.jpg",
+    category: "academic",
+    order: 4,
+  },
+];
 
 const CATEGORY_LABELS: Record<string, string> = {
   academic: "tour.academic",
@@ -56,7 +92,11 @@ export default function CampusTour({
   landmarks,
 }: CampusTourProps) {
   const { t } = useLang();
-  const withImages = landmarks.filter((l) => l.image_url);
+  const effectiveLandmarks = (landmarks && landmarks.length > 0) ? landmarks : DEFAULT_LANDMARKS;
+  const withImages = effectiveLandmarks.map((l, i) => ({
+    ...l,
+    image_url: getCampusImageUrl(l.image_url, l.category, i),
+  }));
   const availableCats = Array.from(
     new Set(withImages.map((l) => l.category || "life"))
   );
@@ -301,29 +341,22 @@ export default function CampusTour({
                   className="relative aspect-[16/9] sm:aspect-[21/9] w-full"
                   style={{ transformStyle: "preserve-3d" }}
                 >
-                  {!imgError && current.image_url ? (
-                    <AnimatePresence mode="wait">
-                      <motion.img
-                        key={current.id}
-                        src={current.image_url}
-                        alt={current.name}
-                        onError={() => setImgError(true)}
-                        initial={{ opacity: 0, scale: 1.05 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </AnimatePresence>
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#0a1628] via-purple/10 to-cyan/10 flex flex-col items-center justify-center gap-3">
-                      <ImageOff className="w-10 h-10 text-text-muted" />
-                      <p className="text-text-secondary font-medium">
-                        {current.name}
-                      </p>
-                    </div>
-                  )}
+                  <AnimatePresence mode="wait">
+                    <motion.img
+                      key={current.id}
+                      src={current.image_url || getCampusFallback(current.category, index)}
+                      alt={current.name}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getCampusFallback(current.category, index + 1);
+                      }}
+                      initial={{ opacity: 0, scale: 1.05 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </AnimatePresence>
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
@@ -403,8 +436,11 @@ export default function CampusTour({
                       }
                     >
                       <img
-                        src={lm.image_url || ""}
+                        src={lm.image_url || getCampusFallback(lm.category, i)}
                         alt={lm.name}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = getCampusFallback(lm.category, i);
+                        }}
                         className="w-full h-full object-cover"
                         loading="lazy"
                       />
@@ -508,8 +544,11 @@ export default function CampusTour({
 
             <motion.img
               key={current.id}
-              src={current.image_url || ""}
+              src={current.image_url || getCampusFallback(current.category, index)}
               alt={current.name}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getCampusFallback(current.category, index);
+              }}
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}

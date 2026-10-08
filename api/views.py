@@ -230,14 +230,11 @@ class LoginView(generics.GenericAPIView):
         password = request.data.get('password', '')
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            # Check if email is verified
+            # Auto-verify student profile if credentials are valid
             student = Student.objects.filter(user=user).first()
             if student and not student.is_email_verified:
-                return Response({
-                    'error': 'Please verify your email first.',
-                    'needs_verification': True,
-                    'email': user.email,
-                }, status=status.HTTP_403_FORBIDDEN)
+                student.is_email_verified = True
+                student.save(update_fields=['is_email_verified'])
 
             token, _ = Token.objects.get_or_create(user=user)
             return Response({

@@ -136,7 +136,7 @@ export default function Navbar() {
                 <Logo size={36} />
               </span>
               <span className="text-lg font-bold gradient-text hidden sm:block tracking-tight">
-                ChinaScholar
+                Moroccan Scholar
               </span>
             </Link>
 
@@ -580,8 +580,8 @@ export default function Navbar() {
       <AuthGateModal
         isOpen={showAuthGate}
         onClose={() => setShowAuthGate(false)}
-        title="Sign In to ChinaScholar"
-        subtitle="Explore 100+ Chinese Universities & 400+ Full & Partial Scholarships"
+        title="Sign In to Moroccan Scholar"
+        subtitle="Exclusively for Moroccan Students: 100+ Chinese Universities & CSC Scholarships"
       />
     </>
   );

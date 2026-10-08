@@ -280,6 +280,33 @@ export default function AuthGateModal({
             </button>
           </div>
 
+          {/* Quick Demo Credentials Fill for Testing */}
+          {tab === 'login' && (
+            <div className="mb-4 p-2.5 rounded-xl bg-white/5 border border-emerald-500/20 flex items-center justify-between gap-2 text-xs">
+              <span className="text-white/70 text-[11px]">Testing platform?</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (role === 'university') {
+                    setUsername('admission_officer');
+                    setPassword('admissions123456');
+                  } else if (role === 'provider') {
+                    setUsername('moroccan_translator');
+                    setPassword('provider123456');
+                  } else {
+                    setUsername('yassine_benali');
+                    setPassword('student123456');
+                  }
+                  setError('');
+                }}
+                className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-bold transition-all text-xs flex items-center gap-1 cursor-pointer active:scale-95"
+              >
+                <span>⚡ Quick Fill Demo:</span>
+                <span className="underline">{role === 'university' ? 'PKU Admissions' : role === 'provider' ? 'Sworn Translator' : 'Yassine (Casablanca)'}</span>
+              </button>
+            </div>
+          )}
+
           {/* Error Banner */}
           {error && (
             <div className="mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-xs text-red-300 text-center font-medium">
