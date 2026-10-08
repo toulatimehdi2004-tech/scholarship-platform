@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { PenLine, Download, Copy, Check, FileText } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
-import { fetchApi, getToken } from "@/lib/api";
+import { fetchApi, getToken, getApiBaseUrl } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
 export default function SopPage() {
@@ -50,10 +50,11 @@ export default function SopPage() {
 
   async function download(fmt: "pdf" | "docx") {
     const token = getToken();
-    const res = await fetch("http://localhost:8000/api/sop/export/", {
+    const res = await fetch(`${getApiBaseUrl()}/sop/export/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
         ...(token ? { Authorization: "Token " + token } : {}),
       },
       body: JSON.stringify({ letter, format: fmt, full_name: fullName }),

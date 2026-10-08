@@ -90,6 +90,7 @@ export default function UniversityPortalPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showAuthGate, setShowAuthGate] = useState(false);
+  const [actionToast, setActionToast] = useState<string | null>(null);
 
   // Load universities and applicants on mount with auth enforcement
   useEffect(() => {
@@ -166,7 +167,7 @@ export default function UniversityPortalPage() {
   // Action: Update applicant status
   async function handleUpdateApplicantStatus(appId: number, newStep: string) {
     try {
-      const res = await fetchApi<Applicant>(`/applications/${appId}/`, {
+      await fetchApi<Applicant>(`/applications/${appId}/`, {
         method: "PATCH",
         body: JSON.stringify({ current_step: newStep }),
       });
@@ -178,6 +179,15 @@ export default function UniversityPortalPage() {
       if (selectedApplicant?.id === appId) {
         setSelectedApplicant((prev) => (prev ? { ...prev, current_step: newStep } : null));
       }
+
+      const msg =
+        newStep === "accepted"
+          ? "✓ Candidate Admitted to Program!"
+          : newStep === "rejected"
+          ? "Candidate Marked as Declined"
+          : "Candidate Moved to Evaluation Review";
+      setActionToast(msg);
+      setTimeout(() => setActionToast(null), 3000);
     } catch (err) {
       console.error("Failed to update applicant:", err);
     }
@@ -977,11 +987,26 @@ export default function UniversityPortalPage() {
         )}
       </AnimatePresence>
 
-      {/* Imposed Auth Gate for University Admissions */}
+      {/* Action Toast Feedback */}
+      <AnimatePresence>
+        {actionToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl bg-slate-900 border border-emerald-500/50 text-emerald-300 font-bold text-xs shadow-2xl shadow-emerald-500/30 flex items-center gap-2"
+          >
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>{actionToast}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Auth Gate for University Admissions */}
       <AuthGateModal
-        isOpen={showAuthGate}
-        onClose={() => {}}
-        canClose={false}
+        isOpen={showAuthGate && !getToken()}
+        onClose={() => setShowAuthGate(false)}
+        canClose={true}
         role="university"
         onSuccess={() => {
           setShowAuthGate(false);

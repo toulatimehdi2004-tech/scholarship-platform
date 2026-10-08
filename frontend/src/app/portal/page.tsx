@@ -24,7 +24,7 @@ export default function PortalPage() {
     } else if (role === "provider") {
       router.push("/provider-portal");
     } else {
-      router.push("/");
+      router.push("/scholarships");
     }
   }
 

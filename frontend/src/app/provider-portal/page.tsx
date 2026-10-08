@@ -69,6 +69,39 @@ export default function ProviderPortalPage() {
   const [deliveryNote, setDeliveryNote] = useState("");
   const [deliveredSuccess, setDeliveredSuccess] = useState(false);
   const [showAuthGate, setShowAuthGate] = useState(false);
+  const [uploadedCertFile, setUploadedCertFile] = useState<string | null>(null);
+  const [editingService, setEditingService] = useState<{ name: string; price: string } | null>(null);
+  const [editPriceInput, setEditPriceInput] = useState("");
+  const [servicesList, setServicesList] = useState([
+    {
+      name: "Academic Transcript Sworn Translation (Arabic/FR to Chinese)",
+      price: "$35.00",
+      turnaround: "24-48 Hours",
+      active: true,
+      desc: "Certified sworn translation of university semester grades with official red seal stamp.",
+    },
+    {
+      name: "Degree & Diploma Embassy Legalization Prep",
+      price: "$65.00",
+      turnaround: "3-4 Days",
+      active: true,
+      desc: "Pre-check, sworn notarization and authentication formatting for Chinese Embassy visa submission.",
+    },
+    {
+      name: "Motivation Letter & Recommendation Translation (Chinese)",
+      price: "$25.00",
+      turnaround: "24 Hours",
+      active: true,
+      desc: "Professional academic translation of recommendation letters and personal statements into Mandarin.",
+    },
+    {
+      name: "Medical Examination Foreigner Form Translation",
+      price: "$20.00",
+      turnaround: "12-24 Hours",
+      active: true,
+      desc: "Bilingual English-Chinese translation of official physical examination reports.",
+    },
+  ]);
 
   useEffect(() => {
     if (!getToken()) {
@@ -573,13 +606,25 @@ export default function ProviderPortalPage() {
                   <p className="text-[11px] text-text-muted mt-0.5">
                     Drag & drop stamped Chinese translation with red seal
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => alert("Select certified translation PDF file")}
-                    className="mt-3 px-4 py-2 rounded-xl text-xs bg-purple/20 hover:bg-purple/30 text-purple font-bold transition-all"
+                  <input
+                    type="file"
+                    id="cert-file-picker"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) setUploadedCertFile(e.target.files[0].name);
+                    }}
+                  />
+                  <label
+                    htmlFor="cert-file-picker"
+                    className="mt-3 inline-block px-4 py-2 rounded-xl text-xs bg-purple/20 hover:bg-purple/30 text-purple font-bold transition-all cursor-pointer"
                   >
-                    Select File
-                  </button>
+                    {uploadedCertFile ? `✓ ${uploadedCertFile}` : "Select File"}
+                  </label>
+                  {uploadedCertFile && (
+                    <p className="text-[11px] text-emerald-400 font-bold mt-2">
+                      ✓ File attached: {uploadedCertFile}
+                    </p>
+                  )}
                 </div>
 
                 <button
@@ -608,36 +653,7 @@ export default function ProviderPortalPage() {
             </p>
 
             <div className="space-y-4">
-              {[
-                {
-                  name: "Academic Transcript Sworn Translation (Arabic/FR to Chinese)",
-                  price: "$35.00",
-                  turnaround: "24-48 Hours",
-                  active: true,
-                  desc: "Certified sworn translation of university semester grades with official red seal stamp.",
-                },
-                {
-                  name: "Degree & Diploma Embassy Legalization Prep",
-                  price: "$65.00",
-                  turnaround: "3-4 Days",
-                  active: true,
-                  desc: "Pre-check, sworn notarization and authentication formatting for Chinese Embassy visa submission.",
-                },
-                {
-                  name: "Motivation Letter & Recommendation Translation (Chinese)",
-                  price: "$25.00",
-                  turnaround: "24 Hours",
-                  active: true,
-                  desc: "Professional academic translation of recommendation letters and personal statements into Mandarin.",
-                },
-                {
-                  name: "Medical Examination Foreigner Form Translation",
-                  price: "$20.00",
-                  turnaround: "12-24 Hours",
-                  active: true,
-                  desc: "Bilingual English-Chinese translation of official physical examination reports.",
-                },
-              ].map((srv, idx) => (
+              {servicesList.map((srv, idx) => (
                 <div
                   key={idx}
                   className="glass rounded-2xl p-5 border border-border-glass flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -657,8 +673,11 @@ export default function ProviderPortalPage() {
                     <span className="text-base font-extrabold text-emerald-400">{srv.price}</span>
                     <button
                       type="button"
-                      onClick={() => alert(`Edit rates for: ${srv.name}`)}
-                      className="px-3 py-1.5 rounded-xl text-xs glass hover:bg-white/10 text-cyan transition-all"
+                      onClick={() => {
+                        setEditingService(srv);
+                        setEditPriceInput(srv.price);
+                      }}
+                      className="px-3 py-1.5 rounded-xl text-xs glass hover:bg-white/10 text-cyan transition-all cursor-pointer"
                     >
                       Edit Rate
                     </button>
@@ -735,11 +754,72 @@ export default function ProviderPortalPage() {
         )}
       </AnimatePresence>
 
-      {/* Imposed Auth Gate for Service Providers */}
+      {/* ── EDIT RATE MODAL ── */}
+      <AnimatePresence>
+        {editingService && (
+          <div
+            className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={() => setEditingService(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass rounded-3xl p-6 max-w-sm w-full border border-cyan/40 shadow-2xl text-left"
+            >
+              <h3 className="text-base font-bold text-text-primary mb-1">
+                Edit Service Rate
+              </h3>
+              <p className="text-xs text-text-muted mb-4 line-clamp-1">
+                {editingService.name}
+              </p>
+
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-text-secondary mb-1 block">
+                  New Rate (e.g. $40.00):
+                </label>
+                <input
+                  type="text"
+                  value={editPriceInput}
+                  onChange={(e) => setEditPriceInput(e.target.value)}
+                  className="w-full glass rounded-xl px-3 py-2 text-sm font-bold text-emerald-400 outline-none border border-border-glass"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingService(null)}
+                  className="px-3 py-1.5 rounded-xl text-xs text-text-muted hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServicesList((prev) =>
+                      prev.map((s) =>
+                        s.name === editingService.name ? { ...s, price: editPriceInput } : s
+                      )
+                    );
+                    setEditingService(null);
+                  }}
+                  className="btn-gradient px-4 py-2 rounded-xl text-xs font-bold text-text-primary shadow-md"
+                >
+                  Save Rate
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Auth Gate for Service Providers */}
       <AuthGateModal
-        isOpen={showAuthGate}
-        onClose={() => {}}
-        canClose={false}
+        isOpen={showAuthGate && !getToken()}
+        onClose={() => setShowAuthGate(false)}
+        canClose={true}
         role="provider"
         onSuccess={() => {
           setShowAuthGate(false);

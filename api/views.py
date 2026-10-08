@@ -344,35 +344,7 @@ class ScholarshipViewSet(viewsets.ReadOnlyModelViewSet):
         if university:
             qs = qs.filter(university_id=university)
 
-        # Free trial: limit to FREE_TRIAL_LIMIT per type for non-premium users
-        is_premium = False
-        user = self.request.user
-        if user.is_authenticated:
-            try:
-                profile = user.student_profile
-                is_premium = profile.is_premium
-            except Exception:
-                pass
-
-        if not is_premium:
-            from django.db.models import Min, Q
-            featured_ids = Scholarship.objects.filter(
-                is_active=True, is_featured=True
-            ).values_list('id', flat=True)
-
-            limited_ids = []
-            for stype in ['full', 'partial', 'living', 'research', 'tuition']:
-                type_ids = list(
-                    qs.filter(type=stype)
-                    .order_by('-is_featured', '-created_at')
-                    .values_list('id', flat=True)[:FREE_TRIAL_LIMIT]
-                )
-                limited_ids.extend(type_ids)
-
-            all_limited = list(set(list(featured_ids) + limited_ids))
-            qs = qs.filter(id__in=all_limited)
-
-        return qs.distinct()
+        return qs.order_by('-is_featured', '-created_at').distinct()
 
 
 # ── Universities ─────────────────────────────────────────────

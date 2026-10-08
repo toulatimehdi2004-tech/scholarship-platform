@@ -3,10 +3,11 @@
 import { motion } from "framer-motion";
 import { MapPin, Clock, GraduationCap, BookOpen, Scale, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Scholarship } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { toggleCompareId, getCompareIds } from "@/lib/compare";
-import UniversityModal from "./UniversityModal";
 
 interface ScholarshipCardProps {
   scholarship: Scholarship;
@@ -17,13 +18,14 @@ export default function ScholarshipCard({
   scholarship,
   index = 0,
 }: ScholarshipCardProps) {
-  const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
   const { t } = useLang();
   const [inCompare, setInCompare] = useState(() =>
     getCompareIds().includes(scholarship.id)
   );
 
   function onCompare(e: React.MouseEvent) {
+    e.preventDefault();
     e.stopPropagation();
     const r = toggleCompareId(scholarship.id);
     setInCompare(r.ids.includes(scholarship.id));
@@ -81,13 +83,15 @@ export default function ScholarshipCard({
   const isLanguage = scholarship.level === "other";
 
   return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: index * 0.04 }}
-        className="glass rounded-2xl p-6 card-hover cursor-pointer group h-full flex flex-col border border-border-glass relative overflow-hidden"
-        onClick={() => setShowModal(true)}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.04 }}
+      className="h-full"
+    >
+      <Link
+        href={`/scholarships/${scholarship.id}`}
+        className="glass rounded-2xl p-6 card-hover cursor-pointer group h-full flex flex-col border border-border-glass relative overflow-hidden block"
       >
         <div className="flex items-start justify-between mb-3.5">
           <span
@@ -102,13 +106,22 @@ export default function ScholarshipCard({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 mb-2 text-xs text-text-secondary font-medium">
-          <span className="flex items-center gap-1.5">
+          <span
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/university/${scholarship.university}`);
+            }}
+            className="flex items-center gap-1.5 hover:text-cyan transition-colors"
+          >
             {isLanguage ? (
               <BookOpen className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
             ) : (
               <GraduationCap className="w-3.5 h-3.5 text-cyan flex-shrink-0" />
             )}
-            <span className="line-clamp-1">{scholarship.university_name || "Unknown University"}</span>
+            <span className="line-clamp-1 underline-offset-2 hover:underline">
+              {scholarship.university_name || "Unknown University"}
+            </span>
           </span>
           {scholarship.university_city && (
             <span className="flex items-center gap-1 text-text-muted">
@@ -150,20 +163,7 @@ export default function ScholarshipCard({
             </span>
           </div>
         </div>
-      </motion.div>
-
-      <UniversityModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        universityId={scholarship.university}
-        universityName={scholarship.university_name || "Unknown University"}
-        universityWebsite={(scholarship as any).university_website}
-        universityCity={(scholarship as any).university_city}
-        universityCountry={(scholarship as any).university_country}
-        scholarshipId={scholarship.id}
-        scholarshipTitle={scholarship.title}
-        applicationLink={scholarship.application_link}
-      />
-    </>
+      </Link>
+    </motion.div>
   );
 }

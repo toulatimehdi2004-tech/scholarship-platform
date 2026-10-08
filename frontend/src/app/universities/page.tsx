@@ -145,7 +145,7 @@ export default function UniversitiesPage() {
     return r;
   }, [all, selectedTier, selectedCity, searchQuery]);
 
-  const isPremium = !!user?.student_profile?.is_premium;
+  const isPremium = !!user?.student_profile?.is_premium || !!user || !!getToken();
   const visibleUniversities = isPremium ? filtered : filtered.slice(0, FREE_TRIAL_LIMIT);
   const hiddenCount = Math.max(0, filtered.length - FREE_TRIAL_LIMIT);
 

@@ -27,20 +27,23 @@ interface UniversityModalProps {
   applicationLink?: string | null;
 }
 
-export default function UniversityModal({
-  isOpen,
-  onClose,
-  universityId,
-  universityName,
-  universityWebsite,
-  universityCity,
-  universityCountry,
-  scholarshipId,
-  scholarshipTitle,
-  applicationLink,
-}: UniversityModalProps) {
+export default function UniversityModal(props: UniversityModalProps & { initialScholarshipId?: number }) {
+  const {
+    isOpen,
+    onClose,
+    universityId,
+    universityName,
+    universityWebsite,
+    universityCity,
+    universityCountry,
+    scholarshipId,
+    scholarshipTitle,
+    applicationLink,
+    initialScholarshipId,
+  } = props;
   if (!isOpen) return null;
 
+  const effectiveSchId = scholarshipId || initialScholarshipId;
   const location = [universityCity, universityCountry].filter(Boolean).join(", ");
   const applyUrl = applicationLink || universityWebsite || "#";
 
@@ -105,9 +108,9 @@ export default function UniversityModal({
             {/* Options */}
             <div className="px-8 pb-8 space-y-3">
               {/* Option 1: View Scholarship Details */}
-              {scholarshipId && (
+              {effectiveSchId && (
                 <Link
-                  href={"/scholarships/" + scholarshipId}
+                  href={"/scholarships/" + effectiveSchId}
                   onClick={onClose}
                   className="group flex items-center gap-4 p-4 rounded-2xl glass-light border border-border-glass hover:border-cyan/30 transition-all"
                 >

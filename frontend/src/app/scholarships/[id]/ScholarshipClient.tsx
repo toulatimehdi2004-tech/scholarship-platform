@@ -239,7 +239,10 @@ export default function ScholarshipClient() {
       const token = getToken();
       await fetch(`${getApiBaseUrl()}/documents/`, {
         method: "POST",
-        headers: { Authorization: "Token " + token },
+        headers: {
+          Authorization: "Token " + token,
+          "ngrok-skip-browser-warning": "true",
+        },
         body: formData,
       });
       setDocTitle("");
@@ -254,7 +257,10 @@ export default function ScholarshipClient() {
     const token = getToken();
     await fetch(`${getApiBaseUrl()}/documents/${id}/`, {
       method: "DELETE",
-      headers: { Authorization: "Token " + token },
+      headers: {
+        Authorization: "Token " + token,
+        "ngrok-skip-browser-warning": "true",
+      },
     });
     loadDocs();
   }
@@ -572,6 +578,13 @@ export default function ScholarshipClient() {
                     </span>
                   </a>
                 )}
+                <Link
+                  href={`/apply/${scholarship.university.id}`}
+                  className="inline-flex items-center gap-2 glass px-6 py-3 rounded-xl text-text-primary hover:text-cyan hover:border-cyan/40 transition-all border border-border-glass font-medium text-sm"
+                >
+                  <Send className="w-4 h-4 text-emerald-400" />
+                  <span>Guide & Roadmap</span>
+                </Link>
                 <button
                   onClick={() => {
                     setShowDocs(!showDocs);

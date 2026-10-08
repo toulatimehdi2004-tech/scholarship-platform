@@ -5,7 +5,7 @@ import { Send, Bot, User, Sparkles, Lock, Keyboard, Mic, Volume2, VolumeX } from
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { sendChatMessage, getToken, getCurrentUser, type ChatMessage, type User as UserType } from "@/lib/api";
+import { sendChatMessage, getToken, getCurrentUser, getApiBaseUrl, type ChatMessage, type User as UserType } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import ArabicKeyboard from "@/components/ArabicKeyboard";
 
@@ -272,10 +272,11 @@ export default function AiChatPage() {
     let acc = "";
     try {
       const token = getToken();
-      const res = await fetch("http://localhost:8000/api/ai/chat/stream/", {
+      const res = await fetch(`${getApiBaseUrl()}/ai/chat/stream/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
           ...(token ? { Authorization: "Token " + token } : {}),
         },
         body: JSON.stringify({

@@ -125,16 +125,7 @@ export default function HomePage() {
     }
   }, [portalRole, router]);
 
-  // Impose login modal on visitors as the first experience
-  useEffect(() => {
-    if (!getToken()) {
-      const timer = setTimeout(() => {
-        setShowAuthGate(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
+  // Load stats from API
   useEffect(() => {
     fetchApi<{ scholarships: number; universities: number; cities: number }>("/stats/")
       .then((res) => {
@@ -158,6 +149,8 @@ export default function HomePage() {
       router.push("/university-portal");
     } else if (role === "provider") {
       router.push("/provider-portal");
+    } else {
+      router.push("/scholarships");
     }
   }
 
@@ -578,12 +571,12 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Imposed Auth Gate Modal for Moroccan Students */}
+      {/* Auth Gate Modal for Moroccan Students */}
       <AuthGateModal
-        isOpen={showAuthGate}
+        isOpen={showAuthGate && !getToken()}
         onClose={() => setShowAuthGate(false)}
         role="student"
-        canClose={false}
+        canClose={true}
         title="Moroccan Scholar • Student Access"
         subtitle="Sign in or create an account to explore 100+ Chinese Universities & 400+ Scholarships for Moroccans"
         onSuccess={() => {

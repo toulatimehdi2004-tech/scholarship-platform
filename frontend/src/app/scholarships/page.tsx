@@ -583,7 +583,7 @@ export default function ScholarshipsPage() {
                   <div>
                     {/* Unlocked / Free Trial Universities */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {(user?.student_profile?.is_premium
+                      {(user?.student_profile?.is_premium || !!user || !!getToken()
                         ? filteredUnis
                         : filteredUnis.slice(0, FREE_TRIAL_LIMIT)
                       ).map((u, i) => (
@@ -624,7 +624,7 @@ export default function ScholarshipsPage() {
                     </div>
 
                     {/* Foggy Locked Section for Free Trial Users */}
-                    {!user?.student_profile?.is_premium && filteredUnis.length > FREE_TRIAL_LIMIT && (
+                    {!(user?.student_profile?.is_premium || !!user || !!getToken()) && filteredUnis.length > FREE_TRIAL_LIMIT && (
                       <div className="relative mt-8 pt-4">
                         {/* Blurred foggy background preview */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 filter blur-md opacity-30 select-none pointer-events-none">
