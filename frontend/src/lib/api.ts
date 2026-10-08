@@ -120,6 +120,10 @@ export interface University {
   address?: string | null;
   founding_year?: number | null;
   motto?: string | null;
+  tagline?: string | null;
+  description?: string | null;
+  about?: string | null;
+  website?: string | null;
   is_verified: boolean;
 }
 

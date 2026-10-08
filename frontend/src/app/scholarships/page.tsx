@@ -333,60 +333,46 @@ export default function ScholarshipsPage() {
           </button>
         </motion.div>
 
-        {/* Mobile & Quick City Chips Bar (Always visible on mobile & desktop when selecting a university) */}
-        {selectedUni === null && (
-          <div className="mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
+        {/* Moroccan Degree Level & Funding Quick Chips Bar */}
+        <div className="mb-6 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
+          {[
+            { value: "All Levels", label: "🌟 All Levels" },
+            { value: "bachelor", label: "🎓 Bachelor / Licence" },
+            { value: "master", label: "🎓 Master / Ingénieur" },
+            { value: "phd", label: "🎓 PhD / Doctorat" },
+            { value: "other", label: "🇨🇳 1-Year Chinese Language" },
+          ].map((lvl) => (
             <button
-              onClick={() => handleSelectCity("All Cities")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 ${
-                selectedCity === "All Cities"
-                  ? "btn-gradient text-white shadow-md shadow-cyan/20"
-                  : "glass text-text-secondary hover:text-text-primary hover:bg-white/10"
+              key={lvl.value}
+              onClick={() => setSelectedLevel(lvl.value)}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
+                selectedLevel === lvl.value
+                  ? "bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan text-white shadow-lg shadow-emerald-500/25 scale-102"
+                  : "glass text-text-secondary hover:text-white hover:bg-white/10 border border-border-glass"
               }`}
             >
-              <MapPin className="w-3.5 h-3.5" />
-              <span>{t("uni.allCities")}</span>
-              <span className="text-xs opacity-75">({universities.length})</span>
+              <span>{lvl.label}</span>
             </button>
-            {cities.map(([city, count]) => (
-              <button
-                key={city}
-                onClick={() => handleSelectCity(city === selectedCity ? "All Cities" : city)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 ${
-                  selectedCity === city
-                    ? "btn-gradient text-white shadow-md shadow-cyan/20"
-                    : "glass text-text-secondary hover:text-text-primary hover:bg-white/10"
-                }`}
-              >
-                <span>{city}</span>
-                <span className="text-xs opacity-75">({count})</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Active City Banner & One-Click Return to All Cities */}
-        {selectedUni === null && selectedCity !== "All Cities" && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-wrap items-center justify-between gap-3 mb-6 p-4 rounded-2xl glass border border-cyan/20 glow-cyan-sm"
-          >
+          ))}
+          <div className="h-6 w-px bg-white/20 mx-1 flex-shrink-0" />
+          {[
+            { value: "All Types", label: "All Types" },
+            { value: "full", label: "💰 100% Full CSC" },
+            { value: "partial", label: "💎 Partial" },
+          ].map((tp) => (
             <button
-              onClick={() => handleSelectCity("All Cities")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan/15 hover:bg-cyan/25 text-cyan text-sm font-semibold transition-all group"
+              key={tp.value}
+              onClick={() => setSelectedType(tp.value)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
+                selectedType === tp.value
+                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold"
+                  : "glass text-text-muted hover:text-white border border-border-glass"
+              }`}
             >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              <span>← {t("uni.allCities")} ({universities.length})</span>
+              <span>{tp.label}</span>
             </button>
-            <div className="text-sm text-text-secondary flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-cyan" />
-              <span>
-                {t("sch.city")}: <strong className="text-cyan font-bold">{selectedCity}</strong> ({filteredUnis.length} {t("nav.universities")})
-              </span>
-            </div>
-          </motion.div>
-        )}
+          ))}
+        </div>
 
         {/* Step 2 header */}
         {selectedUni !== null && selectedUniEntry && (

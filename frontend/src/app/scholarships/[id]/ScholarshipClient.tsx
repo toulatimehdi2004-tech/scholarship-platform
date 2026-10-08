@@ -20,11 +20,27 @@ import {
   X,
   Sparkles,
   Users,
+  Copy,
+  Check,
+  Building2,
+  Award,
+  Globe,
+  Home,
+  HeartPulse,
+  Banknote,
+  Send,
+  Plane,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { fetchApi, getToken, type ScholarshipDetail, type Scholarship } from "@/lib/api";
+import {
+  fetchApi,
+  getToken,
+  getApiBaseUrl,
+  type ScholarshipDetail,
+  type Scholarship,
+} from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import AutoText, { translateCached } from "@/components/AutoText";
 import ScholarshipCard from "@/components/ScholarshipCard";
@@ -192,6 +208,26 @@ export default function ScholarshipClient() {
     }
   }
 
+  const [copiedAgency, setCopiedAgency] = useState(false);
+  const agencyCode = useMemo(() => {
+    if (!scholarship) return null;
+    const match =
+      scholarship.description?.match(/CSC Agency Code:\s*(\d+)/i) ||
+      scholarship.application_instructions?.match(/【\s*(\d+)\s*】/);
+    return match ? match[1] : null;
+  }, [scholarship]);
+
+  function copyAgency() {
+    if (!agencyCode) return;
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        navigator.clipboard.writeText(agencyCode);
+      }
+    } catch {}
+    setCopiedAgency(true);
+    setTimeout(() => setCopiedAgency(false), 2000);
+  }
+
   async function handleUpload(file: File | null) {
     if (!file || !docTitle.trim()) return;
     setUploading(true);
@@ -201,7 +237,7 @@ export default function ScholarshipClient() {
     formData.append("document_type", docType);
     try {
       const token = getToken();
-      await fetch("http://localhost:8000/api/documents/", {
+      await fetch(`${getApiBaseUrl()}/documents/`, {
         method: "POST",
         headers: { Authorization: "Token " + token },
         body: formData,
@@ -216,7 +252,7 @@ export default function ScholarshipClient() {
 
   async function deleteDoc(id: number) {
     const token = getToken();
-    await fetch("http://localhost:8000/api/documents/" + id + "/", {
+    await fetch(`${getApiBaseUrl()}/documents/${id}/`, {
       method: "DELETE",
       headers: { Authorization: "Token " + token },
     });
@@ -327,6 +363,10 @@ export default function ScholarshipClient() {
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple/20 text-purple border border-purple/30">
               {levelLabels[scholarship.level] || scholarship.level}
             </span>
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30 flex items-center gap-1.5 shadow-sm">
+              <span>🇲🇦</span>
+              <span>Candidats Marocains Éligibles</span>
+            </span>
             {scholarship.is_featured && (
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
                 {t("det.featured")}
@@ -338,10 +378,10 @@ export default function ScholarshipClient() {
             {scholarship.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary mb-6">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary mb-4">
             <Link
               href={"/university/" + scholarship.university.id}
-              className="flex items-center gap-1 hover:text-cyan transition-colors"
+              className="flex items-center gap-1.5 hover:text-cyan transition-colors font-medium"
             >
               <GraduationCap className="w-4 h-4 text-purple" />
               {scholarship.university.name}
@@ -351,6 +391,62 @@ export default function ScholarshipClient() {
               {scholarship.university.city}, {scholarship.university.country}
             </span>
           </div>
+
+          {/* Official CSC Agency Code Card */}
+          {agencyCode && (
+            <div className="my-5 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-cyan/15 via-purple/15 to-emerald-500/10 border border-cyan/40 shadow-lg relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-cyan/20 border border-cyan/40 flex items-center justify-center flex-shrink-0 text-cyan">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs uppercase tracking-wider font-bold text-cyan">
+                        Code Agence CSC Officiel (Agency No.)
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        OFFICIAL
+                      </span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-mono font-black text-white tracking-widest mt-0.5">
+                      {agencyCode}
+                    </div>
+                    <p className="text-xs text-text-muted mt-1">
+                      Code obligatoire lors de votre inscription sur le portail officiel CSC (studyinchina.csc.edu.cn) sous la catégorie Type B (Programme Universitaire).
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-start sm:self-center">
+                  <button
+                    onClick={copyAgency}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/25 text-text-primary transition-all active:scale-95 shadow-sm"
+                  >
+                    {copiedAgency ? (
+                      <>
+                        <Check className="w-4 h-4 text-emerald-400" />
+                        <span className="text-emerald-400 font-bold">Copié !</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 text-cyan" />
+                        <span>Copier le Code</span>
+                      </>
+                    )}
+                  </button>
+                  <a
+                    href="https://studyinchina.csc.edu.cn/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-cyan/20 hover:bg-cyan/30 border border-cyan/40 text-cyan transition-all"
+                  >
+                    <span>Portail CSC</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Deadline Banner */}
           {isDeadlinePassed ? (
@@ -606,6 +702,240 @@ export default function ScholarshipClient() {
               )}
             </div>
           )}
+        </motion.div>
+
+        {/* Moroccan Scholar Financial Coverage Breakdown */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.08 }}
+          className="glass rounded-3xl p-6 sm:p-8 mb-6 border border-emerald-500/30 bg-gradient-to-br from-emerald-500/[0.06] via-surface to-cyan/[0.03]"
+        >
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                <Award className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                  <span>Prise en Charge Financière Complète</span>
+                  <span className="text-base">🇲🇦</span>
+                </h3>
+                <p className="text-xs text-text-muted">
+                  Package officiel d&apos;exonération et allocation pour étudiants marocains (1 RMB ≈ 1.40 MAD)
+                </p>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              {scholarship.type === "full" ? "100% Entièrement Financé (Full CSC)" : "Bourse Partielle"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 1. Tuition */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
+                <DollarSign className="w-4 h-4" />
+              </div>
+              <div className="text-xs text-text-muted font-medium">Frais de Scolarité</div>
+              <div className="text-lg font-bold text-emerald-400 mt-0.5">100% Gratuits</div>
+              <div className="text-[11px] text-text-secondary mt-1">
+                Exonération totale (~42,000 à 63,000 DH/an économisés)
+              </div>
+            </div>
+
+            {/* 2. Dormitory */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass relative overflow-hidden group hover:border-cyan/40 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-cyan/20 text-cyan flex items-center justify-center mb-3">
+                <Home className="w-4 h-4" />
+              </div>
+              <div className="text-xs text-text-muted font-medium">Logement sur Campus</div>
+              <div className="text-lg font-bold text-cyan mt-0.5">0 DH / Mois</div>
+              <div className="text-[11px] text-text-secondary mt-1">
+                Chambre universitaire internationale offerte (salle de bain, AC, Wi-Fi)
+              </div>
+            </div>
+
+            {/* 3. Monthly Stipend */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass relative overflow-hidden group hover:border-purple/40 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-purple/20 text-purple flex items-center justify-center mb-3">
+                <Banknote className="w-4 h-4" />
+              </div>
+              <div className="text-xs text-text-muted font-medium">Allocation Mensuelle</div>
+              <div className="text-lg font-bold text-purple mt-0.5">
+                {scholarship.level === "phd"
+                  ? "3,500 RMB / mois"
+                  : scholarship.level === "master"
+                  ? "3,000 RMB / mois"
+                  : "2,500 RMB / mois"}
+              </div>
+              <div className="text-[11px] text-text-secondary mt-1">
+                Soit{" "}
+                <strong className="text-text-primary">
+                  {scholarship.level === "phd"
+                    ? "~4,900 DH"
+                    : scholarship.level === "master"
+                    ? "~4,200 DH"
+                    : "~3,500 DH"}
+                  /mois
+                </strong>{" "}
+                versé en cash net d&apos;impôt
+              </div>
+            </div>
+
+            {/* 4. Health Insurance */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass relative overflow-hidden group hover:border-blue/40 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-blue/20 text-blue flex items-center justify-center mb-3">
+                <HeartPulse className="w-4 h-4" />
+              </div>
+              <div className="text-xs text-text-muted font-medium">Assurance Médicale</div>
+              <div className="text-lg font-bold text-blue mt-0.5">800 RMB / an</div>
+              <div className="text-[11px] text-text-secondary mt-1">
+                Assurance tous risques Ping An 100% prise en charge
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Official Application Roadmap for Moroccan Students */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.12 }}
+          className="glass rounded-3xl p-6 sm:p-8 mb-6 border border-border-glass"
+        >
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple/20 border border-purple/40 flex items-center justify-center text-purple">
+                <Send className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                  <span>Guide Officiel de Candidature pour Candidats Marocains</span>
+                  <span className="text-base">🇲🇦</span>
+                </h3>
+                <p className="text-xs text-text-muted">
+                  Les 6 étapes indispensables pour soumettre votre dossier avec succès
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {/* Step 1 */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-cyan/40 transition-all">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-cyan/20 border border-cyan/40 text-cyan text-xs font-bold flex items-center justify-center">
+                  1
+                </div>
+                <h4 className="text-sm font-bold text-text-primary">Portail National CSC</h4>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Créez un compte sur <strong>studyinchina.csc.edu.cn</strong>, sélectionnez <strong>Program Category Type B</strong> (Programme Universitaire) et saisissez le code agence officiel de l&apos;université {agencyCode ? `【 ${agencyCode} 】` : ""}.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-purple/40 transition-all">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-purple/20 border border-purple/40 text-purple text-xs font-bold flex items-center justify-center">
+                  2
+                </div>
+                <h4 className="text-sm font-bold text-text-primary">Portail de l&apos;Université</h4>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Déposez votre dossier de candidature directement sur le portail international de {scholarship.university.name} et téléversez votre projet d&apos;étude.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-emerald-500/40 transition-all">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center justify-center">
+                  3
+                </div>
+                <h4 className="text-sm font-bold text-text-primary">Traductions Assermentées</h4>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Faites traduire vos diplômes marocains (Bac, Licence, Master, Ingénieur ENSA/ENCG/FST) et relevés de notes en anglais ou chinois par un traducteur assermenté au Maroc.
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-amber-500/40 transition-all">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold flex items-center justify-center">
+                  4
+                </div>
+                <h4 className="text-sm font-bold text-text-primary">Entretien Académique en Ligne</h4>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Examen de votre dossier par la commission des professeurs et court entretien en anglais ou chinois via Tencent Meeting (Voov) ou Zoom.
+              </p>
+            </div>
+
+            {/* Step 5 */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-blue/40 transition-all">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-blue/20 border border-blue/40 text-blue text-xs font-bold flex items-center justify-center">
+                  5
+                </div>
+                <h4 className="text-sm font-bold text-text-primary">Lettre d&apos;Admission & JW201/JW202</h4>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Les lauréats reçoivent leur lettre d&apos;admission officielle et le certificat officiel de visa pour étudiant étranger envoyé par courrier express (DHL/FedEx) au Maroc.
+              </p>
+            </div>
+
+            {/* Step 6 */}
+            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-rose-500/40 transition-all">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-7 h-7 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold flex items-center justify-center">
+                  6
+                </div>
+                <h4 className="text-sm font-bold text-text-primary">Visa X1 à l&apos;Ambassade à Rabat</h4>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Dépôt de votre demande de visa d&apos;études long séjour X1 auprès du service consulaire de l&apos;Ambassade de Chine à Rabat (Quartier Souissi).
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Portals Links row */}
+          <div className="mt-5 pt-4 border-t border-border-glass flex flex-wrap gap-3">
+            {scholarship.application_link && (
+              <a
+                href={scholarship.application_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-cyan/20 hover:bg-cyan/30 border border-cyan/40 text-cyan transition-all"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>Portail International de l&apos;Université</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+            <a
+              href="https://studyinchina.csc.edu.cn/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-purple/20 hover:bg-purple/30 border border-purple/40 text-purple transition-all"
+            >
+              <Globe className="w-4 h-4" />
+              <span>Portail Officiel CSC CampusChina</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="http://ma.china-embassy.gov.cn/fra/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 border border-white/20 text-text-secondary transition-all"
+            >
+              <Plane className="w-4 h-4" />
+              <span>Ambassade de Chine à Rabat (Visas)</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
         </motion.div>
 
         {/* Details Grid */}
