@@ -43,11 +43,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle('light', savedTheme === 'light');
-    }
+    const savedTheme = (localStorage.getItem('theme') as Theme) || 'dark';
+    setTheme(savedTheme);
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    document.documentElement.classList.toggle('light', savedTheme === 'light');
 
     const savedColor = localStorage.getItem('colorTheme') as ColorTheme;
     if (savedColor && ['morocco', 'royal-gold', 'sahara', 'mediterranean'].includes(savedColor)) {
@@ -62,6 +61,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     localStorage.setItem('theme', next);
+    document.documentElement.classList.toggle('dark', next === 'dark');
     document.documentElement.classList.toggle('light', next === 'light');
   };
 

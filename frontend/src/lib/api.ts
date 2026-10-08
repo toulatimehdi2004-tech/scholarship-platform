@@ -12,14 +12,23 @@ export function getApiBaseUrl(): string {
       localStorage.setItem("custom_api_url", full);
       return full;
     }
-    // 2. Check localStorage (purge any expired cloudflare urls)
+    // 2. Check localStorage (purge invalid, mixed-content, or obsolete urls)
     const saved = localStorage.getItem("custom_api_url");
     if (saved) {
-      if (saved.includes("trycloudflare.com")) {
+      const isMixedContent =
+        window.location.protocol === "https:" && saved.startsWith("http://");
+      const isObsoleteTunnel =
+        saved.includes("trycloudflare.com") ||
+        (saved.includes("ngrok-free.dev") && !saved.includes("proofing-harmless-mulled"));
+      if (isMixedContent || isObsoleteTunnel) {
         localStorage.removeItem("custom_api_url");
       } else {
         return saved;
       }
+    }
+    // 3. Localhost fallback
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return "http://localhost:8000/api";
     }
   }
   return DEFAULT_API_URL;

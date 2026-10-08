@@ -22,7 +22,7 @@ export default function RootLayout({
   children,
 }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html lang="en" className={`dark ${inter.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full bg-background text-foreground antialiased">
         <ThemeProvider>
           <LanguageProvider>
