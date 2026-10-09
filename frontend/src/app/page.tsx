@@ -16,6 +16,8 @@ import {
   Building2,
   CheckCircle2,
   Flame,
+  Calendar,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -515,6 +517,118 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Physical Agency & Services Maroc Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-transparent via-emerald-950/20 to-transparent">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-14"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
+              <span className="text-base">🇲🇦</span> Agences Physiques au Maroc & Chine
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary mb-4 tracking-tight">
+              Un Accompagnement Humain <span className="gradient-text">De Bout en Bout</span>
+            </h2>
+            <p className="text-text-secondary max-w-2xl mx-auto text-base">
+              Bureaux à Casablanca, Rabat et Marrakech. Légalisation officielle MAEC, traduction assermentée, préparation visa et conciergerie complète à l'arrivée en Chine.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {/* Agency card 1 */}
+            <div className="glass rounded-3xl p-7 border border-emerald-500/20 card-hover group relative overflow-hidden">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mb-5 text-emerald-400 group-hover:scale-110 transition-transform">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-text-primary mb-2">Bureaux Physiques</h3>
+              <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                Rencontrez nos conseillers accrédités en personne pour valider vos dossiers, signer vos contrats et rassurer vos parents.
+              </p>
+              <div className="space-y-1.5 text-xs text-text-muted">
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">📍 Casablanca:</span> Bd d'Anfa, Tour Jasmine
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">📍 Rabat:</span> Avenue de France, Agdal
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 font-bold">📍 Marrakech:</span> Bd Mohammed V, Guéliz
+                </div>
+              </div>
+            </div>
+
+            {/* Agency card 2 */}
+            <div className="glass rounded-3xl p-7 border border-cyan/20 card-hover group relative overflow-hidden">
+              <div className="w-12 h-12 rounded-2xl bg-cyan/15 border border-cyan/30 flex items-center justify-center mb-5 text-cyan group-hover:scale-110 transition-transform">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-text-primary mb-2">Légalisation & Visas</h3>
+              <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                Prise en charge intégrale de la chaîne consulaire maroco-chinoise pour garantir 0 rejet de dossier.
+              </p>
+              <ul className="space-y-1.5 text-xs text-text-muted">
+                <li className="flex items-center gap-2">
+                  <span className="text-cyan font-bold">✓</span> Traduction assermentée Arabe/FR vers Chinois
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-cyan font-bold">✓</span> Apostille Ministère Affaires Étrangères (MAEC Rabat)
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-cyan font-bold">✓</span> Préparation entretien & formulaire visa JW201/JW202
+                </li>
+              </ul>
+            </div>
+
+            {/* Agency card 3 */}
+            <div className="glass rounded-3xl p-7 border border-purple/20 card-hover group relative overflow-hidden">
+              <div className="w-12 h-12 rounded-2xl bg-purple/15 border border-purple/30 flex items-center justify-center mb-5 text-purple group-hover:scale-110 transition-transform">
+                <Plane className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-text-primary mb-2">Accueil & Installation Chine</h3>
+              <p className="text-text-secondary text-sm mb-4 leading-relaxed">
+                Notre bureau d'accueil en Chine prend le relais dès l'atterrissage pour une intégration sans stress.
+              </p>
+              <ul className="space-y-1.5 text-xs text-text-muted">
+                <li className="flex items-center gap-2">
+                  <span className="text-purple font-bold">✓</span> Accueil à l'aéroport & transport vers le campus
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-purple font-bold">✓</span> Carte SIM Chinoise & Compte Bank of China/ICBC
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-purple font-bold">✓</span> Visite médicale sur place & Enregistrement PSB police
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Quick Agency CTA bar */}
+          <div className="glass rounded-2xl p-6 sm:p-8 border border-emerald-500/30 bg-emerald-950/20 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+              <h4 className="text-lg font-bold text-text-primary">
+                Besoin d'un accompagnement personnalisé ou de modèles officiels ?
+              </h4>
+              <p className="text-xs sm:text-sm text-text-secondary mt-1">
+                Téléchargez gratuitement nos modèles (Examen médical étranger CHU, Plan d'études CSC) ou réservez un rendez-vous avec un conseiller.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/agency-services"
+                className="btn-gradient px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/20 whitespace-nowrap cursor-pointer"
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Prendre RDV & Voir les Services</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 px-4">
         <motion.div
@@ -553,13 +667,16 @@ export default function HomePage() {
 
       <footer className="py-8 px-4 border-t border-border-glass">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-text-muted">
-          <span>ChinaScholar - AI-Powered Scholarship Platform</span>
-          <div className="flex gap-6">
+          <span>Moroccan Scholar - Plateforme & Agences d'Accompagnement Chine 🇲🇦</span>
+          <div className="flex flex-wrap gap-4 sm:gap-6">
             <Link href="/scholarships" className="hover:text-cyan transition-colors">
               Scholarships
             </Link>
             <Link href="/universities" className="hover:text-cyan transition-colors">
               Universities
+            </Link>
+            <Link href="/agency-services" className="hover:text-emerald-400 font-semibold transition-colors">
+              Agences & Services
             </Link>
             <Link href="/ai-chat" className="hover:text-cyan transition-colors">
               AI Chat

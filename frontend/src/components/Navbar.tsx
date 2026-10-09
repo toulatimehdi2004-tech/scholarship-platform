@@ -31,6 +31,7 @@ import AuthGateModal from "@/components/AuthGateModal";
 const navKeys = [
   { href: "/scholarships", key: "nav.scholarships" },
   { href: "/universities", key: "nav.universities" },
+  { href: "/agency-services", key: "nav.agencyServices" },
   { href: "/ai-chat", key: "nav.aiChat" },
   { href: "/dashboard", key: "nav.dashboard" },
 ];

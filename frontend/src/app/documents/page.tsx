@@ -12,7 +12,9 @@ import {
   Eye,
   X,
   Loader2,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { fetchApi, uploadApi, getToken, getApiBaseUrl } from "@/lib/api";
@@ -202,6 +204,30 @@ export default function DocumentsPage() {
             </span>
           </button>
         </motion.div>
+
+        {/* Moroccan Official Templates & Agency Help Banner */}
+        <div className="glass rounded-2xl p-4 sm:p-5 mb-8 border border-emerald-500/30 bg-emerald-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 flex-shrink-0">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-text-primary">
+                Modèles Officiels CSC & Guide Examen Médical Maroc 🇲🇦
+              </p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                Besoin du formulaire médical CHU Ibn Sina / Ibn Rochd, du Study Plan 800 mots ou d'une traduction assermentée ?
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/agency-services"
+            className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+          >
+            <span>Voir la Boîte à Outils & Services</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
 
         {/* Upload Panel */}
         {showUpload && (

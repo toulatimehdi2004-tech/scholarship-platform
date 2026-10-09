@@ -14,11 +14,13 @@ const dictionaries: Record<Lang, Record<string, string>> = {
   en: {
     'nav.scholarships': 'Scholarships',
     'nav.universities': 'Universities',
+    'nav.agencyServices': 'Agency & Services',
     'nav.explore': 'Explore',
     'nav.aiChat': 'AI Chat',
     'nav.dashboard': 'Dashboard',
     'nav.login': 'Login',
     'nav.getStarted': 'Get Started',
+    'nav.bookConsultation': 'Book Appointment',
 
     'com.back': 'Back',
     'com.search': 'Search',
@@ -264,11 +266,13 @@ const dictionaries: Record<Lang, Record<string, string>> = {
   fr: {
     'nav.scholarships': 'Bourses',
     'nav.universities': 'Universités',
+    'nav.agencyServices': 'Services Agence',
     'nav.explore': 'Explorer',
     'nav.aiChat': 'Assistant IA',
     'nav.dashboard': 'Tableau de bord',
     'nav.login': 'Connexion',
     'nav.getStarted': 'Commencer',
+    'nav.bookConsultation': 'Prendre RDV',
 
     'com.back': 'Retour',
     'com.search': 'Rechercher',
@@ -514,11 +518,13 @@ const dictionaries: Record<Lang, Record<string, string>> = {
   ar: {
     'nav.scholarships': 'المنح الدراسية',
     'nav.universities': 'الجامعات',
+    'nav.agencyServices': 'خدمات الوكالة',
     'nav.explore': 'استكشف',
     'nav.aiChat': 'المساعد الذكي',
     'nav.dashboard': 'لوحة التحكم',
     'nav.login': 'تسجيل الدخول',
     'nav.getStarted': 'ابدأ الآن',
+    'nav.bookConsultation': 'حجز موعد',
 
     'com.back': 'رجوع',
     'com.search': 'بحث',
