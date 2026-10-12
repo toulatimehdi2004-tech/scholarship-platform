@@ -68,7 +68,11 @@ class AdmissionAnnouncementSerializer(serializers.ModelSerializer):
 class UniversityListSerializer(serializers.ModelSerializer):
     class Meta:
         model = University
-        fields = ['id', 'name', 'logo', 'description', 'website', 'country', 'city', 'address', 'founding_year', 'motto', 'latitude', 'longitude', 'tagline', 'is_verified']
+        fields = [
+            'id', 'name', 'logo', 'description', 'website', 'country', 'city',
+            'address', 'founding_year', 'motto', 'latitude', 'longitude', 'tagline',
+            'is_verified', 'admissions_email', 'secondary_email', 'official_domain',
+        ]
 
 
 class UniversityDetailSerializer(serializers.ModelSerializer):
@@ -84,6 +88,7 @@ class UniversityDetailSerializer(serializers.ModelSerializer):
             'latitude', 'longitude', 'tagline', 'about', 'about_ar', 'wikipedia_url',
             'is_verified', 'created_at', 'scholarships_count',
             'landmarks', 'announcements',
+            'admissions_email', 'secondary_email', 'official_domain',
         ]
 
     def get_scholarships_count(self, obj):

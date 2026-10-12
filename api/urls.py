@@ -18,6 +18,7 @@ urlpatterns = [
     path('auth/logout/', views.logout_view, name='api-logout'),
     path('auth/user/', views.current_user_view, name='api-current-user'),
     path('auth/activate-premium/', views.activate_premium_view, name='api-activate-premium'),
+    path('auth/verify-university-email/', views.verify_university_email_view, name='api-verify-university-email'),
 
     # Email verification (2FA)
     path('auth/send-code/', views.send_verification_code, name='api-send-code'),

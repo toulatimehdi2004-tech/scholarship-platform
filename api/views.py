@@ -33,7 +33,104 @@ from .serializers import (
 )
 
 
-# ── Auth Views ───────────────────────────────────────────────
+# ── Auth & University Accreditation Views ───────────────────────────────
+
+def check_university_email_accreditation(email, university_id=None):
+    """
+    Verify if email belongs to an accredited admissions office or verified Gmail desk.
+    Returns (is_accredited: bool, university: University or None, error_message: str or None)
+    """
+    email = (email or '').strip().lower()
+    if not email or '@' not in email:
+        return False, None, "Format d'email invalide. Veuillez renseigner une adresse email valide."
+
+    domain = email.split('@')[-1].lower()
+
+    if university_id:
+        try:
+            u = University.objects.get(id=university_id)
+            # 1. Match secondary_email (official admissions Gmail)
+            if u.secondary_email and u.secondary_email.strip().lower() == email:
+                return True, u, None
+            # 2. Match admissions_email (official .edu.cn email)
+            if u.admissions_email and u.admissions_email.strip().lower() == email:
+                return True, u, None
+            # 3. Match official institutional domain
+            if u.official_domain:
+                official_dom = u.official_domain.strip().lower()
+                if domain == official_dom or email.endswith('@' + official_dom) or domain.endswith('.' + official_dom):
+                    return True, u, None
+
+            return False, u, (
+                f"Accès refusé: L'adresse email '{email}' ne correspond pas au bureau des admissions officiel de {u.name}. "
+                f"Email officiel attendu: {u.admissions_email} ou {u.secondary_email}."
+            )
+        except University.DoesNotExist:
+            return False, None, "Université introuvable dans le registre officiel des universités chinoises."
+
+    # Search across all 102 accredited universities
+    # 1. Exact match on secondary_email (Gmail desk)
+    u_gmail = University.objects.filter(secondary_email__iexact=email).first()
+    if u_gmail:
+        return True, u_gmail, None
+
+    # 2. Exact match on admissions_email
+    u_edu = University.objects.filter(admissions_email__iexact=email).first()
+    if u_edu:
+        return True, u_edu, None
+
+    # 3. Institutional domain match
+    for candidate in University.objects.exclude(official_domain__isnull=True).exclude(official_domain=''):
+        c_dom = candidate.official_domain.strip().lower()
+        if domain == c_dom or email.endswith('@' + c_dom) or domain.endswith('.' + c_dom):
+            return True, candidate, None
+
+    return False, None, (
+        f"Accès refusé: L'adresse email '{email}' n'est pas reconnue dans notre registre officiel des 102 universités accréditées. "
+        "Seuls les bureaux des admissions officiels et leurs adresses Gmails accréditées peuvent accéder au portail Université."
+    )
+
+
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
+def verify_university_email_view(request):
+    """
+    POST/GET /api/auth/verify-university-email/
+    Check if an email is an accredited admissions office or verified Gmail desk.
+    """
+    if request.method == 'GET':
+        email = request.query_params.get('email', '')
+        university_id = request.query_params.get('university_id')
+    else:
+        email = request.data.get('email', '')
+        university_id = request.data.get('university_id')
+
+    if university_id:
+        try:
+            university_id = int(university_id)
+        except (ValueError, TypeError):
+            university_id = None
+
+    is_accredited, university, err = check_university_email_accreditation(email, university_id)
+
+    if is_accredited and university:
+        return Response({
+            'accredited': True,
+            'message': f"Accréditation validée pour {university.name} (Bureau des Admissions).",
+            'university': {
+                'id': university.id,
+                'name': university.name,
+                'admissions_email': university.admissions_email,
+                'secondary_email': university.secondary_email,
+                'official_domain': university.official_domain,
+            }
+        }, status=status.HTTP_200_OK)
+    else:
+        return Response({
+            'accredited': False,
+            'error': err or "Accès refusé: Email non accrédité.",
+        }, status=status.HTTP_403_FORBIDDEN)
+
 
 class RegisterView(generics.CreateAPIView):
     """POST /api/auth/register/"""
@@ -41,14 +138,33 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        role = request.data.get('role', 'student')
+        email = request.data.get('email', '').strip()
+        university_id = request.data.get('university_id')
+
+        # Institutional gate for university desk registrations
+        if role == 'university':
+            is_accredited, university, err = check_university_email_accreditation(email, university_id)
+            if not is_accredited:
+                return Response({
+                    'error': err or 'Accès refusé: Votre adresse email ne figure pas dans le registre officiel des admissions universitaires.'
+                }, status=status.HTTP_403_FORBIDDEN)
+
         ser = self.get_serializer(data=request.data)
         ser.is_valid(raise_exception=True)
         user = ser.save()
+
+        # Mark user staff if registering as official university partner
+        if role == 'university':
+            user.is_staff = True
+            user.save(update_fields=['is_staff'])
+
         token, _ = Token.objects.get_or_create(user=user)
         return Response({
             'user': UserSerializer(user).data,
             'token': token.key,
-            'message': 'Account created.',
+            'role': role,
+            'message': 'Account created successfully.',
         }, status=status.HTTP_201_CREATED)
 
 
@@ -226,10 +342,28 @@ class LoginView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get('username', '')
+        username = request.data.get('username', '').strip()
         password = request.data.get('password', '')
+        role = request.data.get('role', '')
+        university_id = request.data.get('university_id')
+
+        # Allow login by username or by email
         user = authenticate(request, username=username, password=password)
+        if not user and '@' in username:
+            user_obj = User.objects.filter(email__iexact=username).first()
+            if user_obj:
+                user = authenticate(request, username=user_obj.username, password=password)
+
         if user is not None:
+            # Check institutional gate if logging into university desk
+            if role == 'university':
+                is_demo_officer = (user.username == 'admission_officer')
+                is_accredited, university, err = check_university_email_accreditation(user.email, university_id)
+                if not is_accredited and not is_demo_officer and not user.is_staff:
+                    return Response({
+                        'error': err or "Accès refusé: Cette adresse email n'est pas accréditée dans notre registre des universités partenaires."
+                    }, status=status.HTTP_403_FORBIDDEN)
+
             # Auto-verify student profile if credentials are valid
             student = Student.objects.filter(user=user).first()
             if student and not student.is_email_verified:
@@ -240,10 +374,11 @@ class LoginView(generics.GenericAPIView):
             return Response({
                 'user': UserSerializer(user).data,
                 'token': token.key,
-                'message': 'Logged in.',
+                'role': role or ('university' if user.is_staff else 'student'),
+                'message': 'Logged in successfully.',
             })
         return Response(
-            {'error': 'Invalid credentials.'},
+            {'error': 'Identifiants invalides. Veuillez vérifier votre nom d\'utilisateur / email et mot de passe.'},
             status=status.HTTP_401_UNAUTHORIZED,
         )
 

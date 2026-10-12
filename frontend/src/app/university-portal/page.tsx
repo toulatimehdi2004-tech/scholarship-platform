@@ -66,6 +66,9 @@ interface UniversityItem {
   founding_year?: number | null;
   description?: string;
   is_verified: boolean;
+  admissions_email?: string | null;
+  secondary_email?: string | null;
+  official_domain?: string | null;
 }
 
 export default function UniversityPortalPage() {
@@ -358,6 +361,35 @@ export default function UniversityPortalPage() {
             </p>
           </div>
         </div>
+
+        {/* Verified Admissions Desk Accreditation Banner */}
+        {(selectedUni?.admissions_email || selectedUni?.secondary_email) && (
+          <div className="mt-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-bold text-amber-300">Bureau des Admissions Accrédité :</span>
+              <span className="text-white/90 font-mono text-[11px] bg-slate-900/60 px-2 py-0.5 rounded-lg border border-white/10">
+                {selectedUni?.admissions_email}
+              </span>
+            </div>
+            {selectedUni?.secondary_email && (
+              <div className="flex items-center gap-2">
+                <span className="text-white/40">|</span>
+                <span className="font-bold text-amber-300">Desk Gmail Officiel :</span>
+                <span className="text-emerald-300 font-mono text-[11px] font-semibold bg-slate-900/60 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                  {selectedUni?.secondary_email}
+                </span>
+              </div>
+            )}
+            {selectedUni?.official_domain && (
+              <div className="flex items-center gap-2">
+                <span className="text-white/40">|</span>
+                <span className="text-white/70">Domaine Officiel :</span>
+                <span className="text-cyan font-mono text-[11px]">@{selectedUni?.official_domain}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Tabs Navigation */}
@@ -1006,7 +1038,12 @@ export default function UniversityPortalPage() {
       <AuthGateModal
         isOpen={showAuthGate && !getToken()}
         onClose={() => setShowAuthGate(false)}
-        canClose={true}
+        canClose={false}
+        onBackToRoles={() => {
+          if (typeof window !== "undefined") {
+            window.location.href = "/scholarship-platform/";
+          }
+        }}
         role="university"
         onSuccess={() => {
           setShowAuthGate(false);

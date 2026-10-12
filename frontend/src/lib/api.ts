@@ -311,6 +311,8 @@ export async function registerUser(data: {
   password: string;
   first_name?: string;
   last_name?: string;
+  role?: string;
+  university_id?: number;
 }): Promise<ApiResponse<AuthResponse>> {
   return fetchApi<AuthResponse>("/auth/register/", {
     method: "POST",
@@ -321,10 +323,22 @@ export async function registerUser(data: {
 export async function loginUser(data: {
   username: string;
   password: string;
+  role?: string;
+  university_id?: number;
 }): Promise<ApiResponse<AuthResponse>> {
   return fetchApi<AuthResponse>("/auth/login/", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export async function verifyUniversityEmailApi(
+  email: string,
+  universityId?: number
+): Promise<ApiResponse<{ accredited: boolean; university: any; message?: string }>> {
+  return fetchApi("/auth/verify-university-email/", {
+    method: "POST",
+    body: JSON.stringify({ email, university_id: universityId }),
   });
 }
 

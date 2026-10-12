@@ -19,6 +19,9 @@ class University(models.Model):
     about = models.TextField(blank=True, null=True, help_text="4-5 paragraph background (e.g. from Wikipedia)")
     about_ar = models.TextField(blank=True, null=True, help_text="Native Arabic background from Arabic Wikipedia")
     wikipedia_url = models.URLField(max_length=500, blank=True, null=True)
+    admissions_email = models.EmailField(max_length=200, blank=True, null=True, help_text="Official admissions office email")
+    secondary_email = models.EmailField(max_length=200, blank=True, null=True, help_text="Backup / admissions Gmail")
+    official_domain = models.CharField(max_length=150, blank=True, null=True, help_text="Official university domain e.g. tsinghua.edu.cn")
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
     
