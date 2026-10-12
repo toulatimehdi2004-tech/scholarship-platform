@@ -81,6 +81,9 @@ export interface Scholarship {
 export interface ScholarshipDetail {
   id: number;
   title: string;
+  university_name?: string;
+  university_city?: string;
+  university_country?: string;
   description: string;
   type: string;
   level: string;

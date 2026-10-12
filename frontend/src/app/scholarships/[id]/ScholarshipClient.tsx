@@ -42,6 +42,7 @@ import {
   type Scholarship,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import { REAL_SCHOLARSHIP_DETAILS } from "@/data/scholarshipsData";
 import AutoText, { translateCached } from "@/components/AutoText";
 import ScholarshipCard from "@/components/ScholarshipCard";
 import SmartBack from "@/components/SmartBack";
@@ -191,6 +192,11 @@ export default function ScholarshipClient() {
       const res = await fetchApi<ScholarshipDetail>("/scholarships/" + schId + "/");
       if (res.data) {
         setScholarship(res.data);
+      } else {
+        const fallback = REAL_SCHOLARSHIP_DETAILS[Number(schId)];
+        if (fallback) {
+          setScholarship(fallback);
+        }
       }
       setLoading(false);
     }

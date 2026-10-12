@@ -30,6 +30,7 @@ import {
   type User,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import { REAL_SCHOLARSHIPS } from "@/data/scholarshipsData";
 
 const FREE_TRIAL_LIMIT = 7;
 
@@ -120,8 +121,10 @@ export default function ScholarshipsPage() {
         fetchApi<University[]>("/universities/"),
         getToken() ? getCurrentUser() : Promise.resolve({ data: null }),
       ]);
-      if (schRes.data) {
+      if (schRes.data && schRes.data.length > 0) {
         setAllScholarships(schRes.data);
+      } else {
+        setAllScholarships(REAL_SCHOLARSHIPS);
       }
       if (uniRes.data) {
         const list = Array.isArray(uniRes.data)
