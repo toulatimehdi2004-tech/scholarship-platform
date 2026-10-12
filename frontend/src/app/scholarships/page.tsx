@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ScholarshipCard from "@/components/ScholarshipCard";
 import AuthGateModal from "@/components/AuthGateModal";
 import LifetimePassModal from "@/components/LifetimePassModal";
@@ -60,6 +61,7 @@ interface UniEntry {
 }
 
 export default function ScholarshipsPage() {
+  const router = useRouter();
   const { t } = useLang();
   const [allScholarships, setAllScholarships] = useState<Scholarship[]>([]);
   const [uniInfo, setUniInfo] = useState<Map<number, University>>(new Map());
@@ -803,9 +805,12 @@ export default function ScholarshipsPage() {
       {/* Auth & Lifetime Modals */}
       <AuthGateModal
         isOpen={showAuthGate}
-        onClose={() => setShowAuthGate(false)}
-        title="Sign In to Discover Scholarships"
-        subtitle="Explore 100+ Chinese Universities & 400+ Full & Partial Scholarships"
+        onClose={() => router.push("/")}
+        onBackToRoles={() => router.push("/")}
+        canClose={false}
+        role="student"
+        title="Moroccan Student Sign In"
+        subtitle="Sign in or register your account to explore 100+ Chinese Universities & 400+ CSC Scholarships for Moroccans"
       />
 
       <LifetimePassModal

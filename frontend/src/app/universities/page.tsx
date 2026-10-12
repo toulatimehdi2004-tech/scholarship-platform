@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { fetchApi, getCurrentUser, getToken, type University, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import UniversityCard from "@/components/UniversityCard";
@@ -50,6 +51,7 @@ const BIZ_KEYWORDS = [
 ];
 
 export default function UniversitiesPage() {
+  const router = useRouter();
   const { t } = useLang();
   const [all, setAll] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
@@ -362,9 +364,10 @@ export default function UniversitiesPage() {
 
       <AuthGateModal
         isOpen={showAuthGate}
-        onClose={() => setShowAuthGate(false)}
+        onClose={() => router.push("/")}
+        onBackToRoles={() => router.push("/")}
         role="student"
-        canClose={true}
+        canClose={false}
         title="Moroccan Student Access"
         subtitle="Sign in or register to explore 100+ Chinese universities and 3D VR campus walkthroughs."
       />

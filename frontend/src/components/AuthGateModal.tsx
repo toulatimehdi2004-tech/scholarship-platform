@@ -25,6 +25,7 @@ interface AuthGateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  onBackToRoles?: () => void;
   role?: PortalAuthRole;
   canClose?: boolean;
   title?: string;
@@ -54,6 +55,7 @@ export default function AuthGateModal({
   isOpen,
   onClose,
   onSuccess,
+  onBackToRoles,
   role = 'student',
   canClose = true,
   title,
@@ -205,6 +207,17 @@ export default function AuthGateModal({
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 bg-slate-900 border border-emerald-500/30 text-white shadow-2xl shadow-emerald-500/20 z-10 overflow-hidden max-h-[92vh] overflow-y-auto"
         >
+          {/* Back to Role Selection button */}
+          {onBackToRoles && (
+            <button
+              type="button"
+              onClick={onBackToRoles}
+              className="absolute top-5 left-5 text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all cursor-pointer shadow-sm"
+            >
+              <span>← Profils / الأدوار</span>
+            </button>
+          )}
+
           {/* Close button (only when dismissible) */}
           {canClose && (
             <button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
@@ -35,13 +35,23 @@ import {
   MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import SmartBack from "@/components/SmartBack";
 import { useLang } from "@/lib/i18n";
 import AuthGateModal from "@/components/AuthGateModal";
+import { getToken } from "@/lib/api";
 
 export default function AgencyServicesPage() {
+  const router = useRouter();
   const { t } = useLang();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const [showAuthGate, setShowAuthGate] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !getToken()) {
+      setShowAuthGate(true);
+    }
+  }, []);
   const [activeTab, setActiveTab] = useState<
     "desks" | "packs" | "toolkit" | "muslim-life" | "mentors" | "calculator"
   >("desks");
@@ -1087,6 +1097,17 @@ export default function AgencyServicesPage() {
           </div>
         </motion.div>
       )}
+
+      {/* Mandatory Auth Gate Modal */}
+      <AuthGateModal
+        isOpen={showAuthGate}
+        onClose={() => router.push("/")}
+        onBackToRoles={() => router.push("/")}
+        role="student"
+        canClose={false}
+        title="Moroccan Student Access"
+        subtitle="Sign in or register your account to access Moroccan agency desks, official templates, and personalized consultations."
+      />
     </div>
   );
 }

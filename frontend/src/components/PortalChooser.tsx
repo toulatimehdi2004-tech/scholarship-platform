@@ -292,8 +292,9 @@ export default function PortalChooser({
       <AuthGateModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
+        onBackToRoles={() => setAuthModalOpen(false)}
         role={chosenRole}
-        canClose={true}
+        canClose={false}
         onSuccess={() => {
           setAuthModalOpen(false);
           onSelectRole(chosenRole);
