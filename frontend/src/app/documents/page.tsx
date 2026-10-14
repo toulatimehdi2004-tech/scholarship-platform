@@ -205,7 +205,7 @@ export default function DocumentsPage() {
           </button>
         </motion.div>
 
-        {/* Moroccan Official Templates & Agency Help Banner */}
+        {/* Moroccan Official Checklist Banner */}
         <div className="glass rounded-2xl p-4 sm:p-5 mb-8 border border-emerald-500/30 bg-emerald-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 flex-shrink-0">
@@ -213,18 +213,18 @@ export default function DocumentsPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-text-primary">
-                Modèles Officiels CSC & Guide Examen Médical Maroc 🇲🇦
+                Guide des Documents Officiels & Pré-départ 🇲🇦
               </p>
               <p className="text-xs text-text-secondary mt-0.5">
-                Besoin du formulaire médical CHU Ibn Sina / Ibn Rochd, du Study Plan 800 mots ou d'une traduction assermentée ?
+                Consultez notre checklist complète pour préparer vos traductions, légalisations et formalités d'études en Chine.
               </p>
             </div>
           </div>
           <Link
-            href="/agency-services"
+            href="/pre-departure"
             className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5"
           >
-            <span>Voir la Boîte à Outils & Services</span>
+            <span>Guide Pré-Départ</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

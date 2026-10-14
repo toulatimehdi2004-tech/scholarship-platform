@@ -215,26 +215,6 @@ export default function ScholarshipClient() {
     }
   }
 
-  const [copiedAgency, setCopiedAgency] = useState(false);
-  const agencyCode = useMemo(() => {
-    if (!scholarship) return null;
-    const match =
-      scholarship.description?.match(/CSC Agency Code:\s*(\d+)/i) ||
-      scholarship.application_instructions?.match(/【\s*(\d+)\s*】/);
-    return match ? match[1] : null;
-  }, [scholarship]);
-
-  function copyAgency() {
-    if (!agencyCode) return;
-    try {
-      if (typeof navigator !== "undefined" && navigator.clipboard) {
-        navigator.clipboard.writeText(agencyCode);
-      }
-    } catch {}
-    setCopiedAgency(true);
-    setTimeout(() => setCopiedAgency(false), 2000);
-  }
-
   async function handleUpload(file: File | null) {
     if (!file || !docTitle.trim()) return;
     setUploading(true);
@@ -404,62 +384,6 @@ export default function ScholarshipClient() {
               {scholarship.university.city}, {scholarship.university.country}
             </span>
           </div>
-
-          {/* Official CSC Agency Code Card */}
-          {agencyCode && (
-            <div className="my-5 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-cyan/15 via-purple/15 to-emerald-500/10 border border-cyan/40 shadow-lg relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-cyan/20 border border-cyan/40 flex items-center justify-center flex-shrink-0 text-cyan">
-                    <Building2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs uppercase tracking-wider font-bold text-cyan">
-                        Code Agence CSC Officiel (Agency No.)
-                      </span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        OFFICIAL
-                      </span>
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-mono font-black text-white tracking-widest mt-0.5">
-                      {agencyCode}
-                    </div>
-                    <p className="text-xs text-text-muted mt-1">
-                      Code obligatoire lors de votre inscription sur le portail officiel CSC (studyinchina.csc.edu.cn) sous la catégorie Type B (Programme Universitaire).
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 self-start sm:self-center">
-                  <button
-                    onClick={copyAgency}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/25 text-text-primary transition-all active:scale-95 shadow-sm"
-                  >
-                    {copiedAgency ? (
-                      <>
-                        <Check className="w-4 h-4 text-emerald-400" />
-                        <span className="text-emerald-400 font-bold">Copié !</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4 text-cyan" />
-                        <span>Copier le Code</span>
-                      </>
-                    )}
-                  </button>
-                  <a
-                    href="https://studyinchina.csc.edu.cn/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-cyan/20 hover:bg-cyan/30 border border-cyan/40 text-cyan transition-all"
-                  >
-                    <span>Portail CSC</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Deadline Banner */}
           {isDeadlinePassed ? (
@@ -851,7 +775,7 @@ export default function ScholarshipClient() {
                 <h4 className="text-sm font-bold text-text-primary">Portail National CSC</h4>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Créez un compte sur <strong>studyinchina.csc.edu.cn</strong>, sélectionnez <strong>Program Category Type B</strong> (Programme Universitaire) et saisissez le code agence officiel de l&apos;université {agencyCode ? `【 ${agencyCode} 】` : ""}.
+                Créez un compte sur <strong>studyinchina.csc.edu.cn</strong>, sélectionnez <strong>Program Category Type B</strong> (Programme Universitaire) et sélectionnez votre université cible.
               </p>
             </div>
 
@@ -1257,7 +1181,6 @@ export default function ScholarshipClient() {
           contactEmail={scholarship.contact_email}
           contactPhone={scholarship.contact_phone}
           scholarshipTitle={scholarship.title}
-          agencyCode={agencyCode}
           className="mb-8"
         />
       </div>
