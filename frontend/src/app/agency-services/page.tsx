@@ -33,6 +33,8 @@ import {
   UtensilsCrossed,
   Languages,
   MessageCircle,
+  Copy,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -68,6 +70,17 @@ export default function AgencyServicesPage() {
   const [candidateDegree, setCandidateDegree] = useState("Baccalaureate (Lycée)");
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [bookingTicketId, setBookingTicketId] = useState("");
+  const [copiedInfo, setCopiedInfo] = useState<string | null>(null);
+
+  const copyBranchText = (text: string, id: string) => {
+    try {
+      navigator?.clipboard?.writeText(text);
+      setCopiedInfo(id);
+      setTimeout(() => setCopiedInfo(null), 2500);
+    } catch {
+      // fallback
+    }
+  };
 
   // Calculator State
   const [calcDegree, setCalcDegree] = useState<"bachelor" | "master" | "phd">("master");
@@ -399,18 +412,99 @@ export default function AgencyServicesPage() {
                     📍 {branch.landmark}
                   </p>
 
-                  <div className="space-y-2 pt-3 border-t border-white/10 text-xs text-text-secondary">
+                  <div className="space-y-2.5 pt-3 border-t border-white/10 text-xs text-text-secondary">
                     <div className="flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-cyan" />
+                      <Clock className="w-3.5 h-3.5 text-cyan flex-shrink-0" />
                       <span>{branch.hours}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>{branch.phone}</span>
+
+                    {/* Interactive Phone */}
+                    <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-white/[0.02] border border-white/5">
+                      <div className="flex items-center gap-2 truncate">
+                        <Phone className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        <a
+                          href={`tel:${branch.phone.replace(/[^0-9+]/g, "")}`}
+                          className="font-mono text-text-primary hover:text-emerald-400 transition-colors truncate"
+                          title="Cliquer pour appeler"
+                        >
+                          {branch.phone}
+                        </a>
+                      </div>
+                      <button
+                        onClick={() => copyBranchText(branch.phone, `${branch.id}-phone`)}
+                        className="px-2 py-0.5 rounded text-[11px] bg-white/5 hover:bg-white/10 text-text-secondary hover:text-emerald-400 flex items-center gap-1 transition-colors flex-shrink-0"
+                        title="Copier le numéro"
+                      >
+                        {copiedInfo === `${branch.id}-phone` ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-400" />
+                            <span className="text-emerald-400">Copié</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>Copier</span>
+                          </>
+                        )}
+                      </button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="w-3.5 h-3.5 text-teal-400" />
-                      <span className="font-mono">WhatsApp : {branch.whatsapp}</span>
+
+                    {/* Interactive Email */}
+                    <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-white/[0.02] border border-white/5">
+                      <div className="flex items-center gap-2 truncate">
+                        <Mail className="w-3.5 h-3.5 text-cyan flex-shrink-0" />
+                        <a
+                          href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+                            branch.email
+                          )}&su=${encodeURIComponent(
+                            `Demande de RDV / Renseignements - Agence ${branch.city}`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-text-primary hover:text-cyan transition-colors truncate"
+                          title="Ouvrir dans Gmail"
+                        >
+                          {branch.email}
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          onClick={() => copyBranchText(branch.email, `${branch.id}-email`)}
+                          className="px-2 py-0.5 rounded text-[11px] bg-white/5 hover:bg-white/10 text-text-secondary hover:text-cyan flex items-center gap-1 transition-colors"
+                          title="Copier l'email"
+                        >
+                          {copiedInfo === `${branch.id}-email` ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-400" />
+                              <span className="text-emerald-400">Copié</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" />
+                              <span>Copier</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* WhatsApp Direct */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="w-3.5 h-3.5 text-teal-400 flex-shrink-0" />
+                        <span className="font-mono text-[11px]">WhatsApp : {branch.whatsapp}</span>
+                      </div>
+                      <a
+                        href={`https://wa.me/${branch.whatsapp.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                          `Salam, je souhaite des renseignements sur l'agence de ${branch.city}.`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-teal-400 hover:underline flex items-center gap-0.5"
+                      >
+                        <span>Chatter</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
                     </div>
                   </div>
                 </div>

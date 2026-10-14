@@ -22,6 +22,7 @@ import SmartBack from "@/components/SmartBack";
 import { fetchApi, type Scholarship, getToken } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { getUniversityCoverImage } from "@/lib/campusImages";
+import ContactInformationCard from "@/components/ContactInformationCard";
 
 interface UniversityDetail {
   id: number;
@@ -299,6 +300,13 @@ export default function UniversityClient() {
             )}
           </motion.div>
         )}
+
+        {/* Official Admissions & Contact Desk */}
+        <ContactInformationCard
+          universityName={university.name}
+          universityId={university.id}
+          className="mb-8"
+        />
 
         {/* Scholarships at this University */}
         <motion.div

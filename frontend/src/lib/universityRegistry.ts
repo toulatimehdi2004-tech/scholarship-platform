@@ -790,3 +790,75 @@ export function verifyUniversityEmail(
     error: 'Accès refusé : Cette adresse email n\'est pas reconnue dans le registre officiel des universités partenaires. Seuls les officiers d\'admissions accrédités sont autorisés.',
   };
 }
+
+/**
+ * Find an accredited university by numeric ID or by name
+ */
+export function findAccreditedUniversity(
+  idOrName: number | string | undefined | null
+): AccreditedUniversity | undefined {
+  if (!idOrName) return undefined;
+  if (typeof idOrName === 'number') {
+    return ACCREDITED_UNIVERSITIES.find((u) => u.id === idOrName);
+  }
+  const clean = String(idOrName).toLowerCase().trim();
+  const num = Number(clean);
+  if (!isNaN(num) && num > 0) {
+    const byId = ACCREDITED_UNIVERSITIES.find((u) => u.id === num);
+    if (byId) return byId;
+  }
+  return ACCREDITED_UNIVERSITIES.find(
+    (u) =>
+      u.name.toLowerCase() === clean ||
+      clean.includes(u.name.toLowerCase()) ||
+      u.name.toLowerCase().includes(clean)
+  );
+}
+
+/**
+ * Official Admissions Office Phone Hotlines for major Chinese Universities
+ * Defaults to the CSC International Secretariat Hotline if not listed
+ */
+export const UNIVERSITY_HOTLINES: Record<string, string> = {
+  "Tsinghua University": "+86 10 6278 4857",
+  "Peking University": "+86 10 6275 1258",
+  "Shanghai Jiao Tong University": "+86 21 5474 3244",
+  "Fudan University": "+86 21 6564 2250",
+  "Zhejiang University": "+86 571 8795 1718",
+  "University of Science and Technology of China": "+86 551 6360 0279",
+  "Nanjing University": "+86 25 8359 4535",
+  "Wuhan University": "+86 27 6875 3912",
+  "Harbin Institute of Technology": "+86 451 8641 2647",
+  "Tongji University": "+86 21 6598 3636",
+  "Beihang University": "+86 10 8231 7685",
+  "Beijing Institute of Technology": "+86 10 6891 8034",
+  "Beijing Normal University": "+86 10 5880 7960",
+  "Sun Yat-sen University": "+86 20 8411 0819",
+  "Xi'an Jiaotong University": "+86 29 8266 8063",
+  "Tianjin University": "+86 22 2740 6691",
+  "Nankai University": "+86 22 2350 8825",
+  "Shandong University": "+86 531 8836 4853",
+  "Xiamen University": "+86 592 218 4792",
+  "Sichuan University": "+86 28 8540 7199",
+  "Southeast University": "+86 25 8379 3022",
+  "Dalian University of Technology": "+86 411 8470 6048",
+  "Central South University": "+86 731 8883 6737",
+  "Jilin University": "+86 431 8516 6885",
+  "East China Normal University": "+86 21 6223 2013",
+  "Chinese Academy of Sciences (UCAS & CAS Fellowships)": "+86 10 8267 2900",
+  "University of Chinese Academy of Sciences": "+86 10 8267 2900",
+};
+
+export function getUniversityHotline(name?: string): string {
+  if (!name) return "+86 10 6609 3970";
+  for (const [key, phone] of Object.entries(UNIVERSITY_HOTLINES)) {
+    if (
+      name.toLowerCase().includes(key.toLowerCase()) ||
+      key.toLowerCase().includes(name.toLowerCase())
+    ) {
+      return phone;
+    }
+  }
+  return "+86 10 6609 3970"; // China Scholarship Council (CSC) International Secretariat Desk
+}
+

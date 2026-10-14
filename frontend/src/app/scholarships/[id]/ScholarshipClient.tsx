@@ -49,6 +49,7 @@ import SmartBack from "@/components/SmartBack";
 import AdmissionAnnouncements, {
   type Announcement,
 } from "@/components/AdmissionAnnouncements";
+import ContactInformationCard from "@/components/ContactInformationCard";
 
 const ANN_STOP = new Set([
   "the", "a", "an", "at", "for", "of", "and", "in", "on", "to",
@@ -1245,36 +1246,20 @@ export default function ScholarshipClient() {
           </motion.div>
         )}
 
-        {/* Contact Info */}
-        {(scholarship.contact_email || scholarship.contact_phone) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="glass rounded-2xl p-6"
-          >
-            <h3 className="text-lg font-semibold text-text-primary mb-4">
-              {t("det.contact")}
-            </h3>
-            <div className="space-y-2">
-              {scholarship.contact_email && (
-                <a
-                  href={"mailto:" + scholarship.contact_email}
-                  className="flex items-center gap-2 text-sm text-cyan hover:text-purple transition-colors"
-                >
-                  <Mail className="w-4 h-4" />
-                  {scholarship.contact_email}
-                </a>
-              )}
-              {scholarship.contact_phone && (
-                <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <Phone className="w-4 h-4" />
-                  {scholarship.contact_phone}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
+        {/* Official Admissions Desk & Interactive Contact Hub */}
+        <ContactInformationCard
+          universityName={scholarship.university.name}
+          universityId={
+            typeof scholarship.university === "object"
+              ? scholarship.university.id
+              : undefined
+          }
+          contactEmail={scholarship.contact_email}
+          contactPhone={scholarship.contact_phone}
+          scholarshipTitle={scholarship.title}
+          agencyCode={agencyCode}
+          className="mb-8"
+        />
       </div>
     </div>
   );
