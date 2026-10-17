@@ -109,16 +109,11 @@ export default function HomePage() {
   const [portalRole, setPortalRole] = useState<PortalRole | null>(null);
   const [hasCheckedRole, setHasCheckedRole] = useState(false);
 
-  // Check stored role on mount - unauthenticated visitors MUST choose role and log in
+  // Check stored role on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("portal_role") as PortalRole | null;
-      const token = getToken();
-      if (!token) {
-        setPortalRole(null);
-      } else {
-        setPortalRole(saved || "student");
-      }
+      setPortalRole(saved || "student");
       setHasCheckedRole(true);
     }
   }, []);
@@ -162,27 +157,16 @@ export default function HomePage() {
   }
 
   function handleDiscover() {
-    if (!getToken()) {
-      setShowAuthGate(true);
-      return;
-    }
     router.push("/scholarships");
   }
 
   function doSearch() {
-    if (!getToken()) {
-      setShowAuthGate(true);
-      return;
+    if (query.trim()) {
+      try {
+        sessionStorage.setItem("home-query", query.trim());
+      } catch {}
     }
-    try {
-      sessionStorage.setItem("home-query", query.trim());
-    } catch {}
     router.push("/scholarships");
-  }
-
-  // UNAUTHENTICATED OR FIRST-TIME VISITORS: Impose Role Choosing Screen & Mandatory Login
-  if (hasCheckedRole && (!portalRole || !getToken())) {
-    return <PortalChooser onSelectRole={handleSelectRole} currentRole={portalRole} />;
   }
 
   return (
@@ -587,7 +571,7 @@ export default function HomePage() {
           setPortalRole(null);
         }}
         role="student"
-        canClose={false}
+        canClose={true}
         title="Moroccan Scholar • Student Access"
         subtitle="Sign in or create an account to explore 100+ Chinese Universities & 400+ Scholarships for Moroccans"
         onSuccess={() => {

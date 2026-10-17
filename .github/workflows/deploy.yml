@@ -38,7 +38,9 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /scholarship-platform
           NEXT_PUBLIC_API_URL: https://proofing-harmless-mulled.ngrok-free.dev/api
-        run: npm run build
+        run: |
+          npm run build
+          touch out/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

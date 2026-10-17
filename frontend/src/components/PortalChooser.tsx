@@ -294,7 +294,7 @@ export default function PortalChooser({
         onClose={() => setAuthModalOpen(false)}
         onBackToRoles={() => setAuthModalOpen(false)}
         role={chosenRole}
-        canClose={false}
+        canClose={true}
         onSuccess={() => {
           setAuthModalOpen(false);
           onSelectRole(chosenRole);
