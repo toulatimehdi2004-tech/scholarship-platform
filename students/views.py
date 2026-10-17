@@ -145,6 +145,7 @@ class StudentApplicationTrackerViewSet(viewsets.ModelViewSet):
                     'interview': 0,
                     'accepted': 0,
                     'rejected': 0,
+                    'urgent_deadlines': 0,
                 }
             }, status=status.HTTP_200_OK)
 
@@ -176,6 +177,7 @@ class StudentApplicationTrackerViewSet(viewsets.ModelViewSet):
             'interview': len(grouped['interview']),
             'accepted': len(grouped['accepted']),
             'rejected': len(grouped['rejected']),
+            'urgent_deadlines': sum(1 for a in apps if a.get('is_deadline_urgent')),
         }
 
         return Response({
