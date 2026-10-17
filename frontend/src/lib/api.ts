@@ -88,6 +88,7 @@ export interface ScholarshipDetail {
   type: string;
   level: string;
   amount: string;
+  stipend_amount?: number | null;
   currency: string;
   duration: string;
   tuition_info?: string | null;
@@ -435,3 +436,104 @@ export async function sendChatMessage(
 export async function getApplications(): Promise<ApiResponse<unknown[]>> {
   return fetchApi<unknown[]>("/applications/");
 }
+
+// ── ScholarTrack Application CRM Pipeline API ─────────────────
+export interface ApplicationTrackerItem {
+  id: number;
+  scholarship_id?: number;
+  scholarship: {
+    id: number;
+    title: string;
+    level: string;
+    type: string;
+    amount?: string;
+    currency?: string;
+    application_deadline: string;
+    application_link?: string;
+    required_documents?: string[];
+    university_id?: number;
+    university_name?: string;
+    university_city?: string;
+    university_country?: string;
+    days_until_deadline?: number | null;
+    is_deadline_urgent?: boolean;
+    is_deadline_passed?: boolean;
+  };
+  status: 'wishlist' | 'preparing_docs' | 'submitted' | 'interview' | 'accepted' | 'rejected';
+  notes?: string | null;
+  portal_application_id?: string | null;
+  checklist?: Record<string, boolean>;
+  checklist_progress?: {
+    total: number;
+    completed: number;
+    percentage: number;
+    all_done: boolean;
+  };
+  days_until_deadline?: number | null;
+  is_deadline_urgent?: boolean;
+  is_deadline_passed?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TrackerResponse {
+  authenticated: boolean;
+  applications: ApplicationTrackerItem[];
+  grouped: {
+    wishlist: ApplicationTrackerItem[];
+    preparing_docs: ApplicationTrackerItem[];
+    submitted: ApplicationTrackerItem[];
+    interview: ApplicationTrackerItem[];
+    accepted: ApplicationTrackerItem[];
+    rejected: ApplicationTrackerItem[];
+  };
+  stats: {
+    total: number;
+    wishlist: number;
+    preparing_docs: number;
+    submitted: number;
+    interview: number;
+    accepted: number;
+    rejected: number;
+    urgent_deadlines: number;
+  };
+}
+
+export async function getTrackedApplications(): Promise<ApiResponse<TrackerResponse>> {
+  return fetchApi<TrackerResponse>("/tracker/");
+}
+
+export async function addToTracker(
+  scholarshipId: number,
+  status: string = "wishlist",
+  notes: string = ""
+): Promise<ApiResponse<ApplicationTrackerItem>> {
+  return fetchApi<ApplicationTrackerItem>("/tracker/", {
+    method: "POST",
+    body: JSON.stringify({ scholarship_id: scholarshipId, status, notes }),
+  });
+}
+
+export async function updateTrackedApplication(
+  id: number,
+  data: {
+    status?: string;
+    notes?: string;
+    portal_application_id?: string;
+    checklist?: Record<string, boolean>;
+  }
+): Promise<ApiResponse<ApplicationTrackerItem>> {
+  return fetchApi<ApplicationTrackerItem>(`/tracker/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteTrackedApplication(
+  id: number
+): Promise<ApiResponse<{ success: boolean }>> {
+  return fetchApi<{ success: boolean }>(`/tracker/${id}/`, {
+    method: "DELETE",
+  });
+}
+

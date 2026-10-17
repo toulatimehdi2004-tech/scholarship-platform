@@ -3,9 +3,12 @@ from rest_framework.routers import DefaultRouter
 
 from . import views
 
+from students.views import StudentApplicationTrackerViewSet
+
 router = DefaultRouter()
 router.register(r'scholarships', views.ScholarshipViewSet, basename='scholarship')
 router.register(r'universities', views.UniversityViewSet, basename='university')
+router.register(r'tracker', StudentApplicationTrackerViewSet, basename='tracker')
 router.register(r'applications', views.ApplicationTrackerViewSet, basename='application')
 router.register(r'suggestions', views.AISuggestionViewSet, basename='suggestion')
 router.register(r'documents', views.DocumentViewSet, basename='document')

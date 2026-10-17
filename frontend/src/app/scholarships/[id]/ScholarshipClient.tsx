@@ -30,6 +30,7 @@ import {
   Banknote,
   Send,
   Plane,
+  Layers,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -38,8 +39,11 @@ import {
   fetchApi,
   getToken,
   getApiBaseUrl,
+  addToTracker,
+  getTrackedApplications,
   type ScholarshipDetail,
   type Scholarship,
+  type ApplicationTrackerItem,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { REAL_SCHOLARSHIP_DETAILS } from "@/data/scholarshipsData";
@@ -50,6 +54,8 @@ import AdmissionAnnouncements, {
   type Announcement,
 } from "@/components/AdmissionAnnouncements";
 import ContactInformationCard from "@/components/ContactInformationCard";
+import FundingBreakdownCard from "@/components/FundingBreakdownCard";
+import AcceptanceOddsMeter from "@/components/AcceptanceOddsMeter";
 
 const ANN_STOP = new Set([
   "the", "a", "an", "at", "for", "of", "and", "in", "on", "to",
@@ -86,6 +92,9 @@ export default function ScholarshipClient() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [related, setRelated] = useState<Scholarship[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [trackedItem, setTrackedItem] = useState<ApplicationTrackerItem | null>(null);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackSuccessMsg, setTrackSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -105,6 +114,47 @@ export default function ScholarshipClient() {
       setCheckedDocs({});
     }
   }, [schId]);
+
+  // Check if this scholarship is already in the student's tracker pipeline
+  useEffect(() => {
+    if (!schId) return;
+    const numId = Number(schId);
+    if (isNaN(numId)) return;
+
+    if (getToken()) {
+      getTrackedApplications().then((res) => {
+        if (res.data?.applications) {
+          const match = res.data.applications.find((a) => a.scholarship.id === numId);
+          if (match) setTrackedItem(match);
+        }
+      });
+    } else {
+      try {
+        const local = localStorage.getItem("demo_application_tracker");
+        if (local) {
+          const list: ApplicationTrackerItem[] = JSON.parse(local);
+          const match = list.find((a) => a.scholarship.id === numId);
+          if (match) setTrackedItem(match);
+        }
+      } catch {}
+    }
+  }, [schId]);
+
+  const handleAddToTracker = async () => {
+    if (!scholarship) return;
+    setTrackingLoading(true);
+    setTrackSuccessMsg(null);
+    const res = await addToTracker(scholarship.id);
+    setTrackingLoading(false);
+    if (res.data) {
+      setTrackedItem(res.data);
+      setTrackSuccessMsg("Added to your Application CRM Pipeline! 🚀");
+      setTimeout(() => setTrackSuccessMsg(null), 4000);
+    } else if (res.error) {
+      setTrackSuccessMsg(res.error || "Saved in your pipeline");
+      setTimeout(() => setTrackSuccessMsg(null), 3500);
+    }
+  };
 
   function toggleDoc(i: number) {
     setCheckedDocs((prev) => {
@@ -516,17 +566,52 @@ export default function ScholarshipClient() {
                   <Send className="w-4 h-4 text-emerald-400" />
                   <span>Guide & Roadmap</span>
                 </Link>
+
+                {/* Interactive Tracker CRM Button */}
+                {trackedItem ? (
+                  <Link
+                    href="/tracker"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-semibold text-sm shadow-md"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>In Pipeline ({trackedItem.status.replace("_", " ")})</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handleAddToTracker}
+                    disabled={trackingLoading}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-semibold text-sm cursor-pointer shadow-md"
+                  >
+                    <Layers className="w-4 h-4 text-emerald-400" />
+                    <span>{trackingLoading ? "Saving..." : "📌 Add to Tracker Pipeline"}</span>
+                  </button>
+                )}
+
                 <button
                   onClick={() => {
                     setShowDocs(!showDocs);
                     if (!showDocs) loadDocs();
                   }}
-                  className="inline-flex items-center gap-2 glass px-6 py-3 rounded-xl text-text-primary hover:bg-white/5 transition-all border border-border-glass"
+                  className="inline-flex items-center gap-2 glass px-6 py-3 rounded-xl text-text-primary hover:bg-white/5 transition-all border border-border-glass cursor-pointer"
                 >
                   <Upload className="w-4 h-4 text-cyan" />
                   {t("det.attachDocs")}
                 </button>
               </div>
+
+              {trackSuccessMsg && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>{trackSuccessMsg}</span>
+                  <Link href="/tracker" className="underline ml-1 text-white hover:text-emerald-200">
+                    Open Kanban Board →
+                  </Link>
+                </motion.div>
+              )}
 
               {/* Document Upload Panel */}
               {showDocs && (
@@ -648,97 +733,34 @@ export default function ScholarshipClient() {
           )}
         </motion.div>
 
-        {/* Moroccan Scholar Financial Coverage Breakdown */}
+        {/* Feature 2: Line-by-Line Funding Breakdown & Local Currency Converter (WeMakeScholars Style) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.08 }}
-          className="glass rounded-3xl p-6 sm:p-8 mb-6 border border-emerald-500/30 bg-gradient-to-br from-emerald-500/[0.06] via-surface to-cyan/[0.03]"
         >
-          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                <Award className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                  <span>Prise en Charge Financière Complète</span>
-                  <span className="text-base">🇲🇦</span>
-                </h3>
-                <p className="text-xs text-text-muted">
-                  Package officiel d&apos;exonération et allocation pour étudiants marocains (1 RMB ≈ 1.40 MAD)
-                </p>
-              </div>
-            </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              {scholarship.type === "full" ? "100% Entièrement Financé (Full CSC)" : "Bourse Partielle"}
-            </span>
-          </div>
+          <FundingBreakdownCard
+            scholarshipTitle={scholarship.title}
+            level={scholarship.level}
+            type={scholarship.type}
+            stipendAmount={scholarship.stipend_amount}
+            className="mb-6"
+          />
+        </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* 1. Tuition */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass relative overflow-hidden group hover:border-emerald-500/40 transition-all">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
-                <DollarSign className="w-4 h-4" />
-              </div>
-              <div className="text-xs text-text-muted font-medium">Frais de Scolarité</div>
-              <div className="text-lg font-bold text-emerald-400 mt-0.5">100% Gratuits</div>
-              <div className="text-[11px] text-text-secondary mt-1">
-                Exonération totale (~42,000 à 63,000 DH/an économisés)
-              </div>
-            </div>
-
-            {/* 2. Dormitory */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass relative overflow-hidden group hover:border-cyan/40 transition-all">
-              <div className="w-8 h-8 rounded-lg bg-cyan/20 text-cyan flex items-center justify-center mb-3">
-                <Home className="w-4 h-4" />
-              </div>
-              <div className="text-xs text-text-muted font-medium">Logement sur Campus</div>
-              <div className="text-lg font-bold text-cyan mt-0.5">0 DH / Mois</div>
-              <div className="text-[11px] text-text-secondary mt-1">
-                Chambre universitaire internationale offerte (salle de bain, AC, Wi-Fi)
-              </div>
-            </div>
-
-            {/* 3. Monthly Stipend */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass relative overflow-hidden group hover:border-purple/40 transition-all">
-              <div className="w-8 h-8 rounded-lg bg-purple/20 text-purple flex items-center justify-center mb-3">
-                <Banknote className="w-4 h-4" />
-              </div>
-              <div className="text-xs text-text-muted font-medium">Allocation Mensuelle</div>
-              <div className="text-lg font-bold text-purple mt-0.5">
-                {scholarship.level === "phd"
-                  ? "3,500 RMB / mois"
-                  : scholarship.level === "master"
-                  ? "3,000 RMB / mois"
-                  : "2,500 RMB / mois"}
-              </div>
-              <div className="text-[11px] text-text-secondary mt-1">
-                Soit{" "}
-                <strong className="text-text-primary">
-                  {scholarship.level === "phd"
-                    ? "~4,900 DH"
-                    : scholarship.level === "master"
-                    ? "~4,200 DH"
-                    : "~3,500 DH"}
-                  /mois
-                </strong>{" "}
-                versé en cash net d&apos;impôt
-              </div>
-            </div>
-
-            {/* 4. Health Insurance */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass relative overflow-hidden group hover:border-blue/40 transition-all">
-              <div className="w-8 h-8 rounded-lg bg-blue/20 text-blue flex items-center justify-center mb-3">
-                <HeartPulse className="w-4 h-4" />
-              </div>
-              <div className="text-xs text-text-muted font-medium">Assurance Médicale</div>
-              <div className="text-lg font-bold text-blue mt-0.5">800 RMB / an</div>
-              <div className="text-[11px] text-text-secondary mt-1">
-                Assurance tous risques Ping An 100% prise en charge
-              </div>
-            </div>
-          </div>
+        {/* Feature 3: Realistic Acceptance Odds Meter & Past Admits Benchmark (Yocket Style) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <AcceptanceOddsMeter
+            scholarshipTitle={scholarship.title}
+            universityName={scholarship.university?.name || scholarship.university_name || ""}
+            level={scholarship.level}
+            minGpa={scholarship.minimum_gpa}
+            className="mb-6"
+          />
         </motion.div>
 
         {/* Official Application Roadmap for Moroccan Students */}

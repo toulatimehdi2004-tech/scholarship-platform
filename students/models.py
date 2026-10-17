@@ -64,3 +64,42 @@ class EmailVerification(models.Model):
     def mark_used(self):
         self.is_used = True
         self.save(update_fields=['is_used'])
+
+
+class ApplicationTracker(models.Model):
+    """
+    ScholarTrack-style Application CRM Pipeline:
+    Tracks student applications through 5+ Kanban stages.
+    """
+    STATUS_CHOICES = [
+        ('wishlist', 'Saved / Wishlist'),
+        ('preparing_docs', 'Preparing Documents'),
+        ('submitted', 'Submitted to Portal'),
+        ('interview', 'Under Review / Interview'),
+        ('accepted', 'Accepted (Won 🏆)'),
+        ('rejected', 'Not Selected'),
+    ]
+
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name='tracked_applications'
+    )
+    scholarship = models.ForeignKey(
+        'scholarships.Scholarship', on_delete=models.CASCADE, related_name='tracked_by_students'
+    )
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES, default='wishlist')
+    notes = models.TextField(blank=True, null=True, help_text="Personal notes or portal login references")
+    portal_application_id = models.CharField(max_length=100, blank=True, null=True)
+    checklist = models.JSONField(
+        default=dict, blank=True,
+        help_text="Checked state for required docs: e.g. {'passport': true, 'physical_exam': false}"
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+        unique_together = ['student', 'scholarship']
+
+    def __str__(self):
+        return f"{self.student.user.username} - {self.scholarship.title} [{self.status}]"
+
