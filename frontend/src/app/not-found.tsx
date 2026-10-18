@@ -1,37 +1,93 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowLeft, Home, Search } from 'lucide-react';
-import { useLang } from '@/lib/i18n';
+import Link from "next/link";
+import { ArrowLeft, Home, Search, Layers, Crown, Sparkles } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function NotFound() {
-  const { t } = useLang();
-
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-16">
-      <div className="glass rounded-3xl p-8 sm:p-12 max-w-lg w-full text-center glow-cyan-sm">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center mx-auto mb-6">
-          <Search className="w-8 h-8 text-white" />
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-16">
+      <div className="glass rounded-3xl p-8 sm:p-12 max-w-xl w-full text-center border border-border-glass shadow-2xl relative overflow-hidden">
+        {/* Glow backdrop */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        
+        <div className="flex justify-center mb-6">
+          <Logo size={56} />
         </div>
-        <h1 className="text-4xl font-extrabold text-text-primary mb-2">404</h1>
-        <h2 className="text-xl font-semibold text-text-secondary mb-4">Page Not Found</h2>
-        <p className="text-sm text-text-muted mb-8 leading-relaxed">
-          The page you are looking for might have moved or the address may have a slight typo.
+
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/30 mb-4">
+          <span>Error 404 • Page Not Found</span>
+        </div>
+
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight mb-3">
+          Looking for something specific?
+        </h1>
+        <p className="text-sm text-text-secondary mb-8 leading-relaxed max-w-md mx-auto">
+          The link you followed may be broken or the page may have been moved. Here are the most popular sections on ScholarChina:
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+
+        {/* Quick Nav Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 text-left">
           <Link
-            href="/universities"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl btn-gradient text-sm font-semibold flex items-center justify-center gap-2"
+            href="/"
+            className="p-3.5 rounded-2xl glass hover:bg-white/10 border border-white/5 hover:border-cyan/40 transition-all flex items-center gap-3 group"
           >
-            <Search className="w-4 h-4" />
-            <span>Browse Universities</span>
+            <div className="w-10 h-10 rounded-xl bg-cyan/10 text-cyan flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+              <Home className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-text-primary group-hover:text-cyan transition-colors">Home Page</div>
+              <div className="text-[11px] text-text-muted">Return to homepage</div>
+            </div>
           </Link>
+
           <Link
             href="/scholarships"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl glass hover:bg-white/10 text-sm font-semibold text-text-primary flex items-center justify-center gap-2"
+            className="p-3.5 rounded-2xl glass hover:bg-white/10 border border-white/5 hover:border-cyan/40 transition-all flex items-center gap-3 group"
           >
-            <Home className="w-4 h-4 text-cyan" />
-            <span>Browse Scholarships</span>
+            <div className="w-10 h-10 rounded-xl bg-purple/10 text-purple flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+              <Search className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-text-primary group-hover:text-cyan transition-colors">400+ Scholarships</div>
+              <div className="text-[11px] text-text-muted">Browse CSC & grants</div>
+            </div>
+          </Link>
+
+          <Link
+            href="/tracker"
+            className="p-3.5 rounded-2xl glass hover:bg-white/10 border border-white/5 hover:border-emerald-500/40 transition-all flex items-center gap-3 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-text-primary group-hover:text-emerald-400 transition-colors">Application Pipeline</div>
+              <div className="text-[11px] text-text-muted">Track your documents</div>
+            </div>
+          </Link>
+
+          <Link
+            href="/pricing"
+            className="p-3.5 rounded-2xl glass hover:bg-white/10 border border-white/5 hover:border-amber-500/40 transition-all flex items-center gap-3 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+              <Crown className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-text-primary group-hover:text-amber-400 transition-colors">Lifetime VIP Pass</div>
+              <div className="text-[11px] text-text-muted">$29 One-Time Access</div>
+            </div>
+          </Link>
+        </div>
+
+        <div className="flex items-center justify-center">
+          <Link
+            href="/"
+            className="btn-gradient text-sm px-6 py-3 rounded-xl flex items-center gap-2 font-bold cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Go Back to Main Page</span>
           </Link>
         </div>
       </div>
