@@ -93,34 +93,23 @@ const VISA_REQUIREMENTS: VisaRequirementItem[] = [
 
 const OFFICIAL_MOROCCO_VISA_PORTALS = [
   {
-    id: "cova",
-    name: "Système Officiel COVA (Ministère des Affaires Étrangères)",
-    nameEn: "China Online Visa Application & Appointment Portal (COVA)",
+    id: "appointment",
+    title: "1. Prendre Rendez-vous en Ligne (COVA)",
+    subtitle: "China Online Visa Application & Appointment System",
     url: "https://consular.mfa.gov.cn/VISA/",
-    region: "Portail Officiel • Juridiction Maroc (Rabat)",
-    desc: "Le seul portail officiel pour les Marocains : remplissage en ligne du formulaire de visa étudiant (X1/X2), vérification préliminaire des documents et prise de rendez-vous obligatoire.",
-    steps: [
-      "1. Choisissez votre juridiction : « Morocco » et Ambassade de Chine à Rabat",
-      "2. Remplissez le formulaire en ligne & téléversez vos justificatifs (JW202, Lettre d'admission, Visite médicale)",
-      "3. Après pré-approbation en ligne, réservez directement votre date et heure de rendez-vous",
-    ],
-    badge: "Prise de Rendez-vous en Ligne",
-    buttonText: "Prendre Rendez-vous en Ligne (COVA)",
+    badge: "Lien Officiel Rendez-vous",
+    desc: "Le seul site officiel pour les Marocains : remplissez le formulaire de visa étudiant et réservez votre date de rendez-vous (choisir « Morocco » puis « Ambassade à Rabat »).",
+    buttonText: "Prendre Rendez-vous (COVA)",
     isPrimary: true,
   },
   {
-    id: "embassy",
-    name: "Section Consulaire — Ambassade de Chine au Maroc",
-    nameEn: "Embassy of the People's Republic of China in Rabat",
+    id: "visa-page",
+    title: "2. Page Officielle du Visa (Ambassade à Rabat)",
+    subtitle: "Section Consulaire — Ambassade de Chine au Maroc",
     url: "http://ma.china-embassy.gov.cn/fra/lsfw/lsb/qzyw/",
-    region: "16, Avenue Ahmed Balafrej, Souissi, Rabat",
-    desc: "Avis consulaire officiel pour le dépôt physique : instructions de dépôt des passeports, pièces originales à fournir et horaires officiels du guichet consulaire à Rabat.",
-    steps: [
-      "Adresse de dépôt : 16, Avenue Ahmed Balafrej, Souissi, Rabat",
-      "Dépôt physique sur présentation de la confirmation de rendez-vous COVA",
-    ],
-    badge: "Ambassade à Rabat",
-    buttonText: "Consulter l'Avis Consulaire Officiel",
+    badge: "Consignes Officielles Visa",
+    desc: "Page officielle de l'Ambassade de Chine à Rabat : liste des pièces à fournir, frais consulaires et dépôt physique au 16, Avenue Ahmed Balafrej, Souissi.",
+    buttonText: "Page Officielle du Visa",
     isPrimary: false,
   },
 ];
@@ -317,102 +306,77 @@ export default function StudentVisaProcessCard() {
         </div>
       </div>
 
-      {/* Official Morocco Appointment & Submission Portals */}
-      <div className="relative z-10 space-y-4">
+      {/* Official 2 Links for Moroccans */}
+      <div className="relative z-10 space-y-3">
         <div>
           <h4 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <Calendar className="w-4 h-4 text-cyan" />
-            <span>Prise de Rendez-vous Visa Chine — Liens Officiels Maroc</span>
+            <span>Liens Officiels Visa Chine — Maroc (2 Liens Uniques)</span>
           </h4>
           <p className="text-xs text-text-muted">
-            Pour les étudiants marocains, la démarche s'effectue directement en ligne sur le portail gouvernemental officiel (COVA) avant le dépôt physique du passeport à l'Ambassade de Chine à Rabat.
+            Les deux seuls liens officiels nécessaires pour votre visa d&apos;études en Chine depuis le Maroc : la prise de rendez-vous en ligne et les consignes officielles de l&apos;Ambassade.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {OFFICIAL_MOROCCO_VISA_PORTALS.map((portal) => (
             <div
               key={portal.id}
-              className={`p-5 sm:p-6 rounded-2xl border transition-all ${
+              className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
                 portal.isPrimary
                   ? "bg-gradient-to-br from-blue-950/40 via-slate-900/60 to-blue-900/30 border-blue-500/40 shadow-xl shadow-blue-500/10"
                   : "bg-white/[0.03] border-white/10 hover:border-emerald-500/30"
               }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md border ${
-                        portal.isPrimary
-                          ? "bg-blue-500/20 text-cyan border-blue-500/40"
-                          : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                      }`}
-                    >
-                      {portal.badge}
-                    </span>
-                    <span className="text-[11px] text-text-muted font-medium">
-                      {portal.region}
-                    </span>
-                  </div>
-                  <h5 className="text-base font-bold text-text-primary">
-                    {portal.name}
-                  </h5>
-                  <p className="text-xs text-text-muted">{portal.nameEn}</p>
-                </div>
-
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <a
-                    href={portal.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-md cursor-pointer ${
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md border ${
                       portal.isPrimary
-                        ? "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30"
-                        : "bg-white/10 hover:bg-white/15 text-text-primary border border-white/10"
+                        ? "bg-blue-500/20 text-cyan border-blue-500/40"
+                        : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                     }`}
                   >
-                    <span>{portal.buttonText}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-
-                  <button
-                    onClick={() => handleCopyLink(portal.url)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-text-muted hover:text-white transition-colors border border-white/10"
-                    title="Copier le lien"
-                  >
-                    {copiedUrl === portal.url ? (
-                      <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
-                        <Check className="w-3.5 h-3.5" /> Copié
-                      </span>
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </button>
+                    {portal.badge}
+                  </span>
                 </div>
+                <h5 className="text-sm sm:text-base font-bold text-text-primary">
+                  {portal.title}
+                </h5>
+                <p className="text-xs text-cyan font-medium mt-0.5">{portal.subtitle}</p>
+                <p className="text-xs text-text-secondary leading-relaxed mt-2.5">
+                  {portal.desc}
+                </p>
               </div>
 
-              <p className="text-xs text-text-secondary leading-relaxed mb-3">
-                {portal.desc}
-              </p>
+              <div className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+                <a
+                  href={portal.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer ${
+                    portal.isPrimary
+                      ? "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30"
+                      : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30"
+                  }`}
+                >
+                  <span>{portal.buttonText}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
 
-              {/* Steps Guide */}
-              <div className="p-3 rounded-xl bg-black/20 border border-white/5 space-y-1.5">
-                <div className="text-[11px] font-bold text-text-primary flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-cyan" />
-                  <span>Procédure officielle étape par étape :</span>
-                </div>
-                <div className="space-y-1">
-                  {portal.steps.map((st, idx) => (
-                    <div
-                      key={idx}
-                      className="text-[11px] text-text-muted flex items-start gap-2"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan mt-1.5 flex-shrink-0" />
-                      <span>{st}</span>
-                    </div>
-                  ))}
-                </div>
+                <button
+                  onClick={() => handleCopyLink(portal.url)}
+                  className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-text-muted hover:text-white transition-colors border border-white/10"
+                  title="Copier le lien"
+                >
+                  {copiedUrl === portal.url ? (
+                    <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Copié
+                    </span>
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
               </div>
             </div>
           ))}
