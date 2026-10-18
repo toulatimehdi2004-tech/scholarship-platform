@@ -290,7 +290,7 @@ class AIConversationSerializer(serializers.ModelSerializer):
 class AIChatRequestSerializer(serializers.Serializer):
     message = serializers.CharField(max_length=2000)
     session_id = serializers.CharField(max_length=64, required=False, allow_blank=True, allow_null=True)
-    use_ai = serializers.BooleanField(default=False)
+    use_ai = serializers.BooleanField(default=True)
     language = serializers.CharField(max_length=8, required=False, allow_blank=True, default='')
 
 

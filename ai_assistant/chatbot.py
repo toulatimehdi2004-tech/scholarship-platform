@@ -114,13 +114,11 @@ def get_student_context(user):
     return context
 
 
-def generate_response(user, message, session_id, use_ai=False, language=None):
+def generate_response(user, message, session_id, use_ai=True, language=None):
     """
-    Generate an AI assistant response based on the student's message.
-    Uses the real LLM (BazaarLink) whenever use_ai=True, grounded with
-    live platform data (relevant scholarships/universities). Falls back
-    to instant keyword-based responses only if the LLM is unavailable.
-    Returns dict with: response_text, intent, metadata
+    Generate an elite AI assistant response based on the student's message.
+    Uses the real LLM engine with live platform data grounding.
+    Returns dict with: response, intent, metadata
     """
     intent = detect_intent(message)
     context = get_student_context(user)
@@ -147,7 +145,7 @@ def generate_response(user, message, session_id, use_ai=False, language=None):
     for msg in recent_messages:
         messages.append({
             "role": "user" if msg.role == "user" else "assistant",
-            "content": (msg.message or "")[:600],
+            "content": (msg.message or "")[:1200],
         })
     messages.append({"role": "user", "content": message})
 
@@ -155,7 +153,7 @@ def generate_response(user, message, session_id, use_ai=False, language=None):
     response_text = None
     llm_used = False
     if use_ai and llm_available():
-        response_text = chat_completion(messages, temperature=0.7, max_tokens=2048)
+        response_text = chat_completion(messages, temperature=0.7, max_tokens=3500)
         llm_used = bool(response_text)
 
     if not response_text:
@@ -314,65 +312,81 @@ def _find_relevant_context(message):
 
 
 def _build_system_prompt(message, context, language=None):
-    """Build a rich grounded system prompt so the LLM answers like a smart
-    assistant: any question, correct facts, platform-aware."""
+    """
+    Build an elite, omni-intelligent system prompt (Antigravity Scholar AI)
+    capable of answering ANY question with world-class depth, precision, and clarity.
+    """
     try:
         uni_count = University.objects.count()
         sch_count = Scholarship.objects.filter(is_active=True).count()
     except Exception:
         uni_count, sch_count = 80, 100
 
-    edu = context.get('education_level') or 'unknown'
-    field = context.get('field_of_study') or 'unknown'
-    country = context.get('country') or 'unknown'
-    premium = 'premium' if context.get('is_premium') else 'free plan'
+    edu = context.get('education_level') or 'Not specified'
+    field = context.get('field_of_study') or 'Not specified'
+    country = context.get('country') or 'Morocco'
+    plan = 'VIP Premium Plan' if context.get('is_premium') else 'Standard Plan'
 
     relevant = _find_relevant_context(message)
 
     lang_names = {'en': 'English', 'fr': 'French', 'ar': 'Arabic'}
     if language in lang_names:
         lang_rule = (
-            f"LANGUAGE RULE (most important): the student chose {lang_names[language]} "
-            f"as the application language. ALWAYS reply in {lang_names[language]} — "
-            "every word of your answer, no matter what language the student writes in. "
-            "Never switch to another language and never ask them to switch."
+            f"LANGUAGE RULE: The student selected {lang_names[language]} as their platform language. "
+            f"Reply fluently, eloquently, and completely in {lang_names[language]}."
         )
     else:
         lang_rule = (
-            "LANGUAGE RULE (most important): first detect the language of the student's "
-            "latest message automatically — Arabic, French, English, Chinese, or anything else — "
-            "and ALWAYS reply in that exact same language, no matter what language the UI "
-            "or earlier messages used. Never ask the student to switch languages."
+            "LANGUAGE RULE: Automatically detect the language of the student's message "
+            "(Arabic, Moroccan Darija, French, English, Chinese, etc.) and ALWAYS reply in that exact same language. "
+            "If the student writes in Arabic, write your complete answer in beautiful, natural Arabic. "
+            "If in French, write in refined, natural French. If in English, write in crisp, professional English."
         )
 
-    return (
-        "You are a friendly, knowledgeable AI study-abroad assistant inside a "
-        "China scholarship-finder web platform. Answer ANY question the student asks "
-        "— scholarships, universities, applications, documents, visas, studying and "
-        "living in China, plus general knowledge questions — with correct, helpful, "
-        "well-organized answers. Use **bold** for key points and short lists where useful. "
-        + lang_rule + "\n\n"
-        f"PLATFORM FACTS: {uni_count} Chinese universities, {sch_count} active scholarships "
-        "(real 2026 programs: CSC/Chinese Government Scholarship via campuschina.org, "
-        "university scholarships, plus key world scholarships). Free plan: 5 scholarships per "
-        "type visible, 3 AI messages/day. Premium: one-time payment, unlocks everything. "
-        "Every scholarship page has a live deadline countdown, an interactive document "
-        "checklist, and an Apply button going straight to the official application page. "
-        "Every university page has a photo-based virtual campus tour with map and street view.\n\n"
-        f"STUDENT: name={context['name']}, education={edu}, field={field}, "
-        f"country={country}, plan={premium}, saved={context.get('saved_count', 0)}, "
-        f"active applications={context.get('active_applications', 0)}. "
-        "Personalize when relevant.\n\n"
-        f"{relevant}\n\n"
-        "RULES: Use the REAL scholarships/universities above when relevant — exact titles, "
-        "deadlines, links, and /scholarships/<id>/ or /university/<id>/ page paths. "
-        "Never invent deadlines, amounts, or URLs. If unsure about a platform fact, say so "
-        "and point to the site search. Keep answers focused and practical; ask a follow-up "
-        "question when it helps."
-        + ("\n\nFINAL REMINDER: write your ENTIRE response in "
-           + (lang_names[language] if language in lang_names else "the student's message language")
-           + ". Do not use any other language.")
-    )
+    return f"""You are **Scholar AI** (inspired by Google DeepMind's Antigravity AI), an elite, universally capable, and articulate academic AI companion and polymath assistant.
+
+### CORE IDENTITY & INTELLIGENCE LEVEL
+- You possess deep reasoning capabilities, vast multidisciplinary knowledge, and razor-sharp intellect.
+- You can answer **ANY question whatever it is** without refusal, hesitation, or artificial limitations:
+  * Universal Knowledge: mathematics, programming, algorithms, science, physics, history, philosophy, writing, linguistics, and creative problems.
+  * Higher Education & Scholarships: CSC Type A (bilateral through embassy), CSC Type B (university postgraduate programs), Provincial Government Scholarships (Jiangsu Jasmine, Shanghai Municipal, Zhejiang, Guangdong, etc.), University Presidential & Dean's Merit Awards, Belt & Road / Silk Road scholarships, ANSO, CAS-TWAS, and MOFCOM.
+  * Application Strategy & Materials: crafting and refining winning Statements of Purpose (SOP), Research Proposals, finding lab supervisors, drafting high-conversion professor cold emails for Acceptance Letters, CV optimization, and interview preparation.
+  * Moroccan & Global Admissions Specifics: conversion of Moroccan marks (/20) to 4.0 GPA scale (16-20 = 3.7-4.0, 14-16 = 3.3-3.6, 12-14 = 2.8-3.2), document legalization at the Ministry of Foreign Affairs (Ministère des Affaires Étrangères) in Rabat, Apostille certification (apostille.ma), Foreigner Physical Examination Form (valid 6 months, mandatory blood tests & chest X-ray), police clearance certificate (Fiche anthropométrique / Casier judiciaire), and X1/X2 visa application at the Chinese Embassy in Rabat (JW201 / JW202 forms).
+  * Living & Studying in China: Alipay & WeChat Pay setup with international bank cards, campus dormitories, halal food (Muslim cafeterias 清真餐厅 - Qīngzhēn Cāntīng on all campuses), student SIM cards, high-speed rail (12306 app), and residence permits (converting within 30 days of arrival).
+
+### TONE & FORMATTING PRINCIPLES
+- **Articulate, structured, and insightful**: Never give lazy one-sentence brush-offs. Provide thorough, well-reasoned answers with actionable next steps.
+- **Rich Markdown Formatting**:
+  * Use clear headings (`##`, `###`) for major topics.
+  * Use **bold** text to emphasize key takeaways, requirements, or formulas.
+  * Use clean bullet points or numbered lists for sequential procedures.
+  * Use markdown tables to compare programs, types, or criteria.
+  * For code, mathematics, or email templates, use syntax-highlighted code blocks or blockquotes (`>`).
+- **Zero Competitor Mentions**: You are the student's direct, autonomous mentor. Never recommend third-party commercial educational agencies or middlemen.
+
+### CURRENT STUDENT PROFILE
+- **Name**: {context['name']}
+- **Education Level**: {edu}
+- **Field of Study**: {field}
+- **Country**: {country}
+- **Account Tier**: {plan}
+- **Active Pipeline Trackers**: {context.get('active_applications', 0)}
+- **Saved Opportunities**: {context.get('saved_count', 0)}
+
+### LIVE DATABASE GROUNDING (REAL VERIFIED PLATFORM DATA)
+{relevant}
+
+### PLATFORM DIRECTORY & NAVIGATION
+- Platform contains {uni_count} leading Chinese universities and {sch_count} verified 2026 scholarship programs.
+- When referencing platform opportunities, link them cleanly using Markdown:
+  * For scholarships: `[Scholarship Title](/scholarships/<id>)`
+  * For universities: `[University Name](/universities/<id>)`
+  * For application tracker: `[Application Pipeline](/tracker)`
+  * For student profile: `[Student Profile](/profile)`
+  * For pricing and plans: `[VIP Plans](/pricing)`
+
+{lang_rule}
+Deliver an exceptionally helpful, smart, and comprehensive response."""
 
 
 def _fallback_response(intent, user, message, context):

@@ -601,10 +601,13 @@ class AIChatView(generics.GenericAPIView):
         # Check premium status
         is_premium = False
         try:
-            profile = request.user.student_profile
-            is_premium = profile.is_premium
+            if request.user.is_staff or request.user.is_superuser:
+                is_premium = True
+            else:
+                profile = request.user.student_profile
+                is_premium = bool(getattr(profile, 'is_premium', False))
         except Exception:
-            pass
+            is_premium = False
 
         if not is_premium:
             # Free trial: limit AI chat messages
@@ -615,14 +618,14 @@ class AIChatView(generics.GenericAPIView):
                 created_at__date=timezone.now().date()
             ).count()
 
-            if today_count >= 3:
+            if today_count >= 10:
                 session_id = ser.validated_data.get('session_id') or str(uuid.uuid4())
                 return Response({
                     'response': (
-                        "You've used your 3 free AI messages today! "
-                        "Upgrade to Premium for unlimited AI chat, "
-                        "full scholarship access, and application tracking.\n\n"
-                        "To upgrade, go to your Dashboard or contact us."
+                        "You've reached your 10 free AI questions for today! "
+                        "Upgrade to the VIP Premium Plan for unlimited AI conversations, "
+                        "full scholarship database access, and document tracking.\n\n"
+                        "👉 Visit [VIP Plans](/pricing) to upgrade instantly."
                     ),
                     'session_id': session_id,
                     'intent': 'payment',
@@ -631,7 +634,7 @@ class AIChatView(generics.GenericAPIView):
 
         message = ser.validated_data['message']
         session_id = ser.validated_data.get('session_id') or str(uuid.uuid4())
-        use_ai = ser.validated_data.get('use_ai', False)
+        use_ai = ser.validated_data.get('use_ai', True)
         language = ser.validated_data.get('language') or None
 
         result = generate_response(
@@ -667,9 +670,13 @@ class AIChatStreamView(generics.GenericAPIView):
         ser = self.get_serializer(data=request.data)
         ser.is_valid(raise_exception=True)
 
+        is_premium = False
         try:
-            profile = request.user.student_profile
-            is_premium = profile.is_premium
+            if request.user.is_staff or request.user.is_superuser:
+                is_premium = True
+            else:
+                profile = request.user.student_profile
+                is_premium = bool(getattr(profile, 'is_premium', False))
         except Exception:
             is_premium = False
 
@@ -679,13 +686,14 @@ class AIChatStreamView(generics.GenericAPIView):
                 role='user',
                 created_at__date=timezone.now().date()
             ).count()
-            if today_count >= 3:
+            if today_count >= 10:
                 def limited():
                     yield 'data: ' + json.dumps({
                         'error': 'limit',
                         'response': (
-                            "You've used your 3 free AI messages today! "
-                            "Upgrade to Premium for unlimited AI chat."
+                            "You've reached your 10 free AI questions for today! "
+                            "Upgrade to the VIP Premium Plan for unlimited AI conversations. "
+                            "Visit [VIP Plans](/pricing) to upgrade."
                         ),
                     }) + '\n\n'
                 resp = StreamingHttpResponse(limited(), content_type='text/event-stream')
@@ -712,7 +720,7 @@ class AIChatStreamView(generics.GenericAPIView):
         for msg in history:
             messages.append({
                 "role": "user" if msg.role == "user" else "assistant",
-                "content": (msg.message or "")[:600],
+                "content": (msg.message or "")[:1200],
             })
         messages.append({"role": "user", "content": message})
 
@@ -723,7 +731,7 @@ class AIChatStreamView(generics.GenericAPIView):
             yield 'data: ' + json.dumps({'session_id': session_id, 'intent': intent}) + '\n\n'
             full = []
             try:
-                for chunk in chat_completion_stream(messages, temperature=0.7, max_tokens=2048):
+                for chunk in chat_completion_stream(messages, temperature=0.7, max_tokens=3500):
                     if chunk:
                         full.append(chunk)
                         yield 'data: ' + json.dumps({'token': chunk}) + '\n\n'
