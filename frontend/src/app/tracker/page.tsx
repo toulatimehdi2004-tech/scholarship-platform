@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   GraduationCap,
   ListTodo,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 import SmartBack from "@/components/SmartBack";
@@ -215,6 +216,7 @@ export default function ApplicationTrackerPage() {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [restrictedRole, setRestrictedRole] = useState<string | null>(null);
 
   // Quick Note & ID Modal State
   const [editingItem, setEditingItem] = useState<ApplicationTrackerItem | null>(null);
@@ -235,6 +237,15 @@ export default function ApplicationTrackerPage() {
 
   // Load applications
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("portal_role");
+      if (role === "provider" || role === "university") {
+        setRestrictedRole(role);
+        setLoading(false);
+        return;
+      }
+    }
+
     async function load() {
       const token = getToken();
       if (!token) {
@@ -416,6 +427,60 @@ export default function ApplicationTrackerPage() {
       won: applications.filter((a) => a.status === "accepted").length,
     };
   }, [applications]);
+
+  // If Service Provider or University: Restricted Isolation View
+  if (restrictedRole) {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center p-4">
+        <div className="glass rounded-3xl p-8 max-w-lg w-full text-center border border-rose-500/30 shadow-2xl relative overflow-hidden">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-rose-500/20">
+            {restrictedRole === "provider" ? (
+              <Briefcase className="w-8 h-8" />
+            ) : (
+              <GraduationCap className="w-8 h-8" />
+            )}
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+            <span>Confidential Student Privacy Gate</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-text-primary mb-2">
+            {restrictedRole === "provider"
+              ? "Service Provider Workspace Active"
+              : "University Admissions Desk Active"}
+          </h2>
+          <p className="text-sm text-text-secondary mb-6 leading-relaxed">
+            Candidate CRM pipelines, document checklists, and personal application notes are strictly confidential to students.
+            {restrictedRole === "provider"
+              ? " Please use your Service Provider Desk to fulfill translation orders and client documents."
+              : " Please use your Admissions Desk to review candidate records and campus programs."}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href={restrictedRole === "provider" ? "/provider-portal" : "/university-portal"}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl btn-gradient text-sm font-bold flex items-center justify-center gap-2"
+            >
+              <span>
+                {restrictedRole === "provider"
+                  ? "Go to Provider Orders Desk"
+                  : "Go to Admissions Desk"}
+              </span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={() => {
+                localStorage.setItem("portal_role", "student");
+                setRestrictedRole(null);
+                window.location.reload();
+              }}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl glass hover:bg-white/10 text-sm font-semibold text-text-primary cursor-pointer transition-colors"
+            >
+              Switch to Student Portal
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen px-4 sm:px-6 py-8 max-w-[1600px] mx-auto">

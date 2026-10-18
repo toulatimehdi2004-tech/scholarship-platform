@@ -527,6 +527,10 @@ export default function Navbar() {
         onClose={() => setShowAuthGate(false)}
         title="Sign In to ScholarChina"
         subtitle="Gateway to 100+ Chinese Universities & CSC Full Scholarships"
+        onSuccess={() => {
+          setShowAuthGate(false);
+          router.push("/dashboard");
+        }}
       />
     </>
   );

@@ -16,6 +16,13 @@ import {
   ExternalLink,
   Crown,
   User as UserIcon,
+  Briefcase,
+  Globe,
+  Plane,
+  ShieldCheck,
+  Scale,
+  BadgeCheck,
+  GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -68,8 +75,18 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [trackerData, setTrackerData] = useState<TrackerResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [restrictedRole, setRestrictedRole] = useState<string | null>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("portal_role");
+      if (role === "provider" || role === "university") {
+        setRestrictedRole(role);
+        setLoading(false);
+        return;
+      }
+    }
+
     if (!getToken()) {
       router.push("/auth/login");
       return;
@@ -101,6 +118,60 @@ export default function DashboardPage() {
     localStorage.removeItem("user");
     router.push("/");
   };
+
+  // If Service Provider or University: Restricted Isolation View
+  if (restrictedRole) {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center p-4">
+        <div className="glass rounded-3xl p-8 max-w-lg w-full text-center border border-rose-500/30 shadow-2xl relative overflow-hidden">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-rose-500/20">
+            {restrictedRole === "provider" ? (
+              <Briefcase className="w-8 h-8" />
+            ) : (
+              <GraduationCap className="w-8 h-8" />
+            )}
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-3">
+            <span>Confidential Student Privacy Gate</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-text-primary mb-2">
+            {restrictedRole === "provider"
+              ? "Service Provider Workspace Active"
+              : "University Admissions Desk Active"}
+          </h2>
+          <p className="text-sm text-text-secondary mb-6 leading-relaxed">
+            Candidate dashboards, private notes, and internal application pipelines are confidential to students.
+            {restrictedRole === "provider"
+              ? " Please use your Service Provider Desk to manage document orders and translations."
+              : " Please use your Admissions Desk to review candidate records and campus programs."}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href={restrictedRole === "provider" ? "/provider-portal" : "/university-portal"}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl btn-gradient text-sm font-bold flex items-center justify-center gap-2"
+            >
+              <span>
+                {restrictedRole === "provider"
+                  ? "Go to Provider Orders Desk"
+                  : "Go to Admissions Desk"}
+              </span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={() => {
+                localStorage.setItem("portal_role", "student");
+                setRestrictedRole(null);
+                window.location.reload();
+              }}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl glass hover:bg-white/10 text-sm font-semibold text-text-primary cursor-pointer transition-colors"
+            >
+              Switch to Student Portal
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading && !user) {
     return (
@@ -298,6 +369,98 @@ export default function DashboardPage() {
               </Link>
             </div>
           )}
+        </motion.div>
+
+        {/* Student Academic Services & Interested Hub */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.18 }}
+          className="mb-8"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple" />
+                <span>My Candidate Services & Tools</span>
+              </h2>
+              <p className="text-xs text-text-secondary mt-0.5">
+                Specialized study-in-China services for your admission and visa journey.
+              </p>
+            </div>
+            <Link
+              href="/profile"
+              className="text-xs text-cyan hover:underline font-semibold flex items-center gap-1"
+            >
+              <span>View All Services</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {[
+              {
+                title: "Visa (X1/X2)",
+                desc: "Official CVASC & Embassy",
+                href: "/profile",
+                icon: Globe,
+                color: "from-blue-600 to-cyan",
+              },
+              {
+                title: "SOP Studio",
+                desc: "Motivation Letter AI",
+                href: "/sop",
+                icon: FileText,
+                color: "from-purple to-pink-500",
+              },
+              {
+                title: "Pre-Departure",
+                desc: "Flight & Packing List",
+                href: "/pre-departure",
+                icon: Plane,
+                color: "from-amber-500 to-orange-500",
+              },
+              {
+                title: "Legalization",
+                desc: "Certified Documents",
+                href: "/documents",
+                icon: ShieldCheck,
+                color: "from-emerald-500 to-teal-500",
+              },
+              {
+                title: "AI Matcher",
+                desc: "Eligibility Probability",
+                href: "/eligibility",
+                icon: BadgeCheck,
+                color: "from-indigo-600 to-purple",
+              },
+              {
+                title: "Comparison",
+                desc: "Side-by-side Grants",
+                href: "/compare",
+                icon: Scale,
+                color: "from-cyan to-blue-500",
+              },
+            ].map((svc) => (
+              <Link
+                key={svc.title}
+                href={svc.href}
+                className="p-3.5 rounded-2xl glass hover:bg-white/10 border border-white/5 hover:border-cyan/40 transition-all flex flex-col items-center text-center group cursor-pointer"
+              >
+                <div
+                  className={`w-10 h-10 rounded-xl bg-gradient-to-br ${svc.color} flex items-center justify-center text-white mb-2 shadow-md group-hover:scale-105 transition-transform`}
+                >
+                  <svc.icon className="w-5 h-5" />
+                </div>
+                <div className="text-xs font-bold text-text-primary group-hover:text-cyan transition-colors">
+                  {svc.title}
+                </div>
+                <div className="text-[10px] text-text-muted mt-0.5 truncate w-full">
+                  {svc.desc}
+                </div>
+              </Link>
+            ))}
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

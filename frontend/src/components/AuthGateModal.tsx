@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LogIn,
@@ -65,6 +66,7 @@ export default function AuthGateModal({
   title,
   subtitle,
 }: AuthGateModalProps) {
+  const router = useRouter();
   const { t } = useLang();
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
@@ -191,7 +193,13 @@ export default function AuthGateModal({
             onSuccess();
           } else {
             onClose();
-            window.location.reload();
+            if (role === 'university') {
+              router.push('/university-portal');
+            } else if (role === 'provider') {
+              router.push('/provider-portal');
+            } else {
+              router.push('/dashboard');
+            }
           }
         } else {
           setError(res.error || 'Identifiants invalides. Veuillez vérifier vos accès.');
@@ -230,7 +238,13 @@ export default function AuthGateModal({
             onSuccess();
           } else {
             onClose();
-            window.location.reload();
+            if (role === 'university') {
+              router.push('/university-portal');
+            } else if (role === 'provider') {
+              router.push('/provider-portal');
+            } else {
+              router.push('/dashboard');
+            }
           }
         } else {
           setError(res.error || "Échec de l'enregistrement. L'adresse email ou le nom d'utilisateur est peut-être déjà utilisé.");

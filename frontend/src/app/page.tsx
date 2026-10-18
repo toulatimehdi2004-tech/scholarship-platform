@@ -584,7 +584,7 @@ export default function HomePage() {
         subtitle="Sign in or create an account to explore 100+ Chinese Universities & 400+ CSC Scholarships"
         onSuccess={() => {
           setShowAuthGate(false);
-          router.push("/scholarships");
+          router.push("/dashboard");
         }}
       />
     </div>
