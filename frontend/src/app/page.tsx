@@ -18,6 +18,7 @@ import {
   Flame,
   Calendar,
   ShieldCheck,
+  Crown,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -288,6 +289,13 @@ export default function HomePage() {
               <span>Discover Scholarships</span>
               <ArrowRight className="w-4 h-4 relative z-10" />
             </button>
+            <Link
+              href="/pricing"
+              className="px-6 py-4 rounded-xl text-base font-bold bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-300 hover:bg-amber-500/25 transition-all flex items-center gap-2 shadow-lg shadow-amber-500/10 transform hover:scale-105 cursor-pointer"
+            >
+              <Crown className="w-5 h-5 text-amber-400" />
+              <span>Lifetime VIP Plan ($29)</span>
+            </Link>
             <button
               onClick={() => {
                 if (!getToken()) setShowAuthGate(true);

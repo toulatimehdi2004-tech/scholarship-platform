@@ -17,7 +17,9 @@ const dictionaries: Record<Lang, Record<string, string>> = {
     'nav.tracker': 'Tracker CRM',
     'nav.explore': 'Explore',
     'nav.aiChat': 'AI Chat',
+    'nav.pricing': 'VIP Plan ($29)',
     'nav.dashboard': 'Dashboard',
+    'nav.profile': 'My Profile',
     'nav.login': 'Login',
     'nav.getStarted': 'Get Started',
 
@@ -281,7 +283,9 @@ const dictionaries: Record<Lang, Record<string, string>> = {
     'nav.tracker': 'Suivi Candidatures',
     'nav.explore': 'Explorer',
     'nav.aiChat': 'Assistant IA',
+    'nav.pricing': 'Pass VIP ($29)',
     'nav.dashboard': 'Tableau de bord',
+    'nav.profile': 'Mon Profil',
     'nav.login': 'Connexion',
     'nav.getStarted': 'Commencer',
 
@@ -545,7 +549,9 @@ const dictionaries: Record<Lang, Record<string, string>> = {
     'nav.tracker': 'متابعة الطلبات',
     'nav.explore': 'استكشف',
     'nav.aiChat': 'المساعد الذكي',
+    'nav.pricing': 'باقة VIP ($29)',
     'nav.dashboard': 'لوحة التحكم',
+    'nav.profile': 'ملفي الشخصي',
     'nav.login': 'تسجيل الدخول',
     'nav.getStarted': 'ابدأ الآن',
 

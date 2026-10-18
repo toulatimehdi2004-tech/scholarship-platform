@@ -33,6 +33,7 @@ const navKeys = [
   { href: "/universities", key: "nav.universities" },
   { href: "/tracker", key: "nav.tracker" },
   { href: "/ai-chat", key: "nav.aiChat" },
+  { href: "/pricing", key: "nav.pricing" },
   { href: "/dashboard", key: "nav.dashboard" },
 ];
 
@@ -345,23 +346,27 @@ export default function Navbar() {
               {user ? (
                 <div className="flex items-center gap-2.5">
                   {user.student_profile?.is_premium ? (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shadow-sm shadow-amber-500/20 animate-shimmer">
+                    <Link
+                      href="/pricing"
+                      className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shadow-sm shadow-amber-500/20 animate-shimmer hover:opacity-90 transition-opacity"
+                    >
                       <Crown className="w-3.5 h-3.5 text-amber-400" />
                       <span>Lifetime VIP</span>
-                    </span>
+                    </Link>
                   ) : (
-                    <button
-                      onClick={() => setShowLifetimeModal(true)}
+                    <Link
+                      href="/pricing"
                       className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 hover:opacity-95 transition-all transform hover:scale-105 cursor-pointer animate-shimmer"
                     >
                       <Crown className="w-3.5 h-3.5 text-amber-200" />
-                      <span>Lifetime Pass ($29)</span>
-                    </button>
+                      <span>Lifetime VIP ($29)</span>
+                    </Link>
                   )}
 
                   <Link
-                    href="/dashboard"
+                    href="/profile"
                     className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-cyan transition-colors px-2 py-1 rounded-lg hover:bg-white/5"
+                    title="My Profile"
                   >
                     <UserIcon className="w-3.5 h-3.5" />
                     <span>{user.username}</span>
@@ -377,9 +382,16 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
+                  <Link
+                    href="/pricing"
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 hover:opacity-95 transition-all transform hover:scale-105 cursor-pointer animate-shimmer"
+                  >
+                    <Crown className="w-3.5 h-3.5 text-amber-200" />
+                    <span>Lifetime VIP ($29)</span>
+                  </Link>
                   <button
                     onClick={() => setShowAuthGate(true)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
+                    className="px-3.5 py-2 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     {t("nav.login")}
                   </button>
@@ -517,23 +529,30 @@ export default function Navbar() {
                 {user ? (
                   <>
                     <div className="flex items-center justify-between px-4 py-2">
-                      <span className="text-sm text-text-secondary font-medium">
-                        {user.username}
-                      </span>
+                      <Link
+                        href="/profile"
+                        onClick={() => setMobileOpen(false)}
+                        className="text-sm text-text-primary font-bold flex items-center gap-2 hover:text-cyan"
+                      >
+                        <UserIcon className="w-4 h-4 text-cyan" />
+                        <span>{user.username} (My Profile)</span>
+                      </Link>
                       {user.student_profile?.is_premium ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                        <Link
+                          href="/pricing"
+                          onClick={() => setMobileOpen(false)}
+                          className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1"
+                        >
                           <Crown className="w-3 h-3 text-amber-400" /> Lifetime VIP
-                        </span>
+                        </Link>
                       ) : (
-                        <button
-                          onClick={() => {
-                            setMobileOpen(false);
-                            setShowLifetimeModal(true);
-                          }}
-                          className="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-purple text-white text-xs font-bold flex items-center gap-1"
+                        <Link
+                          href="/pricing"
+                          onClick={() => setMobileOpen(false)}
+                          className="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-purple text-white text-xs font-bold flex items-center gap-1 shadow-sm shadow-amber-500/20"
                         >
                           <Crown className="w-3 h-3" /> $29 VIP Pass
-                        </button>
+                        </Link>
                       )}
                     </div>
                     <button
@@ -546,6 +565,14 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
+                    <Link
+                      href="/pricing"
+                      onClick={() => setMobileOpen(false)}
+                      className="w-full mb-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+                    >
+                      <Crown className="w-4 h-4 text-amber-200" />
+                      <span>Scholar Lifetime VIP ($29)</span>
+                    </Link>
                     <button
                       onClick={() => {
                         setMobileOpen(false);

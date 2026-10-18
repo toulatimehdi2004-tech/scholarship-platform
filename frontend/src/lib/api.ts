@@ -145,20 +145,30 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface StudentProfile {
+  id: number;
+  phone?: string | null;
+  date_of_birth?: string | null;
+  country?: string | null;
+  city?: string | null;
+  education_level?: string | null;
+  field_of_study?: string | null;
+  gpa?: string | number | null;
+  is_premium: boolean;
+  payment_date?: string | null;
+  payment_id?: string | null;
+  saved_scholarships?: number[];
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface User {
   id: number;
   username: string;
   email: string;
   first_name: string;
   last_name: string;
-  student_profile?: {
-    id: number;
-    country: string;
-    education_level: string;
-    field_of_study: string;
-    is_premium: boolean;
-    payment_date: string | null;
-  } | null;
+  student_profile?: StudentProfile | null;
 }
 
 export interface AuthResponse {
@@ -392,6 +402,23 @@ export async function getCurrentUser(): Promise<ApiResponse<User>> {
 
 export async function activatePremium(): Promise<ApiResponse<{ message: string; is_premium: boolean }>> {
   return fetchApi("/auth/activate-premium/", { method: "POST" });
+}
+
+export async function getStudentProfile(): Promise<ApiResponse<StudentProfile>> {
+  return fetchApi<StudentProfile>("/students/profile/");
+}
+
+export async function updateStudentProfile(
+  data: Partial<StudentProfile> & {
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+  }
+): Promise<ApiResponse<StudentProfile>> {
+  return fetchApi<StudentProfile>("/students/profile/", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 
 // ── Scholarships API ───────────────────────────────────────

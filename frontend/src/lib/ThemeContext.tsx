@@ -29,7 +29,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: 'light',
   toggle: () => {},
   colorTheme: 'morocco',
   setColorTheme: () => {},
@@ -37,13 +37,13 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setTheme] = useState<Theme>('light');
   const [colorTheme, setColorThemeState] = useState<ColorTheme>('morocco');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = (localStorage.getItem('theme') as Theme) || 'dark';
+    const savedTheme = (localStorage.getItem('theme') as Theme) || 'light';
     setTheme(savedTheme);
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     document.documentElement.classList.toggle('light', savedTheme === 'light');

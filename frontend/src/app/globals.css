@@ -39,22 +39,23 @@
 }
 
 :root.light {
-  --color-cyan: #047857;
-  --color-purple: #b91c1c;
-  --color-blue: #024e39;
-  --color-neon-cyan: #059669;
-  --color-neon-purple: #c2171a;
-  --color-neon-blue: #034e3a;
-  --background: #f7faf8;
-  --foreground: #051f12;
+  /* Elegant Dark Blue / Royal Navy Palette for Light Mode */
+  --color-cyan: #1d4ed8;
+  --color-purple: #1e3a8a;
+  --color-blue: #0f172a;
+  --color-neon-cyan: #2563eb;
+  --color-neon-purple: #1e40af;
+  --color-neon-blue: #1d4ed8;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --surface: #ffffff;
-  --surface-alt: #edf5f0;
-  --text-primary: #051f12;
-  --text-secondary: #3e5a4a;
-  --text-muted: #789884;
-  --border-glass: rgba(2, 78, 57, 0.1);
-  --card-bg: rgba(255, 255, 255, 0.88);
-  --input-bg: rgba(237, 245, 240, 0.9);
+  --surface-alt: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --border-glass: rgba(30, 58, 138, 0.12);
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --input-bg: rgba(241, 245, 249, 0.95);
 }
 
 /* Dynamic Color Themes aligned with Moroccan Heritage */
@@ -118,13 +119,14 @@ body {
 }
 
 .light .glass {
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(2, 78, 57, 0.1);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(30, 58, 138, 0.12);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
 }
 
 .light .glass-light {
-  background: rgba(237, 245, 240, 0.75);
-  border: 1px solid rgba(2, 78, 57, 0.08);
+  background: rgba(241, 245, 249, 0.85);
+  border: 1px solid rgba(30, 58, 138, 0.08);
 }
 
 /* Glow Effects */
@@ -149,11 +151,11 @@ body {
 }
 
 .light .glow-cyan {
-  box-shadow: 0 0 18px rgba(5, 150, 105, 0.18), 0 0 36px rgba(5, 150, 105, 0.06);
+  box-shadow: 0 0 18px rgba(29, 78, 216, 0.2), 0 0 36px rgba(29, 78, 216, 0.08);
 }
 
 .light .glow-purple {
-  box-shadow: 0 0 18px rgba(194, 23, 26, 0.18), 0 0 36px rgba(194, 23, 26, 0.06);
+  box-shadow: 0 0 18px rgba(30, 58, 138, 0.2), 0 0 36px rgba(30, 58, 138, 0.08);
 }
 
 /* Animated Shimmering Gradient Text (Emerald Green -> Gold -> Crimson Red) */
@@ -308,13 +310,20 @@ body {
   animation: float-slow 18s ease-in-out infinite reverse;
 }
 
-.light .orb { opacity: 0.12; }
+.light .orb { opacity: 0.08; }
+.light .orb-1 { background: radial-gradient(circle, #1d4ed8, transparent 70%); }
+.light .orb-2 { background: radial-gradient(circle, #1e3a8a, transparent 70%); }
+.light .orb-3 { background: radial-gradient(circle, #0f172a, transparent 70%); }
+.light .orb-4 { background: radial-gradient(circle, #3b82f6, transparent 70%); }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 7px; }
 ::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb { background: rgba(92, 124, 105, 0.4); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #059669; }
+
+.light ::-webkit-scrollbar-thumb { background: rgba(30, 58, 138, 0.25); border-radius: 4px; }
+.light ::-webkit-scrollbar-thumb:hover { background: #1d4ed8; }
 
 /* Input Focus Glow */
 .input-glow {
@@ -325,6 +334,11 @@ body {
   outline: none;
   border-color: #059669;
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25), 0 0 25px rgba(5, 150, 105, 0.15);
+}
+
+.light .input-glow:focus {
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2), 0 0 20px rgba(29, 78, 216, 0.12);
 }
 
 /* Card Hover */
@@ -340,8 +354,8 @@ body {
 }
 
 .light .card-hover:hover {
-  box-shadow: 0 14px 32px -8px rgba(2, 78, 57, 0.12), 0 0 24px rgba(5, 150, 105, 0.15);
-  border-color: rgba(5, 150, 105, 0.3);
+  box-shadow: 0 14px 32px -8px rgba(15, 23, 42, 0.12), 0 0 24px rgba(29, 78, 216, 0.12);
+  border-color: rgba(29, 78, 216, 0.3);
 }
 
 /* Typing Indicator */
@@ -374,55 +388,86 @@ body {
 /* Light mode select option fix */
 .light select option {
   background: #ffffff;
-  color: #051f12;
+  color: #0f172a;
 }
 
 /* Light mode placeholder fix */
 .light .placeholder\:text-text-muted::placeholder {
-  color: #789884;
+  color: #64748b;
 }
 
 /* Badges and tags in light mode */
-.light .bg-cyan\/20 { background-color: rgba(5, 150, 105, 0.15); }
-.light .bg-purple\/20 { background-color: rgba(194, 23, 26, 0.15); }
-.light .bg-blue\/20 { background-color: rgba(2, 78, 57, 0.15); }
-.light .bg-emerald-500\/20 { background-color: rgba(16, 185, 129, 0.18); }
-.light .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.18); }
-.light .bg-red-500\/10 { background-color: rgba(194, 23, 26, 0.1); }
-.light .bg-red-500\/20 { background-color: rgba(194, 23, 26, 0.18); }
+.light .bg-cyan\/10 { background-color: rgba(29, 78, 216, 0.08); }
+.light .bg-cyan\/20 { background-color: rgba(29, 78, 216, 0.14); }
+.light .bg-purple\/20 { background-color: rgba(30, 58, 138, 0.14); }
+.light .bg-blue\/20 { background-color: rgba(15, 23, 42, 0.08); }
+.light .bg-emerald-500\/20 { background-color: rgba(16, 185, 129, 0.16); }
+.light .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.16); }
+.light .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08); }
+.light .bg-red-500\/20 { background-color: rgba(220, 38, 38, 0.16); }
 
 /* Text colors for badges in light mode */
-.light .text-cyan { color: #047857; }
-.light .text-purple { color: #b91c1c; }
-.light .text-blue { color: #024e39; }
+.light .text-cyan { color: #1d4ed8; }
+.light .text-purple { color: #1e40af; }
+.light .text-blue { color: #0f172a; }
 .light .text-emerald-400 { color: #059669; }
 .light .text-emerald-500 { color: #047857; }
 .light .text-amber-400 { color: #d97706; }
-.light .text-red-400 { color: #c2171a; }
+.light .text-red-400 { color: #dc2626; }
 
 /* Border colors for badges in light mode */
-.light .border-cyan\/30 { border-color: rgba(5, 150, 105, 0.35); }
-.light .border-purple\/30 { border-color: rgba(194, 23, 26, 0.35); }
-.light .border-blue\/30 { border-color: rgba(2, 78, 57, 0.35); }
-.light .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.35); }
+.light .border-cyan\/30 { border-color: rgba(29, 78, 216, 0.3); }
+.light .border-purple\/30 { border-color: rgba(30, 58, 138, 0.3); }
+.light .border-blue\/30 { border-color: rgba(15, 23, 42, 0.2); }
+.light .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3); }
 .light .border-amber-500\/20 { border-color: rgba(245, 158, 11, 0.25); }
 .light .border-amber-500\/30 { border-color: rgba(245, 158, 11, 0.35); }
-.light .border-red-500\/20 { border-color: rgba(194, 23, 26, 0.25); }
+.light .border-red-500\/20 { border-color: rgba(220, 38, 38, 0.25); }
 
 /* Light mode hover states */
-.light .hover\:bg-white\/5:hover { background-color: rgba(2, 78, 57, 0.05); }
-.light .hover\:bg-white\/10:hover { background-color: rgba(2, 78, 57, 0.08); }
-.light .hover\:bg-red-500\/10:hover { background-color: rgba(194, 23, 26, 0.1); }
+.light .hover\:bg-white\/5:hover { background-color: rgba(15, 23, 42, 0.04); }
+.light .hover\:bg-white\/10:hover { background-color: rgba(15, 23, 42, 0.07); }
+.light .hover\:bg-red-500\/10:hover { background-color: rgba(220, 38, 38, 0.08); }
 
 /* Light mode bg-white override for cards */
-.light .bg-white\/5 { background-color: rgba(2, 78, 57, 0.04); }
+.light .bg-white\/5 { background-color: rgba(15, 23, 42, 0.03); }
 
 /* Light mode input backgrounds */
 .light .glass input,
 .light .glass select {
-  background: rgba(237, 245, 240, 0.9);
-  color: #051f12;
+  background: rgba(241, 245, 249, 0.95);
+  color: #0f172a;
 }
 
 /* Fix loading skeleton in light mode */
-.light .bg-white\/10 { background-color: rgba(2, 78, 57, 0.08); }
+.light .bg-white\/10 { background-color: rgba(15, 23, 42, 0.06); }
+
+/* Light mode gradient text & button */
+.light .gradient-text {
+  background: linear-gradient(-45deg, #1d4ed8, #2563eb, #1e40af, #0f172a, #1d4ed8);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.light .gradient-text-cyan {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.light .btn-gradient {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 50%, #0f172a 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 20px -2px rgba(29, 78, 216, 0.45);
+}
+
+.light .btn-gradient::before {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e3a8a 100%);
+}
+
+.light .btn-gradient:hover {
+  box-shadow: 0 8px 30px rgba(29, 78, 216, 0.5), 0 0 35px rgba(30, 58, 138, 0.35);
+}

@@ -50,6 +50,23 @@ class StudentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['is_premium', 'payment_date', 'payment_id']
 
+    def update(self, instance, validated_data):
+        user_data = self.context.get('request').data if self.context.get('request') else {}
+        user = instance.user
+        updated_user = False
+        if 'first_name' in user_data:
+            user.first_name = user_data['first_name']
+            updated_user = True
+        if 'last_name' in user_data:
+            user.last_name = user_data['last_name']
+            updated_user = True
+        if 'email' in user_data and user_data['email']:
+            user.email = user_data['email']
+            updated_user = True
+        if updated_user:
+            user.save()
+        return super().update(instance, validated_data)
+
 
 # ── Scholarships & Universities ──────────────────────────────
 

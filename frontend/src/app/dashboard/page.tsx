@@ -14,6 +14,8 @@ import {
   Trophy,
   AlertCircle,
   ExternalLink,
+  Crown,
+  User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -47,16 +49,16 @@ const quickActions = [
     color: "from-emerald-400 to-teal-500",
   },
   {
+    icon: UserIcon,
+    label: "My Profile",
+    href: "/profile",
+    color: "from-blue-600 to-indigo-600",
+  },
+  {
     icon: Sparkles,
     label: "AI Assistant",
     href: "/ai-chat",
     color: "from-purple to-pink-500",
-  },
-  {
-    icon: FileText,
-    label: "My Documents",
-    href: "/documents",
-    color: "from-blue to-purple",
   },
 ];
 
@@ -347,68 +349,89 @@ export default function DashboardPage() {
           >
             {/* Premium Upgrade Card (shown for free users) */}
             {!user?.student_profile?.is_premium && (
-              <div className="glass rounded-2xl p-6 border border-amber-500/20">
-                <h3 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-amber-400" />
-                  Unlock Full Access
-                </h3>
-                <p className="text-sm text-text-secondary mb-4">
-                  You&apos;re on the free plan. Upgrade once to get:
+              <div className="glass rounded-2xl p-6 border border-amber-500/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <Crown className="w-5 h-5 text-amber-500" />
+                  <h3 className="text-base font-bold text-text-primary">
+                    Scholar VIP Pass ($29)
+                  </h3>
+                </div>
+                <p className="text-xs text-text-secondary mb-4">
+                  Unlock the full database of 100+ universities & 400+ CSC scholarships for life:
                 </p>
                 <ul className="space-y-2 mb-5">
                   {[
-                    "All 114+ scholarships (not just 5 per type)",
-                    "Unlimited AI chat messages",
-                    "Application tracking",
-                    "Document management",
+                    "All 100+ universities & 3D VR tours",
+                    "Direct official portal application links",
+                    "Unlimited AI matching & SOP generator",
+                    "ScholarTrack Pipeline CRM",
                   ].map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-sm text-text-secondary">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      {item}
+                    <li key={item} className="flex items-center gap-2 text-xs text-text-secondary">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                      <span>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <button
-                  onClick={async () => {
-                    const res = await activatePremium();
-                    if (res.data?.is_premium) {
-                      const userRes = await getCurrentUser();
-                      if (userRes.data) setUser(userRes.data);
-                    }
-                  }}
-                  className="w-full btn-gradient py-3 rounded-xl text-sm"
+                <Link
+                  href="/pricing"
+                  className="w-full btn-gradient py-3 rounded-xl text-xs font-bold block text-center shadow-lg shadow-amber-500/20"
                 >
-                  <span>Upgrade Now — One-Time Payment</span>
-                </button>
+                  <span>Unlock Lifetime VIP ($29)</span>
+                </Link>
               </div>
             )}
 
-            {/* Profile Card (shown for premium users) */}
-            {user?.student_profile?.is_premium && (
-              <div className="glass rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-text-primary mb-5 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-cyan" />
-                  Your Profile
+            {/* Profile Snapshot Card (linking to dedicated /profile page) */}
+            <div className="glass rounded-2xl p-6 border border-border-glass">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-glass">
+                <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
+                  <UserIcon className="w-4 h-4 text-cyan" />
+                  <span>Student Profile</span>
                 </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-muted">Username</span>
-                    <span className="text-text-primary">{user?.username}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-muted">Email</span>
-                    <span className="text-text-primary">{user?.email}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-muted">Premium</span>
-                    <span className="text-emerald-400 font-medium flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Active
+                <Link
+                  href="/profile"
+                  className="text-xs text-cyan hover:underline font-semibold flex items-center gap-1"
+                >
+                  <span>Edit Profile</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Username</span>
+                  <span className="text-text-primary font-semibold">@{user?.username}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Full Name</span>
+                  <span className="text-text-primary font-medium">
+                    {user?.first_name ? `${user.first_name} ${user.last_name || ""}` : "Not set"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Location</span>
+                  <span className="text-text-secondary">
+                    {user?.student_profile?.city ? `${user.student_profile.city}, Morocco` : "Morocco 🇲🇦"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Plan Status</span>
+                  {user?.student_profile?.is_premium ? (
+                    <span className="text-amber-500 dark:text-amber-400 font-bold flex items-center gap-1">
+                      <Crown className="w-3 h-3" />
+                      Lifetime VIP
                     </span>
-                  </div>
+                  ) : (
+                    <span className="text-text-muted">Free Explorer</span>
+                  )}
                 </div>
               </div>
-            )}
+              <Link
+                href="/profile"
+                className="mt-4 w-full py-2.5 rounded-xl glass text-center text-xs font-bold text-cyan hover:bg-white/10 transition-all border border-border-glass block"
+              >
+                Open Dedicated Profile Page →
+              </Link>
+            </div>
 
             <div className="glass rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-text-primary mb-5 flex items-center gap-2">
