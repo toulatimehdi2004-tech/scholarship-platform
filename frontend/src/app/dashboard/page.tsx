@@ -401,7 +401,7 @@ export default function DashboardPage() {
             {[
               {
                 title: "Visa (X1/X2)",
-                desc: "Official CVASC & Embassy",
+                desc: "RDV Visa & Embassy",
                 href: "/profile",
                 icon: Globe,
                 color: "from-blue-600 to-cyan",
