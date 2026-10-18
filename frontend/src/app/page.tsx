@@ -214,7 +214,7 @@ export default function HomePage() {
           >
             <span className="text-text-primary">Discover Your Future</span>
             <br />
-            <span className="gradient-text drop-shadow-[0_0_40px_rgba(6,182,212,0.35)]">
+            <span className="gradient-text drop-shadow-[0_0_40px_rgba(37,99,235,0.35)]">
               in China
             </span>
           </motion.h1>
@@ -235,7 +235,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.8 }}
             className="max-w-xl mx-auto mb-8"
           >
-            <div className="glass rounded-2xl p-2 flex items-center gap-2 glow-cyan-sm border border-cyan/30 focus-within:border-cyan focus-within:shadow-[0_0_35px_rgba(6,182,212,0.35)] transition-all">
+            <div className="glass rounded-2xl p-2 flex items-center gap-2 glow-cyan-sm border border-cyan/30 focus-within:border-cyan focus-within:shadow-[0_0_35px_rgba(37,99,235,0.35)] transition-all">
               <Search className="w-5 h-5 text-cyan ml-3 flex-shrink-0" />
               <input
                 type="text"

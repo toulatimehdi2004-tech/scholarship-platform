@@ -20,7 +20,7 @@ export default function Logo({
         alt="Moroccan Scholar Emblem"
         width={size}
         height={size}
-        className="w-full h-full object-contain filter drop-shadow-[0_2px_12px_rgba(5,150,105,0.4)] transition-transform duration-300 group-hover:scale-105"
+        className="w-full h-full object-contain filter drop-shadow-[0_2px_12px_rgba(37,99,235,0.4)] transition-transform duration-300 group-hover:scale-105"
         loading="eager"
       />
     </div>
