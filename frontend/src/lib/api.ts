@@ -466,7 +466,7 @@ export async function getApplications(): Promise<ApiResponse<unknown[]>> {
   return fetchApi<unknown[]>("/applications/");
 }
 
-// ── ScholarTrack Application CRM Pipeline API ─────────────────
+// ── ScholarChina Application CRM Pipeline API ─────────────────
 export interface ApplicationTrackerItem {
   id: number;
   scholarship_id?: number;

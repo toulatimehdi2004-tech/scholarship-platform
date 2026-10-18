@@ -186,7 +186,7 @@ export default function ProviderPortalPage() {
             Certified Service Provider Desk (Translation & Notarization)
           </span>
           <h1 className="text-2xl sm:text-3xl font-black text-text-primary">
-            Moroccan Scholar Sworn Translation Bureau
+            ScholarChina Certified Translation Bureau
           </h1>
           <p className="text-xs sm:text-sm text-text-secondary">
             Process student document translation orders, inspect source diplomas & deliver certified Chinese translations.
@@ -595,7 +595,7 @@ export default function ProviderPortalPage() {
                   </label>
                   <textarea
                     rows={4}
-                    defaultValue="This is to certify that the attached document is a true, accurate, and faithful translation of the original academic transcript from French/English into Chinese, prepared by Moroccan Scholar Certified Translation Bureau."
+                    defaultValue="This is to certify that the attached document is a true, accurate, and faithful translation of the original academic transcript from French/English into Chinese, prepared by ScholarChina Certified Translation Bureau."
                     className="w-full glass rounded-xl p-3 text-xs text-text-primary outline-none border border-border-glass leading-relaxed"
                   />
                 </div>

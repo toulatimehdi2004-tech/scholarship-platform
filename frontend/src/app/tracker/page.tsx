@@ -447,8 +447,8 @@ export default function ApplicationTrackerPage() {
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
                   Application Tracker & CRM
                 </h1>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-cyan/15 text-cyan border border-cyan/30">
-                  ScholarTrack™
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                  ScholarChina Pipeline
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-text-secondary mt-0.5">

@@ -552,7 +552,7 @@ export default function HomePage() {
 
       <footer className="py-8 px-4 border-t border-border-glass">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-text-muted">
-          <span>Moroccan Scholar - Plateforme Officielle des Bourses en Chine 🇲🇦</span>
+          <span>ScholarChina — China Universities & Scholarships Gateway 🇨🇳</span>
           <div className="flex flex-wrap gap-4 sm:gap-6">
             <Link href="/scholarships" className="hover:text-cyan transition-colors">
               Scholarships
@@ -570,7 +570,7 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Auth Gate Modal for Moroccan Students */}
+      {/* Auth Gate Modal */}
       <AuthGateModal
         isOpen={showAuthGate && !getToken()}
         onClose={() => setShowAuthGate(false)}
@@ -580,8 +580,8 @@ export default function HomePage() {
         }}
         role="student"
         canClose={true}
-        title="Moroccan Scholar • Student Access"
-        subtitle="Sign in or create an account to explore 100+ Chinese Universities & 400+ Scholarships for Moroccans"
+        title="ScholarChina • Student Access"
+        subtitle="Sign in or create an account to explore 100+ Chinese Universities & 400+ CSC Scholarships"
         onSuccess={() => {
           setShowAuthGate(false);
           router.push("/scholarships");

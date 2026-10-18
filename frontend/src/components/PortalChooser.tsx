@@ -176,9 +176,9 @@ export default function PortalChooser({
             <div className="mb-3 hover:scale-105 transition-transform duration-300">
               <Logo size={68} />
             </div>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono text-xs font-bold tracking-wide uppercase mb-3 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              Moroccan Scholar Global Platform • Maroc 🇲🇦
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 font-mono text-xs font-bold tracking-wide uppercase mb-3 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              ScholarChina Global Platform • 🇨🇳
             </span>
             <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-3">
               Choose Your Platform Portal
@@ -277,7 +277,7 @@ export default function PortalChooser({
           >
             <span className="flex items-center gap-1.5 font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              Exclusively dedicated to Moroccan scholars applying to Chinese universities
+              Global gateway connecting scholars directly to Chinese universities & CSC scholarships
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5 font-medium">

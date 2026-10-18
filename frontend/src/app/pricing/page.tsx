@@ -43,7 +43,7 @@ const COMPARISON_FEATURES = [
   { feature: "Top Chinese Universities", free: "Top 7 Universities", vip: "All 100+ Campuses (3D VR Tours)" },
   { feature: "CSC & Provincial Scholarships", free: "5 per category", vip: "400+ Verified Real Grants" },
   { feature: "Direct Official Portal Links", free: false, vip: true },
-  { feature: "ScholarTrack Application Kanban CRM", free: "Limited (3 apps)", vip: "Unlimited In-Flight Pipeline" },
+  { feature: "ScholarChina Application Pipeline CRM", free: "Limited (3 apps)", vip: "Unlimited In-Flight Pipeline" },
   { feature: "Document Checklist & Deadline Alerts", free: "Basic", vip: "Full Auto-Calculated Progress" },
   { feature: "AI Scholarship Matching Chatbot", free: "3 messages / day", vip: "Unlimited AI Inquiries" },
   { feature: "SOP & Motivation Letter Generator", free: false, vip: "Unlimited (PDF & DOCX Export)" },
@@ -59,7 +59,7 @@ const FAQS = [
   },
   {
     q: "How does this compare to hiring a study abroad agency in Morocco?",
-    a: "Traditional agencies in Morocco charge between 15,000 DH and 35,000 DH ($1,500 - $3,500) to submit Chinese university applications. Moroccan Scholar provides you with direct links to the official university and CSC portals, required document checklists, and acceptance benchmarks so you can apply directly and keep 100% of your money.",
+    a: "Traditional agencies in Morocco charge between 15,000 DH and 35,000 DH ($1,500 - $3,500) to submit Chinese university applications. ScholarChina provides you with direct links to the official university and CSC portals, required document checklists, and acceptance benchmarks so you can apply directly and keep 100% of your money.",
   },
   {
     q: "Which scholarships are included in the Lifetime VIP pass?",
@@ -141,7 +141,7 @@ export default function PricingPage() {
             className="text-base sm:text-lg text-text-secondary max-w-2xl mx-auto"
           >
             Full direct access to 100+ Chinese universities, 400+ CSC full scholarships, and our interactive
-            ScholarTrack pipeline. Pay once. Never pay recurring subscriptions.
+            ScholarChina pipeline. Pay once. Never pay recurring subscriptions.
           </motion.p>
 
           {/* Currency Switcher */}
@@ -241,7 +241,7 @@ export default function PricingPage() {
                 ))}
                 {[
                   "Locked official portal application links",
-                  "No automated ScholarTrack Kanban CRM",
+                  "No automated Kanban CRM pipeline",
                   "No statement of purpose (SOP) generator",
                   "No deadline alerts or document checklist",
                 ].map((item, i) => (
@@ -309,7 +309,7 @@ export default function PricingPage() {
                   "All 100+ Chinese Universities & 3D VR Campuses",
                   "400+ Verified CSC, Provincial & Presidential Grants",
                   "Direct Official University Application Portal Links",
-                  "ScholarTrack Pipeline CRM (Drag & Drop Kanban)",
+                  "ScholarChina Pipeline CRM (Drag & Drop Kanban)",
                   "Custom Document Checklists & Deadline Countdown",
                   "Unlimited AI Scholarship Matching & Chat",
                   "AI Motivation Letter (SOP) Writer with DOCX Export",
@@ -372,7 +372,7 @@ export default function PricingPage() {
                 Why Pay 20,000 DH to an Agency When You Can Apply Directly?
               </h3>
               <p className="text-sm text-text-secondary max-w-2xl">
-                Commercial agencies in Morocco charge students between 15,000 DH and 30,000 DH simply to copy-paste documents into official university portals. Moroccan Scholar gives you the exact direct portal links, requirements, and document templates for a one-time 290 DH investment.
+                Commercial agencies in Morocco charge students between 15,000 DH and 30,000 DH simply to copy-paste documents into official university portals. ScholarChina gives you the exact direct portal links, requirements, and document templates for a one-time 290 DH investment.
               </p>
             </div>
             <button
@@ -481,7 +481,7 @@ export default function PricingPage() {
               Ready to Win Your Chinese University Scholarship?
             </h3>
             <p className="text-sm text-text-secondary mb-6">
-              Join dozens of Moroccan scholars studying across China. One single payment of {currentPrice.vipPrice}.
+              Join ambitious scholars studying across China on ScholarChina. One single payment of {currentPrice.vipPrice}.
             </p>
             <button
               onClick={handleCtaClick}

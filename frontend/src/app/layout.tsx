@@ -13,9 +13,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Moroccan Scholar (منحة المغرب) — Chinese University Scholarships & 3D Tours",
+  title: "ScholarChina — Chinese University Scholarships & 3D Campus Tours",
   description:
-    "Exclusively for Moroccan scholars: CSC full scholarships, 100+ Chinese university campuses in 3D VR, sworn document translations, and admissions tracking.",
+    "ScholarChina: Official gateway to CSC full scholarships, 100+ prestigious Chinese university campuses in 3D VR, document checklists, and application pipeline tracking.",
 };
 
 export default function RootLayout({

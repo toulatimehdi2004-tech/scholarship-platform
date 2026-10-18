@@ -164,8 +164,8 @@ export default function UniversitiesPage() {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  🇲🇦 Moroccan Scholar Directory
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                  🇨🇳 ScholarChina Official Directory
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan/15 text-cyan border border-cyan/30">
                   102 Elite Universities in China
@@ -185,7 +185,7 @@ export default function UniversitiesPage() {
             </div>
           </div>
           <p className="text-text-secondary max-w-2xl text-sm sm:text-base">
-            Explore 100+ prestigious Chinese institutions accepting Moroccan scholars. Inspect 3D VR campus panoramas, degree programs, and full CSC scholarship quotas.
+            Explore 100+ prestigious Chinese institutions on ScholarChina. Inspect 3D VR campus panoramas, degree programs, and full CSC scholarship quotas.
           </p>
         </motion.div>
 

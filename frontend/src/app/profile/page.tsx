@@ -590,7 +590,7 @@ export default function ProfilePage() {
                 >
                   <span className="flex items-center gap-2">
                     <Layers className="w-4 h-4 text-cyan" />
-                    <span>ScholarTrack Kanban CRM</span>
+                    <span>ScholarChina Pipeline CRM</span>
                   </span>
                   <ArrowRight className="w-3.5 h-3.5 text-text-muted group-hover:text-cyan group-hover:translate-x-0.5 transition-all" />
                 </Link>

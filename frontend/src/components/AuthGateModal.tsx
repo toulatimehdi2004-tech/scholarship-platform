@@ -86,20 +86,20 @@ export default function AuthGateModal({
   // Role metadata
   const roleConfig = {
     student: {
-      badge: '🇲🇦 Moroccan Scholar • Student Access',
-      badgeColor: 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/40',
+      badge: '🇨🇳 ScholarChina • Student Access',
+      badgeColor: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/40',
       icon: GraduationCap,
-      gradient: 'from-emerald-500 via-teal-500 to-cyan',
+      gradient: 'from-blue-600 via-indigo-600 to-cyan',
       defaultTitle: 'Student Sign In & Portal Access',
       defaultSubtitle:
-        'Exclusively for Moroccan students seeking full and partial scholarships across 100+ Chinese universities.',
+        'Official gateway for students seeking full and partial scholarships across 100+ Chinese universities.',
       highlights: [
-        '🇲🇦 Exclusively for Moroccan Students',
+        '🇨🇳 Official ScholarChina Gateway',
         '🎓 100+ Chinese Universities & 3D Tours',
         '📜 400+ CSC Full & Partial Scholarships',
         '👑 Lifetime VIP Pass Access',
       ],
-      btnText: tab === 'login' ? 'Sign In as Moroccan Student' : 'Create Moroccan Student Account',
+      btnText: tab === 'login' ? 'Sign In to ScholarChina' : 'Create ScholarChina Account',
     },
     university: {
       badge: '🏛️ University Admissions Officer Desk • Strict Accreditation Gate',

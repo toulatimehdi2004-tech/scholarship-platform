@@ -206,7 +206,7 @@ export default function DashboardPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-text-secondary">ScholarTrack-style pipeline tracking your active Chinese university applications</p>
+                <p className="text-xs text-text-secondary">Interactive pipeline tracking your active Chinese university applications</p>
               </div>
             </div>
             <Link
@@ -364,7 +364,7 @@ export default function DashboardPage() {
                     "All 100+ universities & 3D VR tours",
                     "Direct official portal application links",
                     "Unlimited AI matching & SOP generator",
-                    "ScholarTrack Pipeline CRM",
+                    "ScholarChina Pipeline CRM",
                   ].map((item) => (
                     <li key={item} className="flex items-center gap-2 text-xs text-text-secondary">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />

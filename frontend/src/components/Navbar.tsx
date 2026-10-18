@@ -129,12 +129,13 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="group-hover:glow-cyan-sm transition-all duration-300 rounded-xl block">
-                <Logo size={36} />
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <span className="transition-all duration-300 rounded-full block group-hover:scale-105">
+                <Logo size={38} />
               </span>
-              <span className="text-lg font-bold gradient-text hidden sm:block tracking-tight">
-                Moroccan Scholar
+              <span className="text-xl font-black tracking-tight hidden sm:flex items-center">
+                <span className="text-text-primary">Scholar</span>
+                <span className="text-blue-500">China</span>
               </span>
             </Link>
 
@@ -525,8 +526,8 @@ export default function Navbar() {
       <AuthGateModal
         isOpen={showAuthGate}
         onClose={() => setShowAuthGate(false)}
-        title="Sign In to Moroccan Scholar"
-        subtitle="Exclusively for Moroccan Students: 100+ Chinese Universities & CSC Scholarships"
+        title="Sign In to ScholarChina"
+        subtitle="Gateway to 100+ Chinese Universities & CSC Full Scholarships"
       />
     </>
   );

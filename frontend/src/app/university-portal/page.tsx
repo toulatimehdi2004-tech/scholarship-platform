@@ -842,7 +842,7 @@ export default function UniversityPortalPage() {
                 <span>Moroccan Regional Breakdown (Maroc 🇲🇦)</span>
               </h3>
               <p className="text-xs text-text-muted mb-6">
-                Origin regions of Moroccan students applying to Chinese universities on Moroccan Scholar.
+                Origin regions of students applying to Chinese universities on ScholarChina.
               </p>
 
               <div className="space-y-4">

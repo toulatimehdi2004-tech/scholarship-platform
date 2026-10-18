@@ -6,6 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loginUser, setToken } from "@/lib/api";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,12 +51,14 @@ export default function LoginPage() {
         className="glass rounded-3xl p-8 sm:p-10 w-full max-w-md glow-cyan"
       >
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center mx-auto mb-4">
-            <LogIn className="w-7 h-7 text-white" />
+          <div className="flex justify-center mb-4">
+            <Logo size={64} />
           </div>
-          <h1 className="text-2xl font-bold text-text-primary">Welcome Back</h1>
+          <h1 className="text-2xl font-black text-text-primary tracking-tight">
+            Sign In to <span className="text-blue-500">ScholarChina</span>
+          </h1>
           <p className="text-text-secondary text-sm mt-1">
-            Sign in to access your scholarships
+            Access your scholarship matches & application pipeline
           </p>
         </div>
 
