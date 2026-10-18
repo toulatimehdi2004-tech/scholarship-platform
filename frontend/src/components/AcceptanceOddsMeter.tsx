@@ -487,8 +487,8 @@ export default function AcceptanceOddsMeter({
                 </div>
 
                 {/* Key Deciding Factor */}
-                <div className="text-[11px] text-text-secondary leading-relaxed bg-black/20 p-2.5 rounded-xl border border-white/5">
-                  <strong className="text-text-primary block mb-0.5 font-semibold">
+                <div className="text-[11px] text-slate-700 dark:text-text-secondary leading-relaxed bg-slate-50 dark:bg-black/20 p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
+                  <strong className="text-slate-900 dark:text-text-primary block mb-0.5 font-semibold">
                     Deciding Factor:
                   </strong>
                   {admit.keyFactor}

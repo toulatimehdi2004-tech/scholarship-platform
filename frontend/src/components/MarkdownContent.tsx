@@ -251,18 +251,18 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
   };
 
   return (
-    <div className="my-3 rounded-xl border border-white/10 bg-black/40 overflow-hidden">
-      <div className="flex items-center justify-between px-3.5 py-1.5 bg-white/5 border-b border-white/10 text-xs text-text-muted">
+    <div className="my-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/40 overflow-hidden shadow-sm dark:shadow-none">
+      <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-200/60 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 text-xs text-slate-600 dark:text-text-muted">
         <span className="font-mono uppercase">{lang || "code"}</span>
         <button
           onClick={copy}
-          className="flex items-center gap-1 hover:text-text-primary px-2 py-0.5 rounded transition-colors"
+          className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-text-primary px-2 py-0.5 rounded transition-colors"
         >
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
           <span>{copied ? "Copied" : "Copy"}</span>
         </button>
       </div>
-      <pre className="p-3.5 overflow-x-auto text-xs font-mono text-text-primary leading-relaxed">
+      <pre className="p-3.5 overflow-x-auto text-xs font-mono text-slate-800 dark:text-text-primary leading-relaxed">
         <code>{code}</code>
       </pre>
     </div>

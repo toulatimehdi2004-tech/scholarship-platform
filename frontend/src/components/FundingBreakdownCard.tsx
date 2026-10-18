@@ -148,7 +148,7 @@ export default function FundingBreakdownCard({
         </div>
 
         {/* Currency Switcher Toggle */}
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-black/40 border border-white/10 self-start lg:self-center backdrop-blur-md">
+        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 self-start lg:self-center backdrop-blur-md">
           {(Object.keys(CURRENCIES) as Currency[]).map((cKey) => {
             const item = CURRENCIES[cKey];
             const active = selectedCurrency === cKey;
@@ -159,7 +159,7 @@ export default function FundingBreakdownCard({
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   active
                     ? "bg-gradient-to-r from-emerald-400 to-teal-500 text-black shadow-lg shadow-emerald-500/30 font-extrabold"
-                    : "text-text-secondary hover:text-white hover:bg-white/5"
+                    : "text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5"
                 }`}
               >
                 <span>{item.flag}</span>
