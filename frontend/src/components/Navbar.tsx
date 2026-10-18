@@ -32,7 +32,6 @@ const navKeys = [
   { href: "/universities", key: "nav.universities" },
   { href: "/tracker", key: "nav.tracker" },
   { href: "/ai-chat", key: "nav.aiChat" },
-  { href: "/pricing", key: "nav.pricing" },
   { href: "/dashboard", key: "nav.dashboard" },
 ];
 
