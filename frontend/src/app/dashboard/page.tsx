@@ -296,24 +296,24 @@ export default function DashboardPage() {
           {/* 5-Stage Metrics */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
             <div className="p-3 rounded-xl bg-slate-500/10 border border-slate-500/20 text-center">
-              <div className="text-[11px] font-semibold text-text-muted mb-0.5">📌 Wishlist</div>
-              <div className="text-xl font-extrabold text-slate-300">{stats.wishlist}</div>
+              <div className="text-[11px] font-semibold text-slate-600 dark:text-text-muted mb-0.5">📌 Wishlist</div>
+              <div className="text-xl font-extrabold text-slate-900 dark:text-slate-200">{stats.wishlist}</div>
             </div>
             <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center">
-              <div className="text-[11px] font-semibold text-blue-300 mb-0.5">📝 Preparing Docs</div>
-              <div className="text-xl font-extrabold text-blue-400">{stats.preparing_docs}</div>
+              <div className="text-[11px] font-semibold text-blue-700 dark:text-blue-300 mb-0.5">📝 Preparing Docs</div>
+              <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">{stats.preparing_docs}</div>
             </div>
             <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-center">
-              <div className="text-[11px] font-semibold text-purple-300 mb-0.5">🚀 Submitted</div>
-              <div className="text-xl font-extrabold text-purple-400">{stats.submitted}</div>
+              <div className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 mb-0.5">🚀 Submitted</div>
+              <div className="text-xl font-extrabold text-purple-600 dark:text-purple-400">{stats.submitted}</div>
             </div>
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center">
-              <div className="text-[11px] font-semibold text-amber-300 mb-0.5">🔍 In Review</div>
-              <div className="text-xl font-extrabold text-amber-400">{stats.interview}</div>
+              <div className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 mb-0.5">🔍 In Review</div>
+              <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400">{stats.interview}</div>
             </div>
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center col-span-2 sm:col-span-1">
-              <div className="text-[11px] font-semibold text-emerald-300 mb-0.5">🏆 Accepted</div>
-              <div className="text-xl font-extrabold text-emerald-400">{stats.accepted}</div>
+              <div className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 mb-0.5">🏆 Accepted</div>
+              <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400">{stats.accepted}</div>
             </div>
           </div>
 

@@ -692,29 +692,6 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      <footer className="py-8 px-4 border-t border-border-glass">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-text-muted">
-          <span>{t("home.footerGateway")}</span>
-          <div className="flex flex-wrap gap-4 sm:gap-6">
-            <Link href="/scholarships" className="hover:text-cyan transition-colors">
-              {t("nav.scholarships")}
-            </Link>
-            <Link href="/universities" className="hover:text-cyan transition-colors">
-              {t("nav.universities")}
-            </Link>
-            <Link href="/stories" className="hover:text-cyan transition-colors font-bold text-cyan">
-              {t("home.footerStories")}
-            </Link>
-            <Link href="/ai-chat" className="hover:text-cyan transition-colors">
-              {t("nav.aiChat")}
-            </Link>
-            <Link href="/dashboard" className="hover:text-cyan transition-colors">
-              {t("nav.dashboard")}
-            </Link>
-          </div>
-        </div>
-      </footer>
-
       {/* Auth Gate Modal */}
       <AuthGateModal
         isOpen={showAuthGate && !getToken()}

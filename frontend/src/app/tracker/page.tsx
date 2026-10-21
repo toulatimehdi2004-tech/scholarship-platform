@@ -62,9 +62,9 @@ const STAGES: StageConfig[] = [
     titleFr: "Favoris & Wishlist",
     titleAr: "قائمة الرغبات",
     icon: "📌",
-    color: "from-cyan/20 to-blue-500/10",
-    borderHover: "hover:border-cyan/50",
-    badgeBg: "bg-cyan/10 border-cyan/30 text-cyan",
+    color: "from-blue-500/20 to-indigo-500/10",
+    borderHover: "hover:border-blue-400/50",
+    badgeBg: "bg-blue-50 dark:bg-cyan/10 border-blue-200 dark:border-cyan/30 text-blue-700 dark:text-cyan",
     badgeText: "Wishlist",
   },
   {
@@ -75,7 +75,7 @@ const STAGES: StageConfig[] = [
     icon: "📝",
     color: "from-purple/20 to-pink-500/10",
     borderHover: "hover:border-purple/50",
-    badgeBg: "bg-purple/10 border-purple/30 text-purple",
+    badgeBg: "bg-purple-50 dark:bg-purple/10 border-purple-200 dark:border-purple/30 text-purple-700 dark:text-purple",
     badgeText: "En Préparation",
   },
   {
@@ -86,7 +86,7 @@ const STAGES: StageConfig[] = [
     icon: "🚀",
     color: "from-blue-500/20 to-indigo-500/10",
     borderHover: "hover:border-blue-400/50",
-    badgeBg: "bg-blue-500/10 border-blue-500/30 text-blue-400",
+    badgeBg: "bg-indigo-50 dark:bg-blue-500/10 border-indigo-200 dark:border-blue-500/30 text-indigo-700 dark:text-blue-400",
     badgeText: "Soumis",
   },
   {
@@ -97,7 +97,7 @@ const STAGES: StageConfig[] = [
     icon: "🔍",
     color: "from-amber-500/20 to-orange-500/10",
     borderHover: "hover:border-amber-400/50",
-    badgeBg: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+    badgeBg: "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-400",
     badgeText: "En Examen",
   },
   {
@@ -108,7 +108,7 @@ const STAGES: StageConfig[] = [
     icon: "🏆",
     color: "from-emerald-500/20 to-teal-500/10",
     borderHover: "hover:border-emerald-400/50",
-    badgeBg: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+    badgeBg: "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-400",
     badgeText: "Gagné !",
   },
 ];
@@ -531,13 +531,13 @@ export default function ApplicationTrackerPage() {
         {/* Search & Actions */}
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-text-muted" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={lang === "ar" ? "تصفية حسب الجامعة أو المنحة..." : lang === "fr" ? "Filtrer université ou bourse..." : "Filter university or scholarship..."}
-              className="pl-9 pr-4 py-2 rounded-xl glass border border-white/10 text-xs sm:text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-cyan/50 transition-colors w-48 sm:w-64"
+              className="pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs sm:text-sm text-slate-900 dark:text-text-primary placeholder:text-slate-400 dark:placeholder:text-text-muted outline-none focus:border-blue-500 dark:focus:border-cyan/50 shadow-sm transition-colors w-48 sm:w-64"
             />
           </div>
           <Link
@@ -586,71 +586,71 @@ export default function ApplicationTrackerPage() {
 
       {/* Stats KPI Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
-        <div className="glass rounded-2xl p-3.5 border border-white/5 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-cyan/15 text-cyan flex items-center justify-center font-bold text-sm">
+        <div className="bg-white dark:glass rounded-2xl p-3.5 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-none flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-cyan/15 text-blue-700 dark:text-cyan flex items-center justify-center font-bold text-sm">
             {stats.total}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+            <div className="text-[10px] text-slate-500 dark:text-text-muted uppercase tracking-wider font-semibold">
               {lang === "ar" ? "إجمالي المتابعة" : lang === "fr" ? "Total Suivies" : "Total Tracked"}
             </div>
-            <div className="text-sm font-bold text-text-primary">
+            <div className="text-sm font-bold text-slate-900 dark:text-text-primary">
               {stats.total} {lang === "ar" ? "طلبات" : lang === "fr" ? "Candidatures" : "Applications"}
             </div>
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-3.5 border border-white/5 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-purple/15 text-purple flex items-center justify-center font-bold text-sm">
+        <div className="bg-white dark:glass rounded-2xl p-3.5 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-none flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple/15 text-purple-700 dark:text-purple flex items-center justify-center font-bold text-sm">
             {stats.preparing}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+            <div className="text-[10px] text-slate-500 dark:text-text-muted uppercase tracking-wider font-semibold">
               {lang === "ar" ? "تجهيز الوثائق" : lang === "fr" ? "En Préparation" : "In Preparation"}
             </div>
-            <div className="text-sm font-bold text-purple">
+            <div className="text-sm font-bold text-purple-700 dark:text-purple">
               {stats.preparing} {lang === "ar" ? "جارية" : lang === "fr" ? "En Cours" : "Active"}
             </div>
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-3.5 border border-white/5 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center font-bold text-sm">
+        <div className="bg-white dark:glass rounded-2xl p-3.5 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-none flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-blue-500/15 text-indigo-700 dark:text-blue-400 flex items-center justify-center font-bold text-sm">
             {stats.submitted}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+            <div className="text-[10px] text-slate-500 dark:text-text-muted uppercase tracking-wider font-semibold">
               {lang === "ar" ? "تم التقديم" : lang === "fr" ? "Déposées" : "Submitted"}
             </div>
-            <div className="text-sm font-bold text-blue-400">
+            <div className="text-sm font-bold text-indigo-700 dark:text-blue-400">
               {stats.submitted} {lang === "ar" ? "في البوابات" : lang === "fr" ? "Aux Portails" : "Portals"}
             </div>
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-3.5 border border-white/5 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold text-sm">
+        <div className="bg-white dark:glass rounded-2xl p-3.5 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-none flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold text-sm">
             {stats.interview}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+            <div className="text-[10px] text-slate-500 dark:text-text-muted uppercase tracking-wider font-semibold">
               {lang === "ar" ? "مراجعة / مقابلة" : lang === "fr" ? "Examen / Oral" : "Interview / Review"}
             </div>
-            <div className="text-sm font-bold text-amber-400">
+            <div className="text-sm font-bold text-amber-700 dark:text-amber-400">
               {stats.interview} {lang === "ar" ? "قيد التدقيق" : lang === "fr" ? "En Revue" : "Reviewing"}
             </div>
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-3.5 border border-white/5 flex items-center gap-3 col-span-2 sm:col-span-1">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+        <div className="bg-white dark:glass rounded-2xl p-3.5 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-none flex items-center gap-3 col-span-2 sm:col-span-1">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">
             {stats.won}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+            <div className="text-[10px] text-slate-500 dark:text-text-muted uppercase tracking-wider font-semibold">
               {lang === "ar" ? "المنح المحصول عليها" : lang === "fr" ? "Bourses Obtenues" : "Won Scholarships"}
             </div>
-            <div className="text-sm font-bold text-emerald-400">
+            <div className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
               {stats.won} {lang === "ar" ? "مقبول 🏆" : lang === "fr" ? "Admis 🏆" : "Won 🏆"}
             </div>
           </div>
@@ -665,14 +665,14 @@ export default function ApplicationTrackerPage() {
           return (
             <div
               key={stage.key}
-              className="glass rounded-3xl p-3.5 border border-white/10 flex flex-col min-h-[580px] bg-slate-950/40 relative"
+              className="rounded-3xl p-3.5 border border-slate-200/90 dark:border-white/10 flex flex-col min-h-[580px] bg-slate-100/80 dark:bg-slate-950/40 relative shadow-sm"
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/90 dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{stage.icon}</span>
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-text-primary">
                       {lang === "ar" ? stage.titleAr : lang === "fr" ? stage.titleFr : stage.title}
                     </h3>
                   </div>
@@ -685,9 +685,9 @@ export default function ApplicationTrackerPage() {
               {/* Cards list */}
               <div className="space-y-3 flex-1 overflow-y-auto max-h-[720px] pr-1">
                 {items.length === 0 ? (
-                  <div className="h-44 rounded-2xl border-2 border-dashed border-white/5 flex flex-col items-center justify-center p-4 text-center">
-                    <p className="text-xs text-text-muted">{lang === "ar" ? "لا توجد طلبات هنا" : lang === "fr" ? "Aucune candidature" : "No applications"}</p>
-                    <p className="text-[11px] text-text-muted/60 mt-0.5">
+                  <div className="h-44 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 flex flex-col items-center justify-center p-4 text-center bg-white/40 dark:bg-transparent">
+                    <p className="text-xs text-slate-500 dark:text-text-muted font-medium">{lang === "ar" ? "لا توجد طلبات هنا" : lang === "fr" ? "Aucune candidature" : "No applications"}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-text-muted/60 mt-0.5">
                       {lang === "ar" ? "اسحب أو انقل المنح إلى هذه الخانة" : lang === "fr" ? "Glissez ou déplacez des bourses ici" : "Drag or move scholarships here"}
                     </p>
                   </div>
@@ -707,13 +707,13 @@ export default function ApplicationTrackerPage() {
                         layout
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`rounded-2xl p-4 bg-slate-900/90 border border-white/10 hover:border-white/25 shadow-lg transition-all group relative overflow-hidden ${
-                          isUrgent ? "border-red-500/60 ring-1 ring-red-500/30" : ""
+                        className={`rounded-2xl p-4 bg-white dark:bg-slate-900/95 border border-slate-200/90 dark:border-white/10 hover:border-blue-400/60 dark:hover:border-white/25 shadow-sm hover:shadow-md dark:shadow-lg transition-all group relative overflow-hidden ${
+                          isUrgent ? "border-red-400 dark:border-red-500/60 ring-1 ring-red-400/30 dark:ring-red-500/30" : ""
                         }`}
                       >
                         {/* Urgent Pulse Ribbon */}
                         {isUrgent && (
-                          <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-red-500/20 text-red-400 border-b border-l border-red-500/40 text-[10px] font-bold rounded-bl-xl flex items-center gap-1 animate-pulse">
+                          <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-b border-l border-red-200 dark:border-red-500/40 text-[10px] font-bold rounded-bl-xl flex items-center gap-1 animate-pulse">
                             <Clock className="w-3 h-3" />
                             <span>{lang === "ar" ? `عاجل (متبقي ${days} أيام)` : `URGENT (J-${days})`}</span>
                           </div>
@@ -721,20 +721,20 @@ export default function ApplicationTrackerPage() {
 
                         {/* Top: University & Degree Level */}
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-1.5 text-xs text-cyan font-semibold truncate">
+                          <div className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-cyan font-bold truncate">
                             <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
                             <span className="truncate">{app.scholarship.university_name || (lang === "ar" ? "جامعة صينية" : "Université Chinoise")}</span>
                           </div>
-                          <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-white/5 text-text-muted flex-shrink-0">
+                          <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-text-muted flex-shrink-0">
                             {app.scholarship.level || "Master"}
                           </span>
                         </div>
 
                         {/* Title */}
-                        <h4 className="text-xs sm:text-sm font-bold text-text-primary leading-snug line-clamp-2 mb-3">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-text-primary leading-snug line-clamp-2 mb-3">
                           <Link
                             href={`/scholarships/${app.scholarship.id}`}
-                            className="hover:text-cyan transition-colors"
+                            className="hover:text-blue-600 dark:hover:text-cyan transition-colors"
                           >
                             {app.scholarship.title}
                           </Link>
@@ -742,19 +742,19 @@ export default function ApplicationTrackerPage() {
 
                         {/* Deadline tag */}
                         <div className="flex items-center justify-between text-[11px] mb-3">
-                          <span className="text-text-muted flex items-center gap-1">
+                          <span className="text-slate-500 dark:text-text-muted flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             <span>{lang === "ar" ? "الموعد النهائي:" : lang === "fr" ? "Limite :" : "Deadline:"}</span>
                           </span>
                           <span
                             className={`font-semibold ${
                               isUrgent
-                                ? "text-red-400 font-bold"
+                                ? "text-red-600 dark:text-red-400 font-bold"
                                 : isUpcoming
-                                ? "text-amber-400"
+                                ? "text-amber-600 dark:text-amber-400"
                                 : isPassed
-                                ? "text-text-muted"
-                                : "text-text-secondary"
+                                ? "text-slate-400 dark:text-text-muted"
+                                : "text-slate-600 dark:text-text-secondary"
                             }`}
                           >
                             {days !== null
@@ -767,27 +767,27 @@ export default function ApplicationTrackerPage() {
 
                         {/* Checklist Progress Bar */}
                         {docEntries.length > 0 && (
-                          <div className="mb-3 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                          <div className="mb-3 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5">
                             <div className="flex items-center justify-between text-[11px] mb-1.5">
                               <button
                                 onClick={() =>
                                   setChecklistOpenId(isChecklistOpen ? null : app.id)
                                 }
-                                className="font-semibold text-text-secondary hover:text-cyan flex items-center gap-1 transition-colors"
+                                className="font-semibold text-slate-700 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan flex items-center gap-1 transition-colors"
                               >
-                                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                <CheckCircle2 className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
                                 <span>
                                   {app.checklist_progress?.completed ?? 0} /{" "}
                                   {app.checklist_progress?.total ?? docEntries.length} {lang === "ar" ? "وثائق جاهزة" : lang === "fr" ? "docs prêts" : "docs ready"}
                                 </span>
                               </button>
-                              <span className="text-[10px] font-bold text-cyan">
+                              <span className="text-[10px] font-bold text-blue-600 dark:text-cyan">
                                 {app.checklist_progress?.percentage ?? 0}%
                               </span>
                             </div>
-                            <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                            <div className="h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
                               <div
-                                className="h-full rounded-full bg-gradient-to-r from-cyan to-emerald-400 transition-all duration-300"
+                                className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 dark:from-cyan dark:to-emerald-400 transition-all duration-300"
                                 style={{
                                   width: `${app.checklist_progress?.percentage ?? 0}%`,
                                 }}
@@ -799,12 +799,12 @@ export default function ApplicationTrackerPage() {
                               <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: "auto" }}
-                                className="mt-2.5 pt-2 border-t border-white/5 space-y-1.5"
+                                className="mt-2.5 pt-2 border-t border-slate-200/80 dark:border-white/5 space-y-1.5"
                               >
                                 {docEntries.map(([docName, isDone]) => (
                                   <label
                                     key={docName}
-                                    className="flex items-center gap-2 text-[11px] text-text-secondary cursor-pointer hover:text-text-primary transition-colors select-none"
+                                    className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-text-secondary cursor-pointer hover:text-slate-900 dark:hover:text-text-primary transition-colors select-none"
                                   >
                                     <input
                                       type="checkbox"
@@ -812,13 +812,13 @@ export default function ApplicationTrackerPage() {
                                       onChange={() =>
                                         handleToggleChecklist(app.id, docName)
                                       }
-                                      className="rounded border-white/20 bg-white/5 text-cyan focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                                      className="rounded border-slate-300 dark:border-white/20 bg-white dark:bg-white/5 text-blue-600 dark:text-cyan focus:ring-0 focus:ring-offset-0 cursor-pointer"
                                     />
                                     <span
                                       className={
                                         isDone
-                                          ? "line-through text-text-muted"
-                                          : ""
+                                          ? "line-through text-slate-400 dark:text-text-muted"
+                                          : "font-medium"
                                       }
                                     >
                                       {docName}
@@ -832,27 +832,27 @@ export default function ApplicationTrackerPage() {
 
                         {/* Portal ID / Note Snippet */}
                         {app.portal_application_id && (
-                          <div className="mb-2 text-[10px] font-mono px-2 py-1 rounded bg-white/5 border border-white/5 text-cyan truncate flex items-center justify-between">
+                          <div className="mb-2 text-[10px] font-mono px-2 py-1 rounded bg-blue-50/80 dark:bg-white/5 border border-blue-200/70 dark:border-white/5 text-blue-700 dark:text-cyan truncate flex items-center justify-between">
                             <span className="truncate">N° {app.portal_application_id}</span>
-                            <span className="text-text-muted text-[9px]">{lang === "ar" ? "البوابة" : "Portail"}</span>
+                            <span className="text-slate-500 dark:text-text-muted text-[9px]">{lang === "ar" ? "البوابة" : "Portail"}</span>
                           </div>
                         )}
 
                         {app.notes && (
-                          <p className="text-[11px] text-text-muted italic line-clamp-1 mb-3 pl-1 border-l-2 border-purple/40">
+                          <p className="text-[11px] text-slate-600 dark:text-text-muted italic line-clamp-1 mb-3 pl-2 py-0.5 rounded-r bg-purple-50/60 dark:bg-transparent border-l-2 border-purple-500 dark:border-purple/40">
                             &quot;{app.notes}&quot;
                           </p>
                         )}
 
                         {/* Action buttons footer */}
-                        <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-1 text-xs">
+                        <div className="pt-2 border-t border-slate-200/80 dark:border-white/5 flex items-center justify-between gap-1 text-xs">
                           {/* Portal external link */}
                           {app.scholarship.application_link ? (
                             <a
                               href={app.scholarship.application_link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-cyan transition-colors"
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors border border-slate-200/60 dark:border-transparent"
                               title={lang === "ar" ? "فتح بوابة التقديم الرسمية" : "Ouvrir le portail officiel de candidature"}
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
@@ -860,7 +860,7 @@ export default function ApplicationTrackerPage() {
                           ) : (
                             <Link
                               href={`/scholarships/${app.scholarship.id}`}
-                              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-cyan transition-colors"
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors border border-slate-200/60 dark:border-transparent"
                               title={lang === "ar" ? "عرض تفاصيل المنحة" : "Voir la fiche complète"}
                             >
                               <Compass className="w-3.5 h-3.5" />
@@ -874,7 +874,7 @@ export default function ApplicationTrackerPage() {
                               setEditNotes(app.notes || "");
                               setEditPortalId(app.portal_application_id || "");
                             }}
-                            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-purple transition-colors"
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-purple-600 dark:hover:text-purple transition-colors border border-slate-200/60 dark:border-transparent"
                             title={lang === "ar" ? "إضافة ملاحظات أو رقم الطلب" : "Ajouter des notes ou N° de dossier"}
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -883,7 +883,7 @@ export default function ApplicationTrackerPage() {
                           {/* Delete from CRM */}
                           <button
                             onClick={() => handleDelete(app.id)}
-                            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-red-400 transition-colors"
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors border border-slate-200/60 dark:border-transparent"
                             title={lang === "ar" ? "حذف من المتتبع" : "Retirer du tracker"}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -901,7 +901,7 @@ export default function ApplicationTrackerPage() {
                                   if (idx > 0)
                                     handleMoveStage(app.id, STAGES[idx - 1].key);
                                 }}
-                                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-text-secondary hover:text-text-primary transition-colors"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/15 text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary transition-colors border border-slate-200/60 dark:border-transparent"
                                 title={lang === "ar" ? "نقل إلى المرحلة السابقة" : "Déplacer vers l'étape précédente"}
                               >
                                 <ChevronLeft className="w-3.5 h-3.5" />
@@ -918,7 +918,7 @@ export default function ApplicationTrackerPage() {
                                   if (idx < STAGES.length - 1)
                                     handleMoveStage(app.id, STAGES[idx + 1].key);
                                 }}
-                                className="px-2 py-1 rounded-lg bg-cyan/20 hover:bg-cyan/30 text-cyan text-[11px] font-bold flex items-center gap-1 transition-all"
+                                className="px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-cyan/20 dark:hover:bg-cyan/30 text-blue-700 dark:text-cyan text-[11px] font-bold flex items-center gap-1 transition-all border border-blue-200/80 dark:border-transparent"
                                 title={lang === "ar" ? "الانتقال إلى المرحلة التالية" : "Passer à l'étape suivante"}
                               >
                                 <span>{lang === "ar" ? "تقدم" : lang === "fr" ? "Avancer" : "Next"}</span>
@@ -940,29 +940,29 @@ export default function ApplicationTrackerPage() {
       {/* Quick Note & Application ID Modal */}
       <AnimatePresence>
         {editingItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="glass rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-white/20 shadow-2xl relative"
+              className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-slate-200 dark:border-white/20 shadow-2xl relative"
             >
               <button
                 onClick={() => setEditingItem(null)}
-                className="absolute top-5 right-5 p-2 rounded-full hover:bg-white/10 text-text-muted hover:text-text-primary transition-colors"
+                className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:text-text-muted dark:hover:text-text-primary transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
 
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-purple/20 text-purple flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple/20 text-purple-600 dark:text-purple flex items-center justify-center border border-purple-200 dark:border-transparent">
                   <Edit3 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-text-primary">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-text-primary">
                     {lang === "ar" ? "ملاحظات وبيانات مرجعية للطلب" : lang === "fr" ? "Notes & Références de Candidature" : "Application Notes & Reference"}
                   </h3>
-                  <p className="text-xs text-text-muted truncate max-w-xs sm:max-w-sm">
+                  <p className="text-xs text-slate-500 dark:text-text-muted truncate max-w-xs sm:max-w-sm">
                     {editingItem.scholarship.title}
                   </p>
                 </div>
@@ -970,7 +970,7 @@ export default function ApplicationTrackerPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-text-secondary mb-1.5">
                     {lang === "ar" ? "رقم التسجيل أو معرّف البوابة الرسمية" : lang === "fr" ? "N° d'inscription ou Identifiant Portail" : "Application N° or Portal ID"}
                   </label>
                   <input
@@ -978,15 +978,15 @@ export default function ApplicationTrackerPage() {
                     value={editPortalId}
                     onChange={(e) => setEditPortalId(e.target.value)}
                     placeholder={lang === "ar" ? "مثال: CSC2026-TSI-8912 أو PKU-ADM-4482" : "Ex: CSC2026-TSI-8912 ou PKU-ADM-4482"}
-                    className="w-full px-4 py-2.5 rounded-xl glass border border-white/15 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-cyan/50 font-mono transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/15 text-sm text-slate-900 dark:text-text-primary placeholder:text-slate-400 dark:placeholder:text-text-muted outline-none focus:border-blue-500 dark:focus:border-cyan/50 focus:bg-white dark:focus:bg-white/10 font-mono transition-colors"
                   />
-                  <p className="text-[11px] text-text-muted mt-1">
+                  <p className="text-[11px] text-slate-500 dark:text-text-muted mt-1">
                     {lang === "ar" ? "الرقم الممنوح لك عند التسجيل على البوابة الرسمية للجامعة أو موقع CSC." : lang === "fr" ? "Numéro fourni lors de votre inscription sur le portail officiel de l'université ou CSC." : "Number provided when registering on official university or CSC portal."}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-text-secondary mb-1.5">
                     {lang === "ar" ? "ملاحظات شخصية وتذكيرات" : lang === "fr" ? "Notes personnelles & Rappels" : "Personal Notes & Reminders"}
                   </label>
                   <textarea
@@ -994,21 +994,21 @@ export default function ApplicationTrackerPage() {
                     value={editNotes}
                     onChange={(e) => setEditNotes(e.target.value)}
                     placeholder={lang === "ar" ? "ملاحظات المتابعة، بيانات الأستاذ المشرف، مواعيد الرد..." : lang === "fr" ? "Notes de suivi, contacts du professeur superviseur, dates de relance, identifiants..." : "Follow-up notes, professor contact info, interview reminders..."}
-                    className="w-full px-4 py-2.5 rounded-xl glass border border-white/15 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-cyan/50 transition-colors resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/15 text-sm text-slate-900 dark:text-text-primary placeholder:text-slate-400 dark:placeholder:text-text-muted outline-none focus:border-blue-500 dark:focus:border-cyan/50 focus:bg-white dark:focus:bg-white/10 transition-colors resize-none"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-white/10">
                   <button
                     onClick={() => setEditingItem(null)}
-                    className="px-4 py-2 rounded-xl glass text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors"
+                    className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-semibold text-slate-700 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary border border-slate-200 dark:border-transparent transition-colors"
                   >
                     {lang === "ar" ? "إلغاء" : lang === "fr" ? "Annuler" : "Cancel"}
                   </button>
                   <button
                     onClick={handleSaveNotes}
                     disabled={savingNote}
-                    className="px-5 py-2 rounded-xl btn-gradient text-xs font-bold flex items-center gap-1.5 shadow-md shadow-cyan/20"
+                    className="px-5 py-2 rounded-xl btn-gradient text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-500/20"
                   >
                     {savingNote ? (
                       <span>{lang === "ar" ? "جاري الحفظ..." : lang === "fr" ? "Enregistrement..." : "Saving..."}</span>
