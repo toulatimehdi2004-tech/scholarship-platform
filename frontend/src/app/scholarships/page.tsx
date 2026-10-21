@@ -63,7 +63,7 @@ interface UniEntry {
 
 export default function ScholarshipsPage() {
   const router = useRouter();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [allScholarships, setAllScholarships] = useState<Scholarship[]>([]);
   const [uniInfo, setUniInfo] = useState<Map<number, University>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -341,11 +341,11 @@ export default function ScholarshipsPage() {
         {/* Moroccan Degree Level & Funding Quick Chips Bar */}
         <div className="mb-6 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
           {[
-            { value: "All Levels", label: "🌟 All Levels" },
-            { value: "bachelor", label: "🎓 Bachelor / Licence" },
-            { value: "master", label: "🎓 Master / Ingénieur" },
-            { value: "phd", label: "🎓 PhD / Doctorat" },
-            { value: "other", label: "🇨🇳 1-Year Chinese Language" },
+            { value: "All Levels", label: `🌟 ${t("sch.lvlAll")}` },
+            { value: "bachelor", label: `🎓 ${t("sch.bachelor")}` },
+            { value: "master", label: `🎓 ${t("sch.master")}` },
+            { value: "phd", label: `🎓 ${t("sch.phd")}` },
+            { value: "other", label: `🇨🇳 ${t("sch.language")}` },
           ].map((lvl) => (
             <button
               key={lvl.value}
@@ -361,9 +361,9 @@ export default function ScholarshipsPage() {
           ))}
           <div className="h-6 w-px bg-white/20 mx-1 flex-shrink-0" />
           {[
-            { value: "All Types", label: "All Types" },
-            { value: "full", label: "💰 100% Full CSC" },
-            { value: "partial", label: "💎 Partial" },
+            { value: "All Types", label: t("sch.typeAll") },
+            { value: "full", label: `💰 ${t("sch.full")}` },
+            { value: "partial", label: `💎 ${t("sch.partial")}` },
           ].map((tp) => (
             <button
               key={tp.value}
@@ -538,7 +538,7 @@ export default function ScholarshipsPage() {
                     {t("com.of")} {universities.length} {t("uni.exploreB")}
                     {!user?.student_profile?.is_premium && (
                       <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                        <Lock className="w-3 h-3" /> Free Trial ({FREE_TRIAL_LIMIT} Universities)
+                        <Lock className="w-3 h-3" /> {lang === "ar" ? `نسخة تجريبية (${FREE_TRIAL_LIMIT} جامعات)` : `Free Trial (${FREE_TRIAL_LIMIT} Universities)`}
                       </span>
                     )}
                   </p>
@@ -552,7 +552,7 @@ export default function ScholarshipsPage() {
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-purple/20 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-all"
                     >
                       <Crown className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Unlock All 100+ ($29 One-Time)</span>
+                      <span>{lang === "ar" ? "افتح أكثر من 100 جامعة (29$ دفعة واحدة)" : "Unlock All 100+ ($29 One-Time)"}</span>
                     </button>
                   )}
                 </div>
@@ -666,14 +666,15 @@ export default function ScholarshipsPage() {
                               <Crown className="w-7 h-7 text-white" />
                             </div>
                             <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2">
-                              One-Time Payment • No Subscriptions
+                              {lang === "ar" ? "دفع لمرة واحدة • بدون اشتراكات شهرية" : "One-Time Payment • No Subscriptions"}
                             </span>
                             <h3 className="text-xl sm:text-2xl font-extrabold text-text-primary mb-2">
-                              Unlock All 100+ Universities & 400+ Scholarships
+                              {lang === "ar" ? "افتح جميع الجامعات الـ 100+ وأكثر من 400 منحة" : "Unlock All 100+ Universities & 400+ Scholarships"}
                             </h3>
                             <p className="text-xs sm:text-sm text-text-secondary mb-5 max-w-md mx-auto leading-relaxed">
-                              You are viewing the <strong className="text-cyan">7 Free Trial Universities</strong>.
-                              Upgrade once to unlock all <strong className="text-text-primary">100+ Universities</strong> (Chengdu, Beijing, Guangzhou, Shanghai, Wuhan, Xi'an) and <strong className="text-text-primary">400+ Full & Partial Scholarships</strong>.
+                              {lang === "ar"
+                                ? `أنت تشاهد حالياً ${FREE_TRIAL_LIMIT} جامعات تجريبية مجانية. قم بالترقية لمرة واحدة لفتح كل الجامعات الصينية (بكين، شنغهاي، غوانزو، تشنغدو وغيرها) وأكثر من 400 منحة كاملة وجزئية.`
+                                : "You are viewing the 7 Free Trial Universities. Upgrade once to unlock all 100+ Universities (Chengdu, Beijing, Guangzhou, Shanghai, Wuhan, Xi'an) and 400+ Full & Partial Scholarships."}
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
@@ -681,9 +682,13 @@ export default function ScholarshipsPage() {
                                 <div className="flex items-baseline justify-center sm:justify-start gap-1">
                                   <span className="text-3xl font-black text-text-primary">$29</span>
                                   <span className="text-xs text-text-muted line-through">$99</span>
-                                  <span className="text-xs font-bold text-amber-300 ml-1">Pay Once</span>
+                                  <span className="text-xs font-bold text-amber-300 ml-1">
+                                    {lang === "ar" ? "دفع لمرة واحدة" : "Pay Once"}
+                                  </span>
                                 </div>
-                                <p className="text-[11px] text-text-muted">Lifetime access, never pay again</p>
+                                <p className="text-[11px] text-text-muted">
+                                  {lang === "ar" ? "وصول مدى الحياة، بدون دفع متكرر" : "Lifetime access, never pay again"}
+                                </p>
                               </div>
 
                               <button
@@ -694,19 +699,19 @@ export default function ScholarshipsPage() {
                                 className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white font-extrabold text-sm shadow-xl shadow-amber-500/25 hover:opacity-95 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
                               >
                                 <Crown className="w-4 h-4 text-amber-200" />
-                                <span>Unlock Lifetime Access ($29)</span>
+                                <span>{lang === "ar" ? "افتح الوصول مدى الحياة (29$)" : "Unlock Lifetime Access ($29)"}</span>
                               </button>
                             </div>
 
                             <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-text-muted pt-3 border-t border-white/10">
                               <span className="flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> 100+ Universities
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {lang === "ar" ? "+100 جامعة" : "100+ Universities"}
                               </span>
                               <span className="flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-cyan" /> 400+ Scholarships
+                                <CheckCircle2 className="w-3.5 h-3.5 text-cyan" /> {lang === "ar" ? "+400 منحة" : "400+ Scholarships"}
                               </span>
                               <span className="flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-purple" /> Full & Partial Funding
+                                <CheckCircle2 className="w-3.5 h-3.5 text-purple" /> {lang === "ar" ? "تمويل كامل وجزئي" : "Full & Partial Funding"}
                               </span>
                             </div>
                           </div>
@@ -812,8 +817,8 @@ export default function ScholarshipsPage() {
         onBackToRoles={() => router.push("/")}
         canClose={false}
         role="student"
-        title="Moroccan Student Sign In"
-        subtitle="Sign in or register your account to explore 100+ Chinese Universities & 400+ CSC Scholarships for Moroccans"
+        title={lang === "ar" ? "تسجيل دخول الطلاب المغاربة" : "Moroccan Student Sign In"}
+        subtitle={lang === "ar" ? "سجل الدخول أو أنشئ حسابك لاستكشاف أكثر من 100 جامعة صينية وأكثر من 400 منحة CSC للطلاب المغاربة" : "Sign in or register your account to explore 100+ Chinese Universities & 400+ CSC Scholarships for Moroccans"}
       />
 
       <LifetimePassModal

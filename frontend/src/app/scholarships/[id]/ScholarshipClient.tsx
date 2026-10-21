@@ -148,7 +148,7 @@ export default function ScholarshipClient() {
     setTrackingLoading(false);
     if (res.data) {
       setTrackedItem(res.data);
-      setTrackSuccessMsg("Added to your Application CRM Pipeline! 🚀");
+      setTrackSuccessMsg(t("det.addedPipeline"));
       setTimeout(() => setTrackSuccessMsg(null), 4000);
     } else if (res.error) {
       setTrackSuccessMsg(res.error || "Saved in your pipeline");
@@ -303,14 +303,14 @@ export default function ScholarshipClient() {
   }
 
   const docTypes = [
-    { value: "passport", label: "Passport" },
-    { value: "id_card", label: "ID Card" },
-    { value: "transcript", label: "Transcript" },
-    { value: "diploma", label: "Diploma" },
-    { value: "recommendation", label: "Recommendation Letter" },
-    { value: "motivation", label: "Motivation Letter" },
-    { value: "cv", label: "CV / Resume" },
-    { value: "other", label: "Other" },
+    { value: "passport", label: t("docs.passport") },
+    { value: "id_card", label: t("docs.id_card") },
+    { value: "transcript", label: t("docs.transcript") },
+    { value: "diploma", label: t("docs.diploma") },
+    { value: "recommendation", label: t("docs.recommendation") },
+    { value: "motivation", label: t("docs.motivation") },
+    { value: "cv", label: t("docs.cv") },
+    { value: "other", label: t("docs.other") },
   ];
 
   if (loading) {
@@ -372,9 +372,9 @@ export default function ScholarshipClient() {
     phd: t("sch.phd"),
     all: t("sch.lvlAll"),
     other: t("sch.language"),
-    postdoc: "Postdoc",
-    exchange: "Exchange",
-    summer: "Summer School",
+    postdoc: t("sch.postdoc"),
+    exchange: t("sch.exchange"),
+    summer: t("sch.summer"),
   };
 
   return (
@@ -408,7 +408,7 @@ export default function ScholarshipClient() {
             </span>
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30 flex items-center gap-1.5 shadow-sm">
               <span>🇲🇦</span>
-              <span>Candidats Marocains Éligibles</span>
+              <span>{t("det.moroccanEligible")}</span>
             </span>
             {scholarship.is_featured && (
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
@@ -418,7 +418,7 @@ export default function ScholarshipClient() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-            {scholarship.title}
+            <AutoText text={scholarship.title} />
           </h1>
 
           <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary mb-4">
@@ -564,7 +564,7 @@ export default function ScholarshipClient() {
                   className="inline-flex items-center gap-2 glass px-6 py-3 rounded-xl text-text-primary hover:text-cyan hover:border-cyan/40 transition-all border border-border-glass font-medium text-sm"
                 >
                   <Send className="w-4 h-4 text-emerald-400" />
-                  <span>Guide & Roadmap</span>
+                  <span>{t("det.guideRoadmap")}</span>
                 </Link>
 
                 {/* Interactive Tracker CRM Button */}
@@ -574,7 +574,7 @@ export default function ScholarshipClient() {
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-semibold text-sm shadow-md"
                   >
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>In Pipeline ({trackedItem.status.replace("_", " ")})</span>
+                    <span>{t("det.inPipeline")} ({trackedItem.status.replace("_", " ")})</span>
                   </Link>
                 ) : (
                   <button
@@ -583,7 +583,7 @@ export default function ScholarshipClient() {
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-semibold text-sm cursor-pointer shadow-md"
                   >
                     <Layers className="w-4 h-4 text-emerald-400" />
-                    <span>{trackingLoading ? "Saving..." : "📌 Add to Tracker Pipeline"}</span>
+                    <span>{trackingLoading ? t("det.saving") : t("det.addToPipeline")}</span>
                   </button>
                 )}
 
@@ -608,7 +608,7 @@ export default function ScholarshipClient() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <span>{trackSuccessMsg}</span>
                   <Link href="/tracker" className="underline ml-1 text-white hover:text-emerald-200">
-                    Open Kanban Board →
+                    {t("det.openKanban")}
                   </Link>
                 </motion.div>
               )}
@@ -777,11 +777,11 @@ export default function ScholarshipClient() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                  <span>Guide Officiel de Candidature pour Candidats Marocains</span>
+                  <span>{t("roadmap.title")}</span>
                   <span className="text-base">🇲🇦</span>
                 </h3>
                 <p className="text-xs text-text-muted">
-                  Les 6 étapes indispensables pour soumettre votre dossier avec succès
+                  {t("roadmap.subtitle")}
                 </p>
               </div>
             </div>
@@ -794,10 +794,10 @@ export default function ScholarshipClient() {
                 <div className="w-7 h-7 rounded-full bg-cyan/20 border border-cyan/40 text-cyan text-xs font-bold flex items-center justify-center">
                   1
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Portail National CSC</h4>
+                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step1Title")}</h4>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Créez un compte sur <strong>studyinchina.csc.edu.cn</strong>, sélectionnez <strong>Program Category Type B</strong> (Programme Universitaire) et sélectionnez votre université cible.
+                {t("roadmap.step1Desc")}
               </p>
             </div>
 
@@ -807,10 +807,10 @@ export default function ScholarshipClient() {
                 <div className="w-7 h-7 rounded-full bg-purple/20 border border-purple/40 text-purple text-xs font-bold flex items-center justify-center">
                   2
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Portail de l&apos;Université</h4>
+                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step2Title")}</h4>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Déposez votre dossier de candidature directement sur le portail international de {scholarship.university.name} et téléversez votre projet d&apos;étude.
+                {t("roadmap.step2Desc")}
               </p>
             </div>
 
@@ -820,10 +820,10 @@ export default function ScholarshipClient() {
                 <div className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center justify-center">
                   3
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Traductions Assermentées</h4>
+                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step3Title")}</h4>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Faites traduire vos diplômes marocains (Bac, Licence, Master, Ingénieur ENSA/ENCG/FST) et relevés de notes en anglais ou chinois par un traducteur assermenté au Maroc.
+                {t("roadmap.step3Desc")}
               </p>
             </div>
 
@@ -833,10 +833,10 @@ export default function ScholarshipClient() {
                 <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold flex items-center justify-center">
                   4
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Entretien Académique en Ligne</h4>
+                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step4Title")}</h4>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Examen de votre dossier par la commission des professeurs et court entretien en anglais ou chinois via Tencent Meeting (Voov) ou Zoom.
+                {t("roadmap.step4Desc")}
               </p>
             </div>
 
@@ -846,10 +846,10 @@ export default function ScholarshipClient() {
                 <div className="w-7 h-7 rounded-full bg-blue/20 border border-blue/40 text-blue text-xs font-bold flex items-center justify-center">
                   5
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Lettre d&apos;Admission & JW201/JW202</h4>
+                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step5Title")}</h4>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Les lauréats reçoivent leur lettre d&apos;admission officielle et le certificat officiel de visa pour étudiant étranger envoyé par courrier express (DHL/FedEx) au Maroc.
+                {t("roadmap.step5Desc")}
               </p>
             </div>
 
@@ -859,10 +859,10 @@ export default function ScholarshipClient() {
                 <div className="w-7 h-7 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold flex items-center justify-center">
                   6
                 </div>
-                <h4 className="text-sm font-bold text-text-primary">Visa X1 à l&apos;Ambassade à Rabat</h4>
+                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step6Title")}</h4>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed">
-                Dépôt de votre demande de visa d&apos;études long séjour X1 auprès du service consulaire de l&apos;Ambassade de Chine à Rabat (Quartier Souissi).
+                {t("roadmap.step6Desc")}
               </p>
             </div>
           </div>
@@ -877,7 +877,7 @@ export default function ScholarshipClient() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-cyan/20 hover:bg-cyan/30 border border-cyan/40 text-cyan transition-all"
               >
                 <Building2 className="w-4 h-4" />
-                <span>Portail International de l&apos;Université</span>
+                <span>{t("roadmap.linkUni")}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             )}
@@ -888,7 +888,7 @@ export default function ScholarshipClient() {
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-purple/20 hover:bg-purple/30 border border-purple/40 text-purple transition-all"
             >
               <Globe className="w-4 h-4" />
-              <span>Portail Officiel CSC CampusChina</span>
+              <span>{t("roadmap.linkCsc")}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
             <a
@@ -898,7 +898,7 @@ export default function ScholarshipClient() {
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 border border-white/20 text-text-secondary transition-all"
             >
               <Plane className="w-4 h-4" />
-              <span>Ambassade de Chine à Rabat (Visas)</span>
+              <span>{t("roadmap.linkEmbassy")}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
@@ -922,21 +922,25 @@ export default function ScholarshipClient() {
                 <div className="flex justify-between text-sm">
                   <span className="text-text-muted">{t("det.duration")}</span>
                   <span className="text-text-primary">
-                    {scholarship.duration}
+                    <AutoText text={scholarship.duration} />
                   </span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">{t("det.language")}</span>
                 <span className="text-text-primary">
-                  {scholarship.language || t("det.english")}
+                  {scholarship.language ? (
+                    lang === "ar"
+                      ? (scholarship.language.toLowerCase().includes("english") ? "الإنجليزية" : scholarship.language.toLowerCase().includes("chinese") ? "الصينية" : scholarship.language)
+                      : scholarship.language
+                  ) : t("det.english")}
                 </span>
               </div>
               {scholarship.required_education_level && (
                 <div className="flex justify-between text-sm">
                   <span className="text-text-muted">{t("det.requiredLevel")}</span>
                   <span className="text-text-primary">
-                    {scholarship.required_education_level}
+                    <AutoText text={scholarship.required_education_level} />
                   </span>
                 </div>
               )}
@@ -967,7 +971,7 @@ export default function ScholarshipClient() {
                   {hasDeadline
                     ? new Date(
                         scholarship.application_deadline
-                      ).toLocaleDateString("en-US", {
+                      ).toLocaleDateString(lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -980,7 +984,7 @@ export default function ScholarshipClient() {
                   <span className="text-text-muted">{t("det.startDate")}</span>
                   <span className="text-text-primary">
                     {new Date(scholarship.start_date).toLocaleDateString(
-                      "en-US",
+                      lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US",
                       { year: "numeric", month: "long" }
                     )}
                   </span>
@@ -991,7 +995,7 @@ export default function ScholarshipClient() {
                   <span className="text-text-muted">{t("det.endDate")}</span>
                   <span className="text-text-primary">
                     {new Date(scholarship.end_date).toLocaleDateString(
-                      "en-US",
+                      lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US",
                       { year: "numeric", month: "long" }
                     )}
                   </span>

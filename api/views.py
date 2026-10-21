@@ -13,7 +13,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
-from students.models import Student, EmailVerification
+from students.models import Student, EmailVerification, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship
 from documents.models import Document
 from ai_assistant.models import (
@@ -29,7 +29,8 @@ from .serializers import (
     ApplicationTrackerSerializer, ScholarshipMatchSerializer,
     AISuggestionSerializer, AIConversationSerializer,
     AIChatRequestSerializer, DocumentSerializer,
-    ServiceOrderSerializer,
+    ServiceOrderSerializer, SuccessStorySerializer,
+    ExperienceReviewSerializer,
 )
 
 
@@ -342,17 +343,36 @@ class LoginView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get('username', '').strip()
-        password = request.data.get('password', '')
+        username = str(request.data.get('username', '')).strip()
+        password = str(request.data.get('password', ''))
         role = request.data.get('role', '')
         university_id = request.data.get('university_id')
 
-        # Allow login by username or by email
+        if not username or not password:
+            return Response(
+                {'error': 'Veuillez saisir votre nom d\'utilisateur (ou email) et votre mot de passe.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # 1. Try direct exact match authentication
         user = authenticate(request, username=username, password=password)
-        if not user and '@' in username:
-            user_obj = User.objects.filter(email__iexact=username).first()
-            if user_obj:
-                user = authenticate(request, username=user_obj.username, password=password)
+
+        # 2. If direct auth failed, collect candidates (case-insensitive username & email)
+        if not user:
+            candidates = list(User.objects.filter(username__iexact=username))
+            candidates.extend([c for c in User.objects.filter(email__iexact=username) if c not in candidates])
+
+            for cand in candidates:
+                auth_u = authenticate(request, username=cand.username, password=password)
+                if auth_u:
+                    user = auth_u
+                    break
+                # Try with stripped password in case of accidental trailing spaces
+                if password.strip() != password:
+                    auth_u = authenticate(request, username=cand.username, password=password.strip())
+                    if auth_u:
+                        user = auth_u
+                        break
 
         if user is not None:
             # Check institutional gate if logging into university desk
@@ -360,9 +380,8 @@ class LoginView(generics.GenericAPIView):
                 is_demo_officer = (user.username == 'admission_officer')
                 is_accredited, university, err = check_university_email_accreditation(user.email, university_id)
                 if not is_accredited and not is_demo_officer and not user.is_staff:
-                    return Response({
-                        'error': err or "Accès refusé: Cette adresse email n'est pas accréditée dans notre registre des universités partenaires."
-                    }, status=status.HTTP_403_FORBIDDEN)
+                    # Gracefully downgrade to student role rather than blocking login
+                    role = 'student'
 
             # Auto-verify student profile if credentials are valid
             student = Student.objects.filter(user=user).first()
@@ -371,12 +390,17 @@ class LoginView(generics.GenericAPIView):
                 student.save(update_fields=['is_email_verified'])
 
             token, _ = Token.objects.get_or_create(user=user)
+            user_data = UserSerializer(user).data
+            if student:
+                user_data['student_profile'] = StudentSerializer(student).data
+
             return Response({
-                'user': UserSerializer(user).data,
+                'user': user_data,
                 'token': token.key,
                 'role': role or ('university' if user.is_staff else 'student'),
                 'message': 'Logged in successfully.',
             })
+
         return Response(
             {'error': 'Identifiants invalides. Veuillez vérifier votre nom d\'utilisateur / email et mot de passe.'},
             status=status.HTTP_401_UNAUTHORIZED,
@@ -1035,3 +1059,50 @@ class DocumentViewSet(viewsets.ModelViewSet):
             doc.file_name = doc.file.name.split('/')[-1]
             doc.file_size = doc.file.size
             doc.save(update_fields=['file_name', 'file_size'])
+
+
+# ── Success Stories & Testimonials ────────────────────────────
+
+class SuccessStoryViewSet(viewsets.ModelViewSet):
+    """
+    GET /api/stories/ - List verified student success stories
+    POST /api/stories/ - Submit a student story
+    """
+    serializer_class = SuccessStorySerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        qs = SuccessStory.objects.all().order_by('-created_at')
+        degree = self.request.query_params.get('degree')
+        if degree:
+            qs = qs.filter(degree_level__iexact=degree)
+        country = self.request.query_params.get('country')
+        if country:
+            qs = qs.filter(country__icontains=country)
+        return qs
+
+    def perform_create(self, serializer):
+        name = serializer.validated_data.get('name', 'Student')
+        initials = ''.join([part[0].upper() for part in name.strip().split() if part])[:2] or 'SC'
+        serializer.save(avatar_initials=initials, is_verified=True)
+
+
+class ExperienceReviewViewSet(viewsets.ModelViewSet):
+    """
+    GET /api/reviews/ - List all student experience reviews
+    POST /api/reviews/ - Submit a student experience rating and comment
+    """
+    serializer_class = ExperienceReviewSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return ExperienceReview.objects.all().order_by('-created_at')
+
+    def perform_create(self, serializer):
+        user = self.request.user if self.request.user.is_authenticated else None
+        name = ''
+        if user:
+            name = user.get_full_name() or user.username
+        elif 'name' in serializer.validated_data:
+            name = serializer.validated_data['name']
+        serializer.save(user=user, name=name or 'Candidate Scholar')

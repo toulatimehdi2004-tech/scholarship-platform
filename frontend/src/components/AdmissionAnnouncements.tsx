@@ -25,7 +25,7 @@ export default function AdmissionAnnouncements({
 }: {
   announcements: Announcement[];
 }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
 
   if (!announcements || announcements.length === 0) return null;
 
@@ -82,7 +82,7 @@ export default function AdmissionAnnouncements({
               )}
               {a.date && (
                 <p className="text-[11px] text-text-muted mt-0.5">
-                  {new Date(a.date).toLocaleDateString("en-US", {
+                  {new Date(a.date).toLocaleDateString(lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",

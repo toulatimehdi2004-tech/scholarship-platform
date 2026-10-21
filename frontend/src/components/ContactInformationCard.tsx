@@ -148,7 +148,7 @@ export default function ContactInformationCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className={`glass rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden ${className}`}
+      className={`glass rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-white/10 shadow-2xl relative overflow-hidden ${className}`}
     >
       {/* Background ambient glow */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-emerald-500/10 via-cyan/5 to-purple/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
@@ -171,23 +171,23 @@ export default function ContactInformationCard({
       </AnimatePresence>
 
       {/* Header with Verified Institutional Accreditation Badge */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/10 relative z-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-200/80 dark:border-white/10 relative z-10">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-cyan/20 to-purple/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-cyan/20 to-purple/20 border border-emerald-500/30 flex items-center justify-center text-emerald-500 dark:text-emerald-400 shadow-inner">
             <Building2 className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-xl font-bold text-text-primary">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                 {t("det.contactDesk")}
               </h3>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 dark:border-emerald-500/40">
+                <ShieldCheck className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
                 {t("det.verifiedAdmissions")}
               </span>
             </div>
-            <p className="text-xs text-text-secondary mt-0.5">
-              {universityName} • {accredited?.official_domain || "Admissions Internationales"}
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {universityName} • {accredited?.official_domain || t("det.verifiedAdmissions")}
             </p>
           </div>
         </div>
@@ -201,13 +201,13 @@ export default function ContactInformationCard({
               t("det.copiedTemplate")
             )
           }
-          className="self-start sm:self-auto px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-cyan border border-cyan/30 hover:border-cyan/50 transition-all flex items-center gap-2 group shadow-sm"
-          title="Copier un modèle de lettre officiel prêt à l'envoi vers l'université"
+          className="self-start sm:self-auto px-3.5 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-cyan border border-cyan/30 hover:border-cyan/50 transition-all flex items-center gap-2 group shadow-xs"
+          title={t("det.inquiryTemplate")}
         >
           {copiedKey === "template" ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-emerald-300">{t("det.copiedTemplate")}</span>
+              <Check className="w-3.5 h-3.5 text-emerald-500" />
+              <span className="text-emerald-600 dark:text-emerald-300">{t("det.copiedTemplate")}</span>
             </>
           ) : (
             <>
@@ -221,15 +221,15 @@ export default function ContactInformationCard({
       {/* Grid of Official Contact Channels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10 mb-6">
         {/* Card 1: Official University Admissions Email */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 hover:border-cyan/40 transition-all flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-slate-50/90 dark:bg-slate-900/60 border border-slate-200/90 dark:border-white/10 hover:border-cyan/40 dark:hover:border-cyan/40 transition-all flex flex-col justify-between shadow-sm">
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2 text-xs font-bold text-cyan uppercase tracking-wider">
                 <Mail className="w-4 h-4 text-cyan" />
-                <span>Email Officiel des Admissions</span>
+                <span>{t("det.officialEmail")}</span>
               </div>
-              <span className="text-[10px] text-text-muted px-2 py-0.5 rounded-md bg-white/5 border border-white/10 font-mono">
-                Principal
+              <span className="text-[10px] text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-white/5 border border-slate-300/80 dark:border-white/10 font-mono font-medium">
+                {t("det.primaryBadge")}
               </span>
             </div>
 
@@ -237,25 +237,25 @@ export default function ContactInformationCard({
               onClick={() =>
                 handleCopy(cleanEmail, "primary_email", t("det.copiedEmail"))
               }
-              className="group cursor-pointer p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/5 hover:border-cyan/30 transition-all flex items-center justify-between gap-2"
-              title="Cliquer pour copier l'adresse email officielle"
+              className="group cursor-pointer p-3 rounded-xl bg-white dark:bg-white/[0.04] hover:bg-slate-100/90 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/10 hover:border-cyan/40 dark:hover:border-cyan/30 transition-all flex items-center justify-between gap-2 shadow-xs"
+              title={cleanEmail}
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-cyan/10 text-cyan flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
                   <Mail className="w-4 h-4" />
                 </div>
-                <span className="font-mono text-sm sm:text-base font-semibold text-text-primary group-hover:text-cyan transition-colors truncate">
+                <span dir="ltr" className="font-mono text-sm sm:text-base font-semibold text-slate-900 dark:text-white group-hover:text-cyan transition-colors truncate">
                   {cleanEmail}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 {copiedKey === "primary_email" ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-emerald-400 font-bold bg-emerald-500/20 px-2 py-1 rounded-lg">
+                  <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/15 dark:bg-emerald-500/20 px-2 py-1 rounded-lg">
                     <Check className="w-3.5 h-3.5" />
                     {t("det.copiedEmail")}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-xs text-text-secondary group-hover:text-cyan px-2 py-1 rounded-lg bg-white/5 group-hover:bg-cyan/10 transition-colors">
+                  <span className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300 group-hover:text-cyan px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/5 group-hover:bg-cyan/10 transition-colors">
                     <Copy className="w-3.5 h-3.5" />
                     {t("det.copyEmail")}
                   </span>
@@ -265,9 +265,9 @@ export default function ContactInformationCard({
 
             {/* Secondary Admissions Gmail if available */}
             {cleanSecondaryEmail && cleanSecondaryEmail !== cleanEmail && (
-              <div className="mt-2.5 pt-2.5 border-t border-white/5">
-                <div className="flex items-center justify-between text-[11px] text-text-muted mb-1">
-                  <span>Guichet Admissions Gmail :</span>
+              <div className="mt-2.5 pt-2.5 border-t border-slate-200/80 dark:border-white/5">
+                <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 font-medium mb-1">
+                  <span>{t("det.gmailAdmissionsDesk")}</span>
                 </div>
                 <div
                   onClick={() =>
@@ -277,14 +277,14 @@ export default function ContactInformationCard({
                       t("det.copiedEmail")
                     )
                   }
-                  className="group cursor-pointer p-2.5 rounded-lg bg-white/[0.02] hover:bg-white/[0.06] border border-white/5 flex items-center justify-between text-xs transition-colors"
+                  className="group cursor-pointer p-2.5 rounded-lg bg-white dark:bg-white/[0.02] hover:bg-slate-100/80 dark:hover:bg-white/[0.06] border border-slate-200 dark:border-white/5 flex items-center justify-between text-xs transition-colors shadow-2xs"
                 >
-                  <span className="font-mono text-text-secondary group-hover:text-text-primary truncate">
+                  <span dir="ltr" className="font-mono text-slate-800 dark:text-slate-200 group-hover:text-cyan truncate font-medium">
                     {cleanSecondaryEmail}
                   </span>
-                  <span className="text-[11px] text-text-muted group-hover:text-cyan flex items-center gap-1 flex-shrink-0">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 group-hover:text-cyan flex items-center gap-1 flex-shrink-0">
                     {copiedKey === "secondary_email" ? (
-                      <Check className="w-3 h-3 text-emerald-400" />
+                      <Check className="w-3 h-3 text-emerald-500" />
                     ) : (
                       <Copy className="w-3 h-3" />
                     )}
@@ -295,16 +295,16 @@ export default function ContactInformationCard({
           </div>
 
           {/* Direct Action Buttons for Email */}
-          <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center gap-2">
+          <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-white/10 flex flex-wrap items-center gap-2">
             {/* Button 1: Open in Gmail Webmail (100% works in browser) */}
             <a
               href={gmailComposeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 min-w-[140px] py-2 px-3 rounded-xl bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 text-red-300 border border-red-500/30 hover:border-red-500/50 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
-              title="Ouvrir un brouillon prêt dans Gmail"
+              className="flex-1 min-w-[140px] py-2 px-3 rounded-xl bg-gradient-to-r from-red-500/10 to-red-600/10 dark:from-red-500/20 dark:to-red-600/20 hover:from-red-500/20 hover:to-red-600/20 dark:hover:from-red-500/30 dark:hover:to-red-600/30 text-red-600 dark:text-red-300 border border-red-500/30 hover:border-red-500/50 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs"
+              title={t("det.openGmail")}
             >
-              <Send className="w-3.5 h-3.5 text-red-400" />
+              <Send className="w-3.5 h-3.5 text-red-500" />
               <span>{t("det.openGmail")}</span>
               <ExternalLink className="w-3 h-3 opacity-70" />
             </a>
@@ -312,45 +312,45 @@ export default function ContactInformationCard({
             {/* Button 2: Mailto fallback */}
             <a
               href={mailtoUrl}
-              className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary border border-white/10 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
-              title="Ouvrir dans l'application mail locale"
+              className="py-2 px-3 rounded-xl bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+              title={t("det.openMailApp")}
             >
               <Mail className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t("det.openMailApp")}</span>
-              <span className="sm:hidden">App Mail</span>
+              <span className="sm:hidden">{t("det.openMailApp")}</span>
             </a>
           </div>
         </div>
 
         {/* Card 2: Official University Telephone Hotline */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 hover:border-emerald-500/40 transition-all flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-slate-50/90 dark:bg-slate-900/60 border border-slate-200/90 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-500/40 transition-all flex flex-col justify-between shadow-sm">
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                <Phone className="w-4 h-4 text-emerald-400" />
-                <span>Secrétariat Téléphonique International</span>
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{t("det.intlTelephoneDesk")}</span>
               </div>
-              <span className="text-[10px] text-text-muted px-2 py-0.5 rounded-md bg-white/5 border border-white/10 font-mono">
-                Officiel
+              <span className="text-[10px] text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-white/5 border border-slate-300/80 dark:border-white/10 font-mono font-medium">
+                {t("det.officialBadge")}
               </span>
             </div>
 
             {/* University Hotline */}
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0">
+            <div className="p-3.5 rounded-xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
                   <Phone className="w-4 h-4" />
                 </div>
-                <div className="truncate">
+                <div className="min-w-0">
                   <a
                     href={`tel:${cleanPhone.replace(/[^0-9+]/g, "")}`}
-                    className="font-mono text-sm sm:text-base font-semibold text-text-primary hover:text-emerald-400 transition-colors block"
-                    title="Cliquer pour composer le numéro"
+                    className="font-mono text-sm sm:text-base font-bold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors block"
+                    title={cleanPhone}
                   >
-                    {cleanPhone}
+                    <span dir="ltr" className="inline-block">{cleanPhone}</span>
                   </a>
-                  <span className="text-[10px] text-text-muted block">
-                    Bureau des Admissions Internationales ({universityName})
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block truncate font-medium">
+                    {t("det.admissionsOffice", { name: universityName })}
                   </span>
                 </div>
               </div>
@@ -358,20 +358,20 @@ export default function ContactInformationCard({
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 <a
                   href={`tel:${cleanPhone.replace(/[^0-9+]/g, "")}`}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/50 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-xs"
                 >
-                  <Phone className="w-3 h-3" />
+                  <Phone className="w-3.5 h-3.5" />
                   <span>{t("det.directCall")}</span>
                 </a>
                 <button
                   onClick={() =>
                     handleCopy(cleanPhone, "phone", t("det.copiedPhone"))
                   }
-                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary transition-colors"
-                  title="Copier le numéro"
+                  className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10 transition-colors flex-shrink-0"
+                  title={t("det.copyPhone")}
                 >
                   {copiedKey === "phone" ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
                   ) : (
                     <Copy className="w-3.5 h-3.5" />
                   )}
@@ -381,17 +381,22 @@ export default function ContactInformationCard({
 
             {/* Official Website Portal */}
             {accredited?.official_domain && (
-              <div className="mt-2.5 p-3 rounded-xl bg-cyan/5 border border-cyan/20 flex items-center justify-between gap-2">
+              <div className="mt-2.5 p-3 rounded-xl bg-cyan-50/70 dark:bg-cyan/5 border border-cyan-200/80 dark:border-cyan/20 flex items-center justify-between gap-2 shadow-2xs">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-lg bg-cyan/10 text-cyan flex items-center justify-center flex-shrink-0">
                     <Globe className="w-4 h-4" />
                   </div>
                   <div className="truncate">
-                    <span className="font-mono text-xs sm:text-sm font-semibold text-cyan block truncate">
-                      https://{accredited.official_domain}
-                    </span>
-                    <span className="text-[10px] text-text-muted block">
-                      Domaine Universitaire Officiel Accrédité
+                    <a
+                      href={`https://${accredited.official_domain}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs sm:text-sm font-semibold text-cyan hover:underline block truncate"
+                    >
+                      <span dir="ltr">https://{accredited.official_domain}</span>
+                    </a>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">
+                      {t("det.accreditedDomain")}
                     </span>
                   </div>
                 </div>
@@ -400,8 +405,8 @@ export default function ContactInformationCard({
                   href={`https://${accredited.official_domain}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-cyan transition-colors flex-shrink-0"
-                  title="Visiter le site officiel"
+                  className="p-1.5 rounded-lg bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 hover:text-cyan border border-slate-200 dark:border-white/10 transition-colors flex-shrink-0"
+                  title={accredited.official_domain}
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
@@ -410,25 +415,25 @@ export default function ContactInformationCard({
           </div>
 
           {/* Quick call CTA */}
-          <div className="mt-4 pt-3 border-t border-white/10">
+          <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-white/10">
             <a
               href={`tel:${cleanPhone.replace(/[^0-9+]/g, "")}`}
-              className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-text-secondary hover:text-text-primary border border-white/10 text-xs font-semibold flex items-center justify-center gap-2 transition-all"
+              className="w-full py-2 px-3 rounded-xl bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10 text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-xs"
             >
-              <Phone className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Ligne Directrice des Admissions Internationales</span>
+              <Phone className="w-3.5 h-3.5 text-emerald-500" />
+              <span>{t("det.intlHotline")}</span>
             </a>
           </div>
         </div>
       </div>
 
       {/* Helpful admissions info footer */}
-      <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-text-secondary relative z-10">
+      <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-300 relative z-10 shadow-2xs">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-amber-400 flex-shrink-0" />
-          <span>{t("det.admissionsHours")}</span>
+          <Clock className="w-4 h-4 text-amber-500 dark:text-amber-400 flex-shrink-0" />
+          <span className="font-medium">{t("det.admissionsHours")}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
           <Sparkles className="w-3.5 h-3.5 text-cyan flex-shrink-0" />
           <span>{t("det.admissionsAdvice")}</span>
         </div>

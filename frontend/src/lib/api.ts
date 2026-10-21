@@ -12,26 +12,23 @@ export function getApiBaseUrl(): string {
       localStorage.setItem("custom_api_url", full);
       return full;
     }
-    // 2. Check localStorage (purge invalid, mixed-content, or obsolete urls)
-    const saved = localStorage.getItem("custom_api_url");
-    if (saved) {
-      const isMixedContent =
-        window.location.protocol === "https:" && saved.startsWith("http://");
-      const isObsoleteTunnel =
-        saved.includes("trycloudflare.com") ||
-        (saved.includes("ngrok-free.dev") && !saved.includes("proofing-harmless-mulled"));
-      if (isMixedContent || isObsoleteTunnel) {
-        localStorage.removeItem("custom_api_url");
-      } else {
-        return saved;
-      }
+    // 2. If running on GitHub Pages (github.io):
+    if (window.location.hostname.includes("github.io")) {
+      return DEFAULT_API_URL;
     }
     // 3. Localhost fallback
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
       return "http://localhost:8000/api";
     }
+    // 4. Stored custom url
+    const saved = localStorage.getItem("custom_api_url");
+    if (saved && !saved.includes("trycloudflare.com")) {
+      return saved;
+    }
+    // 5. Default fallback
+    return DEFAULT_API_URL;
   }
-  return DEFAULT_API_URL;
+  return "http://127.0.0.1:8000/api";
 }
 
 export function setCustomApiUrl(url: string) {
@@ -176,6 +173,7 @@ export interface User {
 export interface AuthResponse {
   user: User;
   token: string;
+  role?: string;
   message: string;
 }
 
@@ -563,6 +561,66 @@ export async function deleteTrackedApplication(
 ): Promise<ApiResponse<{ success: boolean }>> {
   return fetchApi<{ success: boolean }>(`/tracker/${id}/`, {
     method: "DELETE",
+  });
+}
+
+// ── Success Stories API ──────────────────────────────────────
+export interface SuccessStoryItem {
+  id: number;
+  name: string;
+  country: string;
+  city?: string;
+  university_name: string;
+  degree_level: string;
+  field_of_study: string;
+  scholarship_type: string;
+  year_awarded: number;
+  golden_tip: string;
+  story: string;
+  rating: number;
+  avatar_initials?: string;
+  is_verified?: boolean;
+  created_at?: string;
+}
+
+export async function getStories(
+  params?: Record<string, string>
+): Promise<ApiResponse<SuccessStoryItem[]>> {
+  const query = params ? "?" + new URLSearchParams(params).toString() : "";
+  return fetchApi<SuccessStoryItem[]>(`/stories/${query}`);
+}
+
+export async function submitStory(
+  data: Partial<SuccessStoryItem>
+): Promise<ApiResponse<SuccessStoryItem>> {
+  return fetchApi<SuccessStoryItem>("/stories/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// ── Student Experience Reviews API ───────────────────────────
+export interface ExperienceReviewItem {
+  id?: number;
+  user?: number | null;
+  username?: string;
+  name?: string;
+  rating: number;
+  comment: string;
+  category?: string;
+  created_at?: string;
+}
+
+export async function getExperienceReviews(): Promise<ApiResponse<ExperienceReviewItem[]>> {
+  return fetchApi<ExperienceReviewItem[]>("/reviews/");
+}
+
+export async function submitExperienceReview(
+  data: Partial<ExperienceReviewItem>
+): Promise<ApiResponse<ExperienceReviewItem>> {
+  return fetchApi<ExperienceReviewItem>("/reviews/", {
+    method: "POST",
+    body: JSON.stringify(data),
   });
 }
 

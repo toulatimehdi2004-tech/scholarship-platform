@@ -52,7 +52,7 @@ const BIZ_KEYWORDS = [
 
 export default function UniversitiesPage() {
   const router = useRouter();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [all, setAll] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -165,10 +165,10 @@ export default function UniversitiesPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                  🇨🇳 ScholarChina Official Directory
+                  {lang === "ar" ? "🇨🇳 الدليل الرسمي للجامعات الصينية" : lang === "fr" ? "🇨🇳 Répertoire Officiel ScholarChina" : "🇨🇳 ScholarChina Official Directory"}
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan/15 text-cyan border border-cyan/30">
-                  102 Elite Universities in China
+                  {lang === "ar" ? "102 جامعة رائدة في الصين" : lang === "fr" ? "102 Universités d'élite en Chine" : "102 Elite Universities in China"}
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-text-primary">
@@ -179,13 +179,17 @@ export default function UniversitiesPage() {
             {/* Quick Stats Pill */}
             <div className="flex items-center gap-3">
               <div className="glass px-4 py-2 rounded-2xl border border-border-glass text-right">
-                <div className="text-xs text-text-muted">Available Institutions</div>
-                <div className="text-lg font-bold text-cyan">{filtered.length} Universities</div>
+                <div className="text-xs text-text-muted">{lang === "ar" ? "المؤسسات المتاحة" : lang === "fr" ? "Établissements disponibles" : "Available Institutions"}</div>
+                <div className="text-lg font-bold text-cyan">{filtered.length} {lang === "ar" ? "جامعة" : lang === "fr" ? "Universités" : "Universities"}</div>
               </div>
             </div>
           </div>
           <p className="text-text-secondary max-w-2xl text-sm sm:text-base">
-            Explore 100+ prestigious Chinese institutions on ScholarChina. Inspect 3D VR campus panoramas, degree programs, and full CSC scholarship quotas.
+            {lang === "ar"
+              ? "استكشف أكثر من 100 مؤسسة صينية مرموقة على منصة ScholarChina. اكتشف جولات الحرم الجامعي الافتراضية 3D VR، برامج الدرجات العلمية، وحصص منح CSC الكاملة للطلاب المغاربة."
+              : lang === "fr"
+              ? "Explorez plus de 100 établissements chinois prestigieux sur ScholarChina. Visites VR 3D, programmes diplômants et quotas de bourses CSC complètes pour étudiants marocains."
+              : "Explore 100+ prestigious Chinese institutions on ScholarChina. Inspect 3D VR campus panoramas, degree programs, and full CSC scholarship quotas."}
           </p>
         </motion.div>
 
@@ -200,7 +204,7 @@ export default function UniversitiesPage() {
             <Search className="w-5 h-5 text-text-muted ml-2.5 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search by university name, major, or ranking..."
+              placeholder={lang === "ar" ? "ابحث باسم الجامعة أو التخصص أو الترتيب..." : lang === "fr" ? "Rechercher par nom d'université, filière..." : "Search by university name, major, or ranking..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted outline-none py-2 px-1 text-sm sm:text-base"
@@ -222,10 +226,10 @@ export default function UniversitiesPage() {
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
               className="glass rounded-xl px-3 py-2 text-xs font-semibold text-text-primary outline-none border border-white/10 bg-slate-900/80 cursor-pointer w-full sm:w-48"
-              title="Filter by City (Optional)"
+              title={lang === "ar" ? "تصفية حسب المدينة" : "Filter by City (Optional)"}
             >
               <option value="All Cities" className="bg-slate-900 text-white">
-                📍 All Cities (Optional)
+                {lang === "ar" ? "📍 جميع المدن (اختياري)" : lang === "fr" ? "📍 Toutes les villes" : "📍 All Cities (Optional)"}
               </option>
               {cities.map(([c, count]) => (
                 <option key={c} value={c} className="bg-slate-900 text-white">
@@ -239,12 +243,66 @@ export default function UniversitiesPage() {
         {/* Moroccan Student Prestige & Discipline Category Filter Chips */}
         <div className="mb-8 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
           {[
-            { id: "all", label: "🌟 All Universities", count: all.length },
-            { id: "c9", label: "🏆 C9 League (Top 9)", count: 9 },
-            { id: "985", label: "🎖️ Project 985 (National Elite)", count: 39 },
-            { id: "stem", label: "⚡ Tech, AI & Engineering", count: null },
-            { id: "med", label: "🏥 Medicine & Health", count: null },
-            { id: "biz", label: "📊 Finance & Economics", count: null },
+            {
+              id: "all",
+              label:
+                lang === "ar"
+                  ? "🌟 كل الجامعات"
+                  : lang === "fr"
+                  ? "🌟 Toutes les universités"
+                  : "🌟 All Universities",
+              count: all.length,
+            },
+            {
+              id: "c9",
+              label:
+                lang === "ar"
+                  ? "🏆 رابطة C9 (أفضل 9)"
+                  : lang === "fr"
+                  ? "🏆 Ligue C9 (Top 9)"
+                  : "🏆 C9 League (Top 9)",
+              count: 9,
+            },
+            {
+              id: "985",
+              label:
+                lang === "ar"
+                  ? "🎖️ مشروع 985 (النخبة)"
+                  : lang === "fr"
+                  ? "🎖️ Projet 985 (Élite)"
+                  : "🎖️ Project 985 (National Elite)",
+              count: 39,
+            },
+            {
+              id: "stem",
+              label:
+                lang === "ar"
+                  ? "⚡ الهندسة والذكاء الاصطناعي"
+                  : lang === "fr"
+                  ? "⚡ Ingénierie & IA"
+                  : "⚡ Tech, AI & Engineering",
+              count: null,
+            },
+            {
+              id: "med",
+              label:
+                lang === "ar"
+                  ? "🏥 الطب والعلوم الصحية"
+                  : lang === "fr"
+                  ? "🏥 Médecine & Santé"
+                  : "🏥 Medicine & Health",
+              count: null,
+            },
+            {
+              id: "biz",
+              label:
+                lang === "ar"
+                  ? "📊 المالية والاقتصاد"
+                  : lang === "fr"
+                  ? "📊 Finance & Économie"
+                  : "📊 Finance & Economics",
+              count: null,
+            },
           ].map((cat) => (
             <button
               key={cat.id}
@@ -265,11 +323,11 @@ export default function UniversitiesPage() {
         {(selectedTier !== "all" || selectedCity !== "All Cities" || searchQuery) && (
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-cyan/10 border border-cyan/20 text-xs">
             <div className="flex items-center gap-2 text-text-secondary">
-              <span className="font-semibold text-text-primary">Showing:</span>
-              <span className="text-cyan font-bold">{filtered.length} universities</span>
+              <span className="font-semibold text-text-primary">{t("com.showing")}:</span>
+              <span className="text-cyan font-bold">{filtered.length} {t("nav.universities")}</span>
               {selectedTier !== "all" && (
                 <span className="px-2 py-0.5 rounded bg-cyan/20 text-cyan uppercase font-mono text-[10px]">
-                  Tier: {selectedTier.toUpperCase()}
+                  {lang === "ar" ? "الفئة: " : lang === "fr" ? "Catégorie: " : "Tier: "}{selectedTier.toUpperCase()}
                 </span>
               )}
               {selectedCity !== "All Cities" && (
@@ -286,7 +344,7 @@ export default function UniversitiesPage() {
               }}
               className="text-cyan hover:underline font-bold"
             >
-              Reset Filters ↺
+              {lang === "ar" ? "إعادة تعيين المرشحات ↺" : lang === "fr" ? "Réinitialiser les filtres ↺" : "Reset Filters ↺"}
             </button>
           </div>
         )}
@@ -301,9 +359,11 @@ export default function UniversitiesPage() {
         ) : filtered.length === 0 ? (
           <div className="glass rounded-3xl p-12 text-center max-w-md mx-auto">
             <Building className="w-12 h-12 text-cyan mx-auto mb-3 opacity-60" />
-            <h3 className="text-lg font-bold text-text-primary mb-1">No Universities Found</h3>
+            <h3 className="text-lg font-bold text-text-primary mb-1">
+              {lang === "ar" ? "لم يتم العثور على أي جامعة" : lang === "fr" ? "Aucune université trouvée" : "No Universities Found"}
+            </h3>
             <p className="text-xs text-text-muted mb-4">
-              Try adjusting your search criteria or clearing selected filters.
+              {lang === "ar" ? "يرجى تعديل معايير البحث أو مسح المرشحات المحددة." : lang === "fr" ? "Essayez d'ajuster vos critères ou d'effacer les filtres." : "Try adjusting your search criteria or clearing selected filters."}
             </p>
             <button
               onClick={() => {
@@ -313,7 +373,7 @@ export default function UniversitiesPage() {
               }}
               className="px-4 py-2 rounded-xl bg-cyan/20 text-cyan text-xs font-bold hover:bg-cyan/30"
             >
-              View All Universities
+              {lang === "ar" ? "عرض جميع الجامعات" : lang === "fr" ? "Voir toutes les universités" : "View All Universities"}
             </button>
           </div>
         ) : (
@@ -335,24 +395,28 @@ export default function UniversitiesPage() {
                   <Crown className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-black text-text-primary mb-2">
-                  Unlock All {all.length} Universities with Lifetime Pass
+                  {lang === "ar" ? `افتح جميع الجامعات الـ ${all.length} مع تصريح VIP مدى الحياة` : lang === "fr" ? `Débloquez les ${all.length} universités avec le Pass VIP à vie` : `Unlock All ${all.length} Universities with Lifetime Pass`}
                 </h3>
                 <p className="text-sm text-text-secondary max-w-xl mx-auto mb-6">
-                  You are previewing {FREE_TRIAL_LIMIT} universities. Unlock all {all.length} top Chinese universities, 400+ CSC scholarships, 3D VR campus tours, and AI translation tools forever for just $29.
+                  {lang === "ar"
+                    ? `أنت تشاهد حالياً ${FREE_TRIAL_LIMIT} جامعات تجريبية. افتح كل ${all.length} جامعة نخبة صينية، وأكثر من 400 منحة CSC، وجولات 3D VR، وأدوات الترجمة بالذكاء الاصطناعي مدى الحياة مقابل 29 دولار فقط.`
+                    : lang === "fr"
+                    ? `Vous prévisualisez actuellement ${FREE_TRIAL_LIMIT} universités. Débloquez les ${all.length} universités d'élite, plus de 400 bourses CSC, visites 3D VR et outils IA à vie pour seulement 29 $.`
+                    : `You are previewing ${FREE_TRIAL_LIMIT} universities. Unlock all ${all.length} top Chinese universities, 400+ CSC scholarships, 3D VR campus tours, and AI translation tools forever for just $29.`}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={() => setShowLifetimeModal(true)}
                     className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white font-black text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all cursor-pointer"
                   >
-                    Get Lifetime VIP Pass ($29)
+                    {lang === "ar" ? "احصل على تصريح VIP مدى الحياة (29$)" : lang === "fr" ? "Obtenir le Pass VIP à vie (29 $)" : "Get Lifetime VIP Pass ($29)"}
                   </button>
                   {!user && (
                     <button
                       onClick={() => setShowAuthGate(true)}
                       className="px-6 py-3 rounded-xl glass border border-white/20 text-text-primary font-bold text-sm hover:bg-white/10 transition-all cursor-pointer"
                     >
-                      Sign In to Account
+                      {lang === "ar" ? "تسجيل الدخول إلى حسابك" : lang === "fr" ? "Se connecter au compte" : "Sign In to Account"}
                     </button>
                   )}
                 </div>
@@ -368,8 +432,8 @@ export default function UniversitiesPage() {
         onBackToRoles={() => router.push("/")}
         role="student"
         canClose={false}
-        title="Moroccan Student Access"
-        subtitle="Sign in or register to explore 100+ Chinese universities and 3D VR campus walkthroughs."
+        title={lang === "ar" ? "بوابة الطلاب المغاربة" : lang === "fr" ? "Portail Étudiants Marocains" : "Moroccan Student Access"}
+        subtitle={lang === "ar" ? "سجل الدخول أو أنشئ حساباً لاستكشاف أكثر من 100 جامعة صينية وجولات الحرم الجامعي ثلاثية الأبعاد." : lang === "fr" ? "Connectez-vous pour explorer plus de 100 universités chinoises et visites 3D VR." : "Sign in or register to explore 100+ Chinese universities and 3D VR campus walkthroughs."}
       />
 
       <LifetimePassModal

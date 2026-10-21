@@ -67,7 +67,7 @@ export default function AuthGateModal({
   subtitle,
 }: AuthGateModalProps) {
   const router = useRouter();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -88,52 +88,73 @@ export default function AuthGateModal({
   // Role metadata
   const roleConfig = {
     student: {
-      badge: '🇨🇳 ScholarChina • Student Access',
+      badge: lang === "ar" ? "🇨🇳 ScholarChina • بوابة الطلاب" : '🇨🇳 ScholarChina • Student Access',
       badgeColor: 'bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-500/40',
       icon: GraduationCap,
       gradient: 'from-blue-600 via-indigo-600 to-cyan',
-      defaultTitle: 'Student Sign In & Portal Access',
+      defaultTitle: lang === "ar" ? "تسجيل دخول وبوابة الطلاب" : 'Student Sign In & Portal Access',
       defaultSubtitle:
-        'Official gateway for students seeking full and partial scholarships across 100+ Chinese universities.',
-      highlights: [
+        lang === "ar" ? "البوابة الرسمية للطلاب للحصول على منح دراسية كاملة وجزئية في أكثر من 100 جامعة صينية." : 'Official gateway for students seeking full and partial scholarships across 100+ Chinese universities.',
+      highlights: lang === "ar" ? [
+        '🇨🇳 البوابة الرسمية لمنصة ScholarChina',
+        '🎓 أكثر من 100 جامعة صينية مع جولات 3D',
+        '📜 أكثر من 400 منحة CSC كاملة وجزئية',
+        '👑 تصريح VIP مدى الحياة',
+      ] : [
         '🇨🇳 Official ScholarChina Gateway',
         '🎓 100+ Chinese Universities & 3D Tours',
         '📜 400+ CSC Full & Partial Scholarships',
         '👑 Lifetime VIP Pass Access',
       ],
-      btnText: tab === 'login' ? 'Sign In to ScholarChina' : 'Create ScholarChina Account',
+      btnText: tab === 'login'
+        ? (lang === "ar" ? "تسجيل الدخول إلى ScholarChina" : 'Sign In to ScholarChina')
+        : (lang === "ar" ? "إنشاء حساب في ScholarChina" : 'Create ScholarChina Account'),
     },
     university: {
-      badge: '🏛️ University Admissions Officer Desk • Strict Accreditation Gate',
+      badge: lang === "ar" ? "🏛️ مكتب قبول الجامعات • بوابة الاعتماد" : '🏛️ University Admissions Officer Desk • Strict Accreditation Gate',
       badgeColor: 'bg-amber-500/15 text-amber-900 dark:text-amber-300 border-amber-500/40',
       icon: Building2,
       gradient: 'from-amber-400 via-orange-500 to-amber-600',
-      defaultTitle: 'University Admissions Desk',
+      defaultTitle: lang === "ar" ? "مكتب مسؤولي القبول الجامعي" : 'University Admissions Desk',
       defaultSubtitle:
-        'Accredited verification: Only verified admissions office emails and official Gmail desks are granted entry.',
-      highlights: [
+        lang === "ar" ? "التحقق المعتمد: يُسمح بالدخول فقط لرسائل البريد الإلكتروني الرسمية لمكاتب القبول وعناوين Gmail المعتمدة." : 'Accredited verification: Only verified admissions office emails and official Gmail desks are granted entry.',
+      highlights: lang === "ar" ? [
+        '🛡️ التحقق المؤسسي الرسمي مطلوب',
+        '📋 مراجعة ملفات الطلاب ومعدلات GPA',
+        '✏️ تحديث معلومات الحرم الجامعي والشعار',
+        '📊 إصدار خطابات القبول لمنح CSC',
+      ] : [
         '🛡️ Official Institutional Verification Required',
         '📋 Review Moroccan Student Dossiers & GPAs',
         '✏️ Update Campus Profile, Motto & Landmarks',
         '📊 Grant CSC Admission Letters to Candidates',
       ],
-      btnText: tab === 'login' ? 'Sign In to Admissions Desk' : 'Register Official Admissions Desk',
+      btnText: tab === 'login'
+        ? (lang === "ar" ? "تسجيل الدخول لمكتب القبول" : 'Sign In to Admissions Desk')
+        : (lang === "ar" ? "تسجيل مكتب القبول الرسمي" : 'Register Official Admissions Desk'),
     },
     provider: {
-      badge: '💼 Certified Service Provider Desk',
+      badge: lang === "ar" ? "💼 مكتب مزودي الخدمات المعتمدين" : '💼 Certified Service Provider Desk',
       badgeColor: 'bg-rose-500/15 text-rose-900 dark:text-rose-300 border-rose-500/40',
       icon: Briefcase,
       gradient: 'from-rose-500 via-red-600 to-pink-600',
-      defaultTitle: 'Service Provider Desk Sign In',
+      defaultTitle: lang === "ar" ? "تسجيل الدخول لمزودي الخدمات" : 'Service Provider Desk Sign In',
       defaultSubtitle:
-        'Sign in or register to manage Moroccan student document translations, legalizations and certified deliverables.',
-      highlights: [
+        lang === "ar" ? "سجل الدخول لإدارة ترجمة وتصديق وثائق الطلاب والمخرجات المعتمدة." : 'Sign in or register to manage Moroccan student document translations, legalizations and certified deliverables.',
+      highlights: lang === "ar" ? [
+        '📑 قائمة الترجمة المحلفة والتصديق العدلي',
+        '📄 فحص الشهادات الأصلية للطلاب (PDF/PNG)',
+        '🇨🇳 تسليم الترجمات الرسمية المحلفة إلى الصينية',
+        '💰 متابعة الأرباح والمدفوعات',
+      ] : [
         '📑 Sworn Translation & Notarization Queue',
         '📄 Inspect Original Student Diplomas (PDF/PNG)',
         '🇨🇳 Deliver Sworn Mandarin Translations',
         '💰 Track Earnings & Order Payouts',
       ],
-      btnText: tab === 'login' ? 'Sign In to Provider Desk' : 'Register Service Provider Account',
+      btnText: tab === 'login'
+        ? (lang === "ar" ? "تسجيل الدخول لمكتب الخدمات" : 'Sign In to Provider Desk')
+        : (lang === "ar" ? "تسجيل حساب مزود خدمة" : 'Register Service Provider Account'),
     },
   }[role];
 
@@ -173,8 +194,9 @@ export default function AuthGateModal({
       }
 
       if (tab === 'login') {
+        const cleanUsername = username.trim();
         const res = await loginUser({
-          username,
+          username: cleanUsername,
           password,
           role,
           university_id: selectedUniId || undefined,
@@ -183,6 +205,8 @@ export default function AuthGateModal({
         if (res.data) {
           setToken(res.data.token);
           localStorage.setItem('user', JSON.stringify(res.data.user));
+          const effectiveRole = res.data.role || role || 'student';
+          localStorage.setItem('portal_role', effectiveRole);
           if (role === 'university') {
             const matchedUni = liveVerification?.university || ACCREDITED_UNIVERSITIES.find((u) => u.id === selectedUniId);
             if (matchedUni) {
@@ -193,9 +217,9 @@ export default function AuthGateModal({
             onSuccess();
           } else {
             onClose();
-            if (role === 'university') {
+            if (effectiveRole === 'university') {
               router.push('/university-portal');
-            } else if (role === 'provider') {
+            } else if (effectiveRole === 'provider') {
               router.push('/provider-portal');
             } else {
               router.push('/dashboard');
@@ -345,7 +369,7 @@ export default function AuthGateModal({
               }`}
             >
               <LogIn className="w-4 h-4" />
-              Sign In
+              {lang === "ar" ? "تسجيل الدخول" : lang === "fr" ? "Se Connecter" : "Sign In"}
             </button>
             <button
               type="button"
@@ -360,7 +384,7 @@ export default function AuthGateModal({
               }`}
             >
               <UserPlus className="w-4 h-4" />
-              Create Official Account
+              {lang === "ar" ? "إنشاء حساب رسمي" : lang === "fr" ? "Créer un Compte" : "Create Official Account"}
             </button>
           </div>
 
@@ -370,9 +394,9 @@ export default function AuthGateModal({
               <div className="flex items-center justify-between text-[11px] text-amber-300 font-bold">
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-amber-400" />
-                  Tester l'Accréditation (Gmail Officiel vs Rejet) :
+                  {lang === "ar" ? "اختبار الاعتماد (Gmail الرسمي مقابل الرفض):" : "Tester l'Accréditation (Gmail Officiel vs Rejet) :"}
                 </span>
-                <span className="text-[10px] text-amber-400/70 font-mono">102 Universités</span>
+                <span className="text-[10px] text-amber-400/70 font-mono">102 {lang === "ar" ? "جامعة" : "Universités"}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-1.5">
@@ -393,7 +417,7 @@ export default function AuthGateModal({
                   }}
                   className="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-semibold text-[11px] text-left transition-all cursor-pointer flex items-center gap-1"
                 >
-                  <span>✅ PKU (Gmail Officiel)</span>
+                  <span>✅ PKU ({lang === "ar" ? "Gmail رسمي" : "Gmail Officiel"})</span>
                 </button>
 
                 <button
@@ -453,7 +477,7 @@ export default function AuthGateModal({
                   }}
                   className="px-2.5 py-1.5 rounded-xl bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 font-semibold text-[11px] text-left transition-all cursor-pointer flex items-center gap-1"
                 >
-                  <span>❌ Rejet (Email Faux)</span>
+                  <span>❌ {lang === "ar" ? "رفض (بريد مزيف)" : "Rejet (Email Faux)"}</span>
                 </button>
               </div>
             </div>
@@ -462,7 +486,7 @@ export default function AuthGateModal({
           {/* Quick Demo Fill for Student / Provider */}
           {role !== 'university' && tab === 'login' && (
             <div className="mb-4 p-2.5 rounded-xl bg-white/5 border border-emerald-500/20 flex items-center justify-between gap-2 text-xs">
-              <span className="text-white/70 text-[11px]">Testing platform?</span>
+              <span className="text-white/70 text-[11px]">{lang === "ar" ? "هل تجرّب المنصة؟" : "Testing platform?"}</span>
               <button
                 type="button"
                 onClick={() => {
@@ -477,8 +501,8 @@ export default function AuthGateModal({
                 }}
                 className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-bold transition-all text-xs flex items-center gap-1 cursor-pointer active:scale-95"
               >
-                <span>⚡ Quick Fill Demo:</span>
-                <span className="underline">{role === 'provider' ? 'Sworn Translator' : 'Yassine (Casablanca)'}</span>
+                <span>{lang === "ar" ? "⚡ تعبئة تجريبية:" : "⚡ Quick Fill Demo:"}</span>
+                <span className="underline">{role === 'provider' ? (lang === "ar" ? "مترجم محلف" : "Sworn Translator") : (lang === "ar" ? "ياسين (الدار البيضاء)" : "Yassine (Casablanca)")}</span>
               </button>
             </div>
           )}
@@ -538,14 +562,20 @@ export default function AuthGateModal({
             {tab === 'register' && (
               <div>
                 <label className="block text-xs font-semibold text-white/70 mb-1">
-                  {role === 'university' ? 'Nom du Responsable des Admissions / Titre' : 'Full Name (Nom & Prénom)'}
+                  {lang === "ar"
+                    ? (role === 'university' ? 'اسم مسؤول القبول / اللقب' : 'الاسم الكامل (الاسم العائلي والشخصي)')
+                    : (role === 'university' ? 'Nom du Responsable des Admissions / Titre' : 'Full Name (Nom & Prénom)')}
                 </label>
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder={role === 'university' ? 'e.g. Director Zhang Wei (Admissions Desk)' : 'e.g. Yassine Benali'}
+                  placeholder={
+                    lang === "ar"
+                      ? (role === 'university' ? 'مثال: المدير تشانغ وي (مكتب القبول)' : 'مثال: ياسين بنعلي')
+                      : (role === 'university' ? 'e.g. Director Zhang Wei (Admissions Desk)' : 'e.g. Yassine Benali')
+                  }
                   className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-400 text-sm"
                 />
               </div>
@@ -554,12 +584,16 @@ export default function AuthGateModal({
             <div>
               <label className="block text-xs font-semibold text-white/70 mb-1 flex items-center justify-between">
                 <span>
-                  {role === 'university' && tab === 'login'
-                    ? 'Identifiant ou Gmail / Email Officiel'
-                    : 'Nom d\'utilisateur (Username)'}
+                  {lang === "ar"
+                    ? (role === 'university' && tab === 'login'
+                        ? 'المعرف أو بريد Gmail / البريد الرسمي'
+                        : 'اسم المستخدم (Username)')
+                    : (role === 'university' && tab === 'login'
+                        ? 'Identifiant ou Gmail / Email Officiel'
+                        : 'Nom d\'utilisateur (Username)')}
                 </span>
                 {role === 'university' && tab === 'login' && (
-                  <span className="text-[10px] text-amber-400">Email ou Nom d'utilisateur</span>
+                  <span className="text-[10px] text-amber-400">{lang === "ar" ? "البريد أو اسم المستخدم" : "Email ou Nom d'utilisateur"}</span>
                 )}
               </label>
               <input
@@ -570,7 +604,7 @@ export default function AuthGateModal({
                 placeholder={
                   role === 'university' && tab === 'login'
                     ? 'ex: pku.admissions.office@gmail.com'
-                    : 'Choose a username'
+                    : (lang === "ar" ? "اختر اسم مستخدم" : 'Choose a username')
                 }
                 className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-400 text-sm"
               />
@@ -582,12 +616,16 @@ export default function AuthGateModal({
                 <label className="block text-xs font-semibold text-white/70 mb-1 flex items-center justify-between">
                   <span className="flex items-center gap-1">
                     <Mail className="w-3.5 h-3.5 text-emerald-400" />
-                    {role === 'university'
-                      ? 'Email Institutionnel ou Gmail Officiel d\'Admissions'
-                      : 'Email Address'}
+                    {lang === "ar"
+                      ? (role === 'university'
+                          ? 'البريد المؤسسي أو بريد Gmail الرسمي للقبول'
+                          : 'عنوان البريد الإلكتروني')
+                      : (role === 'university'
+                          ? 'Email Institutionnel ou Gmail Officiel d\'Admissions'
+                          : 'Email Address')}
                   </span>
                   {role === 'university' && (
-                    <span className="text-[10px] text-amber-400 font-bold">Vérification Obligatoire</span>
+                    <span className="text-[10px] text-amber-400 font-bold">{lang === "ar" ? "التحقق إلزامي" : "Vérification Obligatoire"}</span>
                   )}
                 </label>
                 <input
@@ -613,18 +651,18 @@ export default function AuthGateModal({
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="font-bold flex items-center gap-1.5 text-emerald-300">
-                        <span>✅ Accrédité : Bureau des Admissions Officiel</span>
+                        <span>{lang === "ar" ? "✅ معتمد: مكتب القبول الرسمي" : "✅ Accrédité : Bureau des Admissions Officiel"}</span>
                         <span className="text-[10px] bg-emerald-500/30 px-1.5 py-0.5 rounded font-mono font-bold text-emerald-200">
-                          ACCÈS VALIDÉ
+                          {lang === "ar" ? "مقبول ومؤكد" : "ACCÈS VALIDÉ"}
                         </span>
                       </div>
                       <p className="text-[11px] text-emerald-200/80 mt-0.5 leading-relaxed">
-                        {liveVerification.university?.name} • Contact accrédité dans notre base officielle (
+                        {liveVerification.university?.name} • {lang === "ar" ? "جهة اتصال معتمدة في قاعدة بياناتنا الرسمية" : "Contact accrédité dans notre base officielle"} (
                         {liveVerification.matchedBy === 'secondary_gmail'
-                          ? 'Gmail Officiel'
+                          ? (lang === "ar" ? 'Gmail رسمي' : 'Gmail Officiel')
                           : liveVerification.matchedBy === 'domain'
-                          ? 'Domaine Institutionnel'
-                          : 'Email Principal Admissions'}
+                          ? (lang === "ar" ? 'نطاق مؤسسي' : 'Domaine Institutionnel')
+                          : (lang === "ar" ? 'البريد الرئيسي للقبول' : 'Email Principal Admissions')}
                         ).
                       </p>
                     </div>
@@ -634,14 +672,16 @@ export default function AuthGateModal({
                     <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="font-bold flex items-center gap-1.5 text-red-300">
-                        <span>❌ Accès Refusé : Email Non Accrédité</span>
+                        <span>{lang === "ar" ? "❌ الدخول مرفوض: بريد غير معتمد" : "❌ Accès Refusé : Email Non Accrédité"}</span>
                         <span className="text-[10px] bg-red-500/30 px-1.5 py-0.5 rounded font-mono font-bold text-red-200">
-                          VERROUILLÉ
+                          {lang === "ar" ? "مقفل" : "VERROUILLÉ"}
                         </span>
                       </div>
                       <p className="text-[11px] text-red-200/80 mt-0.5 leading-relaxed">
                         {liveVerification?.error ||
-                          "Cette adresse email ne figure pas dans le registre officiel des 102 universités partenaires. Seules les adresses institutionnelles et Gmails d'admissions officiels sont autorisés."}
+                          (lang === "ar"
+                            ? "هذا البريد الإلكتروني غير مسجل في السجل الرسمي للجامعات الشريكة الـ 102."
+                            : "Cette adresse email ne figure pas dans le registre officiel des 102 universités partenaires.")}
                       </p>
                     </div>
                   </div>
@@ -653,7 +693,7 @@ export default function AuthGateModal({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-white/70 mb-1">
-                    City in Morocco (المدينة)
+                    {lang === "ar" ? "المدينة في المغرب" : "City in Morocco (المدينة)"}
                   </label>
                   <select
                     value={city}
@@ -669,10 +709,10 @@ export default function AuthGateModal({
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-white/70 mb-1">
-                    Nationality (الجنسية)
+                    {lang === "ar" ? "الجنسية" : "Nationality (الجنسية)"}
                   </label>
                   <div className="px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                    <span>🇲🇦 Morocco (المغرب)</span>
+                    <span>🇲🇦 {lang === "ar" ? "المغرب" : "Morocco (المغرب)"}</span>
                   </div>
                 </div>
               </div>
@@ -680,7 +720,7 @@ export default function AuthGateModal({
 
             <div>
               <label className="block text-xs font-semibold text-white/70 mb-1">
-                Mot de passe (Password)
+                {lang === "ar" ? "كلمة المرور" : "Mot de passe (Password)"}
               </label>
               <input
                 type="password"
@@ -702,7 +742,7 @@ export default function AuthGateModal({
               }`}
             >
               {loading ? (
-                <span>Vérification et connexion en cours...</span>
+                <span>{lang === "ar" ? "جاري التحقق والاتصال..." : "Vérification et connexion en cours..."}</span>
               ) : (
                 <>
                   <span>{roleConfig.btnText}</span>
@@ -715,7 +755,7 @@ export default function AuthGateModal({
           {/* Bottom Security Note */}
           <div className="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-white/10 text-[11px] text-white/50">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Vérification institutionnelle officielle • Registre des 102 universités partenaires</span>
+            <span>{lang === "ar" ? "تحقق مؤسسي رسمي • سجل الـ 102 جامعة شريكة" : "Vérification institutionnelle officielle • Registre des 102 universités partenaires"}</span>
           </div>
         </motion.div>
       </div>

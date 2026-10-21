@@ -6,10 +6,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser, sendVerificationCode } from "@/lib/api";
+import { useLang } from "@/lib/i18n";
 import Logo from "@/components/Logo";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t, lang } = useLang();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,12 +24,16 @@ export default function RegisterPage() {
     setError("");
 
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      setError("Username can only contain letters, numbers, and underscores (no spaces).");
+      setError(
+        lang === "ar"
+          ? "يمكن أن يحتوي اسم المستخدم فقط على أحرف وأرقام وشرطات سفلية (بدون مسافات)."
+          : "Username can only contain letters, numbers, and underscores (no spaces)."
+      );
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(lang === "ar" ? "كلمتا المرور غير متطابقتين." : "Passwords do not match.");
       return;
     }
 
@@ -37,11 +43,11 @@ export default function RegisterPage() {
 
     if (response.data) {
       // Send verification code to email
-      const codeRes = await sendVerificationCode(email);
+      await sendVerificationCode(email);
       // Redirect to verify page
       router.push("/auth/verify?email=" + encodeURIComponent(email));
     } else {
-      let msg = response.error || "Registration failed. Please try again.";
+      let msg = response.error || (lang === "ar" ? "فشل إنشاء الحساب. يرجى المحاولة مجدداً." : "Registration failed. Please try again.");
       if (msg.includes("[") || msg.includes("{")) {
         try {
           const parsed = JSON.parse(msg);
@@ -70,10 +76,13 @@ export default function RegisterPage() {
             <Logo size={64} />
           </div>
           <h1 className="text-2xl font-black text-text-primary tracking-tight">
-            Join <span className="text-blue-500">ScholarChina</span>
+            {lang === "ar" ? "انضم إلى " : "Join "}
+            <span className="text-blue-500">ScholarChina</span>
           </h1>
           <p className="text-text-secondary text-sm mt-1">
-            Create an account to explore 100+ universities & CSC grants
+            {lang === "ar"
+              ? "أنشئ حساباً لاستكشاف أكثر من 100 جامعة ومنح CSC"
+              : "Create an account to explore 100+ universities & CSC grants"}
           </p>
         </div>
 
@@ -86,7 +95,7 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister} className="space-y-5">
           <div>
             <label className="text-sm font-medium text-text-secondary mb-2 block">
-              Username
+              {lang === "ar" ? "اسم المستخدم" : "Username"}
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
@@ -94,7 +103,7 @@ export default function RegisterPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Choose a username"
+                placeholder={lang === "ar" ? "اختر اسم مستخدم" : "Choose a username"}
                 required
                 className="w-full glass rounded-xl py-3 pl-11 pr-4 text-text-primary placeholder:text-text-muted outline-none input-glow"
               />
@@ -103,7 +112,7 @@ export default function RegisterPage() {
 
           <div>
             <label className="text-sm font-medium text-text-secondary mb-2 block">
-              Email
+              {lang === "ar" ? "البريد الإلكتروني" : "Email"}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
@@ -120,7 +129,7 @@ export default function RegisterPage() {
 
           <div>
             <label className="text-sm font-medium text-text-secondary mb-2 block">
-              Password
+              {lang === "ar" ? "كلمة المرور" : "Password"}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
@@ -128,7 +137,7 @@ export default function RegisterPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create a password"
+                placeholder={lang === "ar" ? "أنشئ كلمة مرور" : "Create a password"}
                 required
                 className="w-full glass rounded-xl py-3 pl-11 pr-4 text-text-primary placeholder:text-text-muted outline-none input-glow"
               />
@@ -137,7 +146,7 @@ export default function RegisterPage() {
 
           <div>
             <label className="text-sm font-medium text-text-secondary mb-2 block">
-              Confirm Password
+              {lang === "ar" ? "تأكيد كلمة المرور" : "Confirm Password"}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
@@ -145,7 +154,7 @@ export default function RegisterPage() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
+                placeholder={lang === "ar" ? "أعد إدخال كلمة المرور" : "Confirm your password"}
                 required
                 className="w-full glass rounded-xl py-3 pl-11 pr-4 text-text-primary placeholder:text-text-muted outline-none input-glow"
               />
@@ -157,17 +166,17 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full btn-gradient py-3.5 rounded-xl text-base disabled:opacity-50"
           >
-            <span>{loading ? "Creating account..." : "Create Account"}</span>
+            <span>{loading ? (lang === "ar" ? "جاري إنشاء الحساب..." : "Creating account...") : (lang === "ar" ? "إنشاء حساب" : "Create Account")}</span>
           </button>
         </form>
 
         <p className="text-center text-sm text-text-muted mt-6">
-          Already have an account?{" "}
+          {lang === "ar" ? "لديك حساب بالفعل؟ " : "Already have an account? "}
           <Link
             href="/auth/login"
             className="text-purple hover:text-cyan transition-colors font-medium"
           >
-            Sign in
+            {lang === "ar" ? "تسجيل الدخول" : "Sign in"}
           </Link>
         </p>
       </motion.div>

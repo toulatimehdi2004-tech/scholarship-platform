@@ -21,7 +21,7 @@ export default function UniversityCard({
   selected?: boolean;
   onSelect?: (u: University | null) => void;
 }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [imgError, setImgError] = useState(false);
   const coverUrl = getUniversityCoverImage(university.id);
 
@@ -50,13 +50,13 @@ export default function UniversityCard({
           ) : (
             <span className="flex items-center gap-1 text-[10px] font-bold bg-slate-900/80 text-slate-300 border border-white/20 px-2 py-0.5 rounded-full shadow-md backdrop-blur-md">
               <GraduationCap className="w-3 h-3 text-cyan" />
-              <span>Top University</span>
+              <span>{lang === "ar" ? "جامعة رائدة" : lang === "fr" ? "Université d'élite" : "Top University"}</span>
             </span>
           )}
 
           <span className="flex items-center gap-1 text-[10px] font-bold bg-slate-950/85 text-cyan border border-cyan/40 px-2.5 py-0.5 rounded-full shadow-md backdrop-blur-md">
             <Glasses className="w-3 h-3 text-emerald-400" />
-            <span>3D VR Tour</span>
+            <span>{lang === "ar" ? "جولة 3D VR" : lang === "fr" ? "Visite 3D VR" : "3D VR Tour"}</span>
           </span>
         </div>
 
@@ -64,7 +64,7 @@ export default function UniversityCard({
         <div className="absolute bottom-2.5 left-3 pointer-events-none">
           <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-white/90 bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-white/15 shadow-sm">
             <MapPin className="w-3 h-3 text-cyan flex-shrink-0" />
-            <span>{university.city || "China"}{university.country ? `, ${university.country}` : ""}</span>
+            <span>{university.city || (lang === "ar" ? "الصين" : lang === "fr" ? "Chine" : "China")}{university.country ? `, ${university.country}` : ""}</span>
           </span>
         </div>
       </div>

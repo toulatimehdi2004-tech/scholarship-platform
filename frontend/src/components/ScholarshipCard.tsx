@@ -19,7 +19,7 @@ export default function ScholarshipCard({
   index = 0,
 }: ScholarshipCardProps) {
   const router = useRouter();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [inCompare, setInCompare] = useState(() =>
     getCompareIds().includes(scholarship.id)
   );
@@ -52,9 +52,9 @@ export default function ScholarshipCard({
     phd: t("sch.phd"),
     all: t("sch.lvlAll"),
     other: t("sch.language"),
-    postdoc: "Postdoc",
-    exchange: "Exchange",
-    summer: "Summer School",
+    postdoc: t("sch.postdoc"),
+    exchange: t("sch.exchange"),
+    summer: t("sch.summer"),
   };
 
   const levelColors: Record<string, string> = {
@@ -68,12 +68,15 @@ export default function ScholarshipCard({
     typeColors[scholarship.type] || "bg-cyan/15 text-cyan border-cyan/30";
 
   const deadline = scholarship.application_deadline
-    ? new Date(scholarship.application_deadline).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "Rolling";
+    ? new Date(scholarship.application_deadline).toLocaleDateString(
+        lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US",
+        {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }
+      )
+    : t("det.rolling");
 
   const levelLabel =
     levelLabels[scholarship.level] || scholarship.level || "All Levels";
@@ -120,7 +123,7 @@ export default function ScholarshipCard({
               <GraduationCap className="w-3.5 h-3.5 text-cyan flex-shrink-0" />
             )}
             <span className="line-clamp-1 underline-offset-2 hover:underline">
-              {scholarship.university_name || "Unknown University"}
+              {scholarship.university_name || (lang === "ar" ? "جامعة معتمدة" : lang === "fr" ? "Université accréditée" : "Accredited University")}
             </span>
           </span>
           {scholarship.university_city && (
@@ -148,7 +151,7 @@ export default function ScholarshipCard({
             )}
             <button
               onClick={onCompare}
-              title="+ Compare"
+              title={t("cmp.compareBtn")}
               className={
                 "p-1.5 rounded-lg transition-all " +
                 (inCompare

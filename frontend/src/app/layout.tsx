@@ -23,6 +23,24 @@ export default function RootLayout({
 }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`light ${inter.variable} h-full`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var l = localStorage.getItem('site-lang');
+                if (l === 'ar') {
+                  document.documentElement.dir = 'rtl';
+                  document.documentElement.lang = 'ar';
+                } else if (l === 'fr') {
+                  document.documentElement.lang = 'fr';
+                  document.documentElement.dir = 'ltr';
+                }
+              } catch(e) {}
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full bg-background text-foreground antialiased">
         <ThemeProvider>
           <LanguageProvider>

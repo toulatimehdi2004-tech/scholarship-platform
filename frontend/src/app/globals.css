@@ -434,3 +434,39 @@ body {
 .light .btn-gradient:hover {
   box-shadow: 0 8px 30px rgba(29, 78, 216, 0.5), 0 0 35px rgba(30, 58, 138, 0.35);
 }
+
+/* ── RTL & Arabic Typography & Layout Support ───────────────────────── */
+[dir="rtl"] {
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Tahoma, "Noto Sans Arabic", "Cairo", Arial, sans-serif;
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Tahoma, "Noto Sans Arabic", "Cairo", Arial, sans-serif;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* Prevent unnatural tracking/letter-spacing in Arabic script */
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] p,
+[dir="rtl"] span,
+[dir="rtl"] a,
+[dir="rtl"] button {
+  letter-spacing: normal !important;
+}
+
+/* Flip directional icons when in RTL */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}

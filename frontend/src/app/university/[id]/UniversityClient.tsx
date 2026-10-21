@@ -138,7 +138,7 @@ export default function UniversityClient() {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
             <div className="absolute top-4 right-4 flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-950/80 text-cyan border border-cyan/40 backdrop-blur-md shadow-lg flex items-center gap-1.5">
-                🥽 3D VR Console Available
+                🥽 {lang === "ar" ? "جولة 3D VR متاحة" : lang === "fr" ? "Visite 3D VR Disponible" : "3D VR Console Available"}
               </span>
             </div>
           </div>
@@ -160,13 +160,13 @@ export default function UniversityClient() {
                   </span>
                 )}
                 <span className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-emerald-500/20 to-cyan/20 text-cyan border border-cyan/30 px-2.5 py-1 rounded-full font-semibold">
-                  🥽 3D VR Console Available
+                  🥽 {lang === "ar" ? "جولة 3D VR متاحة" : lang === "fr" ? "Visite 3D VR Disponible" : "3D VR Console Available"}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary mb-4">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-4 h-4 text-cyan" />
-                  {university.city}, {university.country}
+                  {university.city}, {lang === "ar" ? "الصين" : lang === "fr" ? "Chine" : university.country}
                 </span>
                 <span className="flex items-center gap-1">
                   <GraduationCap className="w-4 h-4 text-purple" />
@@ -215,7 +215,7 @@ export default function UniversityClient() {
           {[
             {
               label: t("ud.location"),
-              value: university.city + ", " + university.country,
+              value: university.city + ", " + (lang === "ar" ? "الصين" : lang === "fr" ? "Chine" : university.country),
               icon: <MapPin className="w-5 h-5 text-cyan" />,
             },
             {

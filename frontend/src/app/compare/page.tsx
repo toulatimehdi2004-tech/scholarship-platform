@@ -7,9 +7,10 @@ import Link from "next/link";
 import { fetchApi, type ScholarshipDetail } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { getCompareIds, clearCompareIds } from "@/lib/compare";
+import AutoText from "@/components/AutoText";
 
 export default function ComparePage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [ids, setIds] = useState<number[]>([]);
   const [items, setItems] = useState<ScholarshipDetail[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,27 +69,49 @@ export default function ComparePage() {
     );
   }
 
+  const levelLabels: Record<string, string> = {
+    bachelor: t("sch.bachelor"),
+    master: t("sch.master"),
+    phd: t("sch.phd"),
+    all: t("sch.lvlAll"),
+    other: t("sch.language"),
+    postdoc: t("sch.postdoc"),
+    exchange: t("sch.exchange"),
+    summer: t("sch.summer"),
+  };
+
   const rows: { label: string; get: (s: ScholarshipDetail) => React.ReactNode }[] = [
     { label: t("cmp.university"), get: (s) => s.university?.name || "—" },
     { label: t("cmp.city"), get: (s) => s.university?.city || "—" },
-    { label: t("cmp.type"), get: (s) => s.type },
-    { label: t("cmp.level"), get: (s) => s.level },
+    {
+      label: t("cmp.type"),
+      get: (s) =>
+        s.type === "full"
+          ? t("det.fullSch")
+          : s.type === "partial"
+          ? t("det.partial")
+          : s.type,
+    },
+    { label: t("cmp.level"), get: (s) => levelLabels[s.level] || s.level },
     {
       label: t("cmp.deadline"),
       get: (s) =>
         s.application_deadline
-          ? new Date(s.application_deadline).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })
+          ? new Date(s.application_deadline).toLocaleDateString(
+              lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US",
+              {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }
+            )
           : t("cmp.rolling"),
     },
     {
       label: t("cmp.tuition"),
       get: (s) => (
         <span className="text-xs leading-relaxed whitespace-pre-line">
-          {s.tuition_info || "—"}
+          {s.tuition_info ? <AutoText text={s.tuition_info} /> : "—"}
         </span>
       ),
     },
@@ -101,7 +124,18 @@ export default function ComparePage() {
     },
     {
       label: t("cmp.amount"),
-      get: (s) => (s.amount ? `${s.amount} ${s.currency}` : s.duration || "—"),
+      get: (s) =>
+        s.amount
+          ? `${s.amount} ${
+              s.currency === "MAD" || s.currency === "DH"
+                ? lang === "ar"
+                  ? "د.م."
+                  : "DH"
+                : s.currency
+            }`
+          : s.duration
+          ? <AutoText text={s.duration} />
+          : "—",
     },
     {
       label: t("cmp.documents"),
@@ -144,7 +178,7 @@ export default function ComparePage() {
                           href={"/scholarships/" + s.id}
                           className="text-text-primary hover:text-cyan transition-colors font-semibold leading-snug line-clamp-3"
                         >
-                          {s.title}
+                          <AutoText text={s.title} />
                         </Link>
                         <button
                           onClick={() => remove(s.id)}

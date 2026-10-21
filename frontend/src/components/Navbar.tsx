@@ -30,6 +30,7 @@ import AuthGateModal from "@/components/AuthGateModal";
 const navKeys = [
   { href: "/scholarships", key: "nav.scholarships" },
   { href: "/universities", key: "nav.universities" },
+  { href: "/stories", key: "nav.stories" },
   { href: "/tracker", key: "nav.tracker" },
   { href: "/ai-chat", key: "nav.aiChat" },
   { href: "/dashboard", key: "nav.dashboard" },
@@ -72,6 +73,7 @@ export default function Navbar() {
     clearToken();
     try {
       localStorage.removeItem("user");
+      localStorage.setItem("portal_role", "student");
     } catch {}
     setUser(null);
     window.location.reload();
@@ -103,16 +105,16 @@ export default function Navbar() {
   const getNavLinks = () => {
     if (portalRole === "university") {
       return [
-        { href: "/university-portal", label: "Admissions Desk" },
-        { href: "/universities", label: "Campuses" },
-        { href: "/scholarships", label: "Scholarships" },
+        { href: "/university-portal", label: t("nav.admissionsDesk") },
+        { href: "/universities", label: t("nav.campuses") },
+        { href: "/scholarships", label: t("nav.scholarships") },
       ];
     }
     if (portalRole === "provider") {
       return [
-        { href: "/provider-portal", label: "Orders & Services" },
-        { href: "/universities", label: "Campuses" },
-        { href: "/scholarships", label: "Scholarships" },
+        { href: "/provider-portal", label: t("nav.ordersServices") },
+        { href: "/universities", label: t("nav.campuses") },
+        { href: "/scholarships", label: t("nav.scholarships") },
       ];
     }
     return navKeys.map((link) => ({ href: link.href, label: t(link.key) }));
@@ -178,10 +180,10 @@ export default function Navbar() {
                   )}
                   <span>
                     {portalRole === "university"
-                      ? "University Desk"
+                      ? t("nav.uniPortal")
                       : portalRole === "provider"
-                      ? "Provider Desk"
-                      : "Student Portal"}
+                      ? t("nav.providerDesk")
+                      : t("nav.studentPortal")}
                   </span>
                   <ChevronDown className="w-3 h-3 opacity-60" />
                 </button>
@@ -193,10 +195,10 @@ export default function Navbar() {
                   >
                     <div className="px-3 py-2 border-b border-white/5 mb-1.5">
                       <p className="text-[10px] uppercase font-bold tracking-wider text-text-muted">
-                        Active Workspace
+                        {t("nav.workspace")}
                       </p>
                       <p className="text-xs text-text-secondary mt-0.5">
-                        Switch between platform roles
+                        {t("nav.switchRole")}
                       </p>
                     </div>
 
@@ -213,9 +215,9 @@ export default function Navbar() {
                           <GraduationCap className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-bold">Student Portal</div>
+                          <div className="font-bold">{t("nav.studentPortal")}</div>
                           <div className="text-[10px] text-text-muted truncate">
-                            Scholarships & 3D Tours
+                            {t("nav.studentDesc")}
                           </div>
                         </div>
                         {portalRole === "student" && <Check className="w-3.5 h-3.5 text-emerald-400" />}
@@ -233,9 +235,9 @@ export default function Navbar() {
                           <Building2 className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-bold">University Portal</div>
+                          <div className="font-bold">{t("nav.uniPortal")}</div>
                           <div className="text-[10px] text-text-muted truncate">
-                            Admissions & Edit School Info
+                            {t("nav.uniDesc")}
                           </div>
                         </div>
                         {portalRole === "university" && <Check className="w-3.5 h-3.5 text-rose-400" />}
@@ -253,9 +255,9 @@ export default function Navbar() {
                           <Briefcase className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-bold">Service Provider Desk</div>
+                          <div className="font-bold">{t("nav.providerDesk")}</div>
                           <div className="text-[10px] text-text-muted truncate">
-                            Translations & Document Orders
+                            {t("nav.providerDesc")}
                           </div>
                         </div>
                         {portalRole === "provider" && <Check className="w-3.5 h-3.5 text-amber-400" />}
@@ -268,7 +270,7 @@ export default function Navbar() {
                         className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-bold text-text-muted hover:text-cyan hover:bg-white/5 transition-all cursor-pointer"
                       >
                         <ArrowLeftRight className="w-3 h-3" />
-                        <span>Choose Role Screen</span>
+                        <span>{t("nav.chooseRole")}</span>
                       </button>
                     </div>
                   </div>
@@ -293,7 +295,7 @@ export default function Navbar() {
                       className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shadow-sm shadow-amber-500/20 animate-shimmer hover:opacity-90 transition-opacity"
                     >
                       <Crown className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Lifetime VIP</span>
+                      <span>{t("nav.vipPass")}</span>
                     </Link>
                   ) : (
                     <Link
@@ -301,14 +303,14 @@ export default function Navbar() {
                       className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 hover:opacity-95 transition-all transform hover:scale-105 cursor-pointer animate-shimmer"
                     >
                       <Crown className="w-3.5 h-3.5 text-amber-200" />
-                      <span>Lifetime VIP ($29)</span>
+                      <span>{t("nav.vipPass")}</span>
                     </Link>
                   )}
 
                   <Link
                     href="/profile"
                     className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-cyan transition-colors px-2 py-1 rounded-lg hover:bg-white/5"
-                    title="My Profile"
+                    title={t("nav.myProfile")}
                   >
                     <UserIcon className="w-3.5 h-3.5" />
                     <span>{user.username}</span>
@@ -316,7 +318,7 @@ export default function Navbar() {
 
                   <button
                     onClick={handleLogout}
-                    title="Log out"
+                    title={t("nav.logout")}
                     className="p-2 rounded-lg text-text-muted hover:text-red-400 hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
@@ -329,7 +331,7 @@ export default function Navbar() {
                     className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 hover:opacity-95 transition-all transform hover:scale-105 cursor-pointer animate-shimmer"
                   >
                     <Crown className="w-3.5 h-3.5 text-amber-200" />
-                    <span>Lifetime VIP ($29)</span>
+                    <span>{t("nav.vipPass")}</span>
                   </Link>
                   <button
                     onClick={() => setShowAuthGate(true)}
@@ -377,14 +379,14 @@ export default function Navbar() {
               <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
                 <div className="flex items-center justify-between px-1">
                   <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider">
-                    Active Workspace
+                    {t("nav.workspace")}
                   </span>
                   <button
                     onClick={() => switchRole("choose")}
                     className="text-[11px] font-bold text-cyan flex items-center gap-1 hover:underline"
                   >
                     <ArrowLeftRight className="w-3 h-3" />
-                    <span>Change</span>
+                    <span>{t("nav.switchRole")}</span>
                   </button>
                 </div>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -397,7 +399,7 @@ export default function Navbar() {
                     }`}
                   >
                     <GraduationCap className="w-4 h-4 mx-auto mb-1 text-emerald-400" />
-                    <span className="block text-[11px]">Student</span>
+                    <span className="block text-[11px]">{t("nav.studentPortal")}</span>
                   </button>
                   <button
                     onClick={() => switchRole("university")}
@@ -408,7 +410,7 @@ export default function Navbar() {
                     }`}
                   >
                     <Building2 className="w-4 h-4 mx-auto mb-1 text-rose-400" />
-                    <span className="block text-[11px]">University</span>
+                    <span className="block text-[11px]">{t("nav.uniPortal")}</span>
                   </button>
                   <button
                     onClick={() => switchRole("provider")}
@@ -419,7 +421,7 @@ export default function Navbar() {
                     }`}
                   >
                     <Briefcase className="w-4 h-4 mx-auto mb-1 text-amber-400" />
-                    <span className="block text-[11px]">Provider</span>
+                    <span className="block text-[11px]">{t("nav.providerDesk")}</span>
                   </button>
                 </div>
               </div>
@@ -452,7 +454,7 @@ export default function Navbar() {
                         className="text-sm text-text-primary font-bold flex items-center gap-2 hover:text-cyan"
                       >
                         <UserIcon className="w-4 h-4 text-cyan" />
-                        <span>{user.username} (My Profile)</span>
+                        <span>{user.username} ({t("nav.myProfile")})</span>
                       </Link>
                       {user.student_profile?.is_premium ? (
                         <Link
@@ -460,7 +462,7 @@ export default function Navbar() {
                           onClick={() => setMobileOpen(false)}
                           className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1"
                         >
-                          <Crown className="w-3 h-3 text-amber-400" /> Lifetime VIP
+                          <Crown className="w-3 h-3 text-amber-400" /> {t("nav.vipPass")}
                         </Link>
                       ) : (
                         <Link
@@ -468,16 +470,16 @@ export default function Navbar() {
                           onClick={() => setMobileOpen(false)}
                           className="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-purple text-white text-xs font-bold flex items-center gap-1 shadow-sm shadow-amber-500/20"
                         >
-                          <Crown className="w-3 h-3" /> $29 VIP Pass
+                          <Crown className="w-3 h-3" /> {t("nav.vipPass")}
                         </Link>
                       )}
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-white/5 flex items-center gap-2"
+                      className="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-white/5 flex items-center gap-2 cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>Log Out</span>
+                      <span>{t("nav.logout")}</span>
                     </button>
                   </>
                 ) : (
@@ -488,7 +490,7 @@ export default function Navbar() {
                       className="w-full mb-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
                     >
                       <Crown className="w-4 h-4 text-amber-200" />
-                      <span>Scholar Lifetime VIP ($29)</span>
+                      <span>{t("nav.vipPass")}</span>
                     </Link>
                     <button
                       onClick={() => {

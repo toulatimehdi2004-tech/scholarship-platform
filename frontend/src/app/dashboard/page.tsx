@@ -27,6 +27,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ScholarshipCard from "@/components/ScholarshipCard";
+import StudentExperienceReview from "@/components/StudentExperienceReview";
 import { useEffect, useState } from "react";
 import {
   getScholarships,
@@ -78,15 +79,6 @@ export default function DashboardPage() {
   const [restrictedRole, setRestrictedRole] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const role = localStorage.getItem("portal_role");
-      if (role === "provider" || role === "university") {
-        setRestrictedRole(role);
-        setLoading(false);
-        return;
-      }
-    }
-
     if (!getToken()) {
       router.push("/auth/login");
       return;
@@ -98,11 +90,23 @@ export default function DashboardPage() {
         getCurrentUser(),
         getTrackedApplications(),
       ]);
-      if (schRes.data) {
-        setScholarships(schRes.data.slice(0, 4));
-      }
+
       if (userRes.data) {
         setUser(userRes.data);
+        const role = localStorage.getItem("portal_role");
+        if (role === "provider" || role === "university") {
+          // Only isolate if user is staff/institution; students always get direct access
+          if (userRes.data.is_staff) {
+            setRestrictedRole(role);
+          } else {
+            localStorage.setItem("portal_role", "student");
+            setRestrictedRole(null);
+          }
+        }
+      }
+
+      if (schRes.data) {
+        setScholarships(schRes.data.slice(0, 4));
       }
       if (trackerRes.data) {
         setTrackerData(trackerRes.data);
@@ -595,6 +599,9 @@ export default function DashboardPage() {
                 Open Dedicated Profile Page →
               </Link>
             </div>
+
+            {/* Student Experience & Star Rating Review Widget */}
+            <StudentExperienceReview user={user} />
 
             <div className="glass rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-text-primary mb-5 flex items-center gap-2">

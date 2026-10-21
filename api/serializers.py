@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from students.models import Student
+from students.models import Student, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship, CampusLandmark, AdmissionAnnouncement
 from ai_assistant.models import (
     AIConversation, ApplicationTracker, ScholarshipMatch, AISuggestion
@@ -327,3 +327,29 @@ class DocumentSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.file.url)
             return obj.file.url
         return None
+
+
+class SuccessStorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SuccessStory
+        fields = [
+            'id', 'name', 'country', 'city', 'university_name',
+            'degree_level', 'field_of_study', 'scholarship_type',
+            'year_awarded', 'golden_tip', 'story', 'rating',
+            'avatar_initials', 'is_verified', 'created_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'is_verified']
+
+
+class ExperienceReviewSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ExperienceReview
+        fields = ['id', 'user', 'username', 'name', 'rating', 'comment', 'category', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def get_username(self, obj):
+        if obj.user:
+            return obj.user.get_full_name() or obj.user.username
+        return obj.name or 'ScholarChina Scholar'

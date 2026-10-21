@@ -306,8 +306,9 @@ export default function ApplicationTrackerPage() {
     );
     syncLocal(updated);
 
-    const stageTitle = STAGES.find((s) => s.key === newStage)?.titleFr || newStage;
-    showToast(`✓ Déplacé vers « ${stageTitle} »`);
+    const stageObj = STAGES.find((s) => s.key === newStage);
+    const stageTitle = lang === "ar" ? stageObj?.titleAr : lang === "fr" ? stageObj?.titleFr : stageObj?.title || newStage;
+    showToast(lang === "ar" ? `✓ تم النقل إلى « ${stageTitle} »` : `✓ Déplacé vers « ${stageTitle} »`);
 
     if (isAuthenticated) {
       await updateTrackedApplication(id, { status: newStage });
@@ -502,7 +503,7 @@ export default function ApplicationTrackerPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <SmartBack fallback="/scholarships" label="Retour" />
+          <SmartBack fallback="/scholarships" label={lang === "ar" ? "رجوع" : lang === "fr" ? "Retour" : "Back"} />
           <div className="flex items-center gap-3 mt-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center text-white shadow-lg">
               <ListTodo className="w-6 h-6" />
@@ -510,14 +511,18 @@ export default function ApplicationTrackerPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
-                  Application Tracker & CRM
+                  {lang === "ar" ? "متتبع ومسار تقديم الطلبات" : "Application Tracker & CRM"}
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                  ScholarChina Pipeline
+                  {lang === "ar" ? "مسار ScholarChina" : "ScholarChina Pipeline"}
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-text-secondary mt-0.5">
-                Gérez vos candidatures universitaires étape par étape, de la wishlist à l&apos;admission 🏆
+                {lang === "ar"
+                  ? "إدارة طلباتك الجامعية خطوة بخطوة، من قائمة الرغبات حتى القبول النهائي 🏆"
+                  : lang === "fr"
+                  ? "Gérez vos candidatures universitaires étape par étape, de la wishlist à l'admission 🏆"
+                  : "Manage your university applications step by step, from wishlist to admission 🏆"}
               </p>
             </div>
           </div>
@@ -531,7 +536,7 @@ export default function ApplicationTrackerPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filtrer université ou bourse..."
+              placeholder={lang === "ar" ? "تصفية حسب الجامعة أو المنحة..." : lang === "fr" ? "Filtrer université ou bourse..." : "Filter university or scholarship..."}
               className="pl-9 pr-4 py-2 rounded-xl glass border border-white/10 text-xs sm:text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-cyan/50 transition-colors w-48 sm:w-64"
             />
           </div>
@@ -540,7 +545,7 @@ export default function ApplicationTrackerPage() {
             className="px-4 py-2 rounded-xl btn-gradient text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-cyan/20 whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
-            <span>Ajouter une Bourse</span>
+            <span>{lang === "ar" ? "إضافة منحة" : lang === "fr" ? "Ajouter une Bourse" : "Add Scholarship"}</span>
           </Link>
         </div>
       </div>
@@ -558,10 +563,14 @@ export default function ApplicationTrackerPage() {
             </div>
             <div>
               <p className="text-sm font-bold text-text-primary">
-                Mode Démo Interactif Activé
+                {lang === "ar" ? "وضع العرض التوضيحي التفاعلي مفعّل" : lang === "fr" ? "Mode Démo Interactif Activé" : "Interactive Demo Mode Active"}
               </p>
               <p className="text-xs text-text-secondary mt-0.5">
-                Vous pouvez déplacer des bourses et cocher des documents. Connectez-vous gratuitement pour synchroniser votre CRM sur tous vos appareils.
+                {lang === "ar"
+                  ? "يمكنك نقل المنح ومتابعة تجهيز الوثائق. سجّل مجاناً لحفظ ومزامنة ملفك عبر كل أجهزتك."
+                  : lang === "fr"
+                  ? "Vous pouvez déplacer des bourses et cocher des documents. Connectez-vous gratuitement pour synchroniser votre CRM sur tous vos appareils."
+                  : "You can move scholarships and check off documents. Sign in for free to sync your pipeline across devices."}
               </p>
             </div>
           </div>
@@ -569,7 +578,7 @@ export default function ApplicationTrackerPage() {
             href="/auth/register"
             className="px-4 py-2 rounded-xl bg-purple hover:bg-purple/90 text-white text-xs font-bold whitespace-nowrap shadow-md transition-all flex items-center gap-1.5"
           >
-            <span>Créer mon Compte Gratuit</span>
+            <span>{lang === "ar" ? "إنشاء حساب مجاني" : lang === "fr" ? "Créer mon Compte Gratuit" : "Create Free Account"}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </motion.div>
@@ -582,8 +591,12 @@ export default function ApplicationTrackerPage() {
             {stats.total}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">Total Suivies</div>
-            <div className="text-sm font-bold text-text-primary">{stats.total} Candidatures</div>
+            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+              {lang === "ar" ? "إجمالي المتابعة" : lang === "fr" ? "Total Suivies" : "Total Tracked"}
+            </div>
+            <div className="text-sm font-bold text-text-primary">
+              {stats.total} {lang === "ar" ? "طلبات" : lang === "fr" ? "Candidatures" : "Applications"}
+            </div>
           </div>
         </div>
 
@@ -592,8 +605,12 @@ export default function ApplicationTrackerPage() {
             {stats.preparing}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">En Préparation</div>
-            <div className="text-sm font-bold text-purple">{stats.preparing} En Cours</div>
+            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+              {lang === "ar" ? "تجهيز الوثائق" : lang === "fr" ? "En Préparation" : "In Preparation"}
+            </div>
+            <div className="text-sm font-bold text-purple">
+              {stats.preparing} {lang === "ar" ? "جارية" : lang === "fr" ? "En Cours" : "Active"}
+            </div>
           </div>
         </div>
 
@@ -602,8 +619,12 @@ export default function ApplicationTrackerPage() {
             {stats.submitted}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">Déposées</div>
-            <div className="text-sm font-bold text-blue-400">{stats.submitted} Aux Portails</div>
+            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+              {lang === "ar" ? "تم التقديم" : lang === "fr" ? "Déposées" : "Submitted"}
+            </div>
+            <div className="text-sm font-bold text-blue-400">
+              {stats.submitted} {lang === "ar" ? "في البوابات" : lang === "fr" ? "Aux Portails" : "Portals"}
+            </div>
           </div>
         </div>
 
@@ -612,8 +633,12 @@ export default function ApplicationTrackerPage() {
             {stats.interview}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">Examen / Oral</div>
-            <div className="text-sm font-bold text-amber-400">{stats.interview} En Revue</div>
+            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+              {lang === "ar" ? "مراجعة / مقابلة" : lang === "fr" ? "Examen / Oral" : "Interview / Review"}
+            </div>
+            <div className="text-sm font-bold text-amber-400">
+              {stats.interview} {lang === "ar" ? "قيد التدقيق" : lang === "fr" ? "En Revue" : "Reviewing"}
+            </div>
           </div>
         </div>
 
@@ -622,8 +647,12 @@ export default function ApplicationTrackerPage() {
             {stats.won}
           </div>
           <div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">Bourses Obtenues</div>
-            <div className="text-sm font-bold text-emerald-400">{stats.won} Admis 🏆</div>
+            <div className="text-[10px] text-text-muted uppercase tracking-wider font-semibold">
+              {lang === "ar" ? "المنح المحصول عليها" : lang === "fr" ? "Bourses Obtenues" : "Won Scholarships"}
+            </div>
+            <div className="text-sm font-bold text-emerald-400">
+              {stats.won} {lang === "ar" ? "مقبول 🏆" : lang === "fr" ? "Admis 🏆" : "Won 🏆"}
+            </div>
           </div>
         </div>
       </div>
@@ -644,7 +673,7 @@ export default function ApplicationTrackerPage() {
                   <span className="text-lg">{stage.icon}</span>
                   <div>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary">
-                      {stage.titleFr}
+                      {lang === "ar" ? stage.titleAr : lang === "fr" ? stage.titleFr : stage.title}
                     </h3>
                   </div>
                 </div>
@@ -657,9 +686,9 @@ export default function ApplicationTrackerPage() {
               <div className="space-y-3 flex-1 overflow-y-auto max-h-[720px] pr-1">
                 {items.length === 0 ? (
                   <div className="h-44 rounded-2xl border-2 border-dashed border-white/5 flex flex-col items-center justify-center p-4 text-center">
-                    <p className="text-xs text-text-muted">Aucune candidature</p>
+                    <p className="text-xs text-text-muted">{lang === "ar" ? "لا توجد طلبات هنا" : lang === "fr" ? "Aucune candidature" : "No applications"}</p>
                     <p className="text-[11px] text-text-muted/60 mt-0.5">
-                      Glissez ou déplacez des bourses ici
+                      {lang === "ar" ? "اسحب أو انقل المنح إلى هذه الخانة" : lang === "fr" ? "Glissez ou déplacez des bourses ici" : "Drag or move scholarships here"}
                     </p>
                   </div>
                 ) : (
@@ -686,7 +715,7 @@ export default function ApplicationTrackerPage() {
                         {isUrgent && (
                           <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-red-500/20 text-red-400 border-b border-l border-red-500/40 text-[10px] font-bold rounded-bl-xl flex items-center gap-1 animate-pulse">
                             <Clock className="w-3 h-3" />
-                            <span>URGENT (J-{days})</span>
+                            <span>{lang === "ar" ? `عاجل (متبقي ${days} أيام)` : `URGENT (J-${days})`}</span>
                           </div>
                         )}
 
@@ -694,7 +723,7 @@ export default function ApplicationTrackerPage() {
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="flex items-center gap-1.5 text-xs text-cyan font-semibold truncate">
                             <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
-                            <span className="truncate">{app.scholarship.university_name || "Université Chinoise"}</span>
+                            <span className="truncate">{app.scholarship.university_name || (lang === "ar" ? "جامعة صينية" : "Université Chinoise")}</span>
                           </div>
                           <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-white/5 text-text-muted flex-shrink-0">
                             {app.scholarship.level || "Master"}
@@ -715,7 +744,7 @@ export default function ApplicationTrackerPage() {
                         <div className="flex items-center justify-between text-[11px] mb-3">
                           <span className="text-text-muted flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            <span>Limite :</span>
+                            <span>{lang === "ar" ? "الموعد النهائي:" : lang === "fr" ? "Limite :" : "Deadline:"}</span>
                           </span>
                           <span
                             className={`font-semibold ${
@@ -730,9 +759,9 @@ export default function ApplicationTrackerPage() {
                           >
                             {days !== null
                               ? isPassed
-                                ? "Expiré"
-                                : `J-${days} jours`
-                              : "En cours"}
+                                ? (lang === "ar" ? "منتهي" : lang === "fr" ? "Expiré" : "Expired")
+                                : (lang === "ar" ? `متبقي ${days} يوم` : lang === "fr" ? `J-${days} jours` : `${days} days left`)
+                              : (lang === "ar" ? "جاري" : lang === "fr" ? "En cours" : "Ongoing")}
                           </span>
                         </div>
 
@@ -749,7 +778,7 @@ export default function ApplicationTrackerPage() {
                                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                                 <span>
                                   {app.checklist_progress?.completed ?? 0} /{" "}
-                                  {app.checklist_progress?.total ?? docEntries.length} docs prêts
+                                  {app.checklist_progress?.total ?? docEntries.length} {lang === "ar" ? "وثائق جاهزة" : lang === "fr" ? "docs prêts" : "docs ready"}
                                 </span>
                               </button>
                               <span className="text-[10px] font-bold text-cyan">
@@ -805,7 +834,7 @@ export default function ApplicationTrackerPage() {
                         {app.portal_application_id && (
                           <div className="mb-2 text-[10px] font-mono px-2 py-1 rounded bg-white/5 border border-white/5 text-cyan truncate flex items-center justify-between">
                             <span className="truncate">N° {app.portal_application_id}</span>
-                            <span className="text-text-muted text-[9px]">Portail</span>
+                            <span className="text-text-muted text-[9px]">{lang === "ar" ? "البوابة" : "Portail"}</span>
                           </div>
                         )}
 
@@ -824,7 +853,7 @@ export default function ApplicationTrackerPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-cyan transition-colors"
-                              title="Ouvrir le portail officiel de candidature"
+                              title={lang === "ar" ? "فتح بوابة التقديم الرسمية" : "Ouvrir le portail officiel de candidature"}
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
@@ -832,7 +861,7 @@ export default function ApplicationTrackerPage() {
                             <Link
                               href={`/scholarships/${app.scholarship.id}`}
                               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-cyan transition-colors"
-                              title="Voir la fiche complète"
+                              title={lang === "ar" ? "عرض تفاصيل المنحة" : "Voir la fiche complète"}
                             >
                               <Compass className="w-3.5 h-3.5" />
                             </Link>
@@ -846,7 +875,7 @@ export default function ApplicationTrackerPage() {
                               setEditPortalId(app.portal_application_id || "");
                             }}
                             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-purple transition-colors"
-                            title="Ajouter des notes ou N° de dossier"
+                            title={lang === "ar" ? "إضافة ملاحظات أو رقم الطلب" : "Ajouter des notes ou N° de dossier"}
                           >
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
@@ -855,7 +884,7 @@ export default function ApplicationTrackerPage() {
                           <button
                             onClick={() => handleDelete(app.id)}
                             className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-text-secondary hover:text-red-400 transition-colors"
-                            title="Retirer du tracker"
+                            title={lang === "ar" ? "حذف من المتتبع" : "Retirer du tracker"}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -873,7 +902,7 @@ export default function ApplicationTrackerPage() {
                                     handleMoveStage(app.id, STAGES[idx - 1].key);
                                 }}
                                 className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-text-secondary hover:text-text-primary transition-colors"
-                                title="Déplacer vers l'étape précédente"
+                                title={lang === "ar" ? "نقل إلى المرحلة السابقة" : "Déplacer vers l'étape précédente"}
                               >
                                 <ChevronLeft className="w-3.5 h-3.5" />
                               </button>
@@ -890,9 +919,9 @@ export default function ApplicationTrackerPage() {
                                     handleMoveStage(app.id, STAGES[idx + 1].key);
                                 }}
                                 className="px-2 py-1 rounded-lg bg-cyan/20 hover:bg-cyan/30 text-cyan text-[11px] font-bold flex items-center gap-1 transition-all"
-                                title="Passer à l'étape suivante"
+                                title={lang === "ar" ? "الانتقال إلى المرحلة التالية" : "Passer à l'étape suivante"}
                               >
-                                <span>Avancer</span>
+                                <span>{lang === "ar" ? "تقدم" : lang === "fr" ? "Avancer" : "Next"}</span>
                                 <ChevronRight className="w-3 h-3" />
                               </button>
                             )}
@@ -931,7 +960,7 @@ export default function ApplicationTrackerPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-text-primary">
-                    Notes & Références de Candidature
+                    {lang === "ar" ? "ملاحظات وبيانات مرجعية للطلب" : lang === "fr" ? "Notes & Références de Candidature" : "Application Notes & Reference"}
                   </h3>
                   <p className="text-xs text-text-muted truncate max-w-xs sm:max-w-sm">
                     {editingItem.scholarship.title}
@@ -942,29 +971,29 @@ export default function ApplicationTrackerPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5">
-                    N° d&apos;inscription ou Identifiant Portail
+                    {lang === "ar" ? "رقم التسجيل أو معرّف البوابة الرسمية" : lang === "fr" ? "N° d'inscription ou Identifiant Portail" : "Application N° or Portal ID"}
                   </label>
                   <input
                     type="text"
                     value={editPortalId}
                     onChange={(e) => setEditPortalId(e.target.value)}
-                    placeholder="Ex: CSC2026-TSI-8912 ou PKU-ADM-4482"
+                    placeholder={lang === "ar" ? "مثال: CSC2026-TSI-8912 أو PKU-ADM-4482" : "Ex: CSC2026-TSI-8912 ou PKU-ADM-4482"}
                     className="w-full px-4 py-2.5 rounded-xl glass border border-white/15 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-cyan/50 font-mono transition-colors"
                   />
                   <p className="text-[11px] text-text-muted mt-1">
-                    Numéro fourni lors de votre inscription sur le portail officiel de l&apos;université ou CSC.
+                    {lang === "ar" ? "الرقم الممنوح لك عند التسجيل على البوابة الرسمية للجامعة أو موقع CSC." : lang === "fr" ? "Numéro fourni lors de votre inscription sur le portail officiel de l'université ou CSC." : "Number provided when registering on official university or CSC portal."}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5">
-                    Notes personnelles & Rappels
+                    {lang === "ar" ? "ملاحظات شخصية وتذكيرات" : lang === "fr" ? "Notes personnelles & Rappels" : "Personal Notes & Reminders"}
                   </label>
                   <textarea
                     rows={4}
                     value={editNotes}
                     onChange={(e) => setEditNotes(e.target.value)}
-                    placeholder="Notes de suivi, contacts du professeur superviseur, dates de relance, identifiants..."
+                    placeholder={lang === "ar" ? "ملاحظات المتابعة، بيانات الأستاذ المشرف، مواعيد الرد..." : lang === "fr" ? "Notes de suivi, contacts du professeur superviseur, dates de relance, identifiants..." : "Follow-up notes, professor contact info, interview reminders..."}
                     className="w-full px-4 py-2.5 rounded-xl glass border border-white/15 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-cyan/50 transition-colors resize-none"
                   />
                 </div>
@@ -974,7 +1003,7 @@ export default function ApplicationTrackerPage() {
                     onClick={() => setEditingItem(null)}
                     className="px-4 py-2 rounded-xl glass text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors"
                   >
-                    Annuler
+                    {lang === "ar" ? "إلغاء" : lang === "fr" ? "Annuler" : "Cancel"}
                   </button>
                   <button
                     onClick={handleSaveNotes}
@@ -982,11 +1011,11 @@ export default function ApplicationTrackerPage() {
                     className="px-5 py-2 rounded-xl btn-gradient text-xs font-bold flex items-center gap-1.5 shadow-md shadow-cyan/20"
                   >
                     {savingNote ? (
-                      <span>Enregistrement...</span>
+                      <span>{lang === "ar" ? "جاري الحفظ..." : lang === "fr" ? "Enregistrement..." : "Saving..."}</span>
                     ) : (
                       <>
                         <Check className="w-4 h-4" />
-                        <span>Enregistrer</span>
+                        <span>{lang === "ar" ? "حفظ" : lang === "fr" ? "Enregistrer" : "Save"}</span>
                       </>
                     )}
                   </button>
