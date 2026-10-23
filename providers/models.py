@@ -41,6 +41,25 @@ class Provider(models.Model):
     
     # Custom commission (override default for this provider)
     custom_commission = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Override default commission for this provider")
+
+    # Bank Account & Payout Details
+    bank_name = models.CharField(max_length=200, blank=True, null=True, help_text="Bank Name (e.g. Attijariwafa, BOC, ICBC, CIH)")
+    bank_account_holder = models.CharField(max_length=200, blank=True, null=True, help_text="Legal Account Holder Name")
+    bank_account_number = models.CharField(max_length=100, blank=True, null=True, help_text="Account Number / RIB / IBAN / UnionPay Card")
+    bank_swift_code = models.CharField(max_length=50, blank=True, null=True, help_text="SWIFT / BIC Code")
+    bank_branch_city = models.CharField(max_length=100, blank=True, null=True, help_text="Branch City")
+    payout_currency = models.CharField(max_length=10, default="MAD", help_text="Preferred Payout Currency: MAD, CNY, USD, EUR")
+    payout_method = models.CharField(max_length=50, default="wire_transfer", help_text="wire_transfer, unionpay, wise, alipay, wechat")
+    is_bank_verified = models.BooleanField(default=False)
+
+    # Pickup Service Requirements (Must live in China >= 1 year)
+    years_lived_in_china = models.DecimalField(max_digits=4, decimal_places=1, default=0.0, help_text="Years provider has resided in China (>= 1.0 year required for pickup)")
+    pickup_service_active = models.BooleanField(default=False, help_text="Authorized to provide airport pickup and arrival assistance")
+    pickup_cities = models.CharField(max_length=300, blank=True, null=True, help_text="Chinese cities / airports covered (e.g. Beijing, Shanghai, Hangzhou)")
+    pickup_vehicle_type = models.CharField(max_length=100, blank=True, null=True, help_text="Sedan, Van, Subway/Train escort")
+    pickup_wechat_id = models.CharField(max_length=100, blank=True, null=True, help_text="WeChat ID for airport pickup coordination")
+    pickup_phone = models.CharField(max_length=50, blank=True, null=True, help_text="Chinese +86 phone number")
+
     
     # Ratings
     average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
@@ -143,3 +162,18 @@ class ServiceOrder(models.Model):
         if not self.commission_amount or not self.provider_payout:
             self.calculate_payout()
         super().save(*args, **kwargs)
+
+
+class ProviderPayoutRecord(models.Model):
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE, related_name='payouts')
+    reference_id = models.CharField(max_length=100, unique=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=10, default='MAD')
+    destination = models.CharField(max_length=200)
+    payout_method = models.CharField(max_length=50, default='wire_transfer')
+    status = models.CharField(max_length=30, default='completed')
+    requested_at = models.DateTimeField(default=timezone.now)
+    processed_at = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.reference_id} - {self.amount} {self.currency} ({self.status})"

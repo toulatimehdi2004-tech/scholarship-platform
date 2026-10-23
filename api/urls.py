@@ -47,6 +47,11 @@ urlpatterns = [
     path('sop/export/', views.sop_export_view, name='api-sop-export'),
     path('matches/', views.ScholarshipMatchView.as_view(), name='api-matches'),
 
+    # Provider Banking & Pickup Service
+    path('provider/banking/', views.provider_banking_view, name='api-provider-banking'),
+    path('provider/payout-request/', views.provider_request_payout_view, name='api-provider-payout-request'),
+    path('provider/pickup/', views.provider_pickup_application_view, name='api-provider-pickup'),
+
     # Router-generated routes
     path('', include(router.urls)),
 ]
