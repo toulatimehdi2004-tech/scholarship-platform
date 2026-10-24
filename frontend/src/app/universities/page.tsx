@@ -148,8 +148,14 @@ export default function UniversitiesPage() {
   }, [all, selectedTier, selectedCity, searchQuery]);
 
   const isPremium = Boolean(
-    user?.student_profile?.is_premium ||
-    (typeof window !== "undefined" && (localStorage.getItem("is_premium") === "true" || localStorage.getItem("vip_pass") === "true"))
+    getToken() &&
+    user &&
+    (user.student_profile?.is_premium ||
+     (typeof window !== "undefined" && (
+       localStorage.getItem(`vip_pass_${user.id}`) === "true" ||
+       localStorage.getItem("vip_pass") === "true" ||
+       localStorage.getItem("is_premium") === "true"
+     )))
   );
   const visibleUniversities = typeof window !== "undefined" && !getToken() ? [] : isPremium ? filtered : filtered.slice(0, FREE_TRIAL_LIMIT);
   const hiddenCount = Math.max(0, filtered.length - FREE_TRIAL_LIMIT);

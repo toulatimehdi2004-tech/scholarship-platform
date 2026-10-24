@@ -335,24 +335,14 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link
-                    href="/pricing"
-                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 hover:opacity-95 transition-all transform hover:scale-105 cursor-pointer animate-shimmer"
-                  >
-                    <Crown className="w-3.5 h-3.5 text-amber-200" />
-                    <span>{t("nav.vipPass")}</span>
-                  </Link>
                   <button
-                    onClick={() => setShowAuthGate(true)}
-                    className="px-3.5 py-2 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors cursor-pointer"
+                    onClick={() => {
+                      clearToken();
+                      window.location.href = "/";
+                    }}
+                    className="btn-gradient text-xs sm:text-sm px-4 py-2 rounded-xl font-bold cursor-pointer"
                   >
-                    {t("nav.login")}
-                  </button>
-                  <button
-                    onClick={() => setShowAuthGate(true)}
-                    className="btn-gradient text-sm px-4 py-2 rounded-lg cursor-pointer"
-                  >
-                    <span>{t("nav.getStarted")}</span>
+                    <span>{t("nav.login") || "Sign In"}</span>
                   </button>
                 </div>
               )}

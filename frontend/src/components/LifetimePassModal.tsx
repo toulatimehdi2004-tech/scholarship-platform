@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, CheckCircle2, X, ShieldCheck, Zap, Lock, Crown, ArrowRight } from 'lucide-react';
-import { activatePremium, getCurrentUser } from '@/lib/api';
+import { activatePremium, getCurrentUser, getToken } from '@/lib/api';
 
 interface LifetimePassModalProps {
   isOpen: boolean;
@@ -21,43 +21,32 @@ export default function LifetimePassModal({
   const [error, setError] = useState('');
 
   const handleActivate = async () => {
+    if (!getToken()) {
+      setError('You must be signed in to a student account to purchase or activate a VIP Pass.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
       const res = await activatePremium();
-      if (res.data?.is_premium || !res.error) {
-        setSuccess(true);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('is_premium', 'true');
-          localStorage.setItem('vip_pass', 'true');
-        }
-        // refresh stored user
-        try {
-          const u = await getCurrentUser();
-          if (u.data) {
-            localStorage.setItem('user', JSON.stringify(u.data));
-          }
-        } catch {}
-        setTimeout(() => {
-          onSuccess?.();
-          onClose();
-          window.location.reload();
-        }, 1500);
-      } else {
-        // Fallback demo activation
-        setSuccess(true);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('is_premium', 'true');
-          localStorage.setItem('vip_pass', 'true');
-        }
-        setTimeout(() => {
-          onSuccess?.();
-          onClose();
-          window.location.reload();
-        }, 1500);
+      setSuccess(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('is_premium', 'true');
+        localStorage.setItem('vip_pass', 'true');
       }
+      try {
+        const u = await getCurrentUser();
+        if (u.data) {
+          localStorage.setItem('user', JSON.stringify(u.data));
+          localStorage.setItem(`vip_pass_${u.data.id}`, 'true');
+        }
+      } catch {}
+      setTimeout(() => {
+        onSuccess?.();
+        onClose();
+        window.location.reload();
+      }, 1500);
     } catch {
-      // Fallback demo activation
       setSuccess(true);
       if (typeof window !== 'undefined') {
         localStorage.setItem('is_premium', 'true');

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PortalGate from "@/components/PortalGate";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import RouteTracker from "@/components/RouteTracker";
 import { ThemeProvider } from "@/lib/ThemeContext";
@@ -47,9 +48,11 @@ export default function RootLayout({
           <LanguageProvider>
             <RouteTracker />
             <AnimatedBackground />
-            <Navbar />
-            <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
-            <Footer />
+            <PortalGate>
+              <Navbar />
+              <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
+              <Footer />
+            </PortalGate>
           </LanguageProvider>
         </ThemeProvider>
       </body>

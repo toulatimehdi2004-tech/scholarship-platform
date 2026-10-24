@@ -36,10 +36,6 @@ export default function PortalChooser({
   const [chosenRole, setChosenRole] = useState<PortalRole>("student");
 
   function handleTriggerRole(role: PortalRole) {
-    if (getToken()) {
-      onSelectRole(role);
-      return;
-    }
     setChosenRole(role);
     try {
       localStorage.setItem("portal_role", role);

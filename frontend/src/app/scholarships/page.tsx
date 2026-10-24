@@ -225,8 +225,14 @@ export default function ScholarshipsPage() {
   }, [allScholarships, selectedUni, searchQuery, selectedLevel, selectedType]);
 
   const isPremium = Boolean(
-    user?.student_profile?.is_premium ||
-    (typeof window !== "undefined" && (localStorage.getItem("is_premium") === "true" || localStorage.getItem("vip_pass") === "true"))
+    getToken() &&
+    user &&
+    (user.student_profile?.is_premium ||
+     (typeof window !== "undefined" && (
+       localStorage.getItem(`vip_pass_${user.id}`) === "true" ||
+       localStorage.getItem("vip_pass") === "true" ||
+       localStorage.getItem("is_premium") === "true"
+     )))
   );
 
   const selectUni = (id: number) => {
