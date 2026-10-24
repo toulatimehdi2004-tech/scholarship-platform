@@ -80,7 +80,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!getToken()) {
-      router.push("/auth/login");
+      router.push("/");
       return;
     }
 

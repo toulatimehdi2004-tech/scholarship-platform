@@ -23,9 +23,11 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n";
 import AutoText from "@/components/AutoText";
-import { getStories, submitStory, type SuccessStoryItem } from "@/lib/api";
+import AuthGateModal from "@/components/AuthGateModal";
+import { getStories, submitStory, getToken, type SuccessStoryItem } from "@/lib/api";
 
 const SEED_STORIES: SuccessStoryItem[] = [
   {
@@ -157,6 +159,7 @@ const SEED_STORIES: SuccessStoryItem[] = [
 ];
 
 export default function SuccessStoriesPage() {
+  const router = useRouter();
   const { t, lang } = useLang();
   const [stories, setStories] = useState<SuccessStoryItem[]>(SEED_STORIES);
   const [loading, setLoading] = useState(true);
@@ -165,6 +168,7 @@ export default function SuccessStoriesPage() {
   const [expandedStoryId, setExpandedStoryId] = useState<number | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [submittedToast, setSubmittedToast] = useState(false);
+  const [showAuthGate, setShowAuthGate] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -185,6 +189,11 @@ export default function SuccessStoriesPage() {
   // Load from API and localStorage
   useEffect(() => {
     async function load() {
+      if (!getToken()) {
+        setShowAuthGate(true);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const res = await getStories();
@@ -743,6 +752,20 @@ export default function SuccessStoriesPage() {
           </div>
         )}
       </AnimatePresence>
+
+      <AuthGateModal
+        isOpen={showAuthGate || (typeof window !== "undefined" && !getToken())}
+        onClose={() => router.push("/")}
+        onBackToRoles={() => router.push("/")}
+        canClose={false}
+        role="student"
+        title={lang === "ar" ? "بوابة الطلاب المغاربة" : "Moroccan Student Access Required"}
+        subtitle={lang === "ar" ? "سجل الدخول لاستكشاف تجارب وقصص نجاح الطلاب المغاربة في أكثر من 100 جامعة صينية." : "Sign in or register to read real Moroccan student stories and CSC scholarship journeys."}
+        onSuccess={() => {
+          setShowAuthGate(false);
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }

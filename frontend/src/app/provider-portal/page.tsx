@@ -42,7 +42,7 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import Link from "next/link";
-import { fetchApi, getApiBaseUrl, getToken } from "@/lib/api";
+import { fetchApi, getApiBaseUrl, getToken, clearToken } from "@/lib/api";
 import AuthGateModal from "@/components/AuthGateModal";
 
 interface OrderDocument {
@@ -120,6 +120,14 @@ export default function ProviderPortalPage() {
   const [uploadedCertFile, setUploadedCertFile] = useState<string | null>(null);
   const [editingService, setEditingService] = useState<CatalogServiceItem | null>(null);
   const [editPriceInput, setEditPriceInput] = useState("");
+  const [activeRole, setActiveRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("portal_role") || "student";
+      setActiveRole(saved);
+    }
+  }, []);
 
   // Bank Account & Payouts State
   const [bankDetails, setBankDetails] = useState<BankAccountDetails>({
@@ -445,6 +453,46 @@ export default function ProviderPortalPage() {
   const pendingCount = orders.filter((o) => o.status === "pending").length;
   const inProgressCount = orders.filter((o) => o.status === "in_progress").length;
   const completedCount = orders.filter((o) => o.status === "completed").length;
+
+  if (getToken() && activeRole && activeRole !== "provider") {
+    return (
+      <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto">
+        <div className="w-16 h-16 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center mb-4 shadow-lg shadow-rose-500/10">
+          <FileCheck2 className="w-8 h-8" />
+        </div>
+        <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-3">
+          Role Mismatch • Accès Restreint
+        </span>
+        <h2 className="text-2xl font-black text-text-primary mb-2">
+          Certified Service Providers Only
+        </h2>
+        <p className="text-sm text-text-secondary leading-relaxed mb-6">
+          This workbench is reserved strictly for certified sworn translators and pickup service partners to inspect student document orders and process payouts. You are currently logged in with a <span className="font-bold text-rose-400">{activeRole === "student" ? "Moroccan Student" : "University Admissions"}</span> profile.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+          <button
+            onClick={() => {
+              clearToken();
+              try {
+                localStorage.removeItem("user");
+                localStorage.setItem("portal_role", "provider");
+              } catch {}
+              setShowAuthGate(true);
+            }}
+            className="btn-gradient px-5 py-2.5 rounded-xl font-bold text-sm shadow-md cursor-pointer"
+          >
+            Sign In with Provider Account
+          </button>
+          <Link
+            href="/"
+            className="px-5 py-2.5 rounded-xl glass border border-white/10 text-sm font-semibold hover:bg-white/5 transition-all text-center"
+          >
+            Return to My Portal
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen px-4 py-8 max-w-7xl mx-auto">

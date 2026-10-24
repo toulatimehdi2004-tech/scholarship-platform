@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FileCheck2,
@@ -23,12 +23,23 @@ import {
   Award,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import SmartBack from "@/components/SmartBack";
 import { useLang } from "@/lib/i18n";
+import { getToken } from "@/lib/api";
+import AuthGateModal from "@/components/AuthGateModal";
 
 export default function ServicesPage() {
+  const router = useRouter();
   const { lang } = useLang();
   const [selectedCity, setSelectedCity] = useState("all");
+  const [showAuthGate, setShowAuthGate] = useState(false);
+
+  useEffect(() => {
+    if (!getToken()) {
+      setShowAuthGate(true);
+    }
+  }, []);
 
   const services = [
     {
@@ -241,6 +252,20 @@ export default function ServicesPage() {
           </div>
         </div>
       </div>
+
+      <AuthGateModal
+        isOpen={showAuthGate || (typeof window !== "undefined" && !getToken())}
+        onClose={() => router.push("/")}
+        onBackToRoles={() => router.push("/")}
+        canClose={false}
+        role="student"
+        title={lang === "ar" ? "تسجيل دخول الطلاب" : "Student Access Required"}
+        subtitle={lang === "ar" ? "سجل الدخول لحجز خدمات الاستقبال في المطار والترجمة المحلفة المعتمدة في الصين." : "Sign in to book airport pickup, certified sworn translation, and visa legalization services."}
+        onSuccess={() => {
+          setShowAuthGate(false);
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }

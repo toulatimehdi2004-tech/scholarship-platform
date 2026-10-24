@@ -99,7 +99,7 @@ export default function SopPage() {
         {!loggedIn ? (
           <div className="glass rounded-2xl p-8 text-center">
             <p className="text-text-secondary mb-4">{t("sop.login")}</p>
-            <Link href="/auth/login" className="btn-gradient text-sm px-4 py-2 rounded-lg">
+            <Link href="/" className="btn-gradient text-sm px-4 py-2 rounded-lg">
               <span>{t("nav.login")}</span>
             </Link>
           </div>

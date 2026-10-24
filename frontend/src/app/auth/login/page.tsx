@@ -34,8 +34,15 @@ export default function LoginPage() {
     if (response.data) {
       setToken(response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
-      localStorage.setItem("portal_role", response.data.role || "student");
-      router.push("/dashboard");
+      const role = response.data.role || "student";
+      localStorage.setItem("portal_role", role);
+      if (role === "university") {
+        router.push("/university-portal");
+      } else if (role === "provider") {
+        router.push("/provider-portal");
+      } else {
+        router.push("/");
+      }
     } else {
       // Check if needs verification
       const errData = response as any;

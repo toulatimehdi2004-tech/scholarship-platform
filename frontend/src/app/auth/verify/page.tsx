@@ -106,7 +106,7 @@ function VerifyForm() {
       setToken(res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setSuccess("Email verified! Redirecting...");
-      setTimeout(() => router.push("/dashboard"), 1000);
+      setTimeout(() => router.push("/"), 1000);
     } else {
       setError(res.error || "Verification failed.");
     }

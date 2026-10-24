@@ -73,20 +73,25 @@ export default function Navbar() {
     clearToken();
     try {
       localStorage.removeItem("user");
-      localStorage.setItem("portal_role", "student");
+      localStorage.removeItem("portal_role");
+      localStorage.removeItem("is_premium");
+      localStorage.removeItem("vip_pass");
     } catch {}
     setUser(null);
-    window.location.reload();
+    window.location.href = "/";
   };
 
   const switchRole = (role: "student" | "university" | "provider" | "choose") => {
     setPortalDropdownOpen(false);
     setMobileOpen(false);
     if (role === "choose") {
+      clearToken();
       try {
         localStorage.removeItem("portal_role");
+        localStorage.removeItem("user");
       } catch {}
-      router.push("/portal");
+      setUser(null);
+      window.location.href = "/";
       return;
     }
     try {
@@ -103,6 +108,9 @@ export default function Navbar() {
   };
 
   const getNavLinks = () => {
+    if (typeof window !== "undefined" && !getToken()) {
+      return [];
+    }
     if (portalRole === "university") {
       return [
         { href: "/university-portal", label: t("nav.admissionsDesk") },
@@ -113,6 +121,7 @@ export default function Navbar() {
     if (portalRole === "provider") {
       return [
         { href: "/provider-portal", label: t("nav.ordersServices") },
+        { href: "/services", label: t("nav.services") || "Services" },
         { href: "/universities", label: t("nav.campuses") },
         { href: "/scholarships", label: t("nav.scholarships") },
       ];

@@ -25,7 +25,7 @@ import UniversityCard from "@/components/UniversityCard";
 import AuthGateModal from "@/components/AuthGateModal";
 import LifetimePassModal from "@/components/LifetimePassModal";
 
-const FREE_TRIAL_LIMIT = 7;
+const FREE_TRIAL_LIMIT = 2;
 
 // University Tiers relevant to Moroccan students
 const C9_KEYWORDS = [
@@ -147,8 +147,11 @@ export default function UniversitiesPage() {
     return r;
   }, [all, selectedTier, selectedCity, searchQuery]);
 
-  const isPremium = !!user?.student_profile?.is_premium || !!user || !!getToken();
-  const visibleUniversities = isPremium ? filtered : filtered.slice(0, FREE_TRIAL_LIMIT);
+  const isPremium = Boolean(
+    user?.student_profile?.is_premium ||
+    (typeof window !== "undefined" && (localStorage.getItem("is_premium") === "true" || localStorage.getItem("vip_pass") === "true"))
+  );
+  const visibleUniversities = typeof window !== "undefined" && !getToken() ? [] : isPremium ? filtered : filtered.slice(0, FREE_TRIAL_LIMIT);
   const hiddenCount = Math.max(0, filtered.length - FREE_TRIAL_LIMIT);
 
   return (
@@ -399,10 +402,10 @@ export default function UniversitiesPage() {
                 </h3>
                 <p className="text-sm text-text-secondary max-w-xl mx-auto mb-6">
                   {lang === "ar"
-                    ? `أنت تشاهد حالياً ${FREE_TRIAL_LIMIT} جامعات تجريبية. افتح كل ${all.length} جامعة نخبة صينية، وأكثر من 400 منحة CSC، وجولات 3D VR، وأدوات الترجمة بالذكاء الاصطناعي مدى الحياة مقابل 29 دولار فقط.`
+                    ? `أنت تشاهد حالياً جامعتين (2) تجريبيتين. افتح كل ${all.length} جامعة نخبة صينية، وأكثر من 400 منحة CSC، وجولات 3D VR، وأدوات الترجمة بالذكاء الاصطناعي مدى الحياة مقابل 29 دولار فقط.`
                     : lang === "fr"
-                    ? `Vous prévisualisez actuellement ${FREE_TRIAL_LIMIT} universités. Débloquez les ${all.length} universités d'élite, plus de 400 bourses CSC, visites 3D VR et outils IA à vie pour seulement 29 $.`
-                    : `You are previewing ${FREE_TRIAL_LIMIT} universities. Unlock all ${all.length} top Chinese universities, 400+ CSC scholarships, 3D VR campus tours, and AI translation tools forever for just $29.`}
+                    ? `Vous prévisualisez actuellement 2 universités d'essai. Débloquez les ${all.length} universités d'élite, plus de 400 bourses CSC, visites 3D VR et outils IA à vie pour seulement 29 $.`
+                    : `You are previewing 2 universities on the free trial. Unlock all ${all.length} top Chinese universities, 400+ CSC scholarships, 3D VR campus tours, and AI translation tools forever for just $29.`}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <button

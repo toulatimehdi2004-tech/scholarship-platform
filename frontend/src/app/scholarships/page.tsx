@@ -32,7 +32,7 @@ import {
 import { useLang } from "@/lib/i18n";
 import { REAL_SCHOLARSHIPS } from "@/data/scholarshipsData";
 
-const FREE_TRIAL_LIMIT = 7;
+const FREE_TRIAL_LIMIT = 2;
 
 const levelValues = ["All Levels", "bachelor", "master", "phd", "other"];
 const levelLabelKeys: Record<string, string> = {
@@ -223,6 +223,11 @@ export default function ScholarshipsPage() {
     }
     return r;
   }, [allScholarships, selectedUni, searchQuery, selectedLevel, selectedType]);
+
+  const isPremium = Boolean(
+    user?.student_profile?.is_premium ||
+    (typeof window !== "undefined" && (localStorage.getItem("is_premium") === "true" || localStorage.getItem("vip_pass") === "true"))
+  );
 
   const selectUni = (id: number) => {
     if (!getToken()) {
@@ -531,19 +536,19 @@ export default function ScholarshipsPage() {
                   <p className="text-sm text-text-muted">
                     {t("com.showing")}{" "}
                     <span className="text-text-primary font-medium">
-                      {user?.student_profile?.is_premium
+                      {isPremium
                         ? filteredUnis.length
                         : Math.min(filteredUnis.length, FREE_TRIAL_LIMIT)}
                     </span>{" "}
                     {t("com.of")} {universities.length} {t("uni.exploreB")}
-                    {!user?.student_profile?.is_premium && (
+                    {!isPremium && (
                       <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
                         <Lock className="w-3 h-3" /> {lang === "ar" ? `نسخة تجريبية (${FREE_TRIAL_LIMIT} جامعات)` : `Free Trial (${FREE_TRIAL_LIMIT} Universities)`}
                       </span>
                     )}
                   </p>
 
-                  {!user?.student_profile?.is_premium && (
+                  {!isPremium && (
                     <button
                       onClick={() => {
                         if (!user) setShowAuthGate(true);
@@ -588,7 +593,7 @@ export default function ScholarshipsPage() {
                   <div>
                     {/* Unlocked / Free Trial Universities */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {(user?.student_profile?.is_premium || !!user || !!getToken()
+                      {(isPremium
                         ? filteredUnis
                         : filteredUnis.slice(0, FREE_TRIAL_LIMIT)
                       ).map((u, i) => (
@@ -629,7 +634,7 @@ export default function ScholarshipsPage() {
                     </div>
 
                     {/* Foggy Locked Section for Free Trial Users */}
-                    {!(user?.student_profile?.is_premium || !!user || !!getToken()) && filteredUnis.length > FREE_TRIAL_LIMIT && (
+                    {!isPremium && filteredUnis.length > FREE_TRIAL_LIMIT && (
                       <div className="relative mt-8 pt-4">
                         {/* Blurred foggy background preview */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 filter blur-md opacity-30 select-none pointer-events-none">
@@ -673,8 +678,8 @@ export default function ScholarshipsPage() {
                             </h3>
                             <p className="text-xs sm:text-sm text-text-secondary mb-5 max-w-md mx-auto leading-relaxed">
                               {lang === "ar"
-                                ? `أنت تشاهد حالياً ${FREE_TRIAL_LIMIT} جامعات تجريبية مجانية. قم بالترقية لمرة واحدة لفتح كل الجامعات الصينية (بكين، شنغهاي، غوانزو، تشنغدو وغيرها) وأكثر من 400 منحة كاملة وجزئية.`
-                                : "You are viewing the 7 Free Trial Universities. Upgrade once to unlock all 100+ Universities (Chengdu, Beijing, Guangzhou, Shanghai, Wuhan, Xi'an) and 400+ Full & Partial Scholarships."}
+                                ? `أنت تشاهد حالياً جامعتين (2) تجريبيتين مجانيتين. قم بالترقية لمرة واحدة لفتح كل الجامعات الصينية (بكين، شنغهاي، غوانزو، تشنغدو وغيرها) وأكثر من 400 منحة كاملة وجزئية.`
+                                : "You are viewing 2 Free Trial Universities. Upgrade once to unlock all 100+ Universities (Chengdu, Beijing, Guangzhou, Shanghai, Wuhan, Xi'an) and 400+ Full & Partial Scholarships."}
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">

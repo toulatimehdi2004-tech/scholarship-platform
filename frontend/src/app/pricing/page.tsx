@@ -40,7 +40,7 @@ const CURRENCY_CONFIG: Record<
 };
 
 const COMPARISON_FEATURES = [
-  { feature: "Top Chinese Universities", free: "Top 7 Universities", vip: "All 100+ Campuses (3D VR Tours)" },
+  { feature: "Top Chinese Universities", free: "Top 2 Universities", vip: "All 100+ Campuses (3D VR Tours)" },
   { feature: "CSC & Provincial Scholarships", free: "5 per category", vip: "400+ Verified Real Grants" },
   { feature: "Direct Official Portal Links", free: false, vip: true },
   { feature: "ScholarChina Application Pipeline CRM", free: "Limited (3 apps)", vip: "Unlimited In-Flight Pipeline" },

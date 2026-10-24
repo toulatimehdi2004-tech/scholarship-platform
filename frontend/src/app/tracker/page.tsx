@@ -29,8 +29,10 @@ import {
   Briefcase,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import SmartBack from "@/components/SmartBack";
 import { useLang } from "@/lib/i18n";
+import AuthGateModal from "@/components/AuthGateModal";
 import {
   getToken,
   getTrackedApplications,
@@ -211,10 +213,12 @@ const DEMO_APPLICATIONS: ApplicationTrackerItem[] = [
 ];
 
 export default function ApplicationTrackerPage() {
+  const router = useRouter();
   const { t, lang } = useLang();
   const [applications, setApplications] = useState<ApplicationTrackerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthGate, setShowAuthGate] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [restrictedRole, setRestrictedRole] = useState<string | null>(null);
 
@@ -249,17 +253,7 @@ export default function ApplicationTrackerPage() {
     async function load() {
       const token = getToken();
       if (!token) {
-        // Load from localStorage or use demo
-        const local = localStorage.getItem("moroccan_scholar_tracker");
-        if (local) {
-          try {
-            setApplications(JSON.parse(local));
-          } catch {
-            setApplications(DEMO_APPLICATIONS);
-          }
-        } else {
-          setApplications(DEMO_APPLICATIONS);
-        }
+        setShowAuthGate(true);
         setIsAuthenticated(false);
         setLoading(false);
         return;
@@ -1025,6 +1019,20 @@ export default function ApplicationTrackerPage() {
           </div>
         )}
       </AnimatePresence>
+
+      <AuthGateModal
+        isOpen={showAuthGate || (typeof window !== "undefined" && !getToken())}
+        onClose={() => router.push("/")}
+        onBackToRoles={() => router.push("/")}
+        canClose={false}
+        role="student"
+        title={lang === "ar" ? "بوابة الطلاب المغاربة" : "Moroccan Student Access Required"}
+        subtitle={lang === "ar" ? "سجل الدخول لإدارة ومتابعة طلبات التقديم على المنح والجامعات الصينية." : "Sign in to track your applications, manage document checklists, and view acceptance deadlines."}
+        onSuccess={() => {
+          setShowAuthGate(false);
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }

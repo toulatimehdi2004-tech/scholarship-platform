@@ -178,13 +178,16 @@ export default function PortalChooser({
             </div>
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 font-mono text-xs font-bold tracking-wide uppercase mb-3 shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              ScholarChina Global Platform • 🇨🇳
+              ScholarChina • Portal Access Verification
             </span>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-3">
-              Choose Your Platform Portal
+            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-2">
+              Who Are You? • Qui êtes-vous ? • من أنت؟
             </h1>
-            <p className="text-sm sm:text-base text-emerald-100/80 max-w-2xl mx-auto">
-              Select your role to access tailored tools, real-time pipelines, and personalized workspaces.
+            <p className="text-base sm:text-xl font-bold bg-gradient-to-r from-emerald-300 via-cyan to-amber-300 bg-clip-text text-transparent mb-2">
+              Student • University Admissions • Service Provider
+            </p>
+            <p className="text-xs sm:text-sm text-emerald-100/80 max-w-2xl mx-auto">
+              Please identify your role to proceed. To protect institutional quotas and verify student applicants, authentication is mandatory before accessing platform content.
             </p>
           </motion.div>
 

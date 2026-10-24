@@ -28,7 +28,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { fetchApi, getApiBaseUrl, getToken } from "@/lib/api";
+import { fetchApi, getApiBaseUrl, getToken, clearToken } from "@/lib/api";
 import SmartBack from "@/components/SmartBack";
 import AuthGateModal from "@/components/AuthGateModal";
 
@@ -94,6 +94,15 @@ export default function UniversityPortalPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [showAuthGate, setShowAuthGate] = useState(false);
   const [actionToast, setActionToast] = useState<string | null>(null);
+  const [activeRole, setActiveRole] = useState<string | null>(null);
+
+  // Check stored role on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("portal_role") || "student";
+      setActiveRole(saved);
+    }
+  }, []);
 
   // Load universities and applicants on mount with auth enforcement
   useEffect(() => {
@@ -238,6 +247,46 @@ export default function UniversityPortalPage() {
   const acceptedCount = applicants.filter((a) => a.current_step === "accepted").length;
   const pendingCount = applicants.filter((a) => a.current_step === "submitted" || a.current_step === "interview_prep").length;
   const rejectedCount = applicants.filter((a) => a.current_step === "rejected").length;
+
+  if (getToken() && activeRole && activeRole !== "university") {
+    return (
+      <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto">
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center mb-4 shadow-lg shadow-amber-500/10">
+          <Building2 className="w-8 h-8" />
+        </div>
+        <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 mb-3">
+          Role Mismatch • Accès Restreint
+        </span>
+        <h2 className="text-2xl font-black text-text-primary mb-2">
+          University Admissions Desk Only
+        </h2>
+        <p className="text-sm text-text-secondary leading-relaxed mb-6">
+          This portal is reserved strictly for verified Chinese University Admissions staff to review student dossiers and adjust quotas. You are currently logged in with a <span className="font-bold text-amber-400">{activeRole === "student" ? "Moroccan Student" : "Service Provider"}</span> profile.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
+          <button
+            onClick={() => {
+              clearToken();
+              try {
+                localStorage.removeItem("user");
+                localStorage.setItem("portal_role", "university");
+              } catch {}
+              setShowAuthGate(true);
+            }}
+            className="btn-gradient px-5 py-2.5 rounded-xl font-bold text-sm shadow-md cursor-pointer"
+          >
+            Sign In as University Admissions
+          </button>
+          <Link
+            href="/"
+            className="px-5 py-2.5 rounded-xl glass border border-white/10 text-sm font-semibold hover:bg-white/5 transition-all text-center"
+          >
+            Return to My Portal
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen px-4 py-8 max-w-7xl mx-auto">

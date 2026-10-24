@@ -64,7 +64,7 @@ export default function AiChatPage() {
 
   useEffect(() => {
     if (!getToken()) {
-      router.push("/auth/login");
+      router.push("/");
       return;
     }
     getCurrentUser().then((res) => {

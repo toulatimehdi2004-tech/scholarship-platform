@@ -28,7 +28,7 @@ import { fetchApi, getToken } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import AuthGateModal from "@/components/AuthGateModal";
 import AutoText from "@/components/AutoText";
-import type { PortalRole } from "@/components/PortalChooser";
+import PortalChooser, { type PortalRole } from "@/components/PortalChooser";
 
 function AnimatedCounter({ target, suffix }: { target: number; suffix: string }) {
   const [count, setCount] = useState(0);
@@ -81,23 +81,32 @@ export default function HomePage() {
   const [cityCount, setCityCount] = useState(24);
   const [showAuthGate, setShowAuthGate] = useState(false);
   const [portalRole, setPortalRole] = useState<PortalRole | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  // Check stored role on mount
+  // Check authentication & stored role on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("portal_role") as PortalRole | null;
-      setPortalRole(saved || "student");
+      const token = getToken();
+      const savedRole = localStorage.getItem("portal_role") as PortalRole | null;
+      if (!token) {
+        setIsAuthenticated(false);
+      } else {
+        setIsAuthenticated(true);
+        setPortalRole(savedRole || "student");
+      }
     }
   }, []);
 
-  // Redirect if non-student role
+  // Redirect if authenticated non-student role
   useEffect(() => {
-    if (portalRole === "university") {
-      router.push("/university-portal");
-    } else if (portalRole === "provider") {
-      router.push("/provider-portal");
+    if (isAuthenticated) {
+      if (portalRole === "university") {
+        router.push("/university-portal");
+      } else if (portalRole === "provider") {
+        router.push("/provider-portal");
+      }
     }
-  }, [portalRole, router]);
+  }, [isAuthenticated, portalRole, router]);
 
   // Load stats from API
   useEffect(() => {
@@ -210,6 +219,35 @@ export default function HomePage() {
     },
   ];
 
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050e09]">
+        <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // FIRST PAGE ALWAYS: "Who Are You?" Portal Chooser for unauthenticated visitors
+  if (isAuthenticated === false) {
+    return (
+      <PortalChooser
+        onSelectRole={(role) => {
+          try {
+            localStorage.setItem("portal_role", role);
+          } catch {}
+          setPortalRole(role);
+          if (role === "university") {
+            router.push("/university-portal");
+          } else if (role === "provider") {
+            router.push("/provider-portal");
+          } else {
+            setIsAuthenticated(true);
+          }
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* Active Portal Banner with quick role switch */}
@@ -224,6 +262,7 @@ export default function HomePage() {
               localStorage.removeItem("portal_role");
             } catch {}
             setPortalRole(null);
+            setIsAuthenticated(false);
           }}
           className="text-white hover:text-cyan underline font-bold cursor-pointer"
         >
