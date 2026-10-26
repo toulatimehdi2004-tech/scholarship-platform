@@ -158,6 +158,15 @@ export default function Footer() {
                   {t("footer.schOdds")}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/csca"
+                  className="text-amber-600 dark:text-amber-400 font-bold hover:underline transition-colors flex items-center gap-1.5"
+                >
+                  <span>{lang === "ar" ? "امتحان CSCA (البكالوريوس)" : "Examen CSCA (Bachelor)"}</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded font-black bg-rose-500 text-white">NEW</span>
+                </Link>
+              </li>
             </ul>
           </div>
 

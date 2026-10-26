@@ -14,6 +14,9 @@ import {
   ArrowLeft,
   ChevronRight,
   Crown,
+  Award,
+  ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
@@ -320,6 +323,52 @@ export default function ScholarshipsPage() {
             </Link>
           </motion.div>
         )}
+
+        {/* CSCA Exam Notice for Undergraduate / Bachelor applicants */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-rose-500/15 via-purple/15 to-cyan/15 border border-rose-500/30 flex flex-col sm:flex-row items-center justify-between gap-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
+              <Award className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                  {lang === "ar" ? "إعلان إجباري للبكالوريوس" : "Obligatoire pour Bachelor"}
+                </span>
+                <span className="text-xs font-bold text-text-primary">
+                  {lang === "ar" ? "امتحان CSCA الوطني المعتمد (csca.cn)" : "Examen National CSCA (China Scholastic Assessment)"}
+                </span>
+              </div>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                {lang === "ar"
+                  ? "جميع المتقدمين لدرجة البكالوريوس (Licence) ملزمون باجتياز اختبار CSCA أونلاين وإرفاق الشهادة مع ملف المنحة."
+                  : "Les bacheliers postulant en Licence doivent passer le test CSCA en ligne et joindre l'attestation à leur dossier CSC."}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 flex-shrink-0 self-end sm:self-auto">
+            <Link
+              href="/csca"
+              className="text-xs font-bold text-cyan hover:underline transition-all"
+            >
+              {lang === "ar" ? "دليل المواد ➔" : "Guide & Simulateur ➔"}
+            </Link>
+            <a
+              href="https://www.csca.cn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl btn-gradient text-xs font-bold shadow-sm shadow-cyan/20 cursor-pointer"
+            >
+              <span>{lang === "ar" ? "حجز موعد csca.cn" : "Rendez-vous csca.cn"}</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </motion.div>
 
         {/* Search Bar */}
         <motion.div

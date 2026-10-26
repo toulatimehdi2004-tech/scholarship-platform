@@ -382,6 +382,11 @@ export default function AiChatPage() {
     if (lang === "ar") {
       return [
         {
+          icon: "📝",
+          title: "امتحان CSCA الإجباري للبكالوريوس في الصين",
+          prompt: "ما هو امتحان CSCA الصيني الجديد؟ وما هي المواد الإجبارية للبكالوريا المغربية وكيفية حجز موعد على csca.cn؟",
+        },
+        {
           icon: "🏆",
           title: "مقارنة منح CSC Type A و Type B",
           prompt: "ما هو الفرق بالتفصيل بين منحة الحكومة الصينية CSC Type A و Type B؟ وما هي رواتب المعيشة وشروط القبول؟",
@@ -416,6 +421,11 @@ export default function AiChatPage() {
     if (lang === "fr") {
       return [
         {
+          icon: "📝",
+          title: "Examen CSCA obligatoire pour Bachelor en Chine",
+          prompt: "Qu'est-ce que le nouvel examen CSCA (China Scholastic Assessment) ? Quelles matières passer selon mon Bac marocain et comment prendre rendez-vous sur csca.cn ?",
+        },
+        {
           icon: "🏆",
           title: "Bourses CSC Type A vs Type B",
           prompt: "Explique-moi en détail la différence entre les bourses du gouvernement chinois CSC Type A et Type B, les quotas et les allocations mensuelles.",
@@ -448,6 +458,11 @@ export default function AiChatPage() {
       ];
     }
     return [
+      {
+        icon: "📝",
+        title: "Mandatory CSCA Exam for Bachelor in China",
+        prompt: "What is the new CSCA (China Scholastic Competency Assessment) exam? Which subjects are mandatory for Moroccan applicants and how do I schedule an appointment on csca.cn?",
+      },
       {
         icon: "🏆",
         title: "Compare CSC Type A vs Type B",

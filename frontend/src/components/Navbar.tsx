@@ -27,10 +27,17 @@ import { getCurrentUser, getToken, clearToken, type User } from "@/lib/api";
 import LifetimePassModal from "@/components/LifetimePassModal";
 import AuthGateModal from "@/components/AuthGateModal";
 
-const navKeys = [
+interface NavItem {
+  href: string;
+  label: string;
+  badge?: string;
+}
+
+const navKeys: { href: string; key: string; badge?: string }[] = [
   { href: "/student-portal", key: "nav.home" },
   { href: "/scholarships", key: "nav.scholarships" },
   { href: "/universities", key: "nav.universities" },
+  { href: "/csca", key: "nav.csca", badge: "NEW" },
   { href: "/stories", key: "nav.stories" },
   { href: "/tracker", key: "nav.tracker" },
   { href: "/ai-chat", key: "nav.aiChat" },
@@ -108,7 +115,7 @@ export default function Navbar() {
     redirectToRoot();
   };
 
-  const getNavLinks = () => {
+  const getNavLinks = (): NavItem[] => {
     if (typeof window !== "undefined" && !getToken()) {
       return [];
     }
@@ -127,7 +134,7 @@ export default function Navbar() {
         { href: "/scholarships", label: t("nav.scholarships") },
       ];
     }
-    return navKeys.map((link) => ({ href: link.href, label: t(link.key) }));
+    return navKeys.map((link) => ({ href: link.href, label: t(link.key), badge: link.badge }));
   };
 
   return (
@@ -156,13 +163,18 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-1.5 ${
                     pathname === link.href
                       ? "text-cyan bg-cyan/10 glow-cyan-sm font-semibold"
                       : "text-text-secondary hover:text-text-primary hover:bg-white/5"
                   }`}
                 >
-                  {link.label}
+                  <span>{link.label}</span>
+                  {link.badge && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full font-black bg-gradient-to-r from-amber-400 to-rose-500 text-white shadow-sm shadow-amber-500/30 uppercase tracking-wider animate-pulse">
+                      {link.badge}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>
@@ -322,13 +334,18 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                    className={`flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                       pathname === link.href
                         ? "text-cyan bg-cyan/10 font-bold"
                         : "text-text-secondary hover:text-text-primary hover:bg-white/5"
                     }`}
                   >
-                    {link.label}
+                    <span>{link.label}</span>
+                    {link.badge && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full font-black bg-gradient-to-r from-amber-400 to-rose-500 text-white uppercase tracking-wider">
+                        {link.badge}
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>

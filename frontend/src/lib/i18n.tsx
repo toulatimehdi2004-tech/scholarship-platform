@@ -14,6 +14,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
   en: {
     'nav.scholarships': 'Scholarships',
     'nav.universities': 'Universities',
+    'nav.csca': 'CSCA Exam',
     'nav.tracker': 'Tracker CRM',
     'nav.explore': 'Explore',
     'nav.aiChat': 'AI Chat',
@@ -565,6 +566,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
   fr: {
     'nav.scholarships': 'Bourses',
     'nav.universities': 'Universités',
+    'nav.csca': 'Examen CSCA',
     'nav.tracker': 'Suivi Candidatures',
     'nav.explore': 'Explorer',
     'nav.aiChat': 'Assistant IA',
@@ -1116,6 +1118,7 @@ const dictionaries: Record<Lang, Record<string, string>> = {
   ar: {
     'nav.scholarships': 'المنح الدراسية',
     'nav.universities': 'الجامعات',
+    'nav.csca': 'امتحان CSCA',
     'nav.tracker': 'متابعة الطلبات',
     'nav.explore': 'استكشف',
     'nav.aiChat': 'المساعد الذكي',

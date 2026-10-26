@@ -20,6 +20,7 @@ import {
   Quote,
   Star,
   Users,
+  Award,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -161,11 +162,23 @@ export default function HomePage() {
 
   const studentTools = [
     {
+      href: "/csca",
+      icon: Award,
+      title: lang === "ar" ? "امتحان CSCA (البكالوريوس)" : "Examen CSCA Chine",
+      desc:
+        lang === "ar"
+          ? "دليل الاختبار الوطني الإجباري ورابط حجز الموعد على csca.cn"
+          : "Guide de l'examen national obligatoire & prise de rendez-vous sur csca.cn",
+      color: "from-rose-500 to-amber-500",
+      badge: "NEW",
+    },
+    {
       href: "/eligibility",
       icon: BadgeCheck,
       title: t("home.toolElTitle"),
       desc: t("home.toolElDesc"),
       color: "from-cyan to-blue",
+      badge: undefined,
     },
     {
       href: "/compare",
@@ -173,6 +186,7 @@ export default function HomePage() {
       title: t("home.toolCmpTitle"),
       desc: t("home.toolCmpDesc"),
       color: "from-purple to-pink-500",
+      badge: undefined,
     },
     {
       href: "/sop",
@@ -180,6 +194,7 @@ export default function HomePage() {
       title: t("home.toolSopTitle"),
       desc: t("home.toolSopDesc"),
       color: "from-blue to-purple",
+      badge: undefined,
     },
     {
       href: "/pre-departure",
@@ -187,6 +202,7 @@ export default function HomePage() {
       title: t("home.toolDepTitle"),
       desc: t("home.toolDepDesc"),
       color: "from-amber-500 to-purple",
+      badge: undefined,
     },
   ];
 
@@ -270,6 +286,40 @@ export default function HomePage() {
         >
           {t("home.switchRole")}
         </button>
+      </div>
+
+      {/* CSCA Exam Urgent Announcement Banner for Bachelor applicants */}
+      <div className="bg-gradient-to-r from-rose-950/80 via-purple-950/70 to-blue-950/80 border-b border-rose-500/30 px-4 py-2.5">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2 text-rose-200 text-center sm:text-left">
+            <span className="px-2 py-0.5 rounded-full font-black text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase animate-pulse">
+              🚨 {lang === "ar" ? "إعلان البكالوريوس" : "Nouveau Bachelor"}
+            </span>
+            <span>
+              {lang === "ar"
+                ? "امتحان CSCA الوطني أصبح إلزامياً لجميع خريجي البكالوريا المتقدمين لدراسة البكالوريوس في الصين."
+                : "L'Examen National CSCA est désormais obligatoire pour tous les candidats bacheliers postulant au Bachelor en Chine."}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link
+              href="/csca"
+              className="text-white hover:text-cyan underline font-bold transition-colors"
+            >
+              {lang === "ar" ? "دليل الامتحان والمحاكي ➔" : "Guide & Simulateur ➔"}
+            </Link>
+            <span className="text-white/30">•</span>
+            <a
+              href="https://www.csca.cn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-bold border border-rose-500/30 transition-all"
+            >
+              <span>{lang === "ar" ? "حجز موعد رسمي (csca.cn)" : "Prendre Rendez-vous (csca.cn)"}</span>
+              <ArrowRight className="w-3 h-3 rtl-flip" />
+            </a>
+          </div>
+        </div>
       </div>
 
       <section className="relative min-h-[90vh] flex items-center justify-center px-4 bg-grid py-12">
@@ -570,7 +620,7 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
             {studentTools.map((tool, i) => (
               <motion.div
                 key={tool.href}
@@ -581,17 +631,22 @@ export default function HomePage() {
               >
                 <Link
                   href={tool.href}
-                  className="glass rounded-2xl p-6 card-hover group block h-full border border-border-glass"
+                  className="glass rounded-2xl p-5 card-hover group block h-full border border-border-glass relative overflow-hidden"
                 >
+                  {tool.badge && (
+                    <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                      {tool.badge}
+                    </div>
+                  )}
                   <div
                     className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4 shadow-md`}
                   >
                     <tool.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-text-primary mb-2 group-hover:text-cyan transition-colors">
+                  <h3 className="text-base font-bold text-text-primary mb-2 group-hover:text-cyan transition-colors">
                     {tool.title}
                   </h3>
-                  <p className="text-text-secondary text-sm leading-relaxed">
+                  <p className="text-text-secondary text-xs leading-relaxed">
                     {tool.desc}
                   </p>
                 </Link>

@@ -87,7 +87,8 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         pathname.startsWith("/pricing") ||
         pathname.startsWith("/pre-departure") ||
         pathname.startsWith("/agency-services") ||
-        pathname.startsWith("/apply")
+        pathname.startsWith("/apply") ||
+        pathname.startsWith("/csca")
       ) {
         router.replace("/university-portal");
         return;
@@ -104,7 +105,8 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         pathname.startsWith("/pricing") ||
         pathname.startsWith("/pre-departure") ||
         pathname.startsWith("/agency-services") ||
-        pathname.startsWith("/apply")
+        pathname.startsWith("/apply") ||
+        pathname.startsWith("/csca")
       ) {
         router.replace("/provider-portal");
         return;
