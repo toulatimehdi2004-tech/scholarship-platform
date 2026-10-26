@@ -195,6 +195,26 @@ export default function AuthGateModal({
 
       if (tab === 'login') {
         const cleanUsername = username.trim();
+
+        // Enforce strict role isolation: accounts cannot switch portals
+        try {
+          const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
+          const existingRole = registry[cleanUsername.toLowerCase()];
+          if (existingRole && existingRole !== role) {
+            const roleLabels: Record<string, string> = {
+              student: 'Étudiant Marocain',
+              university: 'Université Chinoise',
+              provider: 'Prestataire de Services',
+            };
+            setError(
+              `Accès refusé : Le compte "${cleanUsername}" est enregistré comme profil ${roleLabels[existingRole] || existingRole}. ` +
+              `Vous ne pouvez pas vous connecter via le portail ${roleLabels[role] || role}.`
+            );
+            setLoading(false);
+            return;
+          }
+        } catch {}
+
         const res = await loginUser({
           username: cleanUsername,
           password,
@@ -207,6 +227,11 @@ export default function AuthGateModal({
           localStorage.setItem('user', JSON.stringify(res.data.user));
           const effectiveRole = res.data.role || role || 'student';
           localStorage.setItem('portal_role', effectiveRole);
+          try {
+            const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
+            registry[username.trim().toLowerCase()] = effectiveRole;
+            localStorage.setItem('user_role_registry', JSON.stringify(registry));
+          } catch {}
           if (role === 'university') {
             const matchedUni = liveVerification?.university || ACCREDITED_UNIVERSITIES.find((u) => u.id === selectedUniId);
             if (matchedUni) {
@@ -277,6 +302,11 @@ export default function AuthGateModal({
           localStorage.setItem('user', JSON.stringify(res.data.user));
           const effectiveRole = res.data.role || role || 'student';
           localStorage.setItem('portal_role', effectiveRole);
+          try {
+            const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
+            registry[username.trim().toLowerCase()] = effectiveRole;
+            localStorage.setItem('user_role_registry', JSON.stringify(registry));
+          } catch {}
           if (role === 'university') {
             const matchedUni = liveVerification?.university || ACCREDITED_UNIVERSITIES.find((u) => u.id === selectedUniId);
             if (matchedUni) {

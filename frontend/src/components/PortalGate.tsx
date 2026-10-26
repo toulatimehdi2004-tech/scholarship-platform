@@ -15,6 +15,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string>("student");
 
   useEffect(() => {
     const token = getToken();
@@ -29,11 +30,70 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
       setIsAuthenticated(false);
       // If unauthenticated and on an internal page, force back to Who Are You root /
       if (pathname !== "/" && !pathname.startsWith("/auth/verify")) {
-        router.push("/");
+        router.replace("/");
       }
-    } else {
-      setIsAuthenticated(true);
+      setMounted(true);
+      return;
     }
+
+    setIsAuthenticated(true);
+
+    // Resolve strict user role
+    let role = "student";
+    try {
+      if (userStr) {
+        const parsed = JSON.parse(userStr);
+        role = parsed.role || "student";
+      }
+    } catch {}
+    setUserRole(role);
+    try {
+      localStorage.setItem("portal_role", role);
+    } catch {}
+
+    // Strict Role Route Boundaries:
+    // A student can NEVER access university or provider portals.
+    if (role === "student") {
+      if (pathname.startsWith("/university-portal") || pathname.startsWith("/provider-portal")) {
+        router.replace("/student-portal");
+        return;
+      }
+    } else if (role === "university") {
+      // A university can NEVER access student portal or provider portal
+      if (
+        pathname.startsWith("/student-portal") ||
+        pathname.startsWith("/provider-portal") ||
+        pathname.startsWith("/tracker") ||
+        pathname.startsWith("/crm") ||
+        pathname.startsWith("/pipeline") ||
+        pathname.startsWith("/vip") ||
+        pathname.startsWith("/pricing") ||
+        pathname.startsWith("/pre-departure") ||
+        pathname.startsWith("/agency-services") ||
+        pathname.startsWith("/apply")
+      ) {
+        router.replace("/university-portal");
+        return;
+      }
+    } else if (role === "provider") {
+      // A service provider can NEVER access student portal or university portal
+      if (
+        pathname.startsWith("/student-portal") ||
+        pathname.startsWith("/university-portal") ||
+        pathname.startsWith("/tracker") ||
+        pathname.startsWith("/crm") ||
+        pathname.startsWith("/pipeline") ||
+        pathname.startsWith("/vip") ||
+        pathname.startsWith("/pricing") ||
+        pathname.startsWith("/pre-departure") ||
+        pathname.startsWith("/agency-services") ||
+        pathname.startsWith("/apply")
+      ) {
+        router.replace("/provider-portal");
+        return;
+      }
+    }
+
     setMounted(true);
   }, [pathname, router]);
 
@@ -63,6 +123,42 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
 
   // If unauthenticated on any other route: redirecting to /
   if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050e09]">
+        <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Strict barrier: never render forbidden content during navigation
+  const isForbidden =
+    (userRole === "student" && (pathname.startsWith("/university-portal") || pathname.startsWith("/provider-portal"))) ||
+    (userRole === "university" && (
+      pathname.startsWith("/student-portal") ||
+      pathname.startsWith("/provider-portal") ||
+      pathname.startsWith("/tracker") ||
+      pathname.startsWith("/crm") ||
+      pathname.startsWith("/pipeline") ||
+      pathname.startsWith("/vip") ||
+      pathname.startsWith("/pricing") ||
+      pathname.startsWith("/pre-departure") ||
+      pathname.startsWith("/agency-services") ||
+      pathname.startsWith("/apply")
+    )) ||
+    (userRole === "provider" && (
+      pathname.startsWith("/student-portal") ||
+      pathname.startsWith("/university-portal") ||
+      pathname.startsWith("/tracker") ||
+      pathname.startsWith("/crm") ||
+      pathname.startsWith("/pipeline") ||
+      pathname.startsWith("/vip") ||
+      pathname.startsWith("/pricing") ||
+      pathname.startsWith("/pre-departure") ||
+      pathname.startsWith("/agency-services") ||
+      pathname.startsWith("/apply")
+    ));
+
+  if (isForbidden) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#050e09]">
         <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />

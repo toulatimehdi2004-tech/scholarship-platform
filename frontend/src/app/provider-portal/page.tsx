@@ -535,22 +535,6 @@ export default function ProviderPortalPage() {
             Process student document translation orders, manage airport pickup arrivals, and manage bank account payouts.
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href="/"
-            onClick={() => {
-              clearToken();
-              try {
-                localStorage.removeItem("user");
-                localStorage.removeItem("portal_role");
-              } catch {}
-            }}
-            className="px-4 py-2 rounded-xl text-xs font-bold glass hover:bg-white/10 text-rose-300 flex items-center gap-1.5 transition-all"
-          >
-            <span>⇄ Who Are You? / Switch Role</span>
-          </Link>
-        </div>
       </div>
 
       {/* Provider Bureau Overview Metrics */}

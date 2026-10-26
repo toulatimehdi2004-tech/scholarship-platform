@@ -346,6 +346,23 @@ export async function registerUser(data: {
   // Seamless fallback for static deployment / network error
   const cleanName = data.username.trim() || "User";
   const role = data.role || "student";
+
+  // Prevent role pollution: if this account has an existing registered role, enforce it strictly
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("user_role_registry");
+      const registry = raw ? JSON.parse(raw) : {};
+      const existingRole = registry[cleanName.toLowerCase()];
+      if (existingRole && existingRole !== role) {
+        return {
+          error: `Accès refusé : Ce compte "${cleanName}" est enregistré sous le profil ${existingRole.toUpperCase()}. Vous ne pouvez pas vous connecter via le portail ${role.toUpperCase()}.`,
+          status: 403,
+        };
+      }
+      registry[cleanName.toLowerCase()] = role;
+      localStorage.setItem("user_role_registry", JSON.stringify(registry));
+    } catch {}
+  }
   const mockUser: User = {
     id: 1,
     username: cleanName,
@@ -391,6 +408,23 @@ export async function loginUser(data: {
   // Seamless fallback for static deployment / network error
   const cleanName = data.username.trim() || "User";
   const role = data.role || "student";
+
+  // Prevent role pollution: if this account has an existing registered role, enforce it strictly
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("user_role_registry");
+      const registry = raw ? JSON.parse(raw) : {};
+      const existingRole = registry[cleanName.toLowerCase()];
+      if (existingRole && existingRole !== role) {
+        return {
+          error: `Accès refusé : Ce compte "${cleanName}" est enregistré sous le profil ${existingRole.toUpperCase()}. Vous ne pouvez pas vous connecter via le portail ${role.toUpperCase()}.`,
+          status: 403,
+        };
+      }
+      registry[cleanName.toLowerCase()] = role;
+      localStorage.setItem("user_role_registry", JSON.stringify(registry));
+    } catch {}
+  }
   const mockUser: User = {
     id: 1,
     username: cleanName,
