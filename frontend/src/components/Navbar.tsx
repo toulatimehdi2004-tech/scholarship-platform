@@ -70,6 +70,11 @@ export default function Navbar() {
     }
   }, [pathname]);
 
+  const redirectToRoot = () => {
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+    window.location.href = `${basePath}/`;
+  };
+
   const handleLogout = () => {
     clearToken();
     try {
@@ -79,7 +84,7 @@ export default function Navbar() {
       localStorage.removeItem("vip_pass");
     } catch {}
     setUser(null);
-    window.location.href = "/";
+    redirectToRoot();
   };
 
   const switchRole = (role: "student" | "university" | "provider" | "choose") => {
@@ -92,7 +97,7 @@ export default function Navbar() {
         localStorage.removeItem("user");
       } catch {}
       setUser(null);
-      window.location.href = "/";
+      redirectToRoot();
       return;
     }
     try {
@@ -339,7 +344,7 @@ export default function Navbar() {
                   <button
                     onClick={() => {
                       clearToken();
-                      window.location.href = "/";
+                      redirectToRoot();
                     }}
                     className="btn-gradient text-xs sm:text-sm px-4 py-2 rounded-xl font-bold cursor-pointer"
                   >
