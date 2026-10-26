@@ -618,6 +618,96 @@ export async function sendChatMessage(
   } catch {}
 
   const lower = (message || "").toLowerCase();
+
+  // 1. Dedicated Major-to-Exam Matcher (Software, E-Commerce, Medicine, etc.)
+  if (
+    lower.includes("software") ||
+    lower.includes("e-commerce") ||
+    lower.includes("ecommerce") ||
+    lower.includes("logiciel") ||
+    lower.includes("برمج") ||
+    lower.includes("تجارة إلكترونية")
+  ) {
+    const isAr = language === "ar" || /[\u0600-\u06FF]/.test(message);
+    const isFr = language === "fr" || lower.includes("logiciel") || lower.includes("étudier") || lower.includes("examen");
+
+    let answer = "";
+    if (isAr) {
+      answer = `### 🎯 توجيه اختيار امتحان CSCA حسب تخصصك الدراسي:
+
+#### 💻 1. إذا كنت ترغب في دراسة هندسة البرمجيات أو علوم الحاسوب (Software Engineering / CS):
+- **المواد الإجبارية:** **الرياضيات (Mathematics مسار STEM) + الفيزياء (Physics)**.
+- **المواد غير المطلوبة:** الكيمياء واللغة الصينية (معفى منها للبرامج الإنجليزية).
+- **الرسوم:** ~750 يوان صيني (~1,050 درهم مغربي).
+- **أفضل الجامعات في الصين:** Zhejiang University (Hangzhou)، Tsinghua (Beijing)، Beihang، Harbin Institute of Technology.
+
+---
+
+#### 🛍️ 2. إذا كنت ترغب في دراسة التجارة الإلكترونية أو إدارة الأعمال (E-Commerce / Business):
+- **المواد الإجبارية:** **الرياضيات فقط (Mathematics - المسار العام)**.
+- **ميزة هامة جداً:** **لا تحتاج لاجتياز الفيزياء ولا الكيمياء نهائياً!**
+- **الرسوم:** ~450 يوان صيني (~630 درهم مغربي) لمادة واحدة فقط!
+- **أفضل الجامعات:** Zhejiang Gongshang University (هانغتشو، المقر الرئيسي لعلي بابا Alibaba)، UIBE بكين، SUFE شنغهاي.
+
+---
+
+🔗 **رابط حجز الموعد الرسمي:** [https://www.csca.cn](https://www.csca.cn)
+🎯 **جرب محاكي التخصصات الكامل على المنصة:** [تصفح محاكي التخصصات CSCA](/csca)`;
+    } else if (isFr) {
+      answer = `### 🎯 Quel examen CSCA choisir selon votre filière d'études ?
+
+#### 💻 1. Vous souhaitez étudier le Génie Logiciel / Informatique (Software Engineering / Computer Science) :
+- **Épreuves obligatoires à passer sur csca.cn :** **Mathématiques (STEM) + Physique (Physics)**.
+- **Matières dispensées :** Chimie (non requise pour l'informatique).
+- **Frais d'examen :** ~750 RMB (~1 050 MAD / ~105 USD) pour le pack 2 matières.
+- **Universités recommandées :** Zhejiang University, Tsinghua, Beihang, Harbin Institute of Technology (HIT).
+
+---
+
+#### 🛍️ 2. Vous souhaitez étudier le Commerce Électronique / Business Digital (E-Commerce) :
+- **Épreuve obligatoire sur csca.cn :** **Mathématiques UNIQUEMENT (Mathematics - General Track)**.
+- **Grande nouvelle :** **AUCUNE PHYSIQUE NI CHIMIE N'EST REQUISE !** Vous êtes totalement dispensé(e) des épreuves scientifiques secondaires.
+- **Frais réduits :** Vous ne payez que pour 1 seule matière : ~450 RMB (~630 MAD / ~63 USD).
+- **Universités recommandées :** Zhejiang Gongshang University (Hangzhou, berceau d'Alibaba), UIBE Pékin, SUFE Shanghai.
+
+---
+
+🔗 **Lien direct pour réserver votre créneau :** [https://www.csca.cn](https://www.csca.cn)
+🎯 **Utiliser notre simulateur interactif par filière :** [Accéder au Guide & Simulateur CSCA](/csca)`;
+    } else {
+      answer = `### 🎯 Which CSCA Exam Should You Choose for Your Major?
+
+#### 💻 1. If you want to study Software Engineering / Computer Science:
+- **Mandatory Exams to Select on csca.cn:** **Mathematics (STEM track) + Physics**.
+- **Exempted:** Chemistry is NOT required.
+- **Estimated Fee:** ~750 RMB (~$105 USD / ~1,050 MAD).
+- **Top Universities in China:** Zhejiang University, Tsinghua University, Beihang University, Harbin Institute of Technology.
+
+---
+
+#### 🛍️ 2. If you want to study E-Commerce / Digital Business:
+- **Mandatory Exam to Select on csca.cn:** **Mathematics ONLY (General Track)**.
+- **Crucial advantage:** **NO PHYSICS OR CHEMISTRY IS REQUIRED!**
+- **Reduced Fee:** You only pay for 1 single subject: ~450 RMB (~$63 USD / ~630 MAD).
+- **Top Universities in China:** Zhejiang Gongshang University (Hangzhou - Alibaba's home city!), UIBE Beijing, SUFE Shanghai.
+
+---
+
+🔗 **Official Booking Portal:** [https://www.csca.cn](https://www.csca.cn)
+🎯 **Explore the interactive Major Matcher:** [Open CSCA Guide & Matcher](/csca)`;
+    }
+
+    return {
+      data: {
+        session_id: sessionId || `session_${Date.now()}`,
+        response: answer,
+        intent: "csca_major_matcher",
+        metadata: { source: "csca_knowledge_base" },
+      },
+      status: 200,
+    };
+  }
+
   if (
     lower.includes("csca") ||
     lower.includes("cssca") ||

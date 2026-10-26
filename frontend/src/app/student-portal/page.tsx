@@ -293,20 +293,20 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
           <div className="flex items-center gap-2 text-rose-200 text-center sm:text-left">
             <span className="px-2 py-0.5 rounded-full font-black text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase animate-pulse">
-              🚨 {lang === "ar" ? "إعلان البكالوريوس" : "Nouveau Bachelor"}
+              🚨 {lang === "ar" ? "توجيه البكالوريوس" : "Nouveau Bachelor"}
             </span>
             <span>
               {lang === "ar"
-                ? "امتحان CSCA الوطني أصبح إلزامياً لجميع خريجي البكالوريا المتقدمين لدراسة البكالوريوس في الصين."
-                : "L'Examen National CSCA est désormais obligatoire pour tous les candidats bacheliers postulant au Bachelor en Chine."}
+                ? "تريد دراسة هندسة البرمجيات (Software)، التجارة الإلكترونية (E-Commerce) أو الطب بالصين؟ اكتشف المواد الإجبارية لامتحان CSCA."
+                : "Vous visez le Génie Logiciel (Software), le E-Commerce ou la Médecine en Chine ? Découvrez les épreuves requises pour le test CSCA."}
             </span>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Link
-              href="/csca"
+              href="/csca#major-matcher"
               className="text-white hover:text-cyan underline font-bold transition-colors"
             >
-              {lang === "ar" ? "دليل الامتحان والمحاكي ➔" : "Guide & Simulateur ➔"}
+              {lang === "ar" ? "محاكي التخصصات (Software, E-Commerce...) ➔" : "Choisir ma Filière (Software, E-Commerce...) ➔"}
             </Link>
             <span className="text-white/30">•</span>
             <a
@@ -315,7 +315,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-bold border border-rose-500/30 transition-all"
             >
-              <span>{lang === "ar" ? "حجز موعد رسمي (csca.cn)" : "Prendre Rendez-vous (csca.cn)"}</span>
+              <span>{lang === "ar" ? "حجز موعد csca.cn" : "Prendre Rendez-vous (csca.cn)"}</span>
               <ArrowRight className="w-3 h-3 rtl-flip" />
             </a>
           </div>

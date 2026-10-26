@@ -353,10 +353,10 @@ export default function ScholarshipsPage() {
           </div>
           <div className="flex items-center gap-2.5 flex-shrink-0 self-end sm:self-auto">
             <Link
-              href="/csca"
+              href="/csca#major-matcher"
               className="text-xs font-bold text-cyan hover:underline transition-all"
             >
-              {lang === "ar" ? "دليل المواد ➔" : "Guide & Simulateur ➔"}
+              {lang === "ar" ? "محاكي التخصصات (Software, E-Commerce...) ➔" : "Simulateur par Filière (Software, E-Commerce...) ➔"}
             </Link>
             <a
               href="https://www.csca.cn"

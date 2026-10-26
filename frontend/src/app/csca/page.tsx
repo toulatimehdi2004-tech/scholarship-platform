@@ -7,6 +7,7 @@ import {
   BookOpen,
   Award,
   CheckCircle2,
+  XCircle,
   AlertTriangle,
   ExternalLink,
   FileText,
@@ -25,9 +26,22 @@ import {
   ChevronDown,
   Layers,
   ArrowLeft,
+  Code2,
+  ShoppingBag,
+  TrendingUp,
+  Stethoscope,
+  Pill,
+  Cog,
+  Zap,
+  Search,
+  Filter,
+  CheckCircle,
+  Briefcase,
+  Languages,
+  Compass,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLang } from "@/lib/i18n";
 
 interface SubjectDetail {
@@ -193,6 +207,490 @@ const CSCA_SUBJECTS: SubjectDetail[] = [
   },
 ];
 
+export interface StudyMajor {
+  id: string;
+  nameFr: string;
+  nameEn: string;
+  nameAr: string;
+  category: "tech" | "business" | "medicine" | "engineering" | "humanities";
+  categoryLabelFr: string;
+  categoryLabelEn: string;
+  categoryLabelAr: string;
+  requiredSubjects: string[]; // ["math", "physics"]
+  exemptSubjects: string[]; // ["chemistry"]
+  whyFr: string;
+  whyEn: string;
+  whyAr: string;
+  moroccanBacAdviceFr: string;
+  moroccanBacAdviceEn: string;
+  moroccanBacAdviceAr: string;
+  topUnis: { name: string; city: string }[];
+  cscaStepsFr: string[];
+  cscaStepsEn: string[];
+  cscaStepsAr: string[];
+}
+
+const STUDY_MAJORS: StudyMajor[] = [
+  {
+    id: "software",
+    nameFr: "Génie Logiciel & Informatique (Software Engineering / Computer Science)",
+    nameEn: "Software Engineering & Computer Science",
+    nameAr: "هندسة البرمجيات وعلوم الحاسوب (Software & CS)",
+    category: "tech",
+    categoryLabelFr: "💻 Informatique & Logiciel",
+    categoryLabelEn: "💻 Tech & Software",
+    categoryLabelAr: "💻 المعلوميات والبرمجيات",
+    requiredSubjects: ["math", "physics"],
+    exemptSubjects: ["chemistry"],
+    whyFr: "Les facultés d'informatique en Chine évaluent obligatoirement la logique mathématique (analyse, fonctions, probabilités) et la physique (électrocinétique, circuits, mécanique).",
+    whyEn: "Chinese Computer Science faculties mandate testing in mathematical logic, calculus, and physics (circuits, mechanics, electromagnetism).",
+    whyAr: "تتطلب كليات علوم الحاسوب الصينية تقييم المنطق الرياضي (التفاضل، الدوال، الاحتمالات) والفيزياء (الدوائر الكهربائية والكهرومغناطيسية).",
+    moroccanBacAdviceFr: "Idéal pour les bacheliers Sciences Maths (SM A/B) et Sciences Physiques (PC). Les SVT doivent renforcer leur préparation en physique.",
+    moroccanBacAdviceEn: "Ideal for Mathematical Sciences (SM) and Physical Sciences (PC) Moroccan Bac graduates.",
+    moroccanBacAdviceAr: "مثالي لشعبتي العلوم الرياضية (أ / ب) والعلوم الفيزيائية (PC) بالمغرب.",
+    topUnis: [
+      { name: "Zhejiang University", city: "Hangzhou" },
+      { name: "Tsinghua University", city: "Beijing" },
+      { name: "Beihang University", city: "Beijing" },
+      { name: "Harbin Institute of Technology", city: "Harbin" },
+      { name: "HUST", city: "Wuhan" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez l'épreuve 'Mathematics' (Voie STEM)",
+      "Cochez l'épreuve 'Physics' (Science & Engineering)",
+      "Ne cochez PAS la Chimie (Chemistry) : elle n'est pas requise",
+      "Langue : Sélectionnez 'English' si vous postulez à un Bachelor enseigné en anglais",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Check 'Mathematics' (STEM track)",
+      "Check 'Physics' (Science & Engineering)",
+      "Do NOT check 'Chemistry': it is not required",
+      "Language: Choose 'English' for English-taught bachelor programs",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر مادة الرياضيات (Mathematics مسار STEM)",
+      "اختر مادة الفيزياء (Physics)",
+      "لا تختر الكيمياء: غير مطلوبة لهندسة البرمجيات",
+      "اللغة: حدد اللغة الإنجليزية للبرامج الموجهة بالإنجليزية",
+    ],
+  },
+  {
+    id: "ecommerce",
+    nameFr: "Commerce Électronique & Digital Business (E-Commerce)",
+    nameEn: "E-Commerce & Digital Business",
+    nameAr: "التجارة الإلكترونية وإدارة الأعمال الرقمية (E-Commerce)",
+    category: "business",
+    categoryLabelFr: "🛍️ E-Commerce & Business",
+    categoryLabelEn: "🛍️ E-Commerce & Business",
+    categoryLabelAr: "🛍️ التجارة الإلكترونية وإدارة الأعمال",
+    requiredSubjects: ["math"],
+    exemptSubjects: ["physics", "chemistry"],
+    whyFr: "La Chine est le leader mondial du e-commerce (Alibaba, Taobao, JD.com). Pour cette filière, AUCUNE PHYSIQUE NI CHIMIE N'EST REQUISE ! Seul le test de Mathématiques (voie générale/commerce) est obligatoire.",
+    whyEn: "China is the global leader in E-Commerce (Alibaba, JD.com). For this major, NO PHYSICS OR CHEMISTRY IS REQUIRED! Only the Mathematics test (General/Business track) is required.",
+    whyAr: "الصين هي الرائدة عالمياً في التجارة الإلكترونية (علي بابا، جيه دي). في هذا التخصص لا تحتاج إلى فيزياء ولا كيمياء نهائياً! يُطلب فقط اختبار الرياضيات الأساسية.",
+    moroccanBacAdviceFr: "Accessible et très recommandé pour le Bac Économie, Bac Sciences Maths, Bac PC et Bac SVT. Une seule épreuve à payer et passer !",
+    moroccanBacAdviceEn: "Accessible and ideal for Moroccan Economics Bac, SM, PC, or SVT. You only need to pay and sit for 1 exam!",
+    moroccanBacAdviceAr: "متاح ومناسب جداً للبكالوريا علوم اقتصادية، علوم رياضية، فيزيائية وعلوم الحياة والأرض. مادة واحدة فقط للاجتياز!",
+    topUnis: [
+      { name: "Zhejiang Gongshang University", city: "Hangzhou (Berceau d'Alibaba)" },
+      { name: "UIBE (Univ. of Intl Business & Econ)", city: "Beijing" },
+      { name: "SUFE (Shanghai Univ of Finance & Econ)", city: "Shanghai" },
+      { name: "SWUFE", city: "Chengdu" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez UNIQUEMENT l'épreuve 'Mathematics' (General Track)",
+      "Laissez les cases 'Physics' et 'Chemistry' VIDES (non requises)",
+      "Économisez les frais : vous ne payez que pour 1 seule matière (~450 RMB / ~630 MAD) !",
+      "Sélectionnez 'English' pour les programmes anglophones",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Check ONLY 'Mathematics' (General Track)",
+      "Leave 'Physics' and 'Chemistry' UNCHECKED (not needed)",
+      "Save fees: You only pay for 1 single subject (~450 RMB / ~630 MAD)!",
+      "Select 'English' for English-taught bachelor programs",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: حدد فقط مادة الرياضيات (Mathematics)",
+      "اترك خانتي الفيزياء والكيمياء فارغتين (غير مطلوبتين)",
+      "وفر التكاليف: ستدفع رسوم مادة واحدة فقط (~450 يوان / ~630 درهم مغربي)!",
+      "اختر اللغة الإنجليزية للبرامج الموجهة بالإنجليزية",
+    ],
+  },
+  {
+    id: "ai",
+    nameFr: "Intelligence Artificielle & Data Science (AI & Data)",
+    nameEn: "Artificial Intelligence & Data Science",
+    nameAr: "الذكاء الاصطناعي وعلم البيانات (AI & Big Data)",
+    category: "tech",
+    categoryLabelFr: "💻 Informatique & Logiciel",
+    categoryLabelEn: "💻 Tech & Software",
+    categoryLabelAr: "💻 المعلوميات والبرمجيات",
+    requiredSubjects: ["math", "physics"],
+    exemptSubjects: ["chemistry"],
+    whyFr: "L'apprentissage automatique et le Deep Learning reposent sur l'algèbre linéaire, le calcul matriciel, les probabilités et l'architecture des circuits électroniques.",
+    whyEn: "Machine Learning and Neural Networks rely heavily on linear algebra, matrix calculus, probabilities, and electronic circuit physics.",
+    whyAr: "يعتمد تعلم الآلة والشبكات العصبية على الجبر الخطي والمصفوفات والاحتمالات وفيزياء المعالجات الإلكترونية.",
+    moroccanBacAdviceFr: "Bac Sciences Maths (SM) ou Bac PC recommandé. Forte maîtrise des fonctions et probabilités exigée.",
+    moroccanBacAdviceEn: "Bac Sciences Maths (SM) or Physical Sciences (PC) recommended.",
+    moroccanBacAdviceAr: "يُفضل خريجو العلوم الرياضية (SM) أو العلوم الفيزيائية (PC).",
+    topUnis: [
+      { name: "Shanghai Jiao Tong University", city: "Shanghai" },
+      { name: "Zhejiang University", city: "Hangzhou" },
+      { name: "USTC", city: "Hefei" },
+      { name: "Nanjing University", city: "Nanjing" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez 'Mathematics' + 'Physics'",
+      "Ne prenez pas la Chimie",
+      "Langue : English",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Select 'Mathematics' + 'Physics'",
+      "Do not select Chemistry",
+      "Language: English",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر الرياضيات + الفيزياء",
+      "لا تختر الكيمياء",
+      "اللغة: English",
+    ],
+  },
+  {
+    id: "trade",
+    nameFr: "Commerce International & Finance (International Trade & Finance)",
+    nameEn: "International Economics & Trade",
+    nameAr: "التجارة الدولية والاقتصاد المالي (Intl Trade & Finance)",
+    category: "business",
+    categoryLabelFr: "🛍️ E-Commerce & Business",
+    categoryLabelEn: "🛍️ E-Commerce & Business",
+    categoryLabelAr: "🛍️ التجارة الإلكترونية وإدارة الأعمال",
+    requiredSubjects: ["math"],
+    exemptSubjects: ["physics", "chemistry"],
+    whyFr: "Pour étudier le commerce international et les marchés mondiaux en Chine, aucune science expérimentale (physique/chimie) n'est requise. Seules les mathématiques d'analyse et d'optimisation sont évaluées.",
+    whyEn: "No physical sciences required. Chinese business universities only require the Mathematics exam (calculus, statistics, optimization).",
+    whyAr: "لا حاجة لمادتي الفيزياء أو الكيمياء. تتطلب الجامعات الصينية لاقتصاد وتجارة العالم فقط مادة الرياضيات.",
+    moroccanBacAdviceFr: "Excellente opportunité pour les bacheliers Sciences Économiques, SM, PC et SVT. Frais d'examen réduits (1 matière).",
+    moroccanBacAdviceEn: "Excellent opportunity for Moroccan Economics, SM, PC, or SVT students. Reduced fee (1 subject).",
+    moroccanBacAdviceAr: "فرصة رائعة لشعب الاقتصاد، العلوم الرياضية، الفيزيائية وSVT. رسم امتحان لمادة واحدة فقط.",
+    topUnis: [
+      { name: "UIBE Beijing", city: "Beijing" },
+      { name: "Fudan University", city: "Shanghai" },
+      { name: "Wuhan University", city: "Wuhan" },
+      { name: "Xiamen University", city: "Xiamen" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Sélectionnez UNIQUEMENT 'Mathematics'",
+      "Laissez les autres matières vides",
+      "Frais : ~450 RMB (~630 MAD)",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Select ONLY 'Mathematics'",
+      "Leave other subjects blank",
+      "Fee: ~450 RMB (~$63 USD)",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر فقط الرياضيات (Mathematics)",
+      "اترك المواد الأخرى فارغة",
+      "الرسوم: ~450 يوان (~630 درهم مغربي)",
+    ],
+  },
+  {
+    id: "mbbs",
+    nameFr: "Médecine Générale MBBS & Chirurgie (Clinical Medicine MBBS)",
+    nameEn: "Clinical Medicine (MBBS) & Surgery",
+    nameAr: "الطب البشري والجراحة العامة (MBBS Medicine)",
+    category: "medicine",
+    categoryLabelFr: "🩺 Médecine & Santé",
+    categoryLabelEn: "🩺 Medicine & Health",
+    categoryLabelAr: "🩺 الطب والعلوم الصحية",
+    requiredSubjects: ["math", "chemistry", "physics"],
+    exemptSubjects: ["chinese"],
+    whyFr: "Le cursus de Médecine Générale MBBS en Chine (accrédité OMS et reconnu par le Ministère marocain de la Santé) exige une solide maîtrise en Chimie (organique, acido-basique), en Mathématiques et en Physique médicale.",
+    whyEn: "WHO-accredited MBBS programs require strong chemistry (organic, solutions), math, and physics for medical diagnostics.",
+    whyAr: "يتطلب برنامج الطب العام MBBS المعترف به من منظمة الصحة العالمية ووزارة الصحة المغربية اجتياز الكيمياء والرياضيات والفيزياء.",
+    moroccanBacAdviceFr: "Parfaitement adapté aux bacheliers Sciences de la Vie et de la Terre (SVT), Sciences Physiques (PC) et Sciences Maths (SM).",
+    moroccanBacAdviceEn: "Tailored for Moroccan SVT, PC, and SM Baccalaureate holders.",
+    moroccanBacAdviceAr: "مناسب جداً لحاملي بكالوريا علوم الحياة والأرض (SVT) والعلوم الفيزيائية (PC) والرياضية.",
+    topUnis: [
+      { name: "Capital Medical University", city: "Beijing" },
+      { name: "Zhejiang University School of Medicine", city: "Hangzhou" },
+      { name: "Shandong University", city: "Jinan" },
+      { name: "Nanjing Medical University", city: "Nanjing" },
+      { name: "Dalian Medical University", city: "Dalian" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez 'Mathematics' (obligatoire)",
+      "Cochez 'Chemistry' (cruciale pour médecine)",
+      "Cochez 'Physics' (recommandée par la majorité des facultés de médecine chinoises)",
+      "Sélectionnez le forfait 3 matières (~950 RMB / ~1 330 MAD)",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Check 'Mathematics' (compulsory)",
+      "Check 'Chemistry' (crucial for medical schools)",
+      "Check 'Physics' (recommended by medical faculties)",
+      "Select the 3-subject bundle (~950 RMB / ~$135 USD)",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر الرياضيات (Mathematics)",
+      "اختر الكيمياء (Chemistry - ضرورية جداً لكليات الطب)",
+      "اختر الفيزياء (Physics - موصى بها من الجامعات الطبية)",
+      "حدد باقة 3 مواد (~950 يوان / ~1330 درهم مغربي)",
+    ],
+  },
+  {
+    id: "pharmacy",
+    nameFr: "Pharmacie & Sciences Biomédicales (Pharmacy & Biotech)",
+    nameEn: "Pharmacy & Biomedical Sciences",
+    nameAr: "الصيدلة والتكنولوجيا الحيوية (Pharmacy & Biotech)",
+    category: "medicine",
+    categoryLabelFr: "🩺 Médecine & Santé",
+    categoryLabelEn: "🩺 Medicine & Health",
+    categoryLabelAr: "🩺 الطب والعلوم الصحية",
+    requiredSubjects: ["math", "chemistry"],
+    exemptSubjects: ["physics"],
+    whyFr: "La pharmacie évalue en priorité la chimie moléculaire, la biochimie, la cinétique des réactions et la modélisation mathématique des solutions.",
+    whyEn: "Pharmacy prioritizes organic chemistry, solutions, molecular kinetics, and mathematical dosing models.",
+    whyAr: "يركز تخصص الصيدلة على الكيمياء العضوية والمحاليل والتفاعلات ونمذجة الجرعات الرياضية.",
+    moroccanBacAdviceFr: "Idéal pour Bac PC et Bac SVT.",
+    moroccanBacAdviceEn: "Ideal for Moroccan PC and SVT students.",
+    moroccanBacAdviceAr: "مثالي لشعبتي العلوم الفيزيائية وعلوم الحياة والأرض.",
+    topUnis: [
+      { name: "China Pharmaceutical University", city: "Nanjing" },
+      { name: "Fudan University Pharmacy", city: "Shanghai" },
+      { name: "Shenyang Pharmaceutical University", city: "Shenyang" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez 'Mathematics' + 'Chemistry'",
+      "La physique est facultative",
+      "Frais : ~750 RMB (~1 050 MAD)",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Check 'Mathematics' + 'Chemistry'",
+      "Physics is optional",
+      "Fee: ~750 RMB (~$105 USD)",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر الرياضيات + الكيمياء",
+      "الفيزياء اختيارية",
+      "الرسوم: ~750 يوان (~1050 درهم)",
+    ],
+  },
+  {
+    id: "civil",
+    nameFr: "Génie Civil & Architecture (Civil Engineering & Architecture)",
+    nameEn: "Civil Engineering & Architecture",
+    nameAr: "الهندسة المدنية والعمارة (Civil Eng & Architecture)",
+    category: "engineering",
+    categoryLabelFr: "🏗️ Ingénierie & Industrie",
+    categoryLabelEn: "🏗️ Engineering & Construction",
+    categoryLabelAr: "🏗️ الهندسة والبناء",
+    requiredSubjects: ["math", "physics"],
+    exemptSubjects: ["chemistry"],
+    whyFr: "La Chine possède les plus grandes prouesses d'ingénierie au monde. L'examen CSCA teste la résistance des matériaux, la statique et la géométrie analytique.",
+    whyEn: "Civil engineering requires analytical geometry, structural statics, vectors, and Newtonian physics.",
+    whyAr: "تتطلب الهندسة المدنية الهندسة التحليلية والميكانيكا الساكنة والمتجهات وفيزياء نيوتن.",
+    moroccanBacAdviceFr: "Bac Sciences Maths (SM) ou Bac Sciences Physiques (PC).",
+    moroccanBacAdviceEn: "Bac SM or PC holders.",
+    moroccanBacAdviceAr: "لحاملي بكالوريا علوم رياضية أو علوم فيزيائية.",
+    topUnis: [
+      { name: "Tongji University (N°1 Mondial Génie Civil)", city: "Shanghai" },
+      { name: "Southeast University", city: "Nanjing" },
+      { name: "Tianjin University", city: "Tianjin" },
+      { name: "Harbin Institute of Technology", city: "Harbin" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez 'Mathematics' + 'Physics'",
+      "Ne prenez pas la Chimie",
+      "Langue : English",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Check 'Mathematics' + 'Physics'",
+      "Do not check Chemistry",
+      "Language: English",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر الرياضيات + الفيزياء",
+      "لا تختر الكيمياء",
+      "اللغة: English",
+    ],
+  },
+  {
+    id: "mechanical",
+    nameFr: "Génie Mécanique & Robotique Industrielle (Mechanical & Robotics)",
+    nameEn: "Mechanical Engineering & Robotics",
+    nameAr: "الهندسة الميكانيكية والروبوتات (Mechanical & Robotics)",
+    category: "engineering",
+    categoryLabelFr: "🏗️ Ingénierie & Industrie",
+    categoryLabelEn: "🏗️ Engineering & Construction",
+    categoryLabelAr: "🏗️ الهندسة والبناء",
+    requiredSubjects: ["math", "physics"],
+    exemptSubjects: ["chemistry"],
+    whyFr: "Cinématique, dynamique newtonienne, thermodynamique et calcul différentiel sont les piliers indispensables.",
+    whyEn: "Kinematics, dynamics, thermodynamics, and calculus are the required pillars.",
+    whyAr: "تعتمد على علم الحركة (السينماتيك)، قوانين نيوتن، الديناميكا الحرارية وحساب التفاضل.",
+    moroccanBacAdviceFr: "Bac SM ou PC.",
+    moroccanBacAdviceEn: "Bac SM or PC.",
+    moroccanBacAdviceAr: "علوم رياضية أو علوم فيزيائية.",
+    topUnis: [
+      { name: "Beijing Institute of Technology (BIT)", city: "Beijing" },
+      { name: "Shanghai Jiao Tong University", city: "Shanghai" },
+      { name: "Xi'an Jiaotong University", city: "Xi'an" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez 'Mathematics' + 'Physics'",
+      "Langue : English",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Check 'Mathematics' + 'Physics'",
+      "Language: English",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر الرياضيات + الفيزياء",
+      "اللغة: English",
+    ],
+  },
+  {
+    id: "electrical",
+    nameFr: "Génie Électrique, Électronique & Télécoms (Electrical & Telecom)",
+    nameEn: "Electrical & Electronic Engineering / Telecom",
+    nameAr: "الهندسة الكهربائية والإلكترونيات والاتصالات (Electrical & Telecom)",
+    category: "engineering",
+    categoryLabelFr: "🏗️ Ingénierie & Industrie",
+    categoryLabelEn: "🏗️ Engineering & Construction",
+    categoryLabelAr: "🏗️ الهندسة والبناء",
+    requiredSubjects: ["math", "physics"],
+    exemptSubjects: ["chemistry"],
+    whyFr: "La Chine mène la technologie mondiale en réseaux 5G/6G et semi-conducteurs. Évaluation poussée en électromagnétisme et circuits.",
+    whyEn: "China leads in 5G/6G and semiconductors. Rigorous evaluation in electromagnetism and AC/DC circuits.",
+    whyAr: "تقود الصين تقنيات شبكات 5G/6G وأشباه الموصلات. اختبار دقيق في الكهرومغناطيسية والدوائر الكهربائية.",
+    moroccanBacAdviceFr: "Bac SM ou Bac PC.",
+    moroccanBacAdviceEn: "Bac SM or PC.",
+    moroccanBacAdviceAr: "علوم رياضية أو علوم فيزيائية.",
+    topUnis: [
+      { name: "UESTC (Univ. of Electronic Science & Tech)", city: "Chengdu" },
+      { name: "BUPT (Beijing Univ. of Posts & Telecoms)", city: "Beijing" },
+      { name: "Xidian University", city: "Xi'an" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez 'Mathematics' + 'Physics'",
+      "Langue : English",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Check 'Mathematics' + 'Physics'",
+      "Language: English",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر الرياضيات + الفيزياء",
+      "اللغة: English",
+    ],
+  },
+  {
+    id: "finance",
+    nameFr: "Finance Internationale & Fintech (International Finance & Banking)",
+    nameEn: "Finance & International Accounting",
+    nameAr: "المالية الدولية وتكنولوجيا المال (Finance & Fintech)",
+    category: "business",
+    categoryLabelFr: "🛍️ E-Commerce & Business",
+    categoryLabelEn: "🛍️ E-Commerce & Business",
+    categoryLabelAr: "🛍️ التجارة الإلكترونية وإدارة الأعمال",
+    requiredSubjects: ["math"],
+    exemptSubjects: ["physics", "chemistry"],
+    whyFr: "AUCUNE PHYSIQUE NI CHIMIE. L'épreuve de mathématiques mesure les compétences quantitatives, les probabilités et la modélisation statistique.",
+    whyEn: "NO PHYSICS OR CHEMISTRY. Mathematics evaluates quantitative skills, probabilities, and financial modeling.",
+    whyAr: "بدون فيزياء وبدون كيمياء. تقييم الرياضيات يقيس المهارات الحسابية والاحتمالات والنمذجة المالية.",
+    moroccanBacAdviceFr: "Bac Économie, Bac SM, Bac PC.",
+    moroccanBacAdviceEn: "Moroccan Bac Economics, SM, PC.",
+    moroccanBacAdviceAr: "بكالوريا علوم اقتصادية، علوم رياضية أو فيزيائية.",
+    topUnis: [
+      { name: "Central University of Finance and Economics (CUFE)", city: "Beijing" },
+      { name: "SUFE", city: "Shanghai" },
+      { name: "SWUFE", city: "Chengdu" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez UNIQUEMENT 'Mathematics'",
+      "Frais : ~450 RMB (~630 MAD)",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Select ONLY 'Mathematics'",
+      "Fee: ~450 RMB (~$63 USD)",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: حدد فقط مادة الرياضيات",
+      "الرسوم: ~450 يوان (~630 درهم)",
+    ],
+  },
+  {
+    id: "chinese_lang",
+    nameFr: "Langue & Littérature Chinoise (Chinese Language & Literature)",
+    nameEn: "Chinese Language & Culture",
+    nameAr: "اللغة الصينية وآدابها (Chinese Language & Culture)",
+    category: "humanities",
+    categoryLabelFr: "🌏 Langues & Tourisme",
+    categoryLabelEn: "🌏 Languages & Humanities",
+    categoryLabelAr: "🌏 اللغات والعلوم الإنسانية",
+    requiredSubjects: ["chinese", "math"],
+    exemptSubjects: ["physics", "chemistry"],
+    whyFr: "Examen de chinois académique évaluant la compréhension de textes et la terminologie universitaire (en complément du HSK).",
+    whyEn: "Academic Chinese exam evaluating reading comprehension and vocabulary alongside basic mathematics.",
+    whyAr: "اختبار اللغة الصينية الأكاديمية لفهم النصوص والمصطلحات الجامعية مع الرياضيات الأساسية.",
+    moroccanBacAdviceFr: "Accessible à toutes les séries de Bac (Lettres, Éco, Sciences).",
+    moroccanBacAdviceEn: "Open to all Moroccan Baccalaureate series.",
+    moroccanBacAdviceAr: "متاح لجميع شعب البكالوريا (آداب، اقتصاد، علوم).",
+    topUnis: [
+      { name: "BLCU (Beijing Language & Culture Univ.)", city: "Beijing" },
+      { name: "BFSU (Beijing Foreign Studies Univ.)", city: "Beijing" },
+      { name: "East China Normal University (ECNU)", city: "Shanghai" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez 'Academic Chinese' + 'Mathematics'",
+      "Langue : Chinese",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Select 'Academic Chinese' + 'Mathematics'",
+      "Language: Chinese",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: اختر اللغة الصينية الأكاديمية + الرياضيات",
+      "اللغة: الصينية",
+    ],
+  },
+  {
+    id: "tourism",
+    nameFr: "Management du Tourisme & Hôtellerie Internationale (Tourism & Hospitality)",
+    nameEn: "Tourism Management & Hospitality",
+    nameAr: "إدارة السياحة والفندقة الدولية (Tourism Management)",
+    category: "humanities",
+    categoryLabelFr: "🌏 Langues & Tourisme",
+    categoryLabelEn: "🌏 Languages & Humanities",
+    categoryLabelAr: "🌏 اللغات والعلوم الإنسانية",
+    requiredSubjects: ["math"],
+    exemptSubjects: ["physics", "chemistry"],
+    whyFr: "AUCUNE PHYSIQUE NI CHIMIE. Seules les mathématiques générales sont requises pour l'analyse de gestion et statistiques hôtelières.",
+    whyEn: "NO PHYSICS OR CHEMISTRY. Only general mathematics is tested for managerial analytics.",
+    whyAr: "بدون فيزياء وبدون كيمياء. فقط الرياضيات العامة لإدارة وتحليل البيانات السياحية.",
+    moroccanBacAdviceFr: "Bac Lettres, Bac Économie, Bac Sciences.",
+    moroccanBacAdviceEn: "Bac Lettres, Economics, Sciences.",
+    moroccanBacAdviceAr: "بكالوريا آداب، اقتصاد، أو علوم.",
+    topUnis: [
+      { name: "Sun Yat-sen University", city: "Guangzhou" },
+      { name: "Nankai University", city: "Tianjin" },
+      { name: "Xiamen University", city: "Xiamen" },
+    ],
+    cscaStepsFr: [
+      "Sur csca.cn : Cochez UNIQUEMENT 'Mathematics'",
+      "Frais : ~450 RMB (~630 MAD)",
+    ],
+    cscaStepsEn: [
+      "On csca.cn: Select ONLY 'Mathematics'",
+      "Fee: ~450 RMB (~$63 USD)",
+    ],
+    cscaStepsAr: [
+      "على csca.cn: حدد فقط الرياضيات",
+      "الرسوم: ~450 يوان (~630 درهم)",
+    ],
+  },
+];
+
 const MOROCCAN_BAC_PRESETS = [
   {
     id: "sm",
@@ -314,30 +812,68 @@ const FAQS = [
 
 export default function CscaPage() {
   const { lang, t } = useLang();
-  const [selectedBac, setSelectedBac] = useState(MOROCCAN_BAC_PRESETS[0].id);
+
+  // Mode: "major" (Default: What do you want to study?) or "bac" (What is your Moroccan Bac?)
+  const [matchMode, setMatchMode] = useState<"major" | "bac">("major");
+
+  // Major-based state
+  const [selectedMajorId, setSelectedMajorId] = useState<string>("software");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [majorSearch, setMajorSearch] = useState<string>("");
+
+  // Bac-based state
+  const [selectedBac, setSelectedBac] = useState<string>(MOROCCAN_BAC_PRESETS[0].id);
   const [targetDegreeLang, setTargetDegreeLang] = useState<"en" | "zh">("en");
+
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [activeTab, setActiveTab] = useState<string>("math");
+
+  // Filtered majors by category and search
+  const filteredMajors = useMemo(() => {
+    return STUDY_MAJORS.filter((m) => {
+      const matchCat = selectedCategory === "all" || m.category === selectedCategory;
+      const q = majorSearch.toLowerCase().trim();
+      if (!q) return matchCat;
+      const matchText =
+        m.nameFr.toLowerCase().includes(q) ||
+        m.nameEn.toLowerCase().includes(q) ||
+        m.nameAr.toLowerCase().includes(q) ||
+        m.id.toLowerCase().includes(q);
+      return matchCat && matchText;
+    });
+  }, [selectedCategory, majorSearch]);
+
+  const activeMajor =
+    STUDY_MAJORS.find((m) => m.id === selectedMajorId) || STUDY_MAJORS[0];
 
   const currentPreset =
     MOROCCAN_BAC_PRESETS.find((p) => p.id === selectedBac) ||
     MOROCCAN_BAC_PRESETS[0];
 
-  // Subject recommendation
+  // Fee calculation for Major Mode
+  const majorFeeRmb =
+    activeMajor.requiredSubjects.length === 1
+      ? 450
+      : activeMajor.requiredSubjects.length === 2
+      ? 750
+      : 950;
+  const majorFeeMad = Math.round(majorFeeRmb * 1.4);
+  const majorFeeUsd = Math.round(majorFeeRmb * 0.14);
+
+  // Subject recommendation for Bac Mode
   const recommendedSubjectList = CSCA_SUBJECTS.filter((s) => {
     if (s.id === "math") return true;
     if (targetDegreeLang === "zh" && s.id === "chinese") return true;
     return currentPreset.recommendedSubjects.includes(s.id);
   });
-
-  const estimatedFeeRmb =
+  const bacFeeRmb =
     recommendedSubjectList.length === 1
       ? 450
       : recommendedSubjectList.length === 2
       ? 750
       : 950;
-  const estimatedFeeMad = Math.round(estimatedFeeRmb * 1.4);
-  const estimatedFeeUsd = Math.round(estimatedFeeRmb * 0.14);
+  const bacFeeMad = Math.round(bacFeeRmb * 1.4);
+  const bacFeeUsd = Math.round(bacFeeRmb * 0.14);
 
   return (
     <div className="min-h-screen px-4 py-8 max-w-7xl mx-auto">
@@ -386,8 +922,8 @@ export default function CscaPage() {
 
           <p className="text-base sm:text-lg text-text-secondary leading-relaxed mb-6">
             {lang === "ar"
-              ? "الاختبار القياسي الوطني المعتمد من مجلس المنح الصيني (CSC) ووزارة التعليم الصينية. إجباري لجميع خريجي البكالوريا المغاربة والطلاب الدوليين الراغبين في دراسة البكالوريوس (Licence) في الجامعات الصينية عبر منحة الحكومة الصينية أو التسجيل المباشر."
-              : "Le test standardisé national d'évaluation académique supervisé par le China Scholarship Council (CSC) et le Ministère de l'Éducation de Chine. Désormais obligatoire pour tous les bacheliers marocains et internationaux postulant à une Licence (Bachelor) en Chine."}
+              ? "هل ترغب في دراسة هندسة البرمجيات (Software Engineering)، التجارة الإلكترونية (E-Commerce)، أو الطب في الصين ولا تعرف أي مادة يجب عليك اجتيازها؟ استخدم أداة المطابقة التفاعلية أدناه لمعرفة المواد الإجبارية بالضبط ورابط حجز الموعد على csca.cn."
+              : "Vous voulez étudier le Génie Logiciel (Software), le E-Commerce, la Médecine ou l'Ingénierie en Chine et ne savez pas quelle épreuve passer ? Choisissez votre filière ci-dessous pour connaître exactement vos examens et réserver votre place officielle sur csca.cn."}
           </p>
 
           {/* Critical Notice Alert Box: Bachelor ONLY */}
@@ -395,7 +931,7 @@ export default function CscaPage() {
             <ShieldCheck className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
             <div className="text-xs sm:text-sm text-amber-200/90 leading-relaxed">
               <strong className="text-amber-300 font-bold">
-                {lang === "ar" ? "توضيح هام جداً للطلاب :" : "Précision essentielle :"}
+                {lang === "ar" ? "توضيح حاسم للطلاب :" : "Précision essentielle :"}
               </strong>{" "}
               {lang === "ar"
                 ? "امتحان CSCA إلزامي حصرياً لطلاب مرحلة البكالوريوس (Undergraduate / Bachelor). طلاب الماستر والدكتوراه (Master / PhD) معفيون تماماً ولا يحتاجون للتسجيل في هذا الاختبار."
@@ -406,21 +942,25 @@ export default function CscaPage() {
           {/* Quick CTA Actions */}
           <div className="flex flex-wrap items-center gap-4">
             <a
-              href="https://www.csca.cn"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#major-matcher"
               className="btn-gradient px-6 py-3.5 rounded-xl text-sm sm:text-base font-bold flex items-center gap-2 shadow-lg shadow-cyan/20 hover:scale-105 transition-transform cursor-pointer"
             >
-              <span>{lang === "ar" ? "حجز موعد الامتحان على CSCA.cn" : "Prendre Rendez-vous sur CSCA.cn"}</span>
-              <ExternalLink className="w-4 h-4" />
+              <Compass className="w-4 h-4" />
+              <span>
+                {lang === "ar"
+                  ? "اختر تخصصك (Software، E-Commerce...)"
+                  : "Choisir ma Filière (Software, E-Commerce...)"}
+              </span>
             </a>
 
             <a
-              href="#bac-simulator"
+              href="https://www.csca.cn"
+              target="_blank"
+              rel="noopener noreferrer"
               className="glass px-6 py-3.5 rounded-xl text-sm sm:text-base font-semibold text-text-primary hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer"
             >
-              <Calculator className="w-4 h-4 text-purple" />
-              <span>{lang === "ar" ? "محاكي المواد حسب البكالوريا" : "Simulateur de Matières Bac Maroc"}</span>
+              <span>{lang === "ar" ? "بوابة حجز الموعد csca.cn" : "Portail Rendez-vous csca.cn"}</span>
+              <ExternalLink className="w-4 h-4 text-cyan" />
             </a>
 
             <a
@@ -430,8 +970,7 @@ export default function CscaPage() {
               className="px-5 py-3.5 rounded-xl text-sm font-semibold text-text-secondary hover:text-cyan glass border border-border-glass flex items-center gap-1.5 transition-colors"
             >
               <Laptop className="w-4 h-4 text-cyan" />
-              <span>{lang === "ar" ? "منصة التدريب CSCA.ai" : "Plateforme d'Entraînement CSCA.ai"}</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+              <span>{lang === "ar" ? "امتحانات تجريبية CSCA.ai" : "Examens Blancs CSCA.ai"}</span>
             </a>
           </div>
         </div>
@@ -500,207 +1039,614 @@ export default function CscaPage() {
         </div>
       </div>
 
-      {/* Interactive Moroccan Baccalaureate Calculator */}
-      <section id="bac-simulator" className="mb-14 scroll-mt-24">
+      {/* ========================================================================= */}
+      {/* SECTION VEDETTE: CHOOSE WHAT YOU WANT TO STUDY (MAJOR-TO-EXAM MATCHER)   */}
+      {/* ========================================================================= */}
+      <section id="major-matcher" className="mb-14 scroll-mt-24">
+        {/* Header with Mode Switcher */}
         <div className="text-center max-w-3xl mx-auto mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-cyan/10 text-cyan border border-cyan/20 mb-3">
-            <Calculator className="w-3.5 h-3.5" />
-            <span>{lang === "ar" ? "توجيه مخصص للطلاب المغاربة" : "Simulateur & Orientation Maroc"}</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-cyan/15 text-cyan border border-cyan/30 mb-3 animate-shimmer">
+            <Compass className="w-3.5 h-3.5" />
+            <span>
+              {lang === "ar"
+                ? "دليل توجيه الامتحانات حسب التخصص الدراسي"
+                : "Simulateur Officiel CSCA : Choisissez ce que vous voulez étudier"}
+            </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-text-primary tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-black text-text-primary tracking-tight">
             {lang === "ar"
-              ? "ما هي المواد التي يجب عليك اجتيازها في امتحان CSCA؟"
-              : "Quelles matières devez-vous passer selon votre Baccalauréat ?"}
+              ? "ماذا تريد أن تدرس في الصين؟"
+              : "Que souhaitez-vous étudier en Chine ?"}
           </h2>
           <p className="text-sm sm:text-base text-text-secondary mt-2">
             {lang === "ar"
-              ? "حدد شعبة البكالوريا المغربية ولغة التدريس المستهدفة في الصين لعرض المواد المطلوبة، الرسوم، والروابط المباشرة."
-              : "Sélectionnez votre série de Baccalauréat marocain et la langue du programme en Chine pour obtenir votre combinaison exacte et vos recommandations."}
+              ? "اختر تخصصك المستهدف (هندسة البرمجيات Software، التجارة الإلكترونية E-Commerce، الطب MBBS...) لنخبرك بالمواد المطلوبة بالتفصيل وبما يجب عليك تحديده على csca.cn."
+              : "Sélectionnez votre filière (Génie Logiciel Software, E-Commerce, Médecine MBBS, Commerce International...) pour savoir exactement quelles épreuves cocher et passer sur le portail csca.cn."}
           </p>
+
+          {/* Mode Switcher Tabs */}
+          <div className="inline-flex p-1.5 rounded-2xl glass border border-border-glass mt-6 gap-1">
+            <button
+              onClick={() => setMatchMode("major")}
+              className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                matchMode === "major"
+                  ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              <Briefcase className="w-4 h-4" />
+              <span>
+                {lang === "ar"
+                  ? "🎯 حسب التخصص الجامعي (موصى به)"
+                  : "🎯 Par Filière d'Études (Recommandé)"}
+              </span>
+            </button>
+            <button
+              onClick={() => setMatchMode("bac")}
+              className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                matchMode === "bac"
+                  ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              <GraduationCap className="w-4 h-4" />
+              <span>
+                {lang === "ar"
+                  ? "🇲🇦 حسب شعبة البكالوريا المغربية"
+                  : "🇲🇦 Par Série de Baccalauréat"}
+              </span>
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Controls (Left 5 Cols) */}
-          <div className="lg:col-span-5 space-y-6 glass rounded-3xl p-6 border border-border-glass">
-            <div>
-              <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
-                1. {lang === "ar" ? "شعبة البكالوريا في المغرب" : "Série du Baccalauréat Marocain"}
-              </label>
-              <div className="space-y-2">
-                {MOROCCAN_BAC_PRESETS.map((preset) => (
+        {/* ========================================================== */}
+        {/* MODE A: BY STUDY MAJOR (SOFTWARE, E-COMMERCE, MBBS, ETC.) */}
+        {/* ========================================================== */}
+        {matchMode === "major" && (
+          <div className="space-y-6">
+            {/* Filter Pills & Live Search */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 glass rounded-2xl p-4 border border-border-glass">
+              {/* Category Pills */}
+              <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                {[
+                  { id: "all", labelFr: "Toutes les filières", labelAr: "جميع التخصصات" },
+                  { id: "tech", labelFr: "💻 Informatique & Logiciel", labelAr: "💻 المعلوميات" },
+                  { id: "business", labelFr: "🛍️ E-Commerce & Business", labelAr: "🛍️ التجارة الإلكترونية" },
+                  { id: "medicine", labelFr: "🩺 Médecine & Santé", labelAr: "🩺 الطب والصيدلة" },
+                  { id: "engineering", labelFr: "🏗️ Ingénierie & BTP", labelAr: "🏗️ الهندسة والبناء" },
+                  { id: "humanities", labelFr: "🌏 Langues & Tourisme", labelAr: "🌏 اللغات والسياحة" },
+                ].map((cat) => (
                   <button
-                    key={preset.id}
-                    onClick={() => setSelectedBac(preset.id)}
-                    className={`w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-between cursor-pointer ${
-                      selectedBac === preset.id
-                        ? "bg-cyan/15 text-cyan border-cyan/50 shadow-md shadow-cyan/10"
-                        : "glass text-text-secondary border-border-glass hover:bg-white/5"
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedCategory === cat.id
+                        ? "bg-cyan text-slate-950 shadow-sm shadow-cyan/30"
+                        : "glass text-text-secondary hover:text-cyan hover:bg-white/5"
                     }`}
                   >
-                    <span>
-                      {lang === "ar"
-                        ? preset.nameAr
-                        : lang === "en"
-                        ? preset.nameEn
-                        : preset.nameFr}
-                    </span>
-                    {selectedBac === preset.id && (
-                      <CheckCircle2 className="w-4 h-4 text-cyan flex-shrink-0" />
-                    )}
+                    {lang === "ar" ? cat.labelAr : cat.labelFr}
                   </button>
                 ))}
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
-                2. {lang === "ar" ? "لغة التدريس في الجامعة الصينية" : "Langue d'Enseignement du Programme en Chine"}
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setTargetDegreeLang("en")}
-                  className={`p-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition-all cursor-pointer ${
-                    targetDegreeLang === "en"
-                      ? "bg-purple/20 text-purple border-purple shadow-md shadow-purple/10"
-                      : "glass text-text-secondary border-border-glass hover:bg-white/5"
-                  }`}
-                >
-                  🇬🇧 {lang === "ar" ? "برنامج بالإنجليزية" : "English-Taught"}
-                </button>
-                <button
-                  onClick={() => setTargetDegreeLang("zh")}
-                  className={`p-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition-all cursor-pointer ${
-                    targetDegreeLang === "zh"
-                      ? "bg-rose-500/20 text-rose-300 border-rose-500 shadow-md shadow-rose-500/10"
-                      : "glass text-text-secondary border-border-glass hover:bg-white/5"
-                  }`}
-                >
-                  🇨🇳 {lang === "ar" ? "برنامج بالصينية" : "Chinese-Taught"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Card (Right 7 Cols) */}
-          <div className="lg:col-span-7 glass rounded-3xl p-6 sm:p-8 border border-border-glass bg-gradient-to-br from-cyan/5 via-purple/5 to-transparent relative">
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-border-glass">
-              <div>
-                <span className="text-xs font-bold text-cyan uppercase tracking-wider">
-                  {lang === "ar" ? "نتيجة التوجيه الأكاديمي" : "Recommandation d'Examen"}
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black text-text-primary mt-1">
-                  {lang === "ar"
-                    ? currentPreset.nameAr
-                    : lang === "en"
-                    ? currentPreset.nameEn
-                    : currentPreset.nameFr}
-                </h3>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-text-muted font-bold">
-                  {lang === "ar" ? "تقدير الرسوم" : "Coût Estimé"}
-                </div>
-                <div className="text-xl font-black text-emerald-400">
-                  {estimatedFeeMad} MAD
-                </div>
-                <div className="text-[11px] text-text-muted">
-                  ~{estimatedFeeRmb} RMB ({estimatedFeeUsd} USD)
-                </div>
+              {/* Search Bar */}
+              <div className="relative w-full md:w-72">
+                <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder={
+                    lang === "ar"
+                      ? "ابحث: software, e-commerce, mbbs..."
+                      : "Filtrer: software, e-commerce, civil..."
+                  }
+                  value={majorSearch}
+                  onChange={(e) => setMajorSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 rounded-xl glass border border-border-glass text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-cyan"
+                />
               </div>
             </div>
 
-            {/* Recommended Subjects Badges */}
-            <div className="mb-6">
-              <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2.5">
-                {lang === "ar"
-                  ? "المواد الواجب حجزها على csca.cn :"
-                  : "Matières à Réserver sur le Portail csca.cn :"}
+            {/* Main Interactive Grid: Major Selector (Left) + Detailed Requirements Card (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Selectable Majors List (5 Cols) */}
+              <div className="lg:col-span-5 space-y-2.5 max-h-[620px] overflow-y-auto pr-1">
+                {filteredMajors.length === 0 ? (
+                  <div className="glass rounded-2xl p-8 text-center text-text-muted text-xs">
+                    {lang === "ar"
+                      ? "لم يتم العثور على تخصص يطابق بحثك."
+                      : "Aucune filière trouvée pour cette recherche."}
+                  </div>
+                ) : (
+                  filteredMajors.map((major) => {
+                    const isSelected = selectedMajorId === major.id;
+                    return (
+                      <button
+                        key={major.id}
+                        onClick={() => setSelectedMajorId(major.id)}
+                        className={`w-full text-left p-4 rounded-2xl border transition-all flex items-start justify-between gap-3 cursor-pointer group ${
+                          isSelected
+                            ? "bg-gradient-to-r from-cyan/20 via-blue/15 to-transparent border-cyan text-text-primary shadow-lg shadow-cyan/10"
+                            : "glass text-text-secondary border-border-glass hover:bg-white/5 hover:border-cyan/30"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 transition-transform group-hover:scale-105 ${
+                              isSelected
+                                ? "bg-cyan text-slate-950 font-black"
+                                : "bg-white/5 text-cyan"
+                            }`}
+                          >
+                            {major.category === "tech"
+                              ? "💻"
+                              : major.category === "business"
+                              ? "🛍️"
+                              : major.category === "medicine"
+                              ? "🩺"
+                              : major.category === "engineering"
+                              ? "🏗️"
+                              : "🌏"}
+                          </div>
+                          <div>
+                            <div className="text-xs sm:text-sm font-extrabold text-text-primary leading-tight">
+                              {lang === "ar"
+                                ? major.nameAr
+                                : lang === "en"
+                                ? major.nameEn
+                                : major.nameFr}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan/15 text-cyan font-bold">
+                                {major.requiredSubjects.length === 1
+                                  ? lang === "ar"
+                                    ? "مادة واحدة فقط (رياضيات)"
+                                    : "1 seule épreuve (Maths)"
+                                  : lang === "ar"
+                                  ? `${major.requiredSubjects.length} مواد مطلوبة`
+                                  : `${major.requiredSubjects.length} matières requises`}
+                              </span>
+                              {major.exemptSubjects.includes("physics") && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-semibold">
+                                  {lang === "ar" ? "بدون فيزياء" : "Sans Physique"}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <ChevronRight
+                          className={`w-4 h-4 flex-shrink-0 mt-1 transition-transform ${
+                            isSelected
+                              ? "text-cyan translate-x-1 rtl:-translate-x-1"
+                              : "text-text-muted"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })
+                )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {recommendedSubjectList.map((subject) => (
-                  <div
-                    key={subject.id}
-                    className="p-3 rounded-xl glass border border-border-glass flex items-center gap-3"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-cyan/15 text-cyan flex items-center justify-center font-bold text-xs">
-                      {subject.id === "math"
-                        ? "∑"
-                        : subject.id === "physics"
-                        ? "⚛"
-                        : subject.id === "chemistry"
-                        ? "🧪"
-                        : "文"}
+
+              {/* Right Column: Dynamic Master Result Card (7 Cols) */}
+              <div className="lg:col-span-7 glass rounded-3xl p-6 sm:p-8 border border-border-glass bg-gradient-to-br from-cyan/5 via-purple/5 to-transparent relative shadow-xl">
+                {/* Header Badge & Title */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-border-glass gap-3 mb-6">
+                  <div>
+                    <span className="text-[11px] font-black uppercase tracking-wider text-cyan px-2.5 py-1 rounded-full bg-cyan/15 border border-cyan/30 inline-block mb-2">
+                      {lang === "ar"
+                        ? activeMajor.categoryLabelAr
+                        : lang === "en"
+                        ? activeMajor.categoryLabelEn
+                        : activeMajor.categoryLabelFr}
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-black text-text-primary">
+                      {lang === "ar"
+                        ? activeMajor.nameAr
+                        : lang === "en"
+                        ? activeMajor.nameEn
+                        : activeMajor.nameFr}
+                    </h3>
+                  </div>
+
+                  {/* Fee badge */}
+                  <div className="text-left sm:text-right bg-white/5 p-3 rounded-2xl border border-white/5 flex-shrink-0">
+                    <div className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                      {lang === "ar" ? "رسوم التسجيل المقدرة" : "Frais Officiels CSCA"}
                     </div>
-                    <div>
-                      <div className="text-xs sm:text-sm font-bold text-text-primary">
-                        {lang === "ar"
-                          ? subject.nameAr
-                          : lang === "en"
-                          ? subject.nameEn
-                          : subject.nameFr}
-                      </div>
-                      <div className="text-[11px] text-text-muted">
-                        {subject.id === "math"
-                          ? lang === "ar"
-                            ? "مادة إجبارية"
-                            : "Obligatoire"
-                          : lang === "ar"
-                          ? "مادة تخصصية"
-                          : "Électif de spécialité"}
-                      </div>
+                    <div className="text-xl font-black text-emerald-400">
+                      {majorFeeMad} MAD
+                    </div>
+                    <div className="text-[11px] text-text-muted">
+                      ~{majorFeeRmb} RMB ({majorFeeUsd} USD)
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* 1. REQUIRED SUBJECTS TO SIT FOR */}
+                <div className="mb-6">
+                  <div className="text-xs font-black text-text-primary uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-400" />
+                    <span>
+                      {lang === "ar"
+                        ? "المواد الإجبارية التي يجب عليك اجتيازها في امتحان CSCA :"
+                        : "Épreuves CSCA Obligatoires à Cocher & Passer :"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {activeMajor.requiredSubjects.map((subId) => {
+                      const sub = CSCA_SUBJECTS.find((s) => s.id === subId);
+                      return (
+                        <div
+                          key={subId}
+                          className="p-3.5 rounded-2xl bg-cyan/10 border border-cyan/40 flex items-center gap-3 shadow-sm"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-cyan text-slate-950 font-black text-xs flex items-center justify-center">
+                            {subId === "math"
+                              ? "∑"
+                              : subId === "physics"
+                              ? "⚛"
+                              : subId === "chemistry"
+                              ? "🧪"
+                              : "文"}
+                          </div>
+                          <div>
+                            <div className="text-sm font-black text-text-primary">
+                              {sub
+                                ? lang === "ar"
+                                  ? sub.nameAr
+                                  : lang === "en"
+                                  ? sub.nameEn
+                                  : sub.nameFr
+                                : subId}
+                            </div>
+                            <div className="text-[11px] text-cyan font-bold">
+                              ✓ {lang === "ar" ? "مطلوبة للتسجيل" : "Épreuve Requise"}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Exempted Subjects Notice */}
+                    {activeMajor.exemptSubjects.map((subId) => {
+                      const subName =
+                        subId === "physics"
+                          ? lang === "ar"
+                            ? "الفيزياء"
+                            : "Physique"
+                          : subId === "chemistry"
+                          ? lang === "ar"
+                            ? "الكيمياء"
+                            : "Chimie"
+                          : lang === "ar"
+                          ? "اللغة الصينية"
+                          : "Chinois";
+                      return (
+                        <div
+                          key={subId}
+                          className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center gap-3 opacity-75"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-white/5 text-text-muted font-bold text-xs flex items-center justify-center">
+                            ✕
+                          </div>
+                          <div>
+                            <div className="text-xs sm:text-sm font-semibold text-text-muted line-through">
+                              {subName}
+                            </div>
+                            <div className="text-[11px] text-emerald-400 font-medium">
+                              {lang === "ar" ? "غير مطلوبة (معفى منها)" : "Non requise (Dispensé)"}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. WHY THIS COMBINATION? */}
+                <div className="mb-5 p-4 rounded-2xl bg-white/5 border border-white/5">
+                  <div className="text-xs font-black text-cyan uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>
+                      {lang === "ar"
+                        ? "لماذا تم تحديد هذه المواد تحديداً؟"
+                        : "Pourquoi cette combinaison est demandée ?"}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
+                    {lang === "ar"
+                      ? activeMajor.whyAr
+                      : lang === "en"
+                      ? activeMajor.whyEn
+                      : activeMajor.whyFr}
+                  </p>
+                </div>
+
+                {/* 3. MOROCCAN HIGH SCHOOL BAC MATCH */}
+                <div className="mb-5 p-4 rounded-2xl bg-purple/10 border border-purple/20">
+                  <div className="text-xs font-black text-purple uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    <span>
+                      {lang === "ar"
+                        ? "التوافق مع البكالوريا المغربية :"
+                        : "Profil Baccalauréat Marocain Recommandé :"}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-purple-200/90 leading-relaxed font-medium">
+                    {lang === "ar"
+                      ? activeMajor.moroccanBacAdviceAr
+                      : lang === "en"
+                      ? activeMajor.moroccanBacAdviceEn
+                      : activeMajor.moroccanBacAdviceFr}
+                  </p>
+                </div>
+
+                {/* 4. STEP-BY-STEP CHECKBOX GUIDE FOR CSCA.CN */}
+                <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+                  <div className="text-xs font-black text-amber-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                    <span>
+                      {lang === "ar"
+                        ? "ما يجب عليك تحديده بالضبط على بوابة csca.cn :"
+                        : "Ce que vous devez cocher exactement sur csca.cn :"}
+                    </span>
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-amber-200/90 font-medium">
+                    {(lang === "ar"
+                      ? activeMajor.cscaStepsAr
+                      : lang === "en"
+                      ? activeMajor.cscaStepsEn
+                      : activeMajor.cscaStepsFr
+                    ).map((step, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-amber-400 font-bold">•</span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* 5. TOP CHINESE UNIVERSITIES FOR THIS MAJOR */}
+                <div className="mb-6">
+                  <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-cyan" />
+                    <span>
+                      {lang === "ar"
+                        ? "أفضل الجامعات الصينية الرائدة في هذا التخصص :"
+                        : "Meilleures universités chinoises pour cette filière :"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {activeMajor.topUnis.map((uni, idx) => (
+                      <Link
+                        key={idx}
+                        href={`/scholarships?city=${encodeURIComponent(uni.city.split(" ")[0])}`}
+                        className="px-3 py-1.5 rounded-xl glass hover:bg-white/10 hover:border-cyan/40 transition-all text-xs font-semibold text-text-primary flex items-center gap-1.5"
+                      >
+                        <span>🏛️ {uni.name}</span>
+                        <span className="text-[10px] text-cyan font-normal">({uni.city})</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Direct Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                  <a
+                    href="https://www.csca.cn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto flex-1 btn-gradient py-3.5 px-6 rounded-xl text-center text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-cyan/20 cursor-pointer"
+                  >
+                    <span>
+                      {lang === "ar"
+                        ? `حجز موعد ${activeMajor.nameAr.split(" ")[0]} على csca.cn`
+                        : `Prendre Rendez-vous sur csca.cn`}
+                    </span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+
+                  <Link
+                    href={`/scholarships?level=bachelor`}
+                    className="w-full sm:w-auto glass py-3.5 px-5 rounded-xl text-center text-xs sm:text-sm font-semibold text-text-secondary hover:text-cyan transition-colors"
+                  >
+                    {lang === "ar" ? "تصفح منح هذا التخصص" : "Voir les bourses CSC"}
+                  </Link>
+                </div>
               </div>
-            </div>
-
-            {/* Target Majors in China */}
-            <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/5">
-              <div className="text-xs font-bold text-cyan uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5" />
-                <span>{lang === "ar" ? "التخصصات المتوافقة في الصين" : "Filières universitaires idéales en Chine"}</span>
-              </div>
-              <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
-                {lang === "ar"
-                  ? currentPreset.suggestedMajorsAr
-                  : lang === "en"
-                  ? currentPreset.suggestedMajorsEn
-                  : currentPreset.suggestedMajorsFr}
-              </p>
-            </div>
-
-            {/* Golden Moroccan Bac Preparation Tip */}
-            <div className="mb-8 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs sm:text-sm text-amber-200/90 leading-relaxed">
-              <strong className="text-amber-300 font-bold block mb-1">
-                💡 {lang === "ar" ? "نصيحة ذهبية للطلاب المغاربة :" : "Conseil de préparation pour bacheliers marocains :"}
-              </strong>
-              {lang === "ar"
-                ? currentPreset.tipsAr
-                : lang === "en"
-                ? currentPreset.tipsEn
-                : currentPreset.tipsFr}
-            </div>
-
-            {/* Action CTA with direct booking link */}
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <a
-                href="https://www.csca.cn"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto flex-1 btn-gradient py-3.5 px-6 rounded-xl text-center text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-cyan/20 cursor-pointer"
-              >
-                <span>{lang === "ar" ? "حجز هذا الموعد رسمياً على csca.cn" : "Réserver ce pack sur csca.cn"}</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
-              <Link
-                href="/ai-chat"
-                className="w-full sm:w-auto glass py-3.5 px-5 rounded-xl text-center text-xs sm:text-sm font-semibold text-text-secondary hover:text-cyan transition-colors"
-              >
-                {lang === "ar" ? "استشارة المساعد الذكي" : "Poser une question à l'IA"}
-              </Link>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* ========================================================== */}
+        {/* MODE B: BY MOROCCAN HIGH SCHOOL BACCALAUREATE SERIES      */}
+        {/* ========================================================== */}
+        {matchMode === "bac" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Controls (Left 5 Cols) */}
+            <div className="lg:col-span-5 space-y-6 glass rounded-3xl p-6 border border-border-glass">
+              <div>
+                <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
+                  1. {lang === "ar" ? "شعبة البكالوريا في المغرب" : "Série du Baccalauréat Marocain"}
+                </label>
+                <div className="space-y-2">
+                  {MOROCCAN_BAC_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => setSelectedBac(preset.id)}
+                      className={`w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                        selectedBac === preset.id
+                          ? "bg-cyan/15 text-cyan border-cyan/50 shadow-md shadow-cyan/10"
+                          : "glass text-text-secondary border-border-glass hover:bg-white/5"
+                      }`}
+                    >
+                      <span>
+                        {lang === "ar"
+                          ? preset.nameAr
+                          : lang === "en"
+                          ? preset.nameEn
+                          : preset.nameFr}
+                      </span>
+                      {selectedBac === preset.id && (
+                        <CheckCircle2 className="w-4 h-4 text-cyan flex-shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
+                  2. {lang === "ar" ? "لغة التدريس في الجامعة الصينية" : "Langue d'Enseignement du Programme en Chine"}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setTargetDegreeLang("en")}
+                    className={`p-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition-all cursor-pointer ${
+                      targetDegreeLang === "en"
+                        ? "bg-purple/20 text-purple border-purple shadow-md shadow-purple/10"
+                        : "glass text-text-secondary border-border-glass hover:bg-white/5"
+                    }`}
+                  >
+                    🇬🇧 {lang === "ar" ? "برنامج بالإنجليزية" : "English-Taught"}
+                  </button>
+                  <button
+                    onClick={() => setTargetDegreeLang("zh")}
+                    className={`p-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition-all cursor-pointer ${
+                      targetDegreeLang === "zh"
+                        ? "bg-rose-500/20 text-rose-300 border-rose-500 shadow-md shadow-rose-500/10"
+                        : "glass text-text-secondary border-border-glass hover:bg-white/5"
+                    }`}
+                  >
+                    🇨🇳 {lang === "ar" ? "برنامج بالصينية" : "Chinese-Taught"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Results Card (Right 7 Cols) */}
+            <div className="lg:col-span-7 glass rounded-3xl p-6 sm:p-8 border border-border-glass bg-gradient-to-br from-cyan/5 via-purple/5 to-transparent relative">
+              <div className="flex items-center justify-between mb-4 pb-4 border-b border-border-glass">
+                <div>
+                  <span className="text-xs font-bold text-cyan uppercase tracking-wider">
+                    {lang === "ar" ? "نتيجة التوجيه الأكاديمي" : "Recommandation d'Examen"}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-black text-text-primary mt-1">
+                    {lang === "ar"
+                      ? currentPreset.nameAr
+                      : lang === "en"
+                      ? currentPreset.nameEn
+                      : currentPreset.nameFr}
+                  </h3>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-text-muted font-bold">
+                    {lang === "ar" ? "تقدير الرسوم" : "Coût Estimé"}
+                  </div>
+                  <div className="text-xl font-black text-emerald-400">
+                    {bacFeeMad} MAD
+                  </div>
+                  <div className="text-[11px] text-text-muted">
+                    ~{bacFeeRmb} RMB ({bacFeeUsd} USD)
+                  </div>
+                </div>
+              </div>
+
+              {/* Recommended Subjects Badges */}
+              <div className="mb-6">
+                <div className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2.5">
+                  {lang === "ar"
+                    ? "المواد الواجب حجزها على csca.cn :"
+                    : "Matières à Réserver sur le Portail csca.cn :"}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {recommendedSubjectList.map((subject) => (
+                    <div
+                      key={subject.id}
+                      className="p-3 rounded-xl glass border border-border-glass flex items-center gap-3"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-cyan/15 text-cyan flex items-center justify-center font-bold text-xs">
+                        {subject.id === "math"
+                          ? "∑"
+                          : subject.id === "physics"
+                          ? "⚛"
+                          : subject.id === "chemistry"
+                          ? "🧪"
+                          : "文"}
+                      </div>
+                      <div>
+                        <div className="text-xs sm:text-sm font-bold text-text-primary">
+                          {lang === "ar"
+                            ? subject.nameAr
+                            : lang === "en"
+                            ? subject.nameEn
+                            : subject.nameFr}
+                        </div>
+                        <div className="text-[11px] text-text-muted">
+                          {subject.id === "math"
+                            ? lang === "ar"
+                              ? "مادة إجبارية"
+                              : "Obligatoire"
+                            : lang === "ar"
+                            ? "مادة تخصصية"
+                            : "Électif de spécialité"}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Target Majors in China */}
+              <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/5">
+                <div className="text-xs font-bold text-cyan uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>{lang === "ar" ? "التخصصات المتوافقة في الصين" : "Filières universitaires idéales en Chine"}</span>
+                </div>
+                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
+                  {lang === "ar"
+                    ? currentPreset.suggestedMajorsAr
+                    : lang === "en"
+                    ? currentPreset.suggestedMajorsEn
+                    : currentPreset.suggestedMajorsFr}
+                </p>
+              </div>
+
+              {/* Golden Moroccan Bac Preparation Tip */}
+              <div className="mb-8 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs sm:text-sm text-amber-200/90 leading-relaxed">
+                <strong className="text-amber-300 font-bold block mb-1">
+                  💡 {lang === "ar" ? "نصيحة ذهبية للطلاب المغاربة :" : "Conseil de préparation pour bacheliers marocains :"}
+                </strong>
+                {lang === "ar"
+                  ? currentPreset.tipsAr
+                  : lang === "en"
+                  ? currentPreset.tipsEn
+                  : currentPreset.tipsFr}
+              </div>
+
+              {/* Action CTA with direct booking link */}
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <a
+                  href="https://www.csca.cn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto flex-1 btn-gradient py-3.5 px-6 rounded-xl text-center text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-cyan/20 cursor-pointer"
+                >
+                  <span>{lang === "ar" ? "حجز هذا الموعد رسمياً على csca.cn" : "Réserver ce pack sur csca.cn"}</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+                <Link
+                  href="/ai-chat"
+                  className="w-full sm:w-auto glass py-3.5 px-5 rounded-xl text-center text-xs sm:text-sm font-semibold text-text-secondary hover:text-cyan transition-colors"
+                >
+                  {lang === "ar" ? "استشارة المساعد الذكي" : "Poser une question à l'IA"}
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Step-by-Step Appointment Booking Walkthrough */}
