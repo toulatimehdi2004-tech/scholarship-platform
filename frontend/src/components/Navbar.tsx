@@ -50,8 +50,15 @@ export default function Navbar() {
 
   const isAccountVip = Boolean(
     user &&
-    (user.student_profile?.is_premium === true ||
-     (typeof window !== "undefined" && user.username && localStorage.getItem(`vip_active_${user.username.toLowerCase()}`) === "true"))
+    typeof window !== "undefined" &&
+    (() => {
+      try {
+        const paid = JSON.parse(localStorage.getItem("paid_vip_accounts") || "[]");
+        return paid.includes(user.username?.toLowerCase());
+      } catch {
+        return false;
+      }
+    })()
   );
 
   useEffect(() => {

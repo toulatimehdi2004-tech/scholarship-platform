@@ -37,8 +37,13 @@ export default function LifetimePassModal({
           if (!u.student_profile) u.student_profile = {};
           u.student_profile.is_premium = true;
           localStorage.setItem('user', JSON.stringify(u));
-          if (u.username) {
-            localStorage.setItem(`vip_active_${u.username.toLowerCase()}`, 'true');
+          const username = u.username?.toLowerCase();
+          if (username) {
+            const paid = JSON.parse(localStorage.getItem('paid_vip_accounts') || '[]');
+            if (!paid.includes(username)) {
+              paid.push(username);
+              localStorage.setItem('paid_vip_accounts', JSON.stringify(paid));
+            }
           }
         }
       }
@@ -56,8 +61,13 @@ export default function LifetimePassModal({
           if (!u.student_profile) u.student_profile = {};
           u.student_profile.is_premium = true;
           localStorage.setItem('user', JSON.stringify(u));
-          if (u.username) {
-            localStorage.setItem(`vip_active_${u.username.toLowerCase()}`, 'true');
+          const username = u.username?.toLowerCase();
+          if (username) {
+            const paid = JSON.parse(localStorage.getItem('paid_vip_accounts') || '[]');
+            if (!paid.includes(username)) {
+              paid.push(username);
+              localStorage.setItem('paid_vip_accounts', JSON.stringify(paid));
+            }
           }
         }
       }

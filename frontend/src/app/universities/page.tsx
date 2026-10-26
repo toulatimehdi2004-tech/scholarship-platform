@@ -150,12 +150,15 @@ export default function UniversitiesPage() {
   const isPremium = Boolean(
     getToken() &&
     user &&
-    (
-      user.student_profile?.is_premium === true ||
-      (typeof window !== "undefined" &&
-       user.username &&
-       localStorage.getItem(`vip_active_${user.username.toLowerCase()}`) === "true")
-    )
+    typeof window !== "undefined" &&
+    (() => {
+      try {
+        const paid = JSON.parse(localStorage.getItem("paid_vip_accounts") || "[]");
+        return paid.includes(user.username?.toLowerCase());
+      } catch {
+        return false;
+      }
+    })()
   );
   const visibleUniversities = typeof window !== "undefined" && !getToken() ? [] : isPremium ? filtered : filtered.slice(0, FREE_TRIAL_LIMIT);
   const hiddenCount = Math.max(0, filtered.length - FREE_TRIAL_LIMIT);

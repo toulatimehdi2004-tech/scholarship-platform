@@ -24,6 +24,18 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         localStorage.removeItem("vip_pass");
         localStorage.removeItem("vip_pass_1");
         localStorage.removeItem("vip_pass_undefined");
+
+        // Keep user in localStorage strictly in sync with paid_vip_accounts
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          const paid = JSON.parse(localStorage.getItem("paid_vip_accounts") || "[]");
+          const isPaid = paid.includes(u.username?.toLowerCase());
+          if (u.student_profile && u.student_profile.is_premium !== isPaid) {
+            u.student_profile.is_premium = isPaid;
+            localStorage.setItem("user", JSON.stringify(u));
+          }
+        }
       } catch {}
     }
 

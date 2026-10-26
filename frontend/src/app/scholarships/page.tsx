@@ -227,12 +227,15 @@ export default function ScholarshipsPage() {
   const isPremium = Boolean(
     getToken() &&
     user &&
-    (
-      user.student_profile?.is_premium === true ||
-      (typeof window !== "undefined" &&
-       user.username &&
-       localStorage.getItem(`vip_active_${user.username.toLowerCase()}`) === "true")
-    )
+    typeof window !== "undefined" &&
+    (() => {
+      try {
+        const paid = JSON.parse(localStorage.getItem("paid_vip_accounts") || "[]");
+        return paid.includes(user.username?.toLowerCase());
+      } catch {
+        return false;
+      }
+    })()
   );
 
   const selectUni = (id: number) => {
@@ -288,7 +291,7 @@ export default function ScholarshipsPage() {
         </motion.div>
 
         {/* Premium Upgrade Banner */}
-        {user && !user.student_profile?.is_premium && (
+        {!isPremium && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -743,7 +746,7 @@ export default function ScholarshipsPage() {
                     {t("com.of")} {t("uni.scholarships")}
                   </p>
 
-                  {!user?.student_profile?.is_premium && (
+                  {!isPremium && (
                     <button
                       onClick={() => {
                         if (!user) setShowAuthGate(true);
@@ -757,7 +760,7 @@ export default function ScholarshipsPage() {
                   )}
                 </div>
 
-                {!user?.student_profile?.is_premium && (
+                {!isPremium && (
                   <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple/10 to-cyan/10 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-purple flex items-center justify-center flex-shrink-0">
