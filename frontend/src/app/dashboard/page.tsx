@@ -23,6 +23,7 @@ import {
   Scale,
   BadgeCheck,
   GraduationCap,
+  Activity,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,15 +52,15 @@ const quickActions = [
     color: "from-cyan to-blue",
   },
   {
-    icon: Layers,
-    label: "Application CRM",
-    href: "/tracker",
+    icon: Activity,
+    label: "Live Traceability",
+    href: "/tracker?view=traceability",
     color: "from-emerald-400 to-teal-500",
   },
   {
-    icon: UserIcon,
-    label: "My Profile",
-    href: "/profile",
+    icon: Layers,
+    label: "Application CRM",
+    href: "/tracker",
     color: "from-blue-600 to-indigo-600",
   },
   {
@@ -345,13 +346,23 @@ export default function DashboardPage() {
                         )}
                       </div>
                     </div>
-                    <Link
-                      href="/tracker"
-                      className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-medium text-slate-700 dark:text-text-secondary hover:text-blue-600 dark:hover:text-white transition-all flex items-center gap-1 flex-shrink-0 border border-slate-200 dark:border-transparent"
-                    >
-                      <span>Manage</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 flex-shrink-0">
+                      <Link
+                        href="/tracker?view=traceability"
+                        className="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 text-xs font-bold border border-emerald-500/30 transition-all flex items-center gap-1"
+                        title="Open Live Traceability"
+                      >
+                        <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
+                        <span>Trace</span>
+                      </Link>
+                      <Link
+                        href="/tracker"
+                        className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-medium text-slate-700 dark:text-text-secondary hover:text-blue-600 dark:hover:text-white transition-all flex items-center gap-1 border border-slate-200 dark:border-transparent"
+                      >
+                        <span>Manage</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -27,12 +27,21 @@ import {
   GraduationCap,
   ListTodo,
   Briefcase,
+  Activity,
+  MapPin,
+  Truck,
+  Copy,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SmartBack from "@/components/SmartBack";
 import { useLang } from "@/lib/i18n";
 import AuthGateModal from "@/components/AuthGateModal";
+import ApplicationTraceabilityModal, {
+  OFFICIAL_MILESTONES,
+  type TraceabilityMilestone,
+} from "@/components/ApplicationTraceabilityModal";
 import {
   getToken,
   getTrackedApplications,
@@ -222,11 +231,28 @@ export default function ApplicationTrackerPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [restrictedRole, setRestrictedRole] = useState<string | null>(null);
 
+  // View Mode: Kanban vs Traceability
+  const [viewMode, setViewMode] = useState<"kanban" | "traceability">("kanban");
+  const [traceabilityApp, setTraceabilityApp] = useState<ApplicationTrackerItem | null>(null);
+  const [copiedTrackingId, setCopiedTrackingId] = useState<string | null>(null);
+
   // Quick Note & ID Modal State
   const [editingItem, setEditingItem] = useState<ApplicationTrackerItem | null>(null);
   const [editNotes, setEditNotes] = useState("");
   const [editPortalId, setEditPortalId] = useState("");
   const [savingNote, setSavingNote] = useState(false);
+
+  // Check URL query param for view=traceability
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("view") === "traceability") {
+          setViewMode("traceability");
+        }
+      } catch {}
+    }
+  }, []);
 
   // Expanded Checklist Drawer
   const [checklistOpenId, setChecklistOpenId] = useState<number | null>(null);
@@ -544,6 +570,49 @@ export default function ApplicationTrackerPage() {
         </div>
       </div>
 
+      {/* View Switcher: Kanban vs Traceability */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 p-2 rounded-2xl glass border border-slate-200 dark:border-white/10 shadow-sm">
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setViewMode("kanban")}
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              viewMode === "kanban"
+                ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary hover:bg-white/5"
+            }`}
+          >
+            <ListTodo className="w-4 h-4" />
+            <span>{lang === "ar" ? "لوحة كانبان (المراحل)" : "Pipeline Kanban"}</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode("traceability")}
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              viewMode === "traceability"
+                ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary hover:bg-white/5"
+            }`}
+          >
+            <Activity className="w-4 h-4 text-emerald-400" />
+            <span>{lang === "ar" ? "مسار التتبع والتوثيق (Traçabilité)" : "Traçabilité Détaillée & Chronologie"}</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500 text-slate-950 uppercase tracking-wider animate-pulse">
+              LIVE
+            </span>
+          </button>
+        </div>
+
+        <div className="text-xs text-text-muted px-2">
+          {viewMode === "kanban" ? (
+            <span>💡 {lang === "ar" ? "اسحب وانقل بين المراحل" : "Déplacez vos candidatures d'une phase à l'autre"}</span>
+          ) : (
+            <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>{lang === "ar" ? "المسار الرسمي الموثق من التقديم حتى فيزا X1" : "Suivi officiel de la soumission jusqu'au visa X1 à Rabat"}</span>
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Unauthenticated Demo Banner */}
       {!isAuthenticated && (
         <motion.div
@@ -651,285 +720,573 @@ export default function ApplicationTrackerPage() {
         </div>
       </div>
 
-      {/* Kanban Board Container */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
-        {STAGES.map((stage) => {
-          const items = grouped[stage.key] || [];
+      {/* Kanban or Traceability View */}
+      {viewMode === "kanban" ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
+          {STAGES.map((stage) => {
+            const items = grouped[stage.key] || [];
 
-          return (
-            <div
-              key={stage.key}
-              className="rounded-3xl p-3.5 border border-slate-200/90 dark:border-white/10 flex flex-col min-h-[580px] bg-slate-100/80 dark:bg-slate-950/40 relative shadow-sm"
-            >
-              {/* Column Header */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/90 dark:border-white/10">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{stage.icon}</span>
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-text-primary">
-                      {lang === "ar" ? stage.titleAr : lang === "fr" ? stage.titleFr : stage.title}
-                    </h3>
+            return (
+              <div
+                key={stage.key}
+                className="rounded-3xl p-3.5 border border-slate-200/90 dark:border-white/10 flex flex-col min-h-[580px] bg-slate-100/80 dark:bg-slate-950/40 relative shadow-sm"
+              >
+                {/* Column Header */}
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/90 dark:border-white/10">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{stage.icon}</span>
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-text-primary">
+                        {lang === "ar" ? stage.titleAr : lang === "fr" ? stage.titleFr : stage.title}
+                      </h3>
+                    </div>
                   </div>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${stage.badgeBg}`}>
+                    {items.length}
+                  </span>
                 </div>
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${stage.badgeBg}`}>
-                  {items.length}
-                </span>
-              </div>
 
-              {/* Cards list */}
-              <div className="space-y-3 flex-1 overflow-y-auto max-h-[720px] pr-1">
-                {items.length === 0 ? (
-                  <div className="h-44 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 flex flex-col items-center justify-center p-4 text-center bg-white/40 dark:bg-transparent">
-                    <p className="text-xs text-slate-500 dark:text-text-muted font-medium">{lang === "ar" ? "لا توجد طلبات هنا" : lang === "fr" ? "Aucune candidature" : "No applications"}</p>
-                    <p className="text-[11px] text-slate-400 dark:text-text-muted/60 mt-0.5">
-                      {lang === "ar" ? "اسحب أو انقل المنح إلى هذه الخانة" : lang === "fr" ? "Glissez ou déplacez des bourses ici" : "Drag or move scholarships here"}
-                    </p>
-                  </div>
-                ) : (
-                  items.map((app) => {
-                    const days = app.days_until_deadline ?? app.scholarship.days_until_deadline ?? null;
-                    const isUrgent = days !== null && days >= 0 && days <= 7;
-                    const isUpcoming = days !== null && days > 7 && days <= 30;
-                    const isPassed = days !== null && days < 0;
-                    const checklist = app.checklist || {};
-                    const docEntries = Object.entries(checklist);
-                    const isChecklistOpen = checklistOpenId === app.id;
+                {/* Cards list */}
+                <div className="space-y-3 flex-1 overflow-y-auto max-h-[720px] pr-1">
+                  {items.length === 0 ? (
+                    <div className="h-44 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 flex flex-col items-center justify-center p-4 text-center bg-white/40 dark:bg-transparent">
+                      <p className="text-xs text-slate-500 dark:text-text-muted font-medium">{lang === "ar" ? "لا توجد طلبات هنا" : lang === "fr" ? "Aucune candidature" : "No applications"}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-text-muted/60 mt-0.5">
+                        {lang === "ar" ? "اسحب أو انقل المنح إلى هذه الخانة" : lang === "fr" ? "Glissez ou déplacez des bourses ici" : "Drag or move scholarships here"}
+                      </p>
+                    </div>
+                  ) : (
+                    items.map((app) => {
+                      const days = app.days_until_deadline ?? app.scholarship.days_until_deadline ?? null;
+                      const isUrgent = days !== null && days >= 0 && days <= 7;
+                      const isUpcoming = days !== null && days > 7 && days <= 30;
+                      const isPassed = days !== null && days < 0;
+                      const checklist = app.checklist || {};
+                      const docEntries = Object.entries(checklist);
+                      const isChecklistOpen = checklistOpenId === app.id;
 
-                    return (
-                      <motion.div
-                        key={app.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className={`rounded-2xl p-4 bg-white dark:bg-slate-900/95 border border-slate-200/90 dark:border-white/10 hover:border-blue-400/60 dark:hover:border-white/25 shadow-sm hover:shadow-md dark:shadow-lg transition-all group relative overflow-hidden ${
-                          isUrgent ? "border-red-400 dark:border-red-500/60 ring-1 ring-red-400/30 dark:ring-red-500/30" : ""
-                        }`}
-                      >
-                        {/* Urgent Pulse Ribbon */}
-                        {isUrgent && (
-                          <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-b border-l border-red-200 dark:border-red-500/40 text-[10px] font-bold rounded-bl-xl flex items-center gap-1 animate-pulse">
-                            <Clock className="w-3 h-3" />
-                            <span>{lang === "ar" ? `عاجل (متبقي ${days} أيام)` : `URGENT (J-${days})`}</span>
-                          </div>
-                        )}
-
-                        {/* Top: University & Degree Level */}
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-cyan font-bold truncate">
-                            <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
-                            <span className="truncate">{app.scholarship.university_name || (lang === "ar" ? "جامعة صينية" : "Université Chinoise")}</span>
-                          </div>
-                          <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-text-muted flex-shrink-0">
-                            {app.scholarship.level || "Master"}
-                          </span>
-                        </div>
-
-                        {/* Title */}
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-text-primary leading-snug line-clamp-2 mb-3">
-                          <Link
-                            href={`/scholarships/${app.scholarship.id}`}
-                            className="hover:text-blue-600 dark:hover:text-cyan transition-colors"
-                          >
-                            {app.scholarship.title}
-                          </Link>
-                        </h4>
-
-                        {/* Deadline tag */}
-                        <div className="flex items-center justify-between text-[11px] mb-3">
-                          <span className="text-slate-500 dark:text-text-muted flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{lang === "ar" ? "الموعد النهائي:" : lang === "fr" ? "Limite :" : "Deadline:"}</span>
-                          </span>
-                          <span
-                            className={`font-semibold ${
-                              isUrgent
-                                ? "text-red-600 dark:text-red-400 font-bold"
-                                : isUpcoming
-                                ? "text-amber-600 dark:text-amber-400"
-                                : isPassed
-                                ? "text-slate-400 dark:text-text-muted"
-                                : "text-slate-600 dark:text-text-secondary"
-                            }`}
-                          >
-                            {days !== null
-                              ? isPassed
-                                ? (lang === "ar" ? "منتهي" : lang === "fr" ? "Expiré" : "Expired")
-                                : (lang === "ar" ? `متبقي ${days} يوم` : lang === "fr" ? `J-${days} jours` : `${days} days left`)
-                              : (lang === "ar" ? "جاري" : lang === "fr" ? "En cours" : "Ongoing")}
-                          </span>
-                        </div>
-
-                        {/* Checklist Progress Bar */}
-                        {docEntries.length > 0 && (
-                          <div className="mb-3 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5">
-                            <div className="flex items-center justify-between text-[11px] mb-1.5">
-                              <button
-                                onClick={() =>
-                                  setChecklistOpenId(isChecklistOpen ? null : app.id)
-                                }
-                                className="font-semibold text-slate-700 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan flex items-center gap-1 transition-colors"
-                              >
-                                <CheckCircle2 className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
-                                <span>
-                                  {app.checklist_progress?.completed ?? 0} /{" "}
-                                  {app.checklist_progress?.total ?? docEntries.length} {lang === "ar" ? "وثائق جاهزة" : lang === "fr" ? "docs prêts" : "docs ready"}
-                                </span>
-                              </button>
-                              <span className="text-[10px] font-bold text-blue-600 dark:text-cyan">
-                                {app.checklist_progress?.percentage ?? 0}%
-                              </span>
+                      return (
+                        <motion.div
+                          key={app.id}
+                          layout
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`rounded-2xl p-4 bg-white dark:bg-slate-900/95 border border-slate-200/90 dark:border-white/10 hover:border-blue-400/60 dark:hover:border-white/25 shadow-sm hover:shadow-md dark:shadow-lg transition-all group relative overflow-hidden ${
+                            isUrgent ? "border-red-400 dark:border-red-500/60 ring-1 ring-red-400/30 dark:ring-red-500/30" : ""
+                          }`}
+                        >
+                          {/* Urgent Pulse Ribbon */}
+                          {isUrgent && (
+                            <div className="absolute top-0 right-0 px-2.5 py-0.5 bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-b border-l border-red-200 dark:border-red-500/40 text-[10px] font-bold rounded-bl-xl flex items-center gap-1 animate-pulse">
+                              <Clock className="w-3 h-3" />
+                              <span>{lang === "ar" ? `عاجل (متبقي ${days} أيام)` : `URGENT (J-${days})`}</span>
                             </div>
-                            <div className="h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 dark:from-cyan dark:to-emerald-400 transition-all duration-300"
-                                style={{
-                                  width: `${app.checklist_progress?.percentage ?? 0}%`,
-                                }}
-                              />
-                            </div>
-
-                            {/* Expandable document toggles */}
-                            {isChecklistOpen && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                className="mt-2.5 pt-2 border-t border-slate-200/80 dark:border-white/5 space-y-1.5"
-                              >
-                                {docEntries.map(([docName, isDone]) => (
-                                  <label
-                                    key={docName}
-                                    className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-text-secondary cursor-pointer hover:text-slate-900 dark:hover:text-text-primary transition-colors select-none"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isDone}
-                                      onChange={() =>
-                                        handleToggleChecklist(app.id, docName)
-                                      }
-                                      className="rounded border-slate-300 dark:border-white/20 bg-white dark:bg-white/5 text-blue-600 dark:text-cyan focus:ring-0 focus:ring-offset-0 cursor-pointer"
-                                    />
-                                    <span
-                                      className={
-                                        isDone
-                                          ? "line-through text-slate-400 dark:text-text-muted"
-                                          : "font-medium"
-                                      }
-                                    >
-                                      {docName}
-                                    </span>
-                                  </label>
-                                ))}
-                              </motion.div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Portal ID / Note Snippet */}
-                        {app.portal_application_id && (
-                          <div className="mb-2 text-[10px] font-mono px-2 py-1 rounded bg-blue-50/80 dark:bg-white/5 border border-blue-200/70 dark:border-white/5 text-blue-700 dark:text-cyan truncate flex items-center justify-between">
-                            <span className="truncate">N° {app.portal_application_id}</span>
-                            <span className="text-slate-500 dark:text-text-muted text-[9px]">{lang === "ar" ? "البوابة" : "Portail"}</span>
-                          </div>
-                        )}
-
-                        {app.notes && (
-                          <p className="text-[11px] text-slate-600 dark:text-text-muted italic line-clamp-1 mb-3 pl-2 py-0.5 rounded-r bg-purple-50/60 dark:bg-transparent border-l-2 border-purple-500 dark:border-purple/40">
-                            &quot;{app.notes}&quot;
-                          </p>
-                        )}
-
-                        {/* Action buttons footer */}
-                        <div className="pt-2 border-t border-slate-200/80 dark:border-white/5 flex items-center justify-between gap-1 text-xs">
-                          {/* Portal external link */}
-                          {app.scholarship.application_link ? (
-                            <a
-                              href={app.scholarship.application_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors border border-slate-200/60 dark:border-transparent"
-                              title={lang === "ar" ? "فتح بوابة التقديم الرسمية" : "Ouvrir le portail officiel de candidature"}
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </a>
-                          ) : (
-                            <Link
-                              href={`/scholarships/${app.scholarship.id}`}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors border border-slate-200/60 dark:border-transparent"
-                              title={lang === "ar" ? "عرض تفاصيل المنحة" : "Voir la fiche complète"}
-                            >
-                              <Compass className="w-3.5 h-3.5" />
-                            </Link>
                           )}
 
-                          {/* Quick Edit Note Button */}
+                          {/* Top: University & Degree Level */}
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-cyan font-bold truncate">
+                              <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span className="truncate">{app.scholarship.university_name || (lang === "ar" ? "جامعة صينية" : "Université Chinoise")}</span>
+                            </div>
+                            <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-text-muted flex-shrink-0">
+                              {app.scholarship.level || "Master"}
+                            </span>
+                          </div>
+
+                          {/* Title */}
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-text-primary leading-snug line-clamp-2 mb-3">
+                            <Link
+                              href={`/scholarships/${app.scholarship.id}`}
+                              className="hover:text-blue-600 dark:hover:text-cyan transition-colors"
+                            >
+                              {app.scholarship.title}
+                            </Link>
+                          </h4>
+
+                          {/* Deadline tag */}
+                          <div className="flex items-center justify-between text-[11px] mb-3">
+                            <span className="text-slate-500 dark:text-text-muted flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{lang === "ar" ? "الموعد النهائي:" : lang === "fr" ? "Limite :" : "Deadline:"}</span>
+                            </span>
+                            <span
+                              className={`font-semibold ${
+                                isUrgent
+                                  ? "text-red-600 dark:text-red-400 font-bold"
+                                  : isUpcoming
+                                  ? "text-amber-600 dark:text-amber-400"
+                                  : isPassed
+                                  ? "text-slate-400 dark:text-text-muted"
+                                  : "text-slate-600 dark:text-text-secondary"
+                              }`}
+                            >
+                              {days !== null
+                                ? isPassed
+                                  ? (lang === "ar" ? "منتهي" : lang === "fr" ? "Expiré" : "Expired")
+                                  : (lang === "ar" ? `متبقي ${days} يوم` : lang === "fr" ? `J-${days} jours` : `${days} days left`)
+                                : (lang === "ar" ? "جاري" : lang === "fr" ? "En cours" : "Ongoing")}
+                            </span>
+                          </div>
+
+                          {/* Checklist Progress Bar */}
+                          {docEntries.length > 0 && (
+                            <div className="mb-3 p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5">
+                              <div className="flex items-center justify-between text-[11px] mb-1.5">
+                                <button
+                                  onClick={() =>
+                                    setChecklistOpenId(isChecklistOpen ? null : app.id)
+                                  }
+                                  className="font-semibold text-slate-700 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan flex items-center gap-1 transition-colors"
+                                >
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
+                                  <span>
+                                    {app.checklist_progress?.completed ?? 0} /{" "}
+                                    {app.checklist_progress?.total ?? docEntries.length} {lang === "ar" ? "وثائق جاهزة" : lang === "fr" ? "docs prêts" : "docs ready"}
+                                  </span>
+                                </button>
+                                <span className="text-[10px] font-bold text-blue-600 dark:text-cyan">
+                                  {app.checklist_progress?.percentage ?? 0}%
+                                </span>
+                              </div>
+                              <div className="h-1.5 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 dark:from-cyan dark:to-emerald-400 transition-all duration-300"
+                                  style={{
+                                    width: `${app.checklist_progress?.percentage ?? 0}%`,
+                                  }}
+                                />
+                              </div>
+
+                              {/* Expandable document toggles */}
+                              {isChecklistOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  className="mt-2.5 pt-2 border-t border-slate-200/80 dark:border-white/5 space-y-1.5"
+                                >
+                                  {docEntries.map(([docName, isDone]) => (
+                                    <label
+                                      key={docName}
+                                      className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-text-secondary cursor-pointer hover:text-slate-900 dark:hover:text-text-primary transition-colors select-none"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={isDone}
+                                        onChange={() =>
+                                          handleToggleChecklist(app.id, docName)
+                                        }
+                                        className="rounded border-slate-300 dark:border-white/20 bg-white dark:bg-white/5 text-blue-600 dark:text-cyan focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                                      />
+                                      <span
+                                        className={
+                                          isDone
+                                            ? "line-through text-slate-400 dark:text-text-muted"
+                                            : "font-medium"
+                                        }
+                                      >
+                                        {docName}
+                                      </span>
+                                    </label>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Portal ID / Note Snippet */}
+                          {app.portal_application_id && (
+                            <div className="mb-2 text-[10px] font-mono px-2 py-1 rounded bg-blue-50/80 dark:bg-white/5 border border-blue-200/70 dark:border-white/5 text-blue-700 dark:text-cyan truncate flex items-center justify-between">
+                              <span className="truncate">N° {app.portal_application_id}</span>
+                              <span className="text-slate-500 dark:text-text-muted text-[9px]">{lang === "ar" ? "البوابة" : "Portail"}</span>
+                            </div>
+                          )}
+
+                          {app.notes && (
+                            <p className="text-[11px] text-slate-600 dark:text-text-muted italic line-clamp-1 mb-3 pl-2 py-0.5 rounded-r bg-purple-50/60 dark:bg-transparent border-l-2 border-purple-500 dark:border-purple/40">
+                              &quot;{app.notes}&quot;
+                            </p>
+                          )}
+
+                          {/* Quick Traceability Status Snippet */}
+                          <button
+                            onClick={() => setTraceabilityApp(app)}
+                            className="w-full text-left mb-2.5 p-2 rounded-xl bg-slate-50 dark:bg-white/[0.03] hover:bg-cyan/10 hover:border-cyan/40 border border-slate-200/80 dark:border-white/5 transition-all group/trace cursor-pointer"
+                          >
+                            <div className="flex items-center justify-between text-[10px] mb-1">
+                              <span className="font-extrabold text-slate-700 dark:text-text-primary flex items-center gap-1 group-hover/trace:text-cyan transition-colors">
+                                <Activity className="w-3 h-3 text-emerald-500" />
+                                <span>{lang === "ar" ? "مسار التتبع والتوثيق" : "Traçabilité Officielle"}</span>
+                              </span>
+                              <span className="font-mono text-cyan font-bold text-[10px]">
+                                {app.status === "wishlist"
+                                  ? "Étape 1/8"
+                                  : app.status === "preparing_docs"
+                                  ? "Étape 2/8"
+                                  : app.status === "submitted"
+                                  ? "Étape 3/8"
+                                  : app.status === "interview"
+                                  ? "Étape 5/8"
+                                  : "Étape 7/8"}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-text-muted truncate">
+                              {app.status === "wishlist"
+                                ? lang === "ar"
+                                  ? "اختيار البرنامج والأهلية"
+                                  : "Sélection du Programme & Éligibilité"
+                                : app.status === "preparing_docs"
+                                ? lang === "ar"
+                                ? "تجهيز الوثائق وامتحان CSCA"
+                                : "Apostille & Examen CSCA"
+                                : app.status === "submitted"
+                                ? lang === "ar"
+                                ? "تم التقديم في البوابة الرسمية"
+                                : "Soumis sur Portail CSC / Univ"
+                                : app.status === "interview"
+                                ? lang === "ar"
+                                ? "التقييم الأكاديمي والمقابلة"
+                                : "Examen Académique & Oral"
+                                : lang === "ar"
+                                ? "إصدار استمارة JW202 والفيزا"
+                                : "JW202 & Visa X1"}
+                            </div>
+                          </button>
+
+                          {/* Action buttons footer */}
+                          <div className="pt-2 border-t border-slate-200/80 dark:border-white/5 flex items-center justify-between gap-1 text-xs">
+                            {/* Live Traceability Button */}
+                            <button
+                              onClick={() => setTraceabilityApp(app)}
+                              className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 transition-colors border border-emerald-200/80 dark:border-emerald-500/30 flex items-center gap-1 font-bold cursor-pointer"
+                              title={lang === "ar" ? "عرض مسار التتبع والتوثيق المباشر" : "Ouvrir la traçabilité détaillée en direct"}
+                            >
+                              <Activity className="w-3.5 h-3.5 text-emerald-500" />
+                              <span className="hidden xl:inline text-[10px]">{lang === "ar" ? "تتبع" : "Traçabilité"}</span>
+                            </button>
+
+                            {/* Portal external link */}
+                            {app.scholarship.application_link ? (
+                              <a
+                                href={app.scholarship.application_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors border border-slate-200/60 dark:border-transparent"
+                                title={lang === "ar" ? "فتح بوابة التقديم الرسمية" : "Ouvrir le portail officiel de candidature"}
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </a>
+                            ) : (
+                              <Link
+                                href={`/scholarships/${app.scholarship.id}`}
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors border border-slate-200/60 dark:border-transparent"
+                                title={lang === "ar" ? "عرض تفاصيل المنحة" : "Voir la fiche complète"}
+                              >
+                                <Compass className="w-3.5 h-3.5" />
+                              </Link>
+                            )}
+
+                            {/* Quick Edit Note Button */}
+                            <button
+                              onClick={() => {
+                                setEditingItem(app);
+                                setEditNotes(app.notes || "");
+                                setEditPortalId(app.portal_application_id || "");
+                              }}
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-purple-600 dark:hover:text-purple transition-colors border border-slate-200/60 dark:border-transparent"
+                              title={lang === "ar" ? "إضافة ملاحظات أو رقم الطلب" : "Ajouter des notes ou N° de dossier"}
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Delete from CRM */}
+                            <button
+                              onClick={() => handleDelete(app.id)}
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors border border-slate-200/60 dark:border-transparent"
+                              title={lang === "ar" ? "حذف من المتتبع" : "Retirer du tracker"}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Move stage controls */}
+                            <div className="flex items-center gap-1 ml-auto">
+                              {/* Prev stage */}
+                              {stage.key !== "wishlist" && (
+                                <button
+                                  onClick={() => {
+                                    const idx = STAGES.findIndex(
+                                      (s) => s.key === stage.key
+                                    );
+                                    if (idx > 0)
+                                      handleMoveStage(app.id, STAGES[idx - 1].key);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/15 text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary transition-colors border border-slate-200/60 dark:border-transparent"
+                                  title={lang === "ar" ? "نقل إلى المرحلة السابقة" : "Déplacer vers l'étape précédente"}
+                                >
+                                  <ChevronLeft className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+
+                              {/* Next stage */}
+                              {stage.key !== "accepted" && (
+                                <button
+                                  onClick={() => {
+                                    const idx = STAGES.findIndex(
+                                      (s) => s.key === stage.key
+                                    );
+                                    if (idx < STAGES.length - 1)
+                                      handleMoveStage(app.id, STAGES[idx + 1].key);
+                                  }}
+                                  className="px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-cyan/20 dark:hover:bg-cyan/30 text-blue-700 dark:text-cyan text-[11px] font-bold flex items-center gap-1 transition-all border border-blue-200/80 dark:border-transparent"
+                                  title={lang === "ar" ? "الانتقال إلى المرحلة التالية" : "Passer à l'étape suivante"}
+                                >
+                                  <span>{lang === "ar" ? "تقدم" : lang === "fr" ? "Avancer" : "Next"}</span>
+                                  <ChevronRight className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* Dedicated Traceability Timeline View */
+        <div className="space-y-6">
+          {filteredApps.length === 0 ? (
+            <div className="glass rounded-3xl p-12 text-center border border-dashed border-slate-300 dark:border-white/10 max-w-xl mx-auto">
+              <div className="w-14 h-14 rounded-2xl bg-cyan/15 text-cyan flex items-center justify-center mx-auto mb-4">
+                <Activity className="w-7 h-7 text-emerald-400" />
+              </div>
+              <h3 className="text-lg font-bold text-text-primary mb-2">
+                {lang === "ar" ? "لا توجد طلبات لتتبعها حالياً" : "Aucune candidature dans votre traçabilité"}
+              </h3>
+              <p className="text-xs text-text-secondary mb-6 leading-relaxed">
+                {lang === "ar"
+                  ? "ابدأ بإضافة منحة إلى قائمة تتبعك لتتمكن من رصد كافة خطوات القبول خطوة بخطوة."
+                  : "Ajoutez une bourse à votre pipeline pour suivre l'évolution de votre dossier étape par étape."}
+              </p>
+              <Link href="/scholarships" className="btn-gradient px-6 py-3 rounded-xl text-xs font-bold inline-flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                <span>{lang === "ar" ? "استكشاف المنح وإضافتها للتتبع" : "Explorer les bourses"}</span>
+              </Link>
+            </div>
+          ) : (
+            filteredApps.map((app) => {
+              // Determine current step
+              let currentStep = 2;
+              let dhlNumber = "";
+              if (app.status === "wishlist") currentStep = 1;
+              else if (app.status === "preparing_docs") currentStep = 2;
+              else if (app.status === "submitted") currentStep = 4;
+              else if (app.status === "interview") currentStep = 5;
+              else if (app.status === "accepted") currentStep = 7;
+
+              if (typeof window !== "undefined") {
+                try {
+                  const saved = localStorage.getItem(`traceability_${app.id}`);
+                  if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.currentStep) currentStep = parsed.currentStep;
+                    if (parsed.dhlCode) dhlNumber = parsed.dhlCode;
+                  }
+                } catch {}
+              }
+
+              const progress = Math.round((currentStep / 8) * 100);
+
+              return (
+                <div
+                  key={app.id}
+                  className="glass rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-white/10 hover:border-cyan/40 shadow-md transition-all relative overflow-hidden"
+                >
+                  {/* Top Bar: Uni, Title, ID and Status Badge */}
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200/90 dark:border-white/10">
+                    <div>
+                      <div className="flex items-center gap-2 text-xs font-bold text-cyan mb-1.5">
+                        <Building2 className="w-4 h-4 flex-shrink-0" />
+                        <span>{app.scholarship.university_name || "Université Chinoise"}</span>
+                        {app.scholarship.university_city && (
+                          <span className="text-text-muted font-normal">({app.scholarship.university_city})</span>
+                        )}
+                        <span className="opacity-40">•</span>
+                        <span className="uppercase text-[10px] px-2 py-0.5 rounded-full bg-cyan/15 text-cyan font-extrabold">
+                          {app.scholarship.level || "Bachelor"}
+                        </span>
+                      </div>
+                      <h3 className="text-base sm:text-xl font-black text-slate-900 dark:text-text-primary">
+                        <Link href={`/scholarships/${app.scholarship.id}`} className="hover:text-cyan transition-colors">
+                          {app.scholarship.title}
+                        </Link>
+                      </h3>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      {app.portal_application_id ? (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-white/5 border border-blue-200 dark:border-white/10 text-xs font-mono text-blue-700 dark:text-cyan">
+                          <span className="font-bold">N° {app.portal_application_id}</span>
                           <button
                             onClick={() => {
-                              setEditingItem(app);
-                              setEditNotes(app.notes || "");
-                              setEditPortalId(app.portal_application_id || "");
+                              navigator.clipboard.writeText(app.portal_application_id || "");
+                              setCopiedTrackingId(app.portal_application_id || "");
+                              setTimeout(() => setCopiedTrackingId(null), 2000);
                             }}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-purple-600 dark:hover:text-purple transition-colors border border-slate-200/60 dark:border-transparent"
-                            title={lang === "ar" ? "إضافة ملاحظات أو رقم الطلب" : "Ajouter des notes ou N° de dossier"}
+                            className="text-text-muted hover:text-cyan ml-1 cursor-pointer"
+                            title="Copier le N° de dossier"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Delete from CRM */}
-                          <button
-                            onClick={() => handleDelete(app.id)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-text-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors border border-slate-200/60 dark:border-transparent"
-                            title={lang === "ar" ? "حذف من المتتبع" : "Retirer du tracker"}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Move stage controls */}
-                          <div className="flex items-center gap-1 ml-auto">
-                            {/* Prev stage */}
-                            {stage.key !== "wishlist" && (
-                              <button
-                                onClick={() => {
-                                  const idx = STAGES.findIndex(
-                                    (s) => s.key === stage.key
-                                  );
-                                  if (idx > 0)
-                                    handleMoveStage(app.id, STAGES[idx - 1].key);
-                                }}
-                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/15 text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary transition-colors border border-slate-200/60 dark:border-transparent"
-                                title={lang === "ar" ? "نقل إلى المرحلة السابقة" : "Déplacer vers l'étape précédente"}
-                              >
-                                <ChevronLeft className="w-3.5 h-3.5" />
-                              </button>
+                            {copiedTrackingId === app.portal_application_id ? (
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
                             )}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setTraceabilityApp(app)}
+                          className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-white/5 border border-white/10 text-text-muted hover:text-cyan transition-colors cursor-pointer"
+                        >
+                          + {lang === "ar" ? "إضافة رقم الطلب" : "Ajouter N° dossier"}
+                        </button>
+                      )}
 
-                            {/* Next stage */}
-                            {stage.key !== "accepted" && (
-                              <button
-                                onClick={() => {
-                                  const idx = STAGES.findIndex(
-                                    (s) => s.key === stage.key
-                                  );
-                                  if (idx < STAGES.length - 1)
-                                    handleMoveStage(app.id, STAGES[idx + 1].key);
-                                }}
-                                className="px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-cyan/20 dark:hover:bg-cyan/30 text-blue-700 dark:text-cyan text-[11px] font-bold flex items-center gap-1 transition-all border border-blue-200/80 dark:border-transparent"
-                                title={lang === "ar" ? "الانتقال إلى المرحلة التالية" : "Passer à l'étape suivante"}
-                              >
-                                <span>{lang === "ar" ? "تقدم" : lang === "fr" ? "Avancer" : "Next"}</span>
-                                <ChevronRight className="w-3 h-3" />
-                              </button>
-                            )}
+                      {dhlNumber && (
+                        <div className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-300">
+                          <Truck className="w-3.5 h-3.5 text-amber-400" />
+                          <span>{dhlNumber}</span>
+                        </div>
+                      )}
+
+                      <span className="px-3 py-1.5 rounded-xl text-xs font-black uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        {app.status === "wishlist"
+                          ? "Étape 1 : Wishlist"
+                          : app.status === "preparing_docs"
+                          ? "Étape 2 : Dossier & CSCA"
+                          : app.status === "submitted"
+                          ? "Étape 4 : Examen Préliminaire"
+                          : app.status === "interview"
+                          ? "Étape 5 : Revue Académique"
+                          : "Étape 7 : JW202 Émis 🏆"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Progress Line */}
+                  <div className="my-5">
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="font-extrabold text-text-primary flex items-center gap-1.5">
+                        <Activity className="w-4 h-4 text-emerald-400" />
+                        <span>
+                          {lang === "ar"
+                            ? `المرحلة الحالية: ${OFFICIAL_MILESTONES[currentStep - 1]?.titleAr || ""}`
+                            : `Étape actuelle : ${OFFICIAL_MILESTONES[currentStep - 1]?.titleFr || ""}`}
+                        </span>
+                      </span>
+                      <span className="font-black text-cyan">
+                        {progress}% {lang === "ar" ? "مكتمل" : "du parcours validé"}
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-cyan via-purple to-emerald-400 transition-all duration-500"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 8 Connected Steps Stepper */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 my-6">
+                    {OFFICIAL_MILESTONES.map((milestone) => {
+                      const isPast = milestone.step < currentStep;
+                      const isNow = milestone.step === currentStep;
+                      return (
+                        <div
+                          key={milestone.step}
+                          onClick={() => setTraceabilityApp(app)}
+                          className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col justify-between ${
+                            isPast
+                              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                              : isNow
+                              ? "bg-cyan/15 border-cyan text-text-primary shadow-lg shadow-cyan/10 ring-1 ring-cyan"
+                              : "glass border-border-glass text-text-muted opacity-60 hover:opacity-100"
+                          }`}
+                        >
+                          <div className="flex items-center justify-center mb-2">
+                            <div
+                              className={`w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs ${
+                                isPast
+                                  ? "bg-emerald-500 text-slate-950"
+                                  : isNow
+                                  ? "bg-cyan text-slate-950 animate-pulse font-extrabold"
+                                  : "bg-white/10 text-text-muted"
+                              }`}
+                            >
+                              {isPast ? "✓" : milestone.step}
+                            </div>
+                          </div>
+                          <div className="text-[11px] font-bold line-clamp-2 leading-tight">
+                            {lang === "ar"
+                              ? milestone.titleAr.replace(/^\d+\.\s*/, "")
+                              : lang === "en"
+                              ? milestone.titleEn.replace(/^\d+\.\s*/, "")
+                              : milestone.titleFr.replace(/^\d+\.\s*/, "")}
+                          </div>
+                          <div className="text-[9px] font-semibold mt-2 uppercase tracking-wider">
+                            {isPast
+                              ? (lang === "ar" ? "مكتمل" : "Validé")
+                              : isNow
+                              ? (lang === "ar" ? "جاري الآن" : "En cours")
+                              : (lang === "ar" ? "قادم" : "À venir")}
                           </div>
                         </div>
-                      </motion.div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Bottom Action Footer */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-200/90 dark:border-white/10 text-xs">
+                    <div className="text-text-secondary flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-text-muted" />
+                      <span>
+                        {lang === "ar"
+                          ? `آخر تحديث للحالة: ${new Date(app.updated_at || app.created_at).toLocaleDateString()}`
+                          : `Dernier horodatage enregistré : ${new Date(app.updated_at || app.created_at).toLocaleDateString()}`}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                      <button
+                        onClick={() => setTraceabilityApp(app)}
+                        className="flex-1 sm:flex-none btn-gradient px-4 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-cyan/20 cursor-pointer"
+                      >
+                        <Activity className="w-3.5 h-3.5" />
+                        <span>{lang === "ar" ? "إدارة وتحديث المسار" : "Gérer la Traçabilité en Direct"}</span>
+                      </button>
+
+                      {app.scholarship.application_link && (
+                        <a
+                          href={app.scholarship.application_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-xl glass hover:bg-white/10 text-text-secondary hover:text-cyan transition-colors"
+                          title="Portail Officiel"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* Quick Note & Application ID Modal */}
       <AnimatePresence>
@@ -1019,6 +1376,18 @@ export default function ApplicationTrackerPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Official Traceability & Lifecycle Progress Modal */}
+      <ApplicationTraceabilityModal
+        isOpen={Boolean(traceabilityApp)}
+        onClose={() => setTraceabilityApp(null)}
+        application={traceabilityApp}
+        onSave={(updated) => {
+          setApplications((prev) =>
+            prev.map((app) => (app.id === updated.id ? updated : app))
+          );
+        }}
+      />
 
       <AuthGateModal
         isOpen={showAuthGate || (typeof window !== "undefined" && !getToken())}

@@ -21,6 +21,7 @@ import {
   Star,
   Users,
   Award,
+  Activity,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -161,6 +162,17 @@ export default function HomePage() {
   ];
 
   const studentTools = [
+    {
+      href: "/tracker?view=traceability",
+      icon: Activity,
+      title: lang === "ar" ? "تتبع مسار الملفات (Traçabilité)" : "Traçabilité des Candidatures",
+      desc:
+        lang === "ar"
+          ? "تتبع مباشر لمسار القبول الرسمي في الصين: من الأبوستيل وامتحان CSCA حتى استلام JW202 والفيزا"
+          : "Suivi en direct des 8 étapes officielles : du tampon Apostille/CSCA jusqu'à l'envoi JW202 et visa",
+      color: "from-emerald-500 to-teal-600",
+      badge: "LIVE",
+    },
     {
       href: "/csca",
       icon: Award,
