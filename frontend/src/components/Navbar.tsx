@@ -48,6 +48,12 @@ export default function Navbar() {
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
   const [showAuthGate, setShowAuthGate] = useState(false);
 
+  const isAccountVip = Boolean(
+    user &&
+    (user.student_profile?.is_premium === true ||
+     (typeof window !== "undefined" && user.username && localStorage.getItem(`vip_active_${user.username.toLowerCase()}`) === "true"))
+  );
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       let role = "student";
@@ -194,7 +200,7 @@ export default function Navbar() {
               {user ? (
                 <div className="flex items-center gap-2.5">
                   {portalRole === "student" && (
-                    user.student_profile?.is_premium ? (
+                    isAccountVip ? (
                       <Link
                         href="/pricing"
                         className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shadow-sm shadow-amber-500/20 animate-shimmer hover:opacity-90 transition-opacity"
@@ -333,7 +339,7 @@ export default function Navbar() {
                         <span>{user.username} ({t("nav.myProfile")})</span>
                       </Link>
                       {portalRole === "student" && (
-                        user.student_profile?.is_premium ? (
+                        isAccountVip ? (
                           <Link
                             href="/pricing"
                             onClick={() => setMobileOpen(false)}

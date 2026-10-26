@@ -227,12 +227,12 @@ export default function ScholarshipsPage() {
   const isPremium = Boolean(
     getToken() &&
     user &&
-    (user.student_profile?.is_premium ||
-     (typeof window !== "undefined" && (
-       localStorage.getItem(`vip_pass_${user.id}`) === "true" ||
-       localStorage.getItem("vip_pass") === "true" ||
-       localStorage.getItem("is_premium") === "true"
-     )))
+    (
+      user.student_profile?.is_premium === true ||
+      (typeof window !== "undefined" &&
+       user.username &&
+       localStorage.getItem(`vip_active_${user.username.toLowerCase()}`) === "true")
+    )
   );
 
   const selectUni = (id: number) => {

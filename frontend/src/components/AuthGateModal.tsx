@@ -223,6 +223,11 @@ export default function AuthGateModal({
         });
 
         if (res.data) {
+          try {
+            localStorage.removeItem('is_premium');
+            localStorage.removeItem('vip_pass');
+            localStorage.removeItem('vip_pass_1');
+          } catch {}
           setToken(res.data.token);
           localStorage.setItem('user', JSON.stringify(res.data.user));
           const effectiveRole = res.data.role || role || 'student';
@@ -298,6 +303,11 @@ export default function AuthGateModal({
         });
 
         if (res.data) {
+          try {
+            localStorage.removeItem('is_premium');
+            localStorage.removeItem('vip_pass');
+            localStorage.removeItem('vip_pass_1');
+          } catch {}
           setToken(res.data.token);
           localStorage.setItem('user', JSON.stringify(res.data.user));
           const effectiveRole = res.data.role || role || 'student';

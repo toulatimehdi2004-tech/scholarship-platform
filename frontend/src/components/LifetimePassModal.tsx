@@ -31,16 +31,17 @@ export default function LifetimePassModal({
       const res = await activatePremium();
       setSuccess(true);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('is_premium', 'true');
-        localStorage.setItem('vip_pass', 'true');
-      }
-      try {
-        const u = await getCurrentUser();
-        if (u.data) {
-          localStorage.setItem('user', JSON.stringify(u.data));
-          localStorage.setItem(`vip_pass_${u.data.id}`, 'true');
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          if (!u.student_profile) u.student_profile = {};
+          u.student_profile.is_premium = true;
+          localStorage.setItem('user', JSON.stringify(u));
+          if (u.username) {
+            localStorage.setItem(`vip_active_${u.username.toLowerCase()}`, 'true');
+          }
         }
-      } catch {}
+      }
       setTimeout(() => {
         onSuccess?.();
         onClose();
@@ -49,8 +50,16 @@ export default function LifetimePassModal({
     } catch {
       setSuccess(true);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('is_premium', 'true');
-        localStorage.setItem('vip_pass', 'true');
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          if (!u.student_profile) u.student_profile = {};
+          u.student_profile.is_premium = true;
+          localStorage.setItem('user', JSON.stringify(u));
+          if (u.username) {
+            localStorage.setItem(`vip_active_${u.username.toLowerCase()}`, 'true');
+          }
+        }
       }
       setTimeout(() => {
         onSuccess?.();

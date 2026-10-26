@@ -410,8 +410,12 @@ export async function loginUser(data: {
   const role = data.role || "student";
 
   // Prevent role pollution: if this account has an existing registered role, enforce it strictly
+  let isVip = false;
   if (typeof window !== "undefined") {
     try {
+      localStorage.removeItem("is_premium");
+      localStorage.removeItem("vip_pass");
+      localStorage.removeItem("vip_pass_1");
       const raw = localStorage.getItem("user_role_registry");
       const registry = raw ? JSON.parse(raw) : {};
       const existingRole = registry[cleanName.toLowerCase()];
@@ -423,6 +427,7 @@ export async function loginUser(data: {
       }
       registry[cleanName.toLowerCase()] = role;
       localStorage.setItem("user_role_registry", JSON.stringify(registry));
+      isVip = localStorage.getItem(`vip_active_${cleanName.toLowerCase()}`) === "true";
     } catch {}
   }
   const mockUser: User = {
@@ -433,7 +438,7 @@ export async function loginUser(data: {
     last_name: "",
     is_staff: role === "university",
     role: role,
-    student_profile: { id: 1, is_premium: false },
+    student_profile: { id: 1, is_premium: isVip },
   };
 
   return {
@@ -523,16 +528,17 @@ export async function activatePremium(): Promise<ApiResponse<{ message: string; 
 
   if (typeof window !== "undefined") {
     try {
-      localStorage.setItem("is_premium", "true");
-      localStorage.setItem("vip_pass", "true");
+      localStorage.removeItem("is_premium");
+      localStorage.removeItem("vip_pass");
+      localStorage.removeItem("vip_pass_1");
       const stored = localStorage.getItem("user");
       if (stored) {
         const u = JSON.parse(stored);
         if (!u.student_profile) u.student_profile = {};
         u.student_profile.is_premium = true;
         localStorage.setItem("user", JSON.stringify(u));
-        if (u.id) {
-          localStorage.setItem(`vip_pass_${u.id}`, "true");
+        if (u.username) {
+          localStorage.setItem(`vip_active_${u.username.toLowerCase()}`, "true");
         }
       }
     } catch {}

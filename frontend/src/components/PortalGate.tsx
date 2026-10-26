@@ -18,15 +18,20 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
   const [userRole, setUserRole] = useState<string>("student");
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("is_premium");
+        localStorage.removeItem("vip_pass");
+        localStorage.removeItem("vip_pass_1");
+        localStorage.removeItem("vip_pass_undefined");
+      } catch {}
+    }
+
     const token = getToken();
     const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
     const authOk = Boolean(token && userStr);
 
     if (!authOk) {
-      try {
-        localStorage.removeItem("is_premium");
-        localStorage.removeItem("vip_pass");
-      } catch {}
       setIsAuthenticated(false);
       // If unauthenticated and on an internal page, force back to Who Are You root /
       if (pathname !== "/" && !pathname.startsWith("/auth/verify")) {
