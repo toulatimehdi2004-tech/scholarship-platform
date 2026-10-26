@@ -48,10 +48,8 @@ export default function RootLayout({
           <LanguageProvider>
             <RouteTracker />
             <AnimatedBackground />
-            <PortalGate>
-              <Navbar />
-              <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
-              <Footer />
+            <PortalGate navbar={<Navbar />} footer={<Footer />}>
+              {children}
             </PortalGate>
           </LanguageProvider>
         </ThemeProvider>

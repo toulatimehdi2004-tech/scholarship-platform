@@ -540,24 +540,15 @@ export default function ProviderPortalPage() {
           <Link
             href="/"
             onClick={() => {
+              clearToken();
               try {
-                localStorage.setItem("portal_role", "student");
+                localStorage.removeItem("user");
+                localStorage.removeItem("portal_role");
               } catch {}
             }}
-            className="px-4 py-2 rounded-xl text-xs font-bold glass hover:bg-white/10 text-cyan flex items-center gap-1.5 transition-all"
+            className="px-4 py-2 rounded-xl text-xs font-bold glass hover:bg-white/10 text-rose-300 flex items-center gap-1.5 transition-all"
           >
-            <span>⇄ Student View</span>
-          </Link>
-          <Link
-            href="/university-portal"
-            onClick={() => {
-              try {
-                localStorage.setItem("portal_role", "university");
-              } catch {}
-            }}
-            className="px-4 py-2 rounded-xl text-xs font-bold glass hover:bg-white/10 text-amber-500 dark:text-amber-300 flex items-center gap-1.5 transition-all"
-          >
-            <span>🏛️ University Portal</span>
+            <span>⇄ Who Are You? / Switch Role</span>
           </Link>
         </div>
       </div>

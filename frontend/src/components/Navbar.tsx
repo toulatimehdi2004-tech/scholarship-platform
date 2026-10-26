@@ -28,6 +28,7 @@ import LifetimePassModal from "@/components/LifetimePassModal";
 import AuthGateModal from "@/components/AuthGateModal";
 
 const navKeys = [
+  { href: "/student-portal", key: "nav.home" },
   { href: "/scholarships", key: "nav.scholarships" },
   { href: "/universities", key: "nav.universities" },
   { href: "/stories", key: "nav.stories" },
@@ -103,7 +104,7 @@ export default function Navbar() {
     } else if (role === "provider") {
       router.push("/provider-portal");
     } else {
-      router.push("/");
+      router.push("/student-portal");
     }
   };
 

@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { getToken, clearToken } from "@/lib/api";
-import PortalChooser, { type PortalRole } from "./PortalChooser";
+import { getToken } from "@/lib/api";
 
 interface PortalGateProps {
+  navbar: React.ReactNode;
   children: React.ReactNode;
+  footer: React.ReactNode;
 }
 
-export default function PortalGate({ children }: PortalGateProps) {
+export default function PortalGate({ navbar, children, footer }: PortalGateProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -18,20 +19,24 @@ export default function PortalGate({ children }: PortalGateProps) {
   useEffect(() => {
     const token = getToken();
     const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-    if (!token || !userStr) {
-      // Purge any orphan/stale premium flags when unauthenticated
+    const authOk = Boolean(token && userStr);
+
+    if (!authOk) {
       try {
         localStorage.removeItem("is_premium");
         localStorage.removeItem("vip_pass");
       } catch {}
       setIsAuthenticated(false);
+      // If unauthenticated and on an internal page, force back to Who Are You root /
+      if (pathname !== "/" && !pathname.startsWith("/auth/verify")) {
+        router.push("/");
+      }
     } else {
       setIsAuthenticated(true);
     }
     setMounted(true);
-  }, [pathname]);
+  }, [pathname, router]);
 
-  // While checking local storage on initial mount, show a clean minimal splash
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#050e09]">
@@ -40,32 +45,37 @@ export default function PortalGate({ children }: PortalGateProps) {
     );
   }
 
-  // Allow verification page to render without token if completing email verification
-  if (pathname.startsWith("/auth/verify")) {
-    return <>{children}</>;
+  // The Root page `/` is ALWAYS "Who Are You?" Portal Chooser
+  if (pathname === "/") {
+    return <main>{children}</main>;
   }
 
-  // If unauthenticated: The ONLY view presented is the "Who Are You?" Portal Chooser
-  if (!isAuthenticated) {
+  // Email verification bypass
+  if (pathname.startsWith("/auth/verify")) {
     return (
-      <PortalChooser
-        onSelectRole={(role: PortalRole) => {
-          setIsAuthenticated(true);
-          try {
-            localStorage.setItem("portal_role", role);
-          } catch {}
-          if (role === "university") {
-            router.push("/university-portal");
-          } else if (role === "provider") {
-            router.push("/provider-portal");
-          } else {
-            router.push("/");
-          }
-        }}
-      />
+      <>
+        {navbar}
+        <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
+        {footer}
+      </>
     );
   }
 
-  // If authenticated: Render internal application content with navbar and footer
-  return <>{children}</>;
+  // If unauthenticated on any other route: redirecting to /
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050e09]">
+        <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Authenticated internal routes: render Navbar, Content, and Footer
+  return (
+    <>
+      {navbar}
+      <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
+      {footer}
+    </>
+  );
 }
