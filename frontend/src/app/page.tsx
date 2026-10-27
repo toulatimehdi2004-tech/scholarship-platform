@@ -20,11 +20,11 @@ export default function RootPage() {
       localStorage.setItem("portal_role", role);
     } catch {}
     if (role === "university") {
-      router.push("/university-portal");
+      router.push("/university-portal/");
     } else if (role === "provider") {
-      router.push("/provider-portal");
+      router.push("/provider-portal/");
     } else {
-      router.push("/student-portal");
+      router.push("/student-portal/");
     }
   }
 

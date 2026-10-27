@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   GraduationCap,
@@ -40,6 +41,7 @@ export default function PortalChooser({
   const roles = [
     {
       id: "student" as PortalRole,
+      href: "/student-portal/",
       title: lang === "ar" ? "طالب (Student)" : "Student",
       desc:
         lang === "ar"
@@ -58,6 +60,7 @@ export default function PortalChooser({
     },
     {
       id: "university" as PortalRole,
+      href: "/university-portal/",
       title: lang === "ar" ? "جامعة (University)" : "University",
       desc:
         lang === "ar"
@@ -76,6 +79,7 @@ export default function PortalChooser({
     },
     {
       id: "provider" as PortalRole,
+      href: "/provider-portal/",
       title: lang === "ar" ? "مزود خدمات (Service Provider)" : "Service Provider",
       desc:
         lang === "ar"
@@ -198,44 +202,49 @@ export default function PortalChooser({
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
-              onClick={() => handleRoleClick(r.id)}
-              className={`relative rounded-3xl bg-slate-900/65 backdrop-blur-xl border ${r.borderClass} ${r.shadowHover} p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 group cursor-pointer overflow-hidden`}
+              className="h-full"
             >
-              {/* Subtle top inner gradient */}
-              <div
-                className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${r.glowBg} pointer-events-none rounded-t-3xl`}
-              />
-
-              <div className="relative z-10">
-                {/* Role Icon Badge */}
+              <Link
+                href={r.href}
+                onClick={() => handleRoleClick(r.id)}
+                className={`relative h-full rounded-3xl bg-slate-900/65 backdrop-blur-xl border ${r.borderClass} ${r.shadowHover} p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 group cursor-pointer overflow-hidden block text-inherit no-underline`}
+              >
+                {/* Subtle top inner gradient */}
                 <div
-                  className={`w-13 h-13 rounded-2xl ${r.badgeBg} text-white flex items-center justify-center shadow-lg shadow-black/40 mb-6 group-hover:scale-105 transition-transform duration-300`}
-                >
-                  <r.icon className="w-6 h-6 text-white" />
+                  className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${r.glowBg} pointer-events-none rounded-t-3xl`}
+                />
+
+                <div className="relative z-10">
+                  {/* Role Icon Badge */}
+                  <div
+                    className={`w-13 h-13 rounded-2xl ${r.badgeBg} text-white flex items-center justify-center shadow-lg shadow-black/40 mb-6 group-hover:scale-105 transition-transform duration-300`}
+                  >
+                    <r.icon className="w-6 h-6 text-white" />
+                  </div>
+
+                  {/* Role Title */}
+                  <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
+                    {r.title}
+                  </h3>
+
+                  {/* Role Description */}
+                  <p className="text-xs text-slate-300 leading-relaxed mb-8">
+                    {r.desc}
+                  </p>
                 </div>
 
-                {/* Role Title */}
-                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
-                  {r.title}
-                </h3>
-
-                {/* Role Description */}
-                <p className="text-xs text-slate-300 leading-relaxed mb-8">
-                  {r.desc}
-                </p>
-              </div>
-
-              {/* Bottom Continue Row */}
-              <div className="relative z-10 flex items-center justify-between pt-2 border-t border-white/5">
-                <span className={`text-xs sm:text-sm font-bold ${r.btnTextColor}`}>
-                  {lang === "ar" ? "متابعة" : "Continue"}
-                </span>
-                <div
-                  className={`w-8 h-8 rounded-full ${r.btnArrowBg} flex items-center justify-center transition-all duration-300`}
-                >
-                  <ArrowRight className="w-4 h-4 rtl-flip" />
+                {/* Bottom Continue Row */}
+                <div className="relative z-10 flex items-center justify-between pt-2 border-t border-white/5">
+                  <span className={`text-xs sm:text-sm font-bold ${r.btnTextColor}`}>
+                    {lang === "ar" ? "متابعة" : "Continue"}
+                  </span>
+                  <div
+                    className={`w-8 h-8 rounded-full ${r.btnArrowBg} flex items-center justify-center transition-all duration-300`}
+                  >
+                    <ArrowRight className="w-4 h-4 rtl-flip" />
+                  </div>
                 </div>
-              </div>
+              </Link>
             </motion.div>
           ))}
         </div>
@@ -245,13 +254,14 @@ export default function PortalChooser({
           {roles.map((r) => {
             const isSelected = selectedMobileRole === r.id;
             return (
-              <div
+              <Link
                 key={r.id}
+                href={r.href}
                 onClick={() => {
                   setSelectedMobileRole(r.id);
                   handleRoleClick(r.id);
                 }}
-                className={`p-4 rounded-2xl bg-slate-900/75 backdrop-blur-xl border transition-all duration-300 flex items-center justify-between gap-3 cursor-pointer ${
+                className={`p-4 rounded-2xl bg-slate-900/75 backdrop-blur-xl border transition-all duration-300 flex items-center justify-between gap-3 cursor-pointer block text-inherit no-underline ${
                   isSelected ? `${r.borderClass} shadow-lg` : "border-white/10"
                 }`}
               >
@@ -277,7 +287,7 @@ export default function PortalChooser({
                 >
                   {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

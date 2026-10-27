@@ -34,14 +34,13 @@ import {
   Award,
 } from "lucide-react";
 import Logo from "@/components/Logo";
-import PortalChooser, { type PortalRole } from "@/components/PortalChooser";
 import { getToken, getCurrentUser, clearToken, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
 export default function StudentPortalPage() {
   const router = useRouter();
   const { lang, t } = useLang();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,10 +52,7 @@ export default function StudentPortalPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = getToken();
-      if (!token) {
-        setIsAuthenticated(false);
-      } else {
-        setIsAuthenticated(true);
+      if (token) {
         getCurrentUser().then((res) => {
           if (res.data) setUser(res.data);
         });
@@ -96,34 +92,6 @@ export default function StudentPortalPage() {
       router.push("/scholarships");
     }
   };
-
-  // If visitor is unauthenticated, show the redesigned Image 1 "Who are you?" Portal Chooser
-  if (isAuthenticated === false) {
-    return (
-      <PortalChooser
-        onSelectRole={(role) => {
-          try {
-            localStorage.setItem("portal_role", role);
-          } catch {}
-          if (role === "university") {
-            router.push("/university-portal");
-          } else if (role === "provider") {
-            router.push("/provider-portal");
-          } else {
-            setIsAuthenticated(true);
-          }
-        }}
-      />
-    );
-  }
-
-  if (isAuthenticated === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#070c18]">
-        <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   const studentName = user?.first_name || user?.username || "Hamza";
 

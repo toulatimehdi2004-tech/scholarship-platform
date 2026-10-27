@@ -15,7 +15,6 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string>("student");
 
   useEffect(() => {
@@ -37,90 +36,18 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
             localStorage.setItem("user", JSON.stringify(u));
           }
         }
+
+        const savedRole = localStorage.getItem("portal_role") || "student";
+        setUserRole(savedRole);
       } catch {}
     }
-
-    const token = getToken();
-    const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-    const authOk = Boolean(token && userStr);
-
-    if (!authOk) {
-      setIsAuthenticated(false);
-      // If unauthenticated and on an internal page, force back to Who Are You root /
-      if (pathname !== "/" && !pathname.startsWith("/auth/verify")) {
-        router.replace("/");
-      }
-      setMounted(true);
-      return;
-    }
-
-    setIsAuthenticated(true);
-
-    // Resolve strict user role
-    let role = "student";
-    try {
-      if (userStr) {
-        const parsed = JSON.parse(userStr);
-        role = parsed.role || "student";
-      }
-    } catch {}
-    setUserRole(role);
-    try {
-      localStorage.setItem("portal_role", role);
-    } catch {}
-
-    // Strict Role Route Boundaries:
-    // A student can NEVER access university or provider portals.
-    if (role === "student") {
-      if (pathname.startsWith("/university-portal") || pathname.startsWith("/provider-portal")) {
-        router.replace("/student-portal");
-        return;
-      }
-    } else if (role === "university") {
-      // A university can NEVER access student portal or provider portal
-      if (
-        pathname.startsWith("/student-portal") ||
-        pathname.startsWith("/provider-portal") ||
-        pathname.startsWith("/tracker") ||
-        pathname.startsWith("/crm") ||
-        pathname.startsWith("/pipeline") ||
-        pathname.startsWith("/vip") ||
-        pathname.startsWith("/pricing") ||
-        pathname.startsWith("/pre-departure") ||
-        pathname.startsWith("/agency-services") ||
-        pathname.startsWith("/apply") ||
-        pathname.startsWith("/csca")
-      ) {
-        router.replace("/university-portal");
-        return;
-      }
-    } else if (role === "provider") {
-      // A service provider can NEVER access student portal or university portal
-      if (
-        pathname.startsWith("/student-portal") ||
-        pathname.startsWith("/university-portal") ||
-        pathname.startsWith("/tracker") ||
-        pathname.startsWith("/crm") ||
-        pathname.startsWith("/pipeline") ||
-        pathname.startsWith("/vip") ||
-        pathname.startsWith("/pricing") ||
-        pathname.startsWith("/pre-departure") ||
-        pathname.startsWith("/agency-services") ||
-        pathname.startsWith("/apply") ||
-        pathname.startsWith("/csca")
-      ) {
-        router.replace("/provider-portal");
-        return;
-      }
-    }
-
     setMounted(true);
-  }, [pathname, router]);
+  }, [pathname]);
 
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#050e09]">
-        <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-400 rounded-full animate-spin" />
       </div>
     );
   }
@@ -147,51 +74,6 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     );
   }
 
-  // If unauthenticated on any other route: redirecting to /
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050e09]">
-        <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  // Strict barrier: never render forbidden content during navigation
-  const isForbidden =
-    (userRole === "student" && (pathname.startsWith("/university-portal") || pathname.startsWith("/provider-portal"))) ||
-    (userRole === "university" && (
-      pathname.startsWith("/student-portal") ||
-      pathname.startsWith("/provider-portal") ||
-      pathname.startsWith("/tracker") ||
-      pathname.startsWith("/crm") ||
-      pathname.startsWith("/pipeline") ||
-      pathname.startsWith("/vip") ||
-      pathname.startsWith("/pricing") ||
-      pathname.startsWith("/pre-departure") ||
-      pathname.startsWith("/agency-services") ||
-      pathname.startsWith("/apply")
-    )) ||
-    (userRole === "provider" && (
-      pathname.startsWith("/student-portal") ||
-      pathname.startsWith("/university-portal") ||
-      pathname.startsWith("/tracker") ||
-      pathname.startsWith("/crm") ||
-      pathname.startsWith("/pipeline") ||
-      pathname.startsWith("/vip") ||
-      pathname.startsWith("/pricing") ||
-      pathname.startsWith("/pre-departure") ||
-      pathname.startsWith("/agency-services") ||
-      pathname.startsWith("/apply")
-    ));
-
-  if (isForbidden) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050e09]">
-        <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   // Dedicated Dashboard Layout for Student Portal (matching Image 3)
   if (pathname === "/student-portal" || pathname === "/student-portal/") {
     return (
@@ -202,7 +84,17 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     );
   }
 
-  // Authenticated internal routes: render Navbar, Content, Footer, and Live Communication
+  // University and Provider Portals full screen layout
+  if (pathname.startsWith("/university-portal") || pathname.startsWith("/provider-portal")) {
+    return (
+      <>
+        <main className="relative z-10 min-h-screen">{children}</main>
+        <LiveCommunicationWidget />
+      </>
+    );
+  }
+
+  // All other public routes: scholarships, universities, tracker, csca, etc.
   return (
     <>
       {navbar}

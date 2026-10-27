@@ -14,7 +14,7 @@ export default function NotFound() {
       
       // If path is missing repo prefix on GitHub Pages (e.g. /tracker -> /scholarship-platform/tracker/)
       if (window.location.hostname.includes("github.io") && !p.startsWith(basePath)) {
-        const cleanPath = p === "/" ? "" : p;
+        const cleanPath = p === "/" ? "" : p.replace(/\/+$/, "");
         window.location.replace(`${basePath}${cleanPath}/${window.location.search}${window.location.hash}`);
       }
     }
