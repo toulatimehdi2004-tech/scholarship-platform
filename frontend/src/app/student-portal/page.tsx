@@ -464,13 +464,26 @@ export default function StudentPortalPage() {
           </Link>
         </div>
 
-        {/* Hero Banner with Chinese Pagoda Night Background (Image 3) */}
-        <section
-          className="rounded-3xl overflow-hidden relative p-6 sm:p-10 border border-white/5 shadow-2xl bg-cover bg-center min-h-[200px] flex flex-col justify-center"
-          style={{ backgroundImage: `url('${bgImage}')` }}
-        >
-          {/* Subtle gradient overlay to enhance text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#070c18] via-[#070c18]/85 to-transparent pointer-events-none" />
+        {/* Hero Banner with Chinese Pagoda Night Background (Matching Image 3) */}
+        <section className="rounded-3xl overflow-hidden relative p-6 sm:p-10 border border-white/5 shadow-2xl min-h-[220px] flex flex-col justify-center">
+          {/* Real High-Resolution Landscape Image */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <img
+              src={bgImage}
+              alt="China Pagoda Night Landscape"
+              className="w-full h-full object-cover object-right sm:object-center brightness-[0.95] contrast-[1.05]"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (!target.src.includes("china-night-pagoda.jpeg")) {
+                  target.src = `${basePath}/china-night-pagoda.jpeg`;
+                } else {
+                  target.src = "/images/china-night-pagoda.jpeg";
+                }
+              }}
+            />
+            {/* Soft left gradient for text readability while leaving pagodas on the right fully luminous */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#060a14] via-[#060a14]/80 sm:via-[#060a14]/55 to-transparent" />
+          </div>
 
           <div className="relative z-10 max-w-xl">
             <p className="text-xs sm:text-sm font-semibold text-slate-300 mb-1 flex items-center gap-1.5">

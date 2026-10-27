@@ -109,15 +109,27 @@ export default function PortalChooser({
 
   return (
     <div className="relative min-h-screen bg-[#030712] text-slate-100 flex flex-col justify-between overflow-hidden selection:bg-cyan/30">
-      {/* High-Resolution Chinese Pagoda & Skyline Night Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-bottom opacity-50 sm:opacity-60 pointer-events-none transition-opacity duration-1000"
-        style={{ backgroundImage: `url('${bgImage}')` }}
-      />
+      {/* High-Resolution Chinese Pagoda & Skyline Night Background (Matching Image 1 & 2) */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <img
+          src={bgImage}
+          alt="ScholarChina Night Pagoda Skyline"
+          className="w-full h-full object-cover object-bottom brightness-[0.92] contrast-[1.08] transition-all duration-700"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            if (!target.src.includes("china-night-pagoda.jpeg")) {
+              target.src = `${basePath}/china-night-pagoda.jpeg`;
+            } else {
+              target.src = "/images/china-night-pagoda.jpeg";
+            }
+          }}
+        />
 
-      {/* Atmospheric Cinematic Gradients */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/75 to-[#030712]/95 pointer-events-none" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
+        {/* Delicate Vignettes preserving the glowing pagodas and water reflections */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/80 via-[#030712]/15 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#030712]/45 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-blue-600/12 rounded-full blur-[140px] pointer-events-none" />
+      </div>
 
       {/* Top Header Navigation */}
       <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex items-center justify-between">
