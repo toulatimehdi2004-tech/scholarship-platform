@@ -51,6 +51,13 @@ export default function StudentPortalPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setUser(parsed);
+        } catch {}
+      }
       const token = getToken();
       if (token) {
         getCurrentUser().then((res) => {
@@ -93,7 +100,17 @@ export default function StudentPortalPage() {
     }
   };
 
-  const studentName = user?.first_name || user?.username || "Hamza";
+  const studentName =
+    user?.first_name ||
+    (user?.username ? user.username.replace(/[0-9]/g, "") : null) ||
+    "Mehdi";
+
+  const studentFullName =
+    user?.first_name && user?.last_name
+      ? `${user.first_name} ${user.last_name}`
+      : user?.first_name
+      ? user.first_name
+      : "Mehdi Toulati";
 
   const recommendedScholarships = [
     {
@@ -403,7 +420,7 @@ export default function StudentPortalPage() {
               </div>
               <div className="text-left text-xs leading-tight">
                 <div className="font-bold text-white group-hover:text-cyan transition-colors">
-                  {studentName} Ismaili
+                  {studentFullName}
                 </div>
                 <div className="text-[10px] text-slate-400">Student</div>
               </div>
