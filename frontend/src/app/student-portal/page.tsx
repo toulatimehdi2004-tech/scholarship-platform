@@ -164,11 +164,11 @@ export default function StudentPortalPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#060a14] text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+    <div className="min-h-screen bg-[#060a14]/50 backdrop-blur-[1px] text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
       {/* ─────────────────────────────────────────────────────────────
           1. LEFT FIXED SIDEBAR (Matching Image 3)
       ───────────────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex w-64 bg-[#0a101d] border-r border-white/5 flex-col justify-between p-4 flex-shrink-0 z-30 min-h-screen sticky top-0">
+      <aside className="hidden lg:flex w-64 bg-[#0a101d]/90 backdrop-blur-xl border-r border-white/5 flex-col justify-between p-4 flex-shrink-0 z-30 min-h-screen sticky top-0">
         <div>
           {/* Logo Brand Header */}
           <Link href="/" className="flex items-center gap-2.5 px-3 py-3 mb-4 group">
@@ -296,7 +296,7 @@ export default function StudentPortalPage() {
       </aside>
 
       {/* Mobile Top Header */}
-      <div className="lg:hidden w-full bg-[#0a101d] border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+      <div className="lg:hidden w-full bg-[#0a101d]/90 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-2">
           <Logo size={28} showText={false} />
           <span className="text-xs font-black tracking-widest text-white">

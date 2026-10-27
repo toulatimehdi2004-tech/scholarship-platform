@@ -24,7 +24,7 @@ export default function RootLayout({
   children,
 }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`light ${inter.variable} h-full`} suppressHydrationWarning>
+    <html lang="en" className={`dark ${inter.variable} h-full`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

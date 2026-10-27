@@ -78,7 +78,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
   if (pathname === "/student-portal" || pathname === "/student-portal/") {
     return (
       <>
-        <main className="relative z-10 min-h-screen bg-[#060a14]">{children}</main>
+        <main className="relative z-10 min-h-screen bg-transparent">{children}</main>
         <LiveCommunicationWidget />
       </>
     );
