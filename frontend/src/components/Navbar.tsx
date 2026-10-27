@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ArrowLeftRight,
   Check,
+  MessageSquare,
 } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
 import { useLang } from "@/lib/i18n";
@@ -50,7 +51,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [portalRole, setPortalRole] = useState<"student" | "university" | "provider">("student");
   const { theme, toggle } = useTheme();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [user, setUser] = useState<User | null>(null);
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
   const [showAuthGate, setShowAuthGate] = useState(false);
@@ -206,6 +207,26 @@ export default function Navbar() {
                 </span>
               </div>
 
+              {/* Real-time Advisor Communication Quick Action */}
+              <button
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open_live_chat"));
+                  }
+                }}
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer shadow-sm group"
+                title={lang === "ar" ? "تواصل مباشر مع مستشار القبول (الرباط & بكين)" : "Assistance directe en temps réel"}
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <MessageSquare className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                <span className="hidden xl:inline-block">
+                  {lang === "ar" ? "مستشار مباشر" : "Support Direct"}
+                </span>
+              </button>
+
               <LanguageSwitcher />
 
               <button
@@ -271,6 +292,26 @@ export default function Navbar() {
             </div>
 
             <div className="flex md:hidden items-center gap-2">
+              {/* Real-time Advisor Communication Quick Action */}
+              <button
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open_live_chat"));
+                  }
+                }}
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer shadow-sm group"
+                title={lang === "ar" ? "تواصل مباشر مع مستشار القبول (الرباط & بكين)" : "Assistance directe en temps réel"}
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <MessageSquare className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                <span className="hidden xl:inline-block">
+                  {lang === "ar" ? "مستشار مباشر" : "Support Direct"}
+                </span>
+              </button>
+
               <LanguageSwitcher />
               <button
                 onClick={toggle}

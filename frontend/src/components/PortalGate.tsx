@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
+import LiveCommunicationWidget from "@/components/LiveCommunicationWidget";
 
 interface PortalGateProps {
   navbar: React.ReactNode;
@@ -126,7 +127,12 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
 
   // The Root page `/` is ALWAYS "Who Are You?" Portal Chooser
   if (pathname === "/") {
-    return <main>{children}</main>;
+    return (
+      <>
+        <main>{children}</main>
+        <LiveCommunicationWidget />
+      </>
+    );
   }
 
   // Email verification bypass
@@ -136,6 +142,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         {navbar}
         <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
         {footer}
+        <LiveCommunicationWidget />
       </>
     );
   }
@@ -185,12 +192,13 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     );
   }
 
-  // Authenticated internal routes: render Navbar, Content, and Footer
+  // Authenticated internal routes: render Navbar, Content, Footer, and Live Communication
   return (
     <>
       {navbar}
       <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
       {footer}
+      <LiveCommunicationWidget />
     </>
   );
 }

@@ -295,6 +295,22 @@ export default function Footer() {
             </div>
             <ul className="space-y-2.5 text-xs sm:text-sm">
               <li>
+                <button
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("open_live_chat"));
+                    }
+                  }}
+                  className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <span>{lang === "ar" ? "تواصل مباشر مع المستشار (الآن)" : "Assistance Directe en Temps Réel (LIVE)"}</span>
+                </button>
+              </li>
+              <li>
                 <Link
                   href="/ai-chat"
                   className="text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400"
