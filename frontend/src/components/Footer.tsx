@@ -152,7 +152,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/acceptance-odds"
+                  href="/eligibility"
                   className="text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors"
                 >
                   {t("footer.schOdds")}
@@ -187,7 +187,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/universities/3d-tour"
+                  href="/universities"
                   className="text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors flex items-center gap-1 font-semibold text-blue-600 dark:text-cyan"
                 >
                   <span>{t("footer.uni3dTour")}</span>
@@ -262,7 +262,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/sop-builder"
+                  href="/sop"
                   className="text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors"
                 >
                   {t("footer.toolsSop")}
@@ -348,7 +348,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/about"
+                  href="/stories"
                   className="text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors"
                 >
                   {t("footer.supFaq")}

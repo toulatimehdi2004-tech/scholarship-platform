@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { getToken, getCurrentUser, type User as UserType } from "@/lib/api";
+import MarkdownContent from "@/components/MarkdownContent";
 
 interface ChatMessage {
   id: string;
@@ -618,8 +619,8 @@ export default function LiveCommunicationWidget() {
                           </div>
                         )}
 
-                        <div className="whitespace-pre-line prose-invert text-xs sm:text-[13px]">
-                          {msg.text}
+                        <div className="prose-invert text-xs sm:text-[13px]">
+                          <MarkdownContent content={msg.text} />
                         </div>
 
                         {msg.isTicketConfirmation && msg.ticketId && (

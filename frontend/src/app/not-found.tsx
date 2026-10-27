@@ -1,10 +1,25 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Home, Search, Layers, Crown, Sparkles } from "lucide-react";
+import { ArrowLeft, Home, Search, Layers, Crown, Sparkles, Award } from "lucide-react";
 import Logo from "@/components/Logo";
 
 export default function NotFound() {
+  // Auto-recovery for GitHub Pages path prefix issues
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const p = window.location.pathname;
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/scholarship-platform";
+      
+      // If path is missing repo prefix on GitHub Pages (e.g. /tracker -> /scholarship-platform/tracker/)
+      if (window.location.hostname.includes("github.io") && !p.startsWith(basePath)) {
+        const cleanPath = p === "/" ? "" : p;
+        window.location.replace(`${basePath}${cleanPath}/${window.location.search}${window.location.hash}`);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-16">
       <div className="glass rounded-3xl p-8 sm:p-12 max-w-xl w-full text-center border border-border-glass shadow-2xl relative overflow-hidden">
@@ -77,6 +92,19 @@ export default function NotFound() {
             <div>
               <div className="text-sm font-bold text-text-primary group-hover:text-amber-400 transition-colors">Lifetime VIP Pass</div>
               <div className="text-[11px] text-text-muted">$29 One-Time Access</div>
+            </div>
+          </Link>
+
+          <Link
+            href="/csca"
+            className="p-3.5 rounded-2xl glass hover:bg-white/10 border border-white/5 hover:border-rose-500/40 transition-all flex items-center gap-3 group sm:col-span-2"
+          >
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+              <Award className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-text-primary group-hover:text-rose-400 transition-colors">Examen CSCA & Bourses Chine 2026/2027</div>
+              <div className="text-[11px] text-text-muted">Matières requises & Prise de RDV csca.cn</div>
             </div>
           </Link>
         </div>
