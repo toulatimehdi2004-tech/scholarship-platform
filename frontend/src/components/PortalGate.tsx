@@ -192,6 +192,16 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     );
   }
 
+  // Dedicated Dashboard Layout for Student Portal (matching Image 3)
+  if (pathname === "/student-portal" || pathname === "/student-portal/") {
+    return (
+      <>
+        <main className="relative z-10 min-h-screen bg-[#060a14]">{children}</main>
+        <LiveCommunicationWidget />
+      </>
+    );
+  }
+
   // Authenticated internal routes: render Navbar, Content, Footer, and Live Communication
   return (
     <>

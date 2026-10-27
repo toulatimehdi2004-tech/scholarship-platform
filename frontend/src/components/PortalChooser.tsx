@@ -5,20 +5,17 @@ import { motion } from "framer-motion";
 import {
   GraduationCap,
   Building2,
-  FileCheck2,
+  Briefcase,
   ArrowRight,
-  Sparkles,
-  ShieldCheck,
-  CheckCircle2,
-  Globe2,
   Sun,
   Moon,
+  Check,
 } from "lucide-react";
 import Logo from "./Logo";
 import { useTheme } from "@/lib/ThemeContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import AuthGateModal from "./AuthGateModal";
-import { getToken } from "@/lib/api";
+import { useLang } from "@/lib/i18n";
 
 export type PortalRole = "student" | "university" | "provider";
 
@@ -32,273 +29,287 @@ export default function PortalChooser({
   currentRole,
 }: PortalChooserProps) {
   const { theme, toggle } = useTheme();
+  const { lang } = useLang();
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [chosenRole, setChosenRole] = useState<PortalRole>("student");
+  const [selectedMobileRole, setSelectedMobileRole] = useState<PortalRole>("student");
+  const [chosenRoleForAuth, setChosenRoleForAuth] = useState<PortalRole>("student");
 
-  function handleTriggerRole(role: PortalRole) {
-    setChosenRole(role);
-    try {
-      localStorage.setItem("portal_role", role);
-    } catch {}
-    setAuthModalOpen(true);
-  }
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const bgImage = `${basePath}/images/china-night-pagoda.jpeg`;
 
-  const portals = [
+  const roles = [
     {
       id: "student" as PortalRole,
-      title: "Moroccan Student & Candidate",
-      titleFr: "Étudiant Marocain • Candidat",
-      titleAr: "طالب مغربي وباحث عن منحة",
-      badge: "Maroc 🇲🇦 • 100+ Chinese Universities",
+      title: lang === "ar" ? "طالب (Student)" : "Student",
+      desc:
+        lang === "ar"
+          ? "البحث عن المنح، استكشاف الجامعات، والتقديم للدراسة في الصين."
+          : "Find scholarships, discover universities, and apply to study in China.",
       icon: GraduationCap,
-      cardClass:
-        "bg-gradient-to-b from-[#0a2318] via-[#05170f] to-[#020a06] border-2 border-emerald-500 shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:border-emerald-400",
-      badgeClass:
-        "bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 font-bold",
-      iconBoxClass:
-        "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/40",
-      titleClass:
-        "text-white font-black group-hover:text-emerald-300 transition-colors",
-      subClass: "text-emerald-300 font-semibold italic",
-      descClass: "text-emerald-100/85",
-      checkClass: "text-emerald-400",
-      featTextClass: "text-white font-medium",
-      btnClass:
-        "bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-black shadow-lg shadow-emerald-600/30",
-      description:
-        "Exclusively for Moroccan students: discover 400+ full and partial CSC scholarships, explore campus grounds in 3D VR, get matched by AI, and track your applications.",
-      features: [
-        "100+ Chinese Universities with 3D VR Console Tours",
-        "400+ Verified Full & Partial Scholarships",
-        "AI Eligibility Matcher & SOP Studio for Moroccans",
-        "Moroccan Baccalaureate / Licence / Master Pathways",
-      ],
-      buttonText: "Enter Student Portal (Morocco 🇲🇦)",
+      color: "blue",
+      badgeBg: "bg-blue-600",
+      borderClass: "border-blue-500/30 hover:border-blue-400/80",
+      shadowHover: "hover:shadow-[0_0_35px_rgba(37,99,235,0.28)]",
+      glowBg: "from-blue-600/20 via-blue-900/10 to-transparent",
+      btnTextColor: "text-blue-400 group-hover:text-blue-300",
+      btnArrowBg: "bg-blue-600/20 group-hover:bg-blue-600 text-blue-400 group-hover:text-white",
+      radioBorder: "border-blue-500",
+      radioDot: "bg-blue-500",
     },
     {
       id: "university" as PortalRole,
-      title: "University & Admissions",
-      titleFr: "Université & Admissions",
-      titleAr: "جامعة وإدارة القبول",
-      badge: "Institutional Desk • Moroccan Candidates",
+      title: lang === "ar" ? "جامعة (University)" : "University",
+      desc:
+        lang === "ar"
+          ? "التواصل مع الطلاب الدوليين وإدارة فرص المنح وبرامج القبول."
+          : "Connect with international students and manage your scholarship opportunities.",
       icon: Building2,
-      cardClass:
-        "bg-gradient-to-b from-[#241707] via-[#160d03] to-[#0a0601] border-2 border-amber-500 shadow-2xl shadow-amber-500/25 hover:shadow-amber-500/40 hover:border-amber-400",
-      badgeClass:
-        "bg-amber-500/25 text-amber-300 border border-amber-500/50 font-bold",
-      iconBoxClass:
-        "bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/40",
-      titleClass:
-        "text-white font-black group-hover:text-amber-300 transition-colors",
-      subClass: "text-amber-300 font-semibold italic",
-      descClass: "text-amber-100/85",
-      checkClass: "text-amber-400",
-      featTextClass: "text-white font-medium",
-      btnClass:
-        "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black shadow-lg shadow-amber-500/30",
-      description:
-        "Review Moroccan applicants applying through our platform, evaluate academic dossiers, modify university campus info, and adjust scholarship quotas.",
-      features: [
-        "Live Moroccan Applicant Pipeline (Review, Admit, Reject)",
-        "Modify School Information & Campus Profile",
-        "Manage Listed Scholarships & Seat Quotas",
-        "Demographics by Moroccan Cities & Qualifications",
-      ],
-      buttonText: "Enter University Admissions Desk",
+      color: "teal",
+      badgeBg: "bg-emerald-600",
+      borderClass: "border-emerald-500/30 hover:border-emerald-400/80",
+      shadowHover: "hover:shadow-[0_0_35px_rgba(16,185,129,0.28)]",
+      glowBg: "from-emerald-600/20 via-teal-900/10 to-transparent",
+      btnTextColor: "text-emerald-400 group-hover:text-emerald-300",
+      btnArrowBg: "bg-emerald-600/20 group-hover:bg-emerald-600 text-emerald-400 group-hover:text-white",
+      radioBorder: "border-emerald-500",
+      radioDot: "bg-emerald-500",
     },
     {
       id: "provider" as PortalRole,
-      title: "Certified Service Provider",
-      titleFr: "Prestataire Agréé (Traduction)",
-      titleAr: "مترجم محلف وتصديق وثائق",
-      badge: "Sworn Translators • Legalization Desk",
-      icon: FileCheck2,
-      cardClass:
-        "bg-gradient-to-b from-[#240a10] via-[#160408] to-[#0a0204] border-2 border-red-500 shadow-2xl shadow-red-500/25 hover:shadow-red-500/40 hover:border-red-400",
-      badgeClass:
-        "bg-rose-500/25 text-rose-300 border border-rose-500/50 font-bold",
-      iconBoxClass:
-        "bg-gradient-to-br from-rose-600 via-red-600 to-pink-600 text-white shadow-lg shadow-rose-600/40",
-      titleClass:
-        "text-white font-black group-hover:text-rose-300 transition-colors",
-      subClass: "text-rose-300 font-semibold italic",
-      descClass: "text-rose-100/85",
-      checkClass: "text-rose-400",
-      featTextClass: "text-white font-medium",
-      btnClass:
-        "bg-gradient-to-r from-rose-600 via-red-600 to-pink-600 hover:from-rose-500 hover:to-red-500 text-white font-black shadow-lg shadow-rose-600/30",
-      description:
-        "Manage Moroccan student document translation orders, inspect uploaded diplomas & transcripts, deliver certified sworn translations, and set service rates.",
-      features: [
-        "Moroccan Student Translation & Legalization Queue",
-        "Original Document Viewer (Transcripts / Diplomas / Bac)",
-        "Deliver Certified Sworn Mandarin Translations",
-        "Manage Service Offerings & Hourly Rates",
-      ],
-      buttonText: "Enter Provider Workspace",
+      title: lang === "ar" ? "مزود خدمات (Service Provider)" : "Service Provider",
+      desc:
+        lang === "ar"
+          ? "تقديم خدمات التأشيرة، الترجمة المحلفة، الوثائق وخدمات الدراسة بالخارج."
+          : "Offer visa, translation, document and study-abroad services.",
+      icon: Briefcase,
+      color: "purple",
+      badgeBg: "bg-purple-600",
+      borderClass: "border-purple-500/30 hover:border-purple-400/80",
+      shadowHover: "hover:shadow-[0_0_35px_rgba(168,85,247,0.28)]",
+      glowBg: "from-purple-600/20 via-purple-900/10 to-transparent",
+      btnTextColor: "text-purple-400 group-hover:text-purple-300",
+      btnArrowBg: "bg-purple-600/20 group-hover:bg-purple-600 text-purple-400 group-hover:text-white",
+      radioBorder: "border-purple-500",
+      radioDot: "bg-purple-500",
     },
   ];
 
+  function handleRoleClick(role: PortalRole) {
+    setChosenRoleForAuth(role);
+    try {
+      localStorage.setItem("portal_role", role);
+    } catch {}
+    onSelectRole(role);
+  }
+
+  function handleSignInClick() {
+    setChosenRoleForAuth("student");
+    setAuthModalOpen(true);
+  }
+
   return (
-    <>
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden bg-[#050e09] text-white transition-colors duration-300">
-        {/* Top Controls: Language & Theme Switcher */}
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+    <div className="relative min-h-screen bg-[#030712] text-slate-100 flex flex-col justify-between overflow-hidden selection:bg-cyan/30">
+      {/* High-Resolution Chinese Pagoda & Skyline Night Background */}
+      <div
+        className="absolute inset-0 bg-cover bg-bottom opacity-50 sm:opacity-60 pointer-events-none transition-opacity duration-1000"
+        style={{ backgroundImage: `url('${bgImage}')` }}
+      />
+
+      {/* Atmospheric Cinematic Gradients */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/75 to-[#030712]/95 pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
+
+      {/* Top Header Navigation */}
+      <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex items-center justify-between">
+        <div />
+
+        {/* Top Right Controls: Language & Theme Toggle */}
+        <div className="flex items-center gap-2 sm:gap-3 bg-slate-900/60 backdrop-blur-md p-1.5 rounded-full border border-white/10 shadow-lg">
           <LanguageSwitcher />
           <button
             onClick={toggle}
-            className="p-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white shadow-sm hover:scale-105 transition-all cursor-pointer"
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className="p-1.5 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
           >
             {theme === "dark" ? (
               <Sun className="w-4 h-4 text-amber-400" />
             ) : (
-              <Moon className="w-4 h-4 text-emerald-400" />
+              <Moon className="w-4 h-4 text-slate-300" />
             )}
           </button>
         </div>
+      </header>
 
-        {/* Radial ambient glow in background */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-emerald-500/15 via-cyan/15 to-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Main Content Area */}
+      <main className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col items-center justify-center flex-1">
+        {/* Brand Logo & Underline Glow */}
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center mb-6"
+        >
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 p-0.5 shadow-[0_0_25px_rgba(37,99,235,0.5)] flex items-center justify-center mb-2.5">
+            <Logo size={52} showText={false} />
+          </div>
+          <span className="text-xs sm:text-sm font-black tracking-[0.25em] text-white uppercase">
+            SCHOLAR<span className="text-blue-400">CHINA</span>
+          </span>
+          <div className="w-8 h-0.5 bg-blue-500 rounded-full mt-1.5 shadow-[0_0_10px_rgba(59,130,246,1)]" />
+        </motion.div>
 
-        <div className="max-w-6xl w-full mx-auto relative z-10 text-center">
-          {/* Emblem & Brand Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col items-center mb-8"
-          >
-            <div className="mb-3 hover:scale-105 transition-transform duration-300">
-              <Logo size={68} />
-            </div>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 font-mono text-xs font-bold tracking-wide uppercase mb-3 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              ScholarChina • Portal Access Verification
+        {/* Page Title: Who are you? */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-center mb-8 sm:mb-12"
+        >
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            {lang === "ar" ? "من أنت" : "Who are you"}
+            <span className="text-cyan drop-shadow-[0_0_20px_rgba(56,189,248,0.9)] ml-0.5">
+              ?
             </span>
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-2">
-              Who Are You? • Qui êtes-vous ? • من أنت؟
-            </h1>
-            <p className="text-base sm:text-xl font-bold bg-gradient-to-r from-emerald-300 via-cyan to-amber-300 bg-clip-text text-transparent mb-2">
-              Student • University Admissions • Service Provider
-            </p>
-            <p className="text-xs sm:text-sm text-emerald-100/80 max-w-2xl mx-auto">
-              Please identify your role to proceed. To protect institutional quotas and verify student applicants, authentication is mandatory before accessing platform content.
-            </p>
-          </motion.div>
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 font-normal mt-2.5 max-w-md mx-auto">
+            {lang === "ar"
+              ? "اختر صفتك للحصول على أفضل تجربة مخصصة لك."
+              : "Choose your role to get the right experience."}
+          </p>
+        </motion.div>
 
-          {/* 3 Portal Cards Grid with vibrant edge-matching colors */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-10 text-left">
-            {portals.map((p, idx) => {
-              const Icon = p.icon;
-              const isCurrent = currentRole === p.id;
+        {/* DESKTOP VIEW: 3 Side-by-Side Cards (Exactly matching Image 1) */}
+        <div className="hidden sm:grid sm:grid-cols-3 gap-5 sm:gap-6 w-full">
+          {roles.map((r, i) => (
+            <motion.div
+              key={r.id}
+              initial={{ opacity: 0, y: 25 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+              onClick={() => handleRoleClick(r.id)}
+              className={`relative rounded-3xl bg-slate-900/65 backdrop-blur-xl border ${r.borderClass} ${r.shadowHover} p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 group cursor-pointer overflow-hidden`}
+            >
+              {/* Subtle top inner gradient */}
+              <div
+                className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${r.glowBg} pointer-events-none rounded-t-3xl`}
+              />
 
-              return (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: idx * 0.12 }}
-                  onClick={() => handleTriggerRole(p.id)}
-                  className={`group rounded-3xl p-6 sm:p-7 transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden hover:-translate-y-2 ${p.cardClass} ${
-                    isCurrent ? "ring-4 ring-emerald-400" : ""
+              <div className="relative z-10">
+                {/* Role Icon Badge */}
+                <div
+                  className={`w-13 h-13 rounded-2xl ${r.badgeBg} text-white flex items-center justify-center shadow-lg shadow-black/40 mb-6 group-hover:scale-105 transition-transform duration-300`}
+                >
+                  <r.icon className="w-6 h-6 text-white" />
+                </div>
+
+                {/* Role Title */}
+                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
+                  {r.title}
+                </h3>
+
+                {/* Role Description */}
+                <p className="text-xs text-slate-300 leading-relaxed mb-8">
+                  {r.desc}
+                </p>
+              </div>
+
+              {/* Bottom Continue Row */}
+              <div className="relative z-10 flex items-center justify-between pt-2 border-t border-white/5">
+                <span className={`text-xs sm:text-sm font-bold ${r.btnTextColor}`}>
+                  {lang === "ar" ? "متابعة" : "Continue"}
+                </span>
+                <div
+                  className={`w-8 h-8 rounded-full ${r.btnArrowBg} flex items-center justify-center transition-all duration-300`}
+                >
+                  <ArrowRight className="w-4 h-4 rtl-flip" />
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* MOBILE VIEW: Vertical List with Radio Circles (Matching Image 1 iPhone View) */}
+        <div className="flex sm:hidden flex-col gap-3 w-full">
+          {roles.map((r) => {
+            const isSelected = selectedMobileRole === r.id;
+            return (
+              <div
+                key={r.id}
+                onClick={() => {
+                  setSelectedMobileRole(r.id);
+                  handleRoleClick(r.id);
+                }}
+                className={`p-4 rounded-2xl bg-slate-900/75 backdrop-blur-xl border transition-all duration-300 flex items-center justify-between gap-3 cursor-pointer ${
+                  isSelected ? `${r.borderClass} shadow-lg` : "border-white/10"
+                }`}
+              >
+                <div className="flex items-center gap-3.5">
+                  <div
+                    className={`w-11 h-11 rounded-xl ${r.badgeBg} text-white flex items-center justify-center flex-shrink-0 shadow-md`}
+                  >
+                    <r.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-sm font-bold text-white">{r.title}</h4>
+                    <p className="text-[11px] text-slate-400 line-clamp-2 mt-0.5 leading-snug">
+                      {r.desc}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Radio selection circle on the right */}
+                <div
+                  className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isSelected ? `${r.radioBorder} ${r.radioDot}` : "border-slate-500"
                   }`}
                 >
-                  {/* Top Badge & Active Indicator */}
-                  <div className="flex items-center justify-between gap-2 mb-5">
-                    <span
-                      className={`text-[10px] sm:text-xs font-mono uppercase px-3 py-1 rounded-full ${p.badgeClass}`}
-                    >
-                      {p.badge}
-                    </span>
-                    {isCurrent && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950">
-                        Active
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Role Icon & Title */}
-                  <div>
-                    <div
-                      className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${p.iconBoxClass} group-hover:scale-110 transition-transform`}
-                    >
-                      <Icon className="w-7 h-7" />
-                    </div>
-
-                    <h3 className={`text-xl sm:text-2xl mb-1 tracking-tight ${p.titleClass}`}>
-                      {p.title}
-                    </h3>
-                    <p className={`text-xs mb-3 ${p.subClass}`}>
-                      {p.titleFr} • {p.titleAr}
-                    </p>
-
-                    <p className={`text-xs sm:text-sm leading-relaxed mb-6 ${p.descClass}`}>
-                      {p.description}
-                    </p>
-
-                    {/* Bullet Highlights */}
-                    <div className="space-y-2.5 mb-6 pt-4 border-t border-white/10">
-                      {p.features.map((feat, fIdx) => (
-                        <div key={fIdx} className="flex items-start gap-2 text-xs">
-                          <CheckCircle2
-                            className={`w-4 h-4 flex-shrink-0 mt-0.5 ${p.checkClass}`}
-                          />
-                          <span className={p.featTextClass}>{feat}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Action CTA Button */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleTriggerRole(p.id);
-                    }}
-                    className={`w-full py-3.5 px-4 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer hover:brightness-110 ${p.btnClass}`}
-                  >
-                    <span>{p.buttonText}</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Bottom Switcher Note */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="flex flex-wrap items-center justify-center gap-4 text-xs text-emerald-100/70"
-          >
-            <span className="flex items-center gap-1.5 font-medium">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              Global gateway connecting scholars directly to Chinese universities & CSC scholarships
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <Globe2 className="w-4 h-4 text-cyan" />
-              Full bilingual support: English, Français, العربية
-            </span>
-          </motion.div>
+                  {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
 
-      {/* Imposed Auth Gate Modal upon role selection */}
+        {/* Already have an account? Sign in */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="text-center mt-8 sm:mt-10 text-xs sm:text-sm text-slate-400"
+        >
+          <span>
+            {lang === "ar" ? "هل لديك حساب بالفعل؟" : "Already have an account?"}{" "}
+          </span>
+          <button
+            onClick={handleSignInClick}
+            className="text-blue-400 hover:text-blue-300 font-bold hover:underline transition-colors cursor-pointer"
+          >
+            {lang === "ar" ? "تسجيل الدخول" : "Sign in"}
+          </button>
+        </motion.div>
+      </main>
+
+      {/* Empty bottom spacer for balance */}
+      <footer className="relative z-10 w-full py-3" />
+
+      {/* Sign-in / Register Modal Gate */}
       <AuthGateModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        onBackToRoles={() => setAuthModalOpen(false)}
-        role={chosenRole}
-        canClose={true}
+        role={chosenRoleForAuth}
+        title={
+          chosenRoleForAuth === "student"
+            ? "Student Sign In"
+            : chosenRoleForAuth === "university"
+            ? "University Admissions Sign In"
+            : "Service Provider Sign In"
+        }
+        subtitle="Sign in to access your customized ScholarChina workspace."
         onSuccess={() => {
           setAuthModalOpen(false);
-          onSelectRole(chosenRole);
+          onSelectRole(chosenRoleForAuth);
         }}
       />
-    </>
+    </div>
   );
 }
