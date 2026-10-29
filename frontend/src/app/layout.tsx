@@ -38,12 +38,22 @@ export default function RootLayout({
                   document.documentElement.lang = 'fr';
                   document.documentElement.dir = 'ltr';
                 }
-              } catch(e) {}
+
+                // Enforce Dark Mode as the Default Theme
+                var t = localStorage.getItem('theme');
+                if (!t || t === 'light') {
+                  localStorage.setItem('theme', 'dark');
+                }
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+              } catch(e) {
+                document.documentElement.classList.add('dark');
+              }
             `,
           }}
         />
       </head>
-      <body className="min-h-full bg-background text-foreground antialiased">
+      <body className="min-h-full bg-[#030712] text-foreground antialiased selection:bg-cyan/30">
         <ThemeProvider>
           <LanguageProvider>
             <RouteTracker />

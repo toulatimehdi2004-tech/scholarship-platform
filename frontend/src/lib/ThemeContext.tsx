@@ -20,10 +20,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = (localStorage.getItem('theme') as Theme) || 'dark';
-    setTheme(savedTheme);
-    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-    document.documentElement.classList.toggle('light', savedTheme === 'light');
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
+    // Default to dark mode across all pages
+    const activeTheme: Theme = (!raw || raw === 'light') ? 'dark' : (raw as Theme);
+    setTheme(activeTheme);
+    try {
+      localStorage.setItem('theme', activeTheme);
+    } catch {}
+    document.documentElement.classList.toggle('dark', activeTheme === 'dark');
+    document.documentElement.classList.toggle('light', activeTheme === 'light');
     // Remove obsolete colorTheme attributes if present
     document.documentElement.removeAttribute('data-color-theme');
     try {

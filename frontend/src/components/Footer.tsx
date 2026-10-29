@@ -29,13 +29,13 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative z-10 mt-20 border-t border-slate-200/90 dark:border-white/10 bg-slate-50/90 dark:bg-slate-950/80 backdrop-blur-xl transition-colors duration-300">
+    <footer className="relative z-10 mt-20 border-t border-white/10 bg-slate-950/80 backdrop-blur-xl transition-colors duration-300">
       {/* Decorative top accent glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-4xl h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
         {/* Top Branding & Verification Ribbon */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12 border-b border-slate-200/80 dark:border-white/10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12 border-b border-white/10 items-start">
           <div className="lg:col-span-5 space-y-4">
             <Link href="/" className="inline-flex items-center gap-3 group">
               <Logo size={42} showText={false} />
@@ -75,7 +75,7 @@ export default function Footer() {
 
           {/* Rabat Embassy & Academic Notice Box */}
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10">
               <div className="flex items-center gap-2 mb-2 text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 <MapPin className="w-4 h-4 text-rose-500" />
                 <span>{t("footer.supEmbassy")}</span>
@@ -89,7 +89,7 @@ export default function Footer() {
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none">
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10">
               <div className="flex items-center gap-2 mb-2 text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 <Award className="w-4 h-4 text-amber-500" />
                 <span>{t("footer.badgeAdmissions")}</span>
@@ -359,10 +359,10 @@ export default function Footer() {
         </div>
 
         {/* Bottom Sub-footer */}
-        <div className="pt-8 border-t border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-text-muted">
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted">
           <div className="flex items-center gap-2 text-center sm:text-left">
             <span>
-              &copy; {new Date().getFullYear()} <strong className="text-slate-700 dark:text-text-secondary">ScholarChina</strong>. {t("footer.rights")}
+              &copy; {new Date().getFullYear()} <strong className="text-text-secondary">ScholarChina</strong>. {t("footer.rights")}
             </span>
           </div>
 
@@ -372,21 +372,21 @@ export default function Footer() {
               <Globe className="w-3.5 h-3.5 text-slate-400" />
               <button
                 onClick={() => setLang("en")}
-                className={`hover:text-blue-600 dark:hover:text-cyan transition-colors ${lang === "en" ? "text-blue-600 dark:text-cyan font-bold" : ""}`}
+                className={`hover:text-cyan transition-colors ${lang === "en" ? "text-cyan font-bold" : ""}`}
               >
                 EN
               </button>
               <span>•</span>
               <button
                 onClick={() => setLang("fr")}
-                className={`hover:text-blue-600 dark:hover:text-cyan transition-colors ${lang === "fr" ? "text-blue-600 dark:text-cyan font-bold" : ""}`}
+                className={`hover:text-cyan transition-colors ${lang === "fr" ? "text-cyan font-bold" : ""}`}
               >
                 FR
               </button>
               <span>•</span>
               <button
                 onClick={() => setLang("ar")}
-                className={`hover:text-blue-600 dark:hover:text-cyan transition-colors ${lang === "ar" ? "text-blue-600 dark:text-cyan font-bold" : ""}`}
+                className={`hover:text-cyan transition-colors ${lang === "ar" ? "text-cyan font-bold" : ""}`}
               >
                 العربية
               </button>
@@ -395,7 +395,7 @@ export default function Footer() {
             {/* Back to top button */}
             <button
               onClick={scrollToTop}
-              className="p-2 rounded-xl bg-slate-200/80 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-700 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-all flex items-center gap-1 cursor-pointer"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-text-secondary hover:text-cyan transition-all flex items-center gap-1 cursor-pointer"
               title={t("footer.backToTop")}
             >
               <ChevronUp className="w-4 h-4" />
