@@ -19,6 +19,8 @@ import {
   ArrowRight,
   Menu,
   X,
+  Stethoscope,
+  Stamp,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import { useLang } from "@/lib/i18n";
@@ -33,6 +35,8 @@ export type SidebarActiveTab =
   | "services"
   | "saved"
   | "documents"
+  | "medical"
+  | "morocco"
   | "messages"
   | "profile"
   | "settings";
@@ -112,6 +116,19 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
       href: "/documents",
       label: lang === "ar" ? "الوثائق" : "Documents",
       icon: FileCheck,
+    },
+    {
+      id: "medical",
+      href: "/medical-guide",
+      label: lang === "ar" ? "الفحص الطبي" : "Visite Médicale",
+      icon: Stethoscope,
+      badge: "CSC",
+    },
+    {
+      id: "morocco",
+      href: "/morocco-guide",
+      label: lang === "ar" ? "دليل المغرب" : "Guide Maroc (Apostille)",
+      icon: Stamp,
     },
     {
       id: "messages",

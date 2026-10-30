@@ -65,7 +65,14 @@ export default function ServicesPage() {
         lang === "ar"
           ? "مقدمو الخدمة ملزمون بالإقامة سنة كاملة على الأقل في الصين لضمان سلامة وخبرة المرافقة."
           : "Chaque chauffeur/accompagnateur a au minimum 1 an de résidence en Chine pour maîtriser le chinois, le réseau TGV et les formalités campus.",
-      cities: ["Beijing (PEK/PKX)", "Shanghai (PVG/SHA)", "Hangzhou (HGH)", "Guangzhou (CAN)", "Wuhan (WUH)", "Chengdu (TFU)"],
+      cities: [
+        "Beijing (PEK/PKX)",
+        "Shanghai (PVG/SHA)",
+        "Hangzhou (HGH)",
+        "Guangzhou (CAN)",
+        "Wuhan (WUH)",
+        "Chengdu (TFU)",
+      ],
       icon: Plane,
       color: "from-blue-500 to-indigo-600",
       accent: "border-blue-500/40 text-blue-400",
@@ -125,13 +132,13 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-8 max-w-7xl mx-auto">
+    <div className="min-h-screen px-4 sm:px-6 py-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="mb-8">
+      <div>
         <SmartBack fallback="/" label={lang === "ar" ? "الرئيسية" : "Home"} />
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-cyan/15 text-cyan border border-cyan/30 mb-2.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>
                 {lang === "ar"
@@ -139,22 +146,22 @@ export default function ServicesPage() {
                   : "Certified Academic & Arrival Services"}
               </span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-text-primary tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
               {lang === "ar"
                 ? "خدمات الترجمة المحلفة والاستقبال بالمطار الصيني"
                 : "Sworn Translation & China Airport Arrival Support"}
             </h1>
-            <p className="text-xs sm:text-base text-slate-600 dark:text-text-secondary mt-1 max-w-3xl">
+            <p className="text-xs sm:text-base text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
               {lang === "ar"
                 ? "حلول متكاملة ومعتمدة لمرافقة الطلاب المغاربة والدوليين من ترجمة الوثائق بالرباط حتى الوصول إلى غرفتك الجامعية في الصين."
                 : "Official partner services designed for Moroccan & international students, from certified document translations to airport reception and dorm check-in."}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-center">
             <Link
               href="/provider-portal"
-              className="px-4 py-2 rounded-xl text-xs font-bold glass hover:bg-white/10 text-purple-600 dark:text-purple border border-purple-500/30 flex items-center gap-1.5 transition-all shadow-sm"
+              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-cyan border border-cyan/30 flex items-center gap-2 transition-all shadow-lg shadow-cyan/10"
             >
               <span>💼 Provider Bureau Desk</span>
             </Link>
@@ -163,7 +170,7 @@ export default function ServicesPage() {
       </div>
 
       {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {services.map((srv) => {
           const Icon = srv.icon;
           return (
@@ -171,46 +178,54 @@ export default function ServicesPage() {
               key={srv.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-white/10 hover:border-blue-500/40 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between"
+              className="rounded-3xl p-6 sm:p-7 bg-[#091122]/90 border border-white/10 hover:border-cyan/40 backdrop-blur-xl shadow-2xl transition-all flex flex-col justify-between group"
             >
               <div>
+                {/* Header Icon + Price */}
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <div
-                    className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${srv.color} text-white flex items-center justify-center shadow-md`}
+                    className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${srv.color} text-white flex items-center justify-center shadow-lg shadow-blue-500/20`}
                   >
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400 text-lg">
+                  <span className="text-xs font-mono font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-xl text-base sm:text-lg">
                     {lang === "ar" ? srv.priceAr : srv.price}
                   </span>
                 </div>
 
-                <div className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-text-muted mb-2">
-                  {srv.badge}
+                {/* Badge */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-cyan/15 border border-cyan/30 text-cyan mb-3">
+                  <Sparkles className="w-3 h-3 text-cyan" />
+                  <span>{srv.badge}</span>
                 </div>
 
-                <h3 className="text-lg font-bold text-slate-900 dark:text-text-primary leading-snug mb-2">
+                {/* Service Name / Title */}
+                <h3 className="text-lg sm:text-xl font-black text-white leading-snug mb-2 group-hover:text-cyan transition-colors">
                   {srv.name}
                 </h3>
 
-                <p className="text-xs text-slate-600 dark:text-text-secondary leading-relaxed mb-4">
+                {/* Description */}
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
                   {srv.desc}
                 </p>
 
                 {/* Requirement / Highlight Box */}
-                <div className="p-3 rounded-2xl bg-blue-50/80 dark:bg-white/[0.03] border border-blue-200/70 dark:border-white/5 text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed mb-4 flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-2xl bg-blue-950/40 border border-blue-500/30 text-xs text-blue-200 leading-relaxed mb-4 flex items-start gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-cyan flex-shrink-0 mt-0.5" />
                   <span>{srv.highlight}</span>
                 </div>
 
                 {/* Cities Covered */}
-                <div className="space-y-1 mb-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="space-y-1.5 mb-6">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                     {lang === "ar" ? "المدن والمطارات المغطاة:" : "Covered Hubs & Airports:"}
                   </p>
-                  <div className="flex flex-wrap gap-1 text-[11px] text-slate-600 dark:text-text-muted">
+                  <div className="flex flex-wrap gap-1.5">
                     {srv.cities.map((c) => (
-                      <span key={c} className="px-2 py-0.5 rounded bg-slate-100 dark:bg-white/5">
+                      <span
+                        key={c}
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/[0.05] border border-white/10 text-slate-200 hover:border-cyan/30 hover:bg-white/10 transition-all"
+                      >
                         {c}
                       </span>
                     ))}
@@ -218,13 +233,14 @@ export default function ServicesPage() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
+              {/* Action Button */}
+              <div className="pt-4 border-t border-white/10">
                 <Link
                   href="/ai-chat"
-                  className="w-full py-2.5 rounded-xl btn-gradient text-xs font-bold flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan text-white text-xs font-black flex items-center justify-center gap-2 shadow-xl shadow-blue-600/25 hover:shadow-cyan/30 hover:scale-[1.01] transition-all cursor-pointer"
                 >
                   <span>{lang === "ar" ? "حجز الخدمة الآن" : "Book This Service"}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </motion.div>
@@ -233,18 +249,18 @@ export default function ServicesPage() {
       </div>
 
       {/* Airport Pickup 1-Year Residency Explanatory Notice */}
-      <div className="glass rounded-3xl p-6 sm:p-8 border border-blue-500/30 bg-gradient-to-r from-blue-500/10 via-slate-50 to-purple/5 dark:from-blue-500/10 dark:via-transparent dark:to-purple/5 mb-12">
+      <div className="rounded-3xl p-6 sm:p-8 bg-[#091122]/90 border border-blue-500/30 backdrop-blur-xl shadow-2xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-cyan flex items-center justify-center flex-shrink-0">
             <Car className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-text-primary">
+            <h3 className="text-base sm:text-lg font-black text-white">
               {lang === "ar"
                 ? "لماذا يشترط سنة كاملة من الإقامة في الصين لمقدمي خدمة التوصيل؟"
                 : "Why does ScholarChina require 1 full year of China residency for Airport Pickup providers?"}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-text-secondary mt-1 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
               {lang === "ar"
                 ? "وصول الطالب لأول مرة إلى الصين يرافقه تحديات لغوية، وإجراءات جمركية، وتغيير العملة وشراء شريحة اتصال صينية. المشرفون الذين عاشوا سنة كاملة على الأقل في الصين يمتلكون المعرفة التامة بمحطات القطار السريع، وتطبيقات النقل (Didi)، وإجراءات التسجيل في السكن الجامعي، مما يضمن أمان وراحة الطالب وعائلته."
                 : "First-time arrivals in China face customs inspection, language hurdles, local taxi booking, and Chinese SIM registration. Only residents with at least 1 year in China have proven familiarity with high-speed rail, airport terminals, and campus dorm check-in procedures, ensuring complete peace of mind for students and families."}
@@ -260,7 +276,11 @@ export default function ServicesPage() {
         canClose={false}
         role="student"
         title={lang === "ar" ? "تسجيل دخول الطلاب" : "Student Access Required"}
-        subtitle={lang === "ar" ? "سجل الدخول لحجز خدمات الاستقبال في المطار والترجمة المحلفة المعتمدة في الصين." : "Sign in to book airport pickup, certified sworn translation, and visa legalization services."}
+        subtitle={
+          lang === "ar"
+            ? "سجل الدخول لحجز خدمات الاستقبال في المطار والترجمة المحلفة المعتمدة في الصين."
+            : "Sign in to book airport pickup, certified sworn translation, and visa legalization services."
+        }
         onSuccess={() => {
           setShowAuthGate(false);
           window.location.reload();

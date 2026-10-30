@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   Check,
   Info,
+  Copy,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
@@ -190,6 +191,63 @@ function getUniversityAvatarColor(name: string): { bg: string; letter: string } 
   return { bg, letter };
 }
 
+const AGENCY_NUMBERS_MAP: Record<string, string> = {
+  "peking university": "10001",
+  "tsinghua university": "10003",
+  "beihang university": "10006",
+  "beijing institute of technology": "10007",
+  "beijing language and culture university": "10032",
+  "nankai university": "10055",
+  "tianjin university": "10056",
+  "dalian university of technology": "10141",
+  "jilin university": "10183",
+  "harbin institute of technology": "10213",
+  "fudan university": "10246",
+  "tongji university": "10247",
+  "shanghai jiao tong university": "10248",
+  "east china normal university": "10269",
+  "nanjing university": "10284",
+  "southeast university": "10286",
+  "zhejiang university": "10335",
+  "university of science and technology of china": "10358",
+  "xiamen university": "10384",
+  "shandong university": "10422",
+  "wuhan university": "10486",
+  "huazhong university of science and technology": "10487",
+  "central south university": "10533",
+  "sun yat-sen university": "10558",
+  "south china university of technology": "10561",
+  "sichuan university": "10610",
+  "chongqing university": "10611",
+  "university of electronic science and technology of china": "10614",
+  "xi'an jiaotong university": "10698",
+  "northwestern polytechnical university": "10699",
+  "chengdu neusoft university": "13580",
+};
+
+const ZERO_FEE_KEYWORDS = [
+  "harbin institute of technology",
+  "science and technology of china",
+  "beihang university",
+  "tongji university",
+  "dalian university of technology",
+  "northwestern polytechnical university",
+  "chinese academy of sciences",
+];
+
+function getUniversityAgencyNumber(name: string): string | null {
+  const lower = (name || "").toLowerCase();
+  for (const [key, code] of Object.entries(AGENCY_NUMBERS_MAP)) {
+    if (lower.includes(key)) return code;
+  }
+  return null;
+}
+
+function isZeroFeeUniversity(name: string): boolean {
+  const lower = (name || "").toLowerCase();
+  return ZERO_FEE_KEYWORDS.some((k) => lower.includes(k));
+}
+
 export default function ScholarshipsPage() {
   const router = useRouter();
   const { t, lang } = useLang();
@@ -209,6 +267,8 @@ export default function ScholarshipsPage() {
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
   const [savedFavorites, setSavedFavorites] = useState<number[]>([1, 2, 3]);
   const [filterSavedOnly, setFilterSavedOnly] = useState(false);
+  const [filterZeroFeeOnly, setFilterZeroFeeOnly] = useState(false);
+  const [copiedAgencyId, setCopiedAgencyId] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -399,6 +459,11 @@ export default function ScholarshipsPage() {
         }
       }
 
+      // 5. Zero RMB Application fee filter
+      if (filterZeroFeeOnly && !isZeroFeeUniversity(u.name)) {
+        continue;
+      }
+
       const hasBachelor = u.allSch.some((s) => matchesLevel(s.level, "bachelor"));
       const hasMaster = u.allSch.some((s) => matchesLevel(s.level, "master"));
       const hasPhd = u.allSch.some((s) => matchesLevel(s.level, "phd"));
@@ -420,7 +485,7 @@ export default function ScholarshipsPage() {
     }
 
     return result.sort((a, b) => a.name.localeCompare(b.name));
-  }, [allScholarships, uniInfo, filterSavedOnly, savedFavorites, selectedCity, searchQuery, selectedLevel, selectedType]);
+  }, [allScholarships, uniInfo, filterSavedOnly, filterZeroFeeOnly, savedFavorites, selectedCity, searchQuery, selectedLevel, selectedType]);
 
   const selectedUniEntry = useMemo(
     () => universities.find((u) => u.id === selectedUni) || null,
@@ -703,7 +768,7 @@ export default function ScholarshipsPage() {
         {/* ─────────────────────────────────────────────────────────────
             3. CSCA NOTICE BANNER (Matching Screenshot 1)
         ───────────────────────────────────────────────────────────── */}
-        <div className="px-4 sm:px-8 pt-5">
+        <div className="px-4 sm:px-8 pt-5 space-y-3">
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
@@ -725,6 +790,36 @@ export default function ScholarshipsPage() {
             >
               <span>{lang === "ar" ? "محاكي CSCA ➔" : "Simulateur CSCA ➔"}</span>
             </Link>
+          </motion.div>
+
+          {/* Moroccan Student Direct Guidance & Anti-Fraud Capsule */}
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-[#0c152b]/90 border border-emerald-500/30 p-3 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-lg shadow-emerald-950/20 backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-3 text-left">
+              <span className="flex-shrink-0 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-black tracking-wider uppercase flex items-center gap-1">
+                🇲🇦 GUIDE ÉTUDIANT MAROC
+              </span>
+              <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
+                Bourses gouvernementales (CSC) <strong>100% gratuites</strong> : ne payez aucun intermédiaire privé (15 000 à 45 000 DH). Procédures officielles vérifiées.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+              <Link
+                href="/morocco-guide"
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all flex items-center gap-1.5"
+              >
+                <span>Apostille & Démarches</span>
+              </Link>
+              <Link
+                href="/medical-guide"
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-emerald-950/40"
+              >
+                <span>🩺 Visite Médicale (Tampon Photo)</span>
+              </Link>
+            </div>
           </motion.div>
         </div>
 
@@ -895,12 +990,24 @@ export default function ScholarshipsPage() {
                     </button>
                   );
                 })}
+                <div className="h-5 w-px bg-white/10 mx-1 flex-shrink-0" />
+                <button
+                  onClick={() => setFilterZeroFeeOnly(!filterZeroFeeOnly)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
+                    filterZeroFeeOnly
+                      ? "bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/30 ring-1 ring-white/30 scale-102"
+                      : "bg-white/5 text-slate-300 hover:text-white border border-white/5"
+                  }`}
+                >
+                  <span>⚡ 0 RMB Application Fee</span>
+                </button>
               </div>
 
               {/* Active Filter Indicator & Reset Bar */}
               {(selectedLevel !== "All Levels" ||
                 selectedType !== "All Types" ||
                 selectedCity !== "All Cities" ||
+                filterZeroFeeOnly ||
                 Boolean(searchQuery)) && (
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-2 p-3 sm:p-3.5 rounded-2xl bg-blue-600/10 border border-blue-500/25 text-xs">
                   <div className="flex flex-wrap items-center gap-2">
@@ -943,6 +1050,18 @@ export default function ScholarshipsPage() {
                         </button>
                       </span>
                     )}
+                    {filterZeroFeeOnly && (
+                      <span className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-extrabold flex items-center gap-1.5 shadow-md">
+                        <span>⚡ 0 RMB Application Fee</span>
+                        <button
+                          onClick={() => setFilterZeroFeeOnly(false)}
+                          className="hover:text-rose-200 ml-1 cursor-pointer font-black"
+                          title="Clear fee filter"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    )}
                     {searchQuery && (
                       <span className="px-2.5 py-1 rounded-xl bg-white/10 text-white border border-white/20 font-extrabold flex items-center gap-1.5">
                         <span>🔍 "{searchQuery}"</span>
@@ -965,6 +1084,7 @@ export default function ScholarshipsPage() {
                       setSelectedLevel("All Levels");
                       setSelectedType("All Types");
                       setSelectedCity("All Cities");
+                      setFilterZeroFeeOnly(false);
                       setSearchQuery("");
                     }}
                     className="text-xs text-rose-400 hover:text-rose-300 font-extrabold underline underline-offset-2 cursor-pointer"
@@ -1093,6 +1213,40 @@ export default function ScholarshipsPage() {
                                 Double First Class
                               </span>
                             </div>
+
+                            {/* Top Right: Agency Number & 0 RMB Fee */}
+                            {(() => {
+                              const agencyCode = getUniversityAgencyNumber(uni.name);
+                              const isZero = isZeroFeeUniversity(uni.name);
+                              return (
+                                <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+                                  {isZero && (
+                                    <span className="px-2 py-0.5 rounded-full bg-emerald-950/80 backdrop-blur-md border border-emerald-500/50 text-[10px] font-bold text-emerald-300">
+                                      0 RMB Fee
+                                    </span>
+                                  )}
+                                  {agencyCode && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard.writeText(agencyCode);
+                                        setCopiedAgencyId(uni.id);
+                                        setTimeout(() => setCopiedAgencyId(null), 2000);
+                                      }}
+                                      title="Code officiel CSC (Agency Number) à saisir sur studyinchina.csc.edu.cn - Cliquer pour copier"
+                                      className="px-2 py-0.5 rounded-full bg-slate-950/85 hover:bg-slate-900 backdrop-blur-md border border-cyan/40 text-[10px] font-bold text-cyan flex items-center gap-1 transition-colors"
+                                    >
+                                      <span>Agency: {agencyCode}</span>
+                                      {copiedAgencyId === uni.id ? (
+                                        <Check className="w-2.5 h-2.5 text-emerald-400" />
+                                      ) : (
+                                        <Copy className="w-2.5 h-2.5 text-slate-400" />
+                                      )}
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })()}
 
                             {/* Bottom: Dynamic Scholarship count badge reflecting active filter */}
                             <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-xs">

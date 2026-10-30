@@ -32,17 +32,18 @@ interface NavItem {
   href: string;
   label: string;
   badge?: string;
+  customLabel?: string;
 }
 
-const navKeys: { href: string; key: string; badge?: string }[] = [
+const navKeys: { href: string; key: string; badge?: string; customLabel?: string }[] = [
   { href: "/student-portal", key: "nav.home" },
   { href: "/scholarships", key: "nav.scholarships" },
   { href: "/universities", key: "nav.universities" },
+  { href: "/medical-guide", key: "nav.medical", customLabel: "Visite Médicale", badge: "CSC" },
+  { href: "/morocco-guide", key: "nav.morocco", customLabel: "Guide Maroc" },
   { href: "/csca", key: "nav.csca", badge: "NEW" },
-  { href: "/stories", key: "nav.stories" },
   { href: "/tracker", key: "nav.tracker" },
   { href: "/ai-chat", key: "nav.aiChat" },
-  { href: "/dashboard", key: "nav.dashboard" },
 ];
 
 export default function Navbar() {
@@ -135,7 +136,11 @@ export default function Navbar() {
         { href: "/scholarships", label: t("nav.scholarships") },
       ];
     }
-    return navKeys.map((link) => ({ href: link.href, label: t(link.key), badge: link.badge }));
+    return navKeys.map((link) => ({
+      href: link.href,
+      label: link.customLabel || t(link.key),
+      badge: link.badge,
+    }));
   };
 
   return (
