@@ -61,6 +61,60 @@ interface UniEntry {
   country: string;
   verified: boolean;
   count: number;
+  matchingCount: number;
+  hasBachelor: boolean;
+  hasMaster: boolean;
+  hasPhd: boolean;
+  hasOther: boolean;
+}
+
+function matchesLevel(scholarshipLevel: string, filterLevel: string): boolean {
+  if (!filterLevel || filterLevel === "All Levels") return true;
+  const s = (scholarshipLevel || "").toLowerCase().trim();
+  const f = filterLevel.toLowerCase().trim();
+
+  // If scholarship is open to "all" levels (like CSC Bilateral Scheme), it fits Bachelor, Master, PhD
+  if (s === "all") return true;
+
+  if (f === "bachelor") {
+    return s === "bachelor" || s === "licence" || s === "undergraduate";
+  }
+  if (f === "master") {
+    return s === "master" || s === "postgraduate" || s === "magister";
+  }
+  if (f === "phd") {
+    return s === "phd" || s === "doctorat" || s === "doctoral";
+  }
+  if (f === "other") {
+    return (
+      s === "other" ||
+      s === "language" ||
+      s === "foundation" ||
+      s === "hsk" ||
+      s === "chinese"
+    );
+  }
+  return s === f;
+}
+
+function matchesType(scholarshipType: string, filterType: string): boolean {
+  if (!filterType || filterType === "All Types") return true;
+  const s = (scholarshipType || "").toLowerCase().trim();
+  const f = filterType.toLowerCase().trim();
+
+  if (f === "full") {
+    return s === "full";
+  }
+  if (f === "partial") {
+    return (
+      s === "partial" ||
+      s === "tuition" ||
+      s === "living" ||
+      s === "research" ||
+      s === "other"
+    );
+  }
+  return s === f;
 }
 
 const CAMPUS_PHOTO_MAP: Record<string, string> = {
@@ -245,10 +299,20 @@ export default function ScholarshipsPage() {
         name: s.university_name || info?.name || "Chinese University",
         city: s.university_city || info?.city || "China",
         country: (s as any).university_country || info?.country || "China",
-        verified: info?.is_verified || true,
+        verified: info?.is_verified ?? true,
         count: 0,
+        matchingCount: 0,
+        hasBachelor: false,
+        hasMaster: false,
+        hasPhd: false,
+        hasOther: false,
       };
       entry.count += 1;
+      entry.matchingCount += 1;
+      if (matchesLevel(s.level, "bachelor")) entry.hasBachelor = true;
+      if (matchesLevel(s.level, "master")) entry.hasMaster = true;
+      if (matchesLevel(s.level, "phd")) entry.hasPhd = true;
+      if (matchesLevel(s.level, "other")) entry.hasOther = true;
       if (s.university_name) entry.name = s.university_name;
       if (s.university_city) entry.city = s.university_city;
       map.set(id, entry);
@@ -265,23 +329,98 @@ export default function ScholarshipsPage() {
   }, [universities]);
 
   const filteredUnis = useMemo(() => {
-    let r = universities;
-    if (filterSavedOnly) {
-      r = r.filter((u) => savedFavorites.includes(u.id));
+    const uniMap = new Map<number, {
+      id: number;
+      name: string;
+      city: string;
+      country: string;
+      verified: boolean;
+      totalCount: number;
+      allSch: Scholarship[];
+    }>();
+
+    for (const s of allScholarships) {
+      const id = Number(s.university);
+      const info = uniInfo.get(id);
+      if (!uniMap.has(id)) {
+        uniMap.set(id, {
+          id,
+          name: s.university_name || info?.name || "Chinese University",
+          city: s.university_city || info?.city || "China",
+          country: (s as any).university_country || info?.country || "China",
+          verified: info?.is_verified ?? true,
+          totalCount: 0,
+          allSch: [],
+        });
+      }
+      const entry = uniMap.get(id)!;
+      entry.totalCount += 1;
+      entry.allSch.push(s);
+      if (s.university_name) entry.name = s.university_name;
+      if (s.university_city) entry.city = s.university_city;
     }
-    if (selectedCity !== "All Cities") {
-      r = r.filter((u) => u.city === selectedCity);
+
+    const q = searchQuery.toLowerCase().trim();
+    const result: UniEntry[] = [];
+
+    for (const u of uniMap.values()) {
+      // 1. Saved filter
+      if (filterSavedOnly && !savedFavorites.includes(u.id)) {
+        continue;
+      }
+
+      // 2. City filter
+      if (selectedCity !== "All Cities" && u.city !== selectedCity) {
+        continue;
+      }
+
+      // 3. Search query filter
+      const matchesSearch =
+        !q ||
+        u.name.toLowerCase().includes(q) ||
+        u.city.toLowerCase().includes(q) ||
+        u.allSch.some((s) => s.title.toLowerCase().includes(q));
+
+      if (!matchesSearch) {
+        continue;
+      }
+
+      // 4. Count scholarships matching active Level & Type filters
+      const matchingScholarships = u.allSch.filter((s) => {
+        const levelMatch = matchesLevel(s.level, selectedLevel);
+        const typeMatch = matchesType(s.type, selectedType);
+        return levelMatch && typeMatch;
+      });
+
+      // If active filter requires specific Level or Type and university has 0 matching scholarships, exclude it!
+      if (selectedLevel !== "All Levels" || selectedType !== "All Types") {
+        if (matchingScholarships.length === 0) {
+          continue;
+        }
+      }
+
+      const hasBachelor = u.allSch.some((s) => matchesLevel(s.level, "bachelor"));
+      const hasMaster = u.allSch.some((s) => matchesLevel(s.level, "master"));
+      const hasPhd = u.allSch.some((s) => matchesLevel(s.level, "phd"));
+      const hasOther = u.allSch.some((s) => matchesLevel(s.level, "other"));
+
+      result.push({
+        id: u.id,
+        name: u.name,
+        city: u.city,
+        country: u.country,
+        verified: u.verified,
+        count: u.totalCount,
+        matchingCount: matchingScholarships.length > 0 ? matchingScholarships.length : u.totalCount,
+        hasBachelor,
+        hasMaster,
+        hasPhd,
+        hasOther,
+      });
     }
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      r = r.filter(
-        (u) =>
-          u.name.toLowerCase().includes(q) ||
-          u.city.toLowerCase().includes(q)
-      );
-    }
-    return r;
-  }, [universities, filterSavedOnly, savedFavorites, selectedCity, searchQuery]);
+
+    return result.sort((a, b) => a.name.localeCompare(b.name));
+  }, [allScholarships, uniInfo, filterSavedOnly, savedFavorites, selectedCity, searchQuery, selectedLevel, selectedType]);
 
   const selectedUniEntry = useMemo(
     () => universities.find((u) => u.id === selectedUni) || null,
@@ -295,13 +434,17 @@ export default function ScholarshipsPage() {
     );
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      r = r.filter((s) => s.title.toLowerCase().includes(q));
+      r = r.filter(
+        (s) =>
+          s.title.toLowerCase().includes(q) ||
+          (s.level || "").toLowerCase().includes(q)
+      );
     }
     if (selectedLevel !== "All Levels") {
-      r = r.filter((s) => s.level.toLowerCase() === selectedLevel.toLowerCase());
+      r = r.filter((s) => matchesLevel(s.level, selectedLevel));
     }
     if (selectedType !== "All Types") {
-      r = r.filter((s) => s.type.toLowerCase() === selectedType.toLowerCase());
+      r = r.filter((s) => matchesType(s.type, selectedType));
     }
     return r;
   }, [allScholarships, selectedUni, searchQuery, selectedLevel, selectedType]);
@@ -700,45 +843,136 @@ export default function ScholarshipsPage() {
               </div>
 
               {/* Quick Degree / Funding Pills Bar */}
-              <div className="mb-6 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
+              <div className="mb-4 overflow-x-auto scrollbar-none flex items-center gap-2 pb-1">
                 {[
                   { value: "All Levels", label: "🌟 All Levels" },
                   { value: "bachelor", label: "🎓 Bachelor" },
                   { value: "master", label: "🎓 Master" },
                   { value: "phd", label: "🎓 PhD" },
                   { value: "other", label: "🇨🇳 Chinese Language / Other" },
-                ].map((lvl) => (
-                  <button
-                    key={lvl.value}
-                    onClick={() => setSelectedLevel(lvl.value)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer ${
-                      selectedLevel === lvl.value
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-                        : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-white/5"
-                    }`}
-                  >
-                    <span>{lvl.label}</span>
-                  </button>
-                ))}
+                ].map((lvl) => {
+                  const isSelected = selectedLevel === lvl.value;
+                  return (
+                    <button
+                      key={lvl.value}
+                      onClick={() =>
+                        setSelectedLevel(
+                          isSelected && lvl.value !== "All Levels" ? "All Levels" : lvl.value
+                        )
+                      }
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
+                        isSelected
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/40 ring-1 ring-white/30 scale-102"
+                          : "bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/5"
+                      }`}
+                    >
+                      <span>{lvl.label}</span>
+                    </button>
+                  );
+                })}
                 <div className="h-5 w-px bg-white/10 mx-1 flex-shrink-0" />
                 {[
                   { value: "All Types", label: "All Types" },
                   { value: "full", label: "💰 Full Scholarship" },
                   { value: "partial", label: "💎 Partial Scholarship" },
-                ].map((tp) => (
-                  <button
-                    key={tp.value}
-                    onClick={() => setSelectedType(tp.value)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer ${
-                      selectedType === tp.value
-                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold"
-                        : "bg-white/5 text-slate-400 hover:text-white border border-white/5"
-                    }`}
-                  >
-                    <span>{tp.label}</span>
-                  </button>
-                ))}
+                ].map((tp) => {
+                  const isSelected = selectedType === tp.value;
+                  return (
+                    <button
+                      key={tp.value}
+                      onClick={() =>
+                        setSelectedType(
+                          isSelected && tp.value !== "All Types" ? "All Types" : tp.value
+                        )
+                      }
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
+                        isSelected
+                          ? "bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/30 ring-1 ring-white/30 scale-102"
+                          : "bg-white/5 text-slate-300 hover:text-white border border-white/5"
+                      }`}
+                    >
+                      <span>{tp.label}</span>
+                    </button>
+                  );
+                })}
               </div>
+
+              {/* Active Filter Indicator & Reset Bar */}
+              {(selectedLevel !== "All Levels" ||
+                selectedType !== "All Types" ||
+                selectedCity !== "All Cities" ||
+                Boolean(searchQuery)) && (
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-2 p-3 sm:p-3.5 rounded-2xl bg-blue-600/10 border border-blue-500/25 text-xs">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-slate-400 font-semibold">Active filters:</span>
+                    {selectedLevel !== "All Levels" && (
+                      <span className="px-2.5 py-1 rounded-xl bg-blue-600 text-white font-extrabold flex items-center gap-1.5 shadow-md shadow-blue-600/30">
+                        <span>🎓 {selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)}</span>
+                        <button
+                          onClick={() => setSelectedLevel("All Levels")}
+                          className="hover:text-rose-200 ml-1 cursor-pointer font-black"
+                          title="Clear level filter"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    )}
+                    {selectedType !== "All Types" && (
+                      <span className="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 font-extrabold flex items-center gap-1.5 shadow-md">
+                        <span>
+                          {selectedType === "full" ? "💰 Full Scholarship" : "💎 Partial Scholarship"}
+                        </span>
+                        <button
+                          onClick={() => setSelectedType("All Types")}
+                          className="hover:text-rose-200 ml-1 cursor-pointer font-black"
+                          title="Clear type filter"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    )}
+                    {selectedCity !== "All Cities" && (
+                      <span className="px-2.5 py-1 rounded-xl bg-cyan/20 text-cyan border border-cyan/40 font-extrabold flex items-center gap-1.5 shadow-md">
+                        <span>📍 {selectedCity}</span>
+                        <button
+                          onClick={() => setSelectedCity("All Cities")}
+                          className="hover:text-rose-200 ml-1 cursor-pointer font-black"
+                          title="Clear city filter"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    )}
+                    {searchQuery && (
+                      <span className="px-2.5 py-1 rounded-xl bg-white/10 text-white border border-white/20 font-extrabold flex items-center gap-1.5">
+                        <span>🔍 "{searchQuery}"</span>
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="hover:text-rose-200 ml-1 cursor-pointer font-black"
+                          title="Clear search query"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    )}
+                    <span className="text-slate-300 font-bold ml-1">
+                      • Showing {filteredUnis.length} {filteredUnis.length === 1 ? "university" : "universities"}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setSelectedLevel("All Levels");
+                      setSelectedType("All Types");
+                      setSelectedCity("All Cities");
+                      setSearchQuery("");
+                    }}
+                    className="text-xs text-rose-400 hover:text-rose-300 font-extrabold underline underline-offset-2 cursor-pointer"
+                  >
+                    Reset all filters
+                  </button>
+                </div>
+              )}
 
               {/* Loading State */}
               {loading ? (
@@ -766,7 +1000,9 @@ export default function ScholarshipsPage() {
                   <Building2 className="w-12 h-12 text-slate-500 mx-auto mb-3" />
                   <p className="text-white font-bold text-lg mb-1">No universities found</p>
                   <p className="text-xs text-slate-400 mb-5">
-                    No results matched your search or filters. Try adjusting your search query.
+                    No universities match your active filters ({selectedLevel !== "All Levels" ? selectedLevel : ""}{" "}
+                    {selectedType !== "All Types" ? selectedType : ""}{" "}
+                    {selectedCity !== "All Cities" ? selectedCity : ""}). Try relaxing your filters.
                   </p>
                   <button
                     onClick={() => {
@@ -776,7 +1012,7 @@ export default function ScholarshipsPage() {
                       setSelectedType("All Types");
                       setFilterSavedOnly(false);
                     }}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs"
+                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs cursor-pointer"
                   >
                     Reset All Filters
                   </button>
@@ -858,10 +1094,39 @@ export default function ScholarshipsPage() {
                               </span>
                             </div>
 
-                            {/* Bottom: Scholarship count badge */}
+                            {/* Bottom: Dynamic Scholarship count badge reflecting active filter */}
                             <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-xs">
-                              <span className="px-2.5 py-1 rounded-xl bg-blue-600/90 text-white font-extrabold text-[11px] backdrop-blur-md shadow-md">
-                                ✨ {uni.count} {lang === "ar" ? "منح متاحة" : "Scholarships"}
+                              <span
+                                className={`px-2.5 py-1 rounded-xl font-extrabold text-[11px] backdrop-blur-md shadow-md flex items-center gap-1 ${
+                                  selectedLevel !== "All Levels"
+                                    ? "bg-blue-600 text-white ring-1 ring-white/30"
+                                    : selectedType !== "All Types"
+                                    ? "bg-amber-500 text-slate-950 font-black ring-1 ring-white/30"
+                                    : "bg-blue-600/90 text-white"
+                                }`}
+                              >
+                                <span>
+                                  {selectedLevel !== "All Levels"
+                                    ? "🎓"
+                                    : selectedType === "full"
+                                    ? "💰"
+                                    : selectedType === "partial"
+                                    ? "💎"
+                                    : "✨"}
+                                </span>
+                                <span>
+                                  {selectedLevel !== "All Levels"
+                                    ? `${uni.matchingCount} ${
+                                        selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)
+                                      } ${uni.matchingCount > 1 ? "Scholarships" : "Scholarship"}`
+                                    : selectedType !== "All Types"
+                                    ? `${uni.matchingCount} ${
+                                        selectedType.charAt(0).toUpperCase() + selectedType.slice(1)
+                                      } ${uni.matchingCount > 1 ? "Scholarships" : "Scholarship"}`
+                                    : `${uni.count} ${
+                                        lang === "ar" ? "منح متاحة" : uni.count > 1 ? "Scholarships" : "Scholarship"
+                                      }`}
+                                </span>
                               </span>
                               <span className="text-[11px] font-bold text-white/90 drop-shadow flex items-center gap-0.5">
                                 Explore ➔
@@ -870,12 +1135,53 @@ export default function ScholarshipsPage() {
                           </div>
                         </div>
 
-                        {/* Bottom Row: Degree Level Tags & Action */}
+                        {/* Bottom Row: Degree Level Tags (Actively highlights selected degree) & Action */}
                         <div className="p-3 pt-3 mt-auto flex items-center justify-between border-t border-white/5 text-[11px]">
-                          <div className="flex items-center gap-1.5 text-slate-400 font-medium">
-                            <span className="px-2 py-0.5 rounded-md bg-white/5">Bachelor</span>
-                            <span className="px-2 py-0.5 rounded-md bg-white/5">Master</span>
-                            <span className="px-2 py-0.5 rounded-md bg-white/5">PhD</span>
+                          <div className="flex items-center gap-1.5 text-[11px]">
+                            {uni.hasBachelor && (
+                              <span
+                                className={`px-2 py-0.5 rounded-md font-semibold transition-all ${
+                                  selectedLevel.toLowerCase() === "bachelor"
+                                    ? "bg-blue-600 text-white font-bold ring-1 ring-cyan/50 shadow-sm"
+                                    : "bg-white/5 text-slate-300"
+                                }`}
+                              >
+                                Bachelor
+                              </span>
+                            )}
+                            {uni.hasMaster && (
+                              <span
+                                className={`px-2 py-0.5 rounded-md font-semibold transition-all ${
+                                  selectedLevel.toLowerCase() === "master"
+                                    ? "bg-blue-600 text-white font-bold ring-1 ring-cyan/50 shadow-sm"
+                                    : "bg-white/5 text-slate-300"
+                                }`}
+                              >
+                                Master
+                              </span>
+                            )}
+                            {uni.hasPhd && (
+                              <span
+                                className={`px-2 py-0.5 rounded-md font-semibold transition-all ${
+                                  selectedLevel.toLowerCase() === "phd"
+                                    ? "bg-blue-600 text-white font-bold ring-1 ring-cyan/50 shadow-sm"
+                                    : "bg-white/5 text-slate-300"
+                                }`}
+                              >
+                                PhD
+                              </span>
+                            )}
+                            {uni.hasOther && (
+                              <span
+                                className={`px-2 py-0.5 rounded-md font-semibold transition-all ${
+                                  selectedLevel.toLowerCase() === "other"
+                                    ? "bg-blue-600 text-white font-bold ring-1 ring-cyan/50 shadow-sm"
+                                    : "bg-white/5 text-slate-300"
+                                }`}
+                              >
+                                Language
+                              </span>
+                            )}
                           </div>
                           <span className="text-cyan font-bold group-hover:underline flex items-center gap-0.5">
                             Details <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -969,37 +1275,51 @@ export default function ScholarshipsPage() {
                     { value: "master", label: "🎓 Master" },
                     { value: "phd", label: "🎓 PhD" },
                     { value: "other", label: "🇨🇳 Language" },
-                  ].map((l) => (
-                    <button
-                      key={l.value}
-                      onClick={() => setSelectedLevel(l.value)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        selectedLevel === l.value
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-                          : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5"
-                      }`}
-                    >
-                      {l.label}
-                    </button>
-                  ))}
+                  ].map((l) => {
+                    const isSelected = selectedLevel === l.value;
+                    return (
+                      <button
+                        key={l.value}
+                        onClick={() =>
+                          setSelectedLevel(
+                            isSelected && l.value !== "All Levels" ? "All Levels" : l.value
+                          )
+                        }
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-blue-600 text-white shadow-md shadow-blue-600/40 ring-1 ring-white/30"
+                            : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5"
+                        }`}
+                      >
+                        {l.label}
+                      </button>
+                    );
+                  })}
                   <div className="h-4 w-px bg-white/10 mx-1" />
                   {[
                     { value: "All Types", label: "All Types" },
                     { value: "full", label: "💰 Full Funding" },
                     { value: "partial", label: "💎 Partial" },
-                  ].map((t) => (
-                    <button
-                      key={t.value}
-                      onClick={() => setSelectedType(t.value)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        selectedType === t.value
-                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                          : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5"
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
+                  ].map((t) => {
+                    const isSelected = selectedType === t.value;
+                    return (
+                      <button
+                        key={t.value}
+                        onClick={() =>
+                          setSelectedType(
+                            isSelected && t.value !== "All Types" ? "All Types" : t.value
+                          )
+                        }
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/30 ring-1 ring-white/30"
+                            : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <span className="text-xs text-slate-400 font-medium">
