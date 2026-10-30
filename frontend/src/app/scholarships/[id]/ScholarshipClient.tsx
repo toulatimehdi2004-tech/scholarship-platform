@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Clock,
@@ -31,6 +31,13 @@ import {
   Send,
   Plane,
   Layers,
+  ChevronRight,
+  ShieldCheck,
+  Search,
+  Bell,
+  ChevronDown,
+  User as UserIcon,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -38,18 +45,24 @@ import Link from "next/link";
 import {
   fetchApi,
   getToken,
+  clearToken,
   getApiBaseUrl,
   addToTracker,
   getTrackedApplications,
   type ScholarshipDetail,
   type Scholarship,
   type ApplicationTrackerItem,
+  type User,
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { REAL_SCHOLARSHIP_DETAILS } from "@/data/scholarshipsData";
-import AutoText, { translateCached } from "@/components/AutoText";
+import AutoText from "@/components/AutoText";
 import ScholarshipCard from "@/components/ScholarshipCard";
-import SmartBack from "@/components/SmartBack";
+import StudentSidebar from "@/components/StudentSidebar";
+import ScholarshipEmblem, {
+  getScholarshipTheme,
+  type ScholarshipThemeInfo,
+} from "@/components/ScholarshipEmblem";
 import AdmissionAnnouncements, {
   type Announcement,
 } from "@/components/AdmissionAnnouncements";
@@ -72,39 +85,208 @@ function annTokens(s: string): string[] {
     .filter((w) => w && !ANN_STOP.has(w));
 }
 
+// ─────────────────────────────────────────────────────────────
+// SMART TEXT PARSERS (Breaks down heavy text into eye-pleasing cards)
+// ─────────────────────────────────────────────────────────────
+interface ParsedBenefits {
+  tuition: string;
+  dorm: string;
+  stipend: string;
+  insurance: string;
+}
+
+function parseScholarshipDescription(desc: string, type: string): {
+  cleanIntro: string;
+  agencyCode: string | null;
+  benefits: ParsedBenefits;
+} {
+  if (!desc) {
+    return {
+      cleanIntro: "Official Chinese Government and University Scholarship program providing academic funding and tuition support for Moroccan candidates.",
+      agencyCode: null,
+      benefits: {
+        tuition: "100% Free Tuition Covered",
+        dorm: "Free On-Campus Student Residence",
+        stipend: type === "full" ? "2,500 - 3,500 RMB / month" : "Partial / Merit Subsidy",
+        insurance: "800 RMB / year Comprehensive Medical Insurance",
+      },
+    };
+  }
+
+  // Extract CSC Agency Code (e.g. 【 13612 】 or "Agency Code: 10001")
+  const codeMatch = desc.match(/【\s*(\d+)\s*】/) || desc.match(/Agency Code[:\s]+(\d+)/i);
+  const agencyCode = codeMatch ? codeMatch[1] : null;
+
+  // Clean Intro: isolate main introductory statement before emoji package or bullets
+  let cleanIntro = desc
+    .split(/💰|•|Step 1|Bourse Partielle|Partial Scholarship Package/i)[0]
+    .replace(/\(CSC Agency Code:.*?\)/i, "")
+    .replace(/【\s*\d+\s*】/g, "")
+    .trim();
+
+  if (cleanIntro.length < 15) {
+    cleanIntro = "Official scholarship program providing academic funding, living support, and campus facilities in China.";
+  }
+
+  const lower = desc.toLowerCase();
+  const tuition =
+    lower.includes("tuition") && (lower.includes("100%") || lower.includes("free") || lower.includes("waiver") || lower.includes("pris en charge"))
+      ? "100% Free Tuition (0 DH / 0 RMB)"
+      : type === "full"
+      ? "100% Full Tuition Waiver"
+      : "Partial Tuition Exemption";
+
+  const dorm =
+    lower.includes("dormitory") || lower.includes("logement") || lower.includes("dorm")
+      ? lower.includes("free") || lower.includes("gratuit")
+        ? "Free On-Campus International Dorm"
+        : "Subsidized Campus Student Housing"
+      : type === "full"
+      ? "Free University Dormitory"
+      : "Subsidized Student Dorm";
+
+  const stipend =
+    lower.includes("stipend") || lower.includes("monthly") || lower.includes("allocation")
+      ? lower.includes("3,500") || lower.includes("3500")
+        ? "3,500 RMB / month (Doctorat/PhD)"
+        : lower.includes("3,000") || lower.includes("3000")
+        ? "3,000 RMB / month (Master)"
+        : lower.includes("2,500") || lower.includes("2500")
+        ? "2,500 RMB / month (Licence/Bachelor)"
+        : "Monthly Living Allowance"
+      : lower.includes("self-funded") || type === "partial"
+      ? "Self-Funded Monthly Meals & Expenses"
+      : "2,500 à 3,500 RMB / month";
+
+  const insurance =
+    lower.includes("insurance") || lower.includes("assurance") || lower.includes("800")
+      ? "800 RMB / yr Comprehensive Health Insurance"
+      : "Comprehensive Medical Coverage Included";
+
+  return {
+    cleanIntro,
+    agencyCode,
+    benefits: { tuition, dorm, stipend, insurance },
+  };
+}
+
+interface EligibilityCardItem {
+  icon: string;
+  title: string;
+  desc: string;
+}
+
+function parseEligibilityCriteria(text: string): EligibilityCardItem[] {
+  if (!text) return [];
+  const parts = text.split(/(?=\d+\.\s+)/);
+  if (parts.length <= 1) {
+    return [
+      {
+        icon: "🎓",
+        title: "Conditions Générales",
+        desc: text.replace(/🇲🇦.*?Criteria.*?:/i, "").trim(),
+      },
+    ];
+  }
+
+  const items: EligibilityCardItem[] = [];
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    const match = trimmed.match(/^(\d+\.\s*[^:\n]+):?([\s\S]*)$/);
+    if (match) {
+      const rawTitle = match[1].replace(/^\d+\.\s*/, "").trim();
+      const rawDesc = match[2].trim();
+      let icon = "📋";
+      if (rawTitle.toLowerCase().includes("nationality") || rawTitle.toLowerCase().includes("nationalité")) icon = "🇲🇦";
+      else if (rawTitle.toLowerCase().includes("qualif") || rawTitle.toLowerCase().includes("education") || rawTitle.toLowerCase().includes("academic")) icon = "🎓";
+      else if (rawTitle.toLowerCase().includes("age")) icon = "🎂";
+      else if (rawTitle.toLowerCase().includes("language") || rawTitle.toLowerCase().includes("langue")) icon = "🗣️";
+      items.push({ icon, title: rawTitle, desc: rawDesc });
+    } else {
+      items.push({ icon: "📌", title: "Condition d'Admission", desc: trimmed });
+    }
+  }
+  return items;
+}
+
+interface ParsedStep {
+  number: number;
+  title: string;
+  bullets: string[];
+}
+
+function parseApplicationInstructions(text: string): ParsedStep[] {
+  if (!text) return [];
+  const parts = text.split(/(?=Step\s+\d+:?|Étape\s+\d+:?)/i);
+  const steps: ParsedStep[] = [];
+  let idx = 1;
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed || trimmed.startsWith("📋")) continue;
+    const match = trimmed.match(/^(?:Step|Étape)\s+(\d+):?\s*([^:\n]+):?([\s\S]*)$/i);
+    if (match) {
+      const stepNumber = parseInt(match[1], 10) || idx++;
+      const title = match[2].trim();
+      const body = match[3].trim();
+      const bullets = body
+        .split(/•|\n-/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 3);
+      steps.push({
+        number: stepNumber,
+        title,
+        bullets: bullets.length > 0 ? bullets : [body],
+      });
+    }
+  }
+  return steps;
+}
+
+type DetailTab = "overview" | "eligibility" | "documents" | "roadmap" | "contact";
+
 export default function ScholarshipClient() {
   const params = useParams();
   const router = useRouter();
   const { t, lang } = useLang();
+  const schId = params?.id;
+
   const [scholarship, setScholarship] = useState<ScholarshipDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<DetailTab>("overview");
+  const [checkedDocs, setCheckedDocs] = useState<Record<number, boolean>>({});
   const [showDocs, setShowDocs] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
   const [docTitle, setDocTitle] = useState("");
   const [docType, setDocType] = useState("passport");
-  const fileRef = useRef<HTMLInputElement>(null);
-  const cameraRef = useRef<HTMLInputElement>(null);
-  const schId = params?.id;
-  const [now, setNow] = useState(() => Date.now());
-  const [checkedDocs, setCheckedDocs] = useState<Record<number, boolean>>({});
-  const [translatedDocs, setTranslatedDocs] = useState<string[] | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [related, setRelated] = useState<Scholarship[]>([]);
   const [mounted, setMounted] = useState(false);
   const [trackedItem, setTrackedItem] = useState<ApplicationTrackerItem | null>(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [trackSuccessMsg, setTrackSuccessMsg] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        try {
+          setUser(JSON.parse(stored));
+        } catch {}
+      }
+    }
   }, []);
 
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
+  // Check document checklist from localStorage
   useEffect(() => {
     if (!schId) return;
     try {
@@ -115,7 +297,7 @@ export default function ScholarshipClient() {
     }
   }, [schId]);
 
-  // Check if this scholarship is already in the student's tracker pipeline
+  // Check if scholarship is already in application tracker
   useEffect(() => {
     if (!schId) return;
     const numId = Number(schId);
@@ -140,6 +322,84 @@ export default function ScholarshipClient() {
     }
   }, [schId]);
 
+  // Load scholarship details
+  useEffect(() => {
+    async function loadDetail() {
+      if (!schId) return;
+      setLoading(true);
+      const res = await fetchApi<ScholarshipDetail>(`/scholarships/${schId}/`);
+      if (res.data) {
+        setScholarship(res.data);
+      } else {
+        const local = (REAL_SCHOLARSHIP_DETAILS as any)[String(schId)];
+        if (local) {
+          setScholarship(local);
+        }
+      }
+      setLoading(false);
+    }
+    loadDetail();
+  }, [schId]);
+
+  // Load related scholarships at the same university
+  useEffect(() => {
+    async function loadRelated() {
+      if (!scholarship?.university?.id) return;
+      const res = await fetchApi<Scholarship[]>(
+        `/scholarships/?university=${scholarship.university.id}`
+      );
+      if (res.data) {
+        setRelated(res.data.filter((s) => s.id !== scholarship.id).slice(0, 3));
+      }
+    }
+    loadRelated();
+  }, [scholarship]);
+
+  // Load university announcements
+  useEffect(() => {
+    async function loadAnn() {
+      if (!scholarship?.university?.name) return;
+      try {
+        const res = await fetchApi<Announcement[]>(
+          `/announcements/?university=${encodeURIComponent(scholarship.university.name)}`
+        );
+        if (res.data) {
+          setAnnouncements(res.data);
+        }
+      } catch {}
+    }
+    loadAnn();
+  }, [scholarship]);
+
+  const toggleDoc = (idx: number) => {
+    const next = { ...checkedDocs, [idx]: !checkedDocs[idx] };
+    setCheckedDocs(next);
+    if (schId) {
+      try {
+        localStorage.setItem(`sch-checklist-${schId}`, JSON.stringify(next));
+      } catch {}
+    }
+  };
+
+  const resetChecklist = () => {
+    setCheckedDocs({});
+    if (schId) {
+      try {
+        localStorage.removeItem(`sch-checklist-${schId}`);
+      } catch {}
+    }
+  };
+
+  const handleCopyCode = (code: string) => {
+    if (typeof navigator !== "undefined") {
+      navigator.clipboard.writeText(code);
+      setCopiedCode(true);
+      setToastMessage(`✅ Code d'Agence [${code}] copié dans le presse-papier !`);
+      setTimeout(() => setCopiedCode(false), 2500);
+      setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
+
   const handleAddToTracker = async () => {
     if (!scholarship) return;
     setTrackingLoading(true);
@@ -148,177 +408,40 @@ export default function ScholarshipClient() {
     setTrackingLoading(false);
     if (res.data) {
       setTrackedItem(res.data);
-      setTrackSuccessMsg(t("det.addedPipeline"));
-      setTimeout(() => setTrackSuccessMsg(null), 4000);
-    } else if (res.error) {
-      setTrackSuccessMsg(res.error || "Saved in your pipeline");
-      setTimeout(() => setTrackSuccessMsg(null), 3500);
+      setTrackSuccessMsg("Ajouté avec succès à vos candidatures !");
+      setToastMessage("✅ Bourse enregistrée dans votre pipeline de candidatures !");
+      setTimeout(() => setToastMessage(null), 3500);
     }
   };
 
-  function toggleDoc(i: number) {
-    setCheckedDocs((prev) => {
-      const next = { ...prev, [i]: !prev[i] };
-      try {
-        localStorage.setItem(`sch-checklist-${schId}`, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-  }
-
-  function resetChecklist() {
-    setCheckedDocs({});
-    try {
-      localStorage.removeItem(`sch-checklist-${schId}`);
-    } catch {}
-  }
-
-  // Load the university's announcements + related scholarships
-  const uniId = scholarship?.university?.id;
-  useEffect(() => {
-    if (!uniId) return;
-    let cancelled = false;
-    fetchApi<{ announcements: Announcement[] }>(`/universities/${uniId}/`).then(
-      (res) => {
-        if (!cancelled && res.data?.announcements) {
-          setAnnouncements(res.data.announcements);
-        }
-      }
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [uniId]);
-
-  useEffect(() => {
-    if (!uniId) return;
-    let cancelled = false;
-    fetchApi<Scholarship[]>(`/scholarships/?university=${uniId}`).then((res) => {
-      if (!cancelled && res.data) {
-        setRelated(
-          res.data.filter((s) => String(s.id) !== String(schId)).slice(0, 3)
-        );
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [uniId, schId]);
-  const docsForLang = scholarship?.required_documents || [];
-  useEffect(() => {
-    if (lang === "en" || docsForLang.length === 0) {
-      setTranslatedDocs(null);
-      return;
-    }
-    let cancelled = false;
-    translateCached(docsForLang.join("\n"), lang).then((r) => {
-      if (!cancelled && r) setTranslatedDocs(r.split("\n"));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [docsForLang, lang]);
-
-  // Most relevant announcements for THIS scholarship (keyword overlap + kind boost)
   const relevantAnnouncements = useMemo(() => {
-    if (!scholarship || announcements.length === 0) return [];
-    const st = new Set(annTokens(scholarship.title));
-    return announcements
-      .map((a) => {
-        const overlap = annTokens(a.title).filter((w) => st.has(w)).length;
-        const boost =
-          a.kind === "scholarship" ? 2 : a.kind === "brochure" || a.kind === "guide" ? 1 : 0;
-        return { a, score: overlap * 2 + boost };
-      })
-      .sort((x, y) => y.score - x.score)
-      .slice(0, 6)
-      .map((x) => x.a);
-  }, [announcements, scholarship]);
-
-  useEffect(() => {
-    if (!schId) return;
-
-    async function load() {
-      setLoading(true);
-      const res = await fetchApi<ScholarshipDetail>("/scholarships/" + schId + "/");
-      if (res.data) {
-        setScholarship(res.data);
-      } else {
-        const fallback = REAL_SCHOLARSHIP_DETAILS[Number(schId)];
-        if (fallback) {
-          setScholarship(fallback);
-        }
-      }
-      setLoading(false);
-    }
-    load();
-  }, [schId]);
-
-  async function loadDocs() {
-    const token = getToken();
-    if (!token) return;
-    const res = await fetchApi<any[]>("/documents/", {
-      headers: { Authorization: "Token " + token },
-    });
-    if (res.data) {
-      setDocuments(Array.isArray(res.data) ? res.data : []);
-    }
-  }
-
-  async function handleUpload(file: File | null) {
-    if (!file || !docTitle.trim()) return;
-    setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", docTitle.trim());
-    formData.append("document_type", docType);
-    try {
-      const token = getToken();
-      await fetch(`${getApiBaseUrl()}/documents/`, {
-        method: "POST",
-        headers: {
-          Authorization: "Token " + token,
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: formData,
+    if (!scholarship || !announcements.length) return [];
+    const tokens = new Set([
+      ...annTokens(scholarship.title),
+      ...annTokens(scholarship.university?.name || ""),
+      (scholarship.level || "").toLowerCase(),
+    ]);
+    return announcements.filter((a) => {
+      const matchText = (a.title + " " + (a.kind || "")).toLowerCase();
+      let hits = 0;
+      tokens.forEach((t) => {
+        if (matchText.includes(t)) hits++;
       });
-      setDocTitle("");
-      loadDocs();
-    } catch (err) {
-      console.error("Upload failed:", err);
-    }
-    setUploading(false);
-  }
-
-  async function deleteDoc(id: number) {
-    const token = getToken();
-    await fetch(`${getApiBaseUrl()}/documents/${id}/`, {
-      method: "DELETE",
-      headers: {
-        Authorization: "Token " + token,
-        "ngrok-skip-browser-warning": "true",
-      },
+      return hits >= 1;
     });
-    loadDocs();
-  }
-
-  const docTypes = [
-    { value: "passport", label: t("docs.passport") },
-    { value: "id_card", label: t("docs.id_card") },
-    { value: "transcript", label: t("docs.transcript") },
-    { value: "diploma", label: t("docs.diploma") },
-    { value: "recommendation", label: t("docs.recommendation") },
-    { value: "motivation", label: t("docs.motivation") },
-    { value: "cv", label: t("docs.cv") },
-    { value: "other", label: t("docs.other") },
-  ];
+  }, [scholarship, announcements]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass rounded-2xl p-8 animate-pulse">
-          <div className="h-6 bg-white/10 rounded w-48 mb-4" />
-          <div className="h-4 bg-white/10 rounded w-64" />
+      <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+        <StudentSidebar activeTab="scholarships" />
+        <div className="flex-1 flex items-center justify-center min-h-screen bg-[#060a14]/65">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-cyan/30 border-t-cyan rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Chargement de la bourse...
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -326,890 +449,702 @@ export default function ScholarshipClient() {
 
   if (!scholarship) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass rounded-2xl p-12 text-center">
-          <p className="text-text-secondary text-lg mb-4">
-            {t("det.notFound")}
-          </p>
-          <Link
-            href="/scholarships"
-            className="text-cyan hover:text-purple transition-colors"
-          >
-            {t("det.backToSch")}
-          </Link>
+      <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased">
+        <StudentSidebar activeTab="scholarships" />
+        <div className="flex-1 flex items-center justify-center min-h-screen bg-[#060a14]/65 p-6">
+          <div className="rounded-3xl bg-[#0c1527]/90 border border-white/10 p-10 max-w-md text-center">
+            <Building2 className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-white mb-2">Bourse introuvable</h2>
+            <p className="text-xs text-slate-400 mb-6">
+              Cette opportunité n'est plus disponible ou a été déplacée.
+            </p>
+            <Link
+              href="/scholarships"
+              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs inline-flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Retour aux bourses</span>
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
-  const hasDeadline = !!scholarship.application_deadline;
-  const deadlineTs = hasDeadline
-    ? new Date(scholarship.application_deadline)
-    : null;
-  if (deadlineTs) deadlineTs.setHours(23, 59, 59, 999);
-  const diffMs = deadlineTs ? deadlineTs.getTime() - now : NaN;
+  const theme: ScholarshipThemeInfo = getScholarshipTheme(scholarship as any);
+  const parsed = parseScholarshipDescription(scholarship.description, scholarship.type);
+  const eligibilityItems = parseEligibilityCriteria(scholarship.eligibility_criteria);
+  const parsedSteps = parseApplicationInstructions(scholarship.application_instructions);
+
+  const hasDeadline = Boolean(scholarship.application_deadline);
+  const deadlineTs = hasDeadline ? new Date(scholarship.application_deadline) : null;
+  const diffMs = deadlineTs ? deadlineTs.getTime() - Date.now() : NaN;
   const daysLeft = Math.ceil(diffMs / 86400000);
   const isDeadlineSoon = diffMs > 0 && diffMs <= 14 * 86400000;
   const isDeadlinePassed = hasDeadline && diffMs <= 0;
   const showCountdown = hasDeadline && diffMs > 0;
-  const countdown = [
-    { label: t("det.days"), value: Math.floor(diffMs / 86400000) },
-    { label: t("det.hours"), value: Math.floor(diffMs / 3600000) % 24 },
-    { label: t("det.minutes"), value: Math.floor(diffMs / 60000) % 60 },
-    { label: t("det.seconds"), value: Math.floor(diffMs / 1000) % 60 },
-  ];
 
   const docs = scholarship.required_documents || [];
   const doneCount = docs.filter((_, i) => checkedDocs[i]).length;
-  const docsPct = docs.length
-    ? Math.round((doneCount / docs.length) * 100)
-    : 0;
+  const docsPct = docs.length ? Math.round((doneCount / docs.length) * 100) : 0;
   const allDocsDone = docs.length > 0 && doneCount === docs.length;
 
-  const levelLabels: Record<string, string> = {
-    bachelor: t("sch.bachelor"),
-    master: t("sch.master"),
-    phd: t("sch.phd"),
-    all: t("sch.lvlAll"),
-    other: t("sch.language"),
-    postdoc: t("sch.postdoc"),
-    exchange: t("sch.exchange"),
-    summer: t("sch.summer"),
-  };
+  const deadlineFormatted = deadlineTs
+    ? deadlineTs.toLocaleDateString(lang === "ar" ? "ar-MA" : "fr-FR", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "Admissions Ouvertes 2026/27";
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
-          <SmartBack fallback="/scholarships" />
-        </motion.div>
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      {/* ─────────────────────────────────────────────────────────────
+          1. LEFT SIDEBAR (Identical to Student Portal)
+      ───────────────────────────────────────────────────────────── */}
+      <StudentSidebar activeTab="scholarships" />
 
-        {/* Main Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="glass rounded-3xl p-8 sm:p-10 mb-6"
-        >
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              {scholarship.type === "full"
-                ? t("det.fullSch")
-                : scholarship.type === "partial"
-                ? t("det.partial")
-                : scholarship.type}
-            </span>
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple/20 text-purple border border-purple/30">
-              {levelLabels[scholarship.level] || scholarship.level}
-            </span>
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/30 flex items-center gap-1.5 shadow-sm">
-              <span>🇲🇦</span>
-              <span>{t("det.moroccanEligible")}</span>
-            </span>
-            {scholarship.is_featured && (
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                {t("det.featured")}
-              </span>
-            )}
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-            <AutoText text={scholarship.title} />
-          </h1>
-
-          <div className="flex flex-wrap items-center gap-4 text-sm text-text-secondary mb-4">
+      {/* ─────────────────────────────────────────────────────────────
+          2. MAIN CONTENT AREA (Translucent Glass Shell)
+      ───────────────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        {/* Sticky Top Header Navigation */}
+        <header className="sticky top-0 z-30 w-full px-4 sm:px-8 py-3 bg-[#0a101d]/90 backdrop-blur-xl border-b border-white/5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <Link
-              href={"/university/" + scholarship.university.id}
-              className="flex items-center gap-1.5 hover:text-cyan transition-colors font-medium"
+              href="/scholarships"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 text-xs font-bold transition-all group"
             >
-              <GraduationCap className="w-4 h-4 text-purple" />
-              {scholarship.university.name}
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+              <span>{lang === "ar" ? "العودة للمنح" : "Retour aux bourses"}</span>
             </Link>
-            <span className="flex items-center gap-1">
-              <MapPin className="w-4 h-4 text-cyan" />
-              {scholarship.university.city}, {scholarship.university.country}
+            <div className="h-4 w-px bg-white/10 hidden sm:block" />
+            <span className="text-xs text-slate-400 truncate max-w-xs hidden sm:block">
+              {scholarship.university?.name}
             </span>
           </div>
 
-          {/* Deadline Banner */}
-          {isDeadlinePassed ? (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">
-              {t("det.passed")}
-            </div>
-          ) : isDeadlineSoon && mounted ? (
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm mb-4 flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              {t("det.daysLeft", { n: daysLeft })}
-            </div>
-          ) : null}
-
-          {/* Live countdown */}
-          {mounted && showCountdown && (
-            <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6 max-w-md">
-              {countdown.map((unit) => (
-                <motion.div
-                  key={unit.label}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="glass-light rounded-xl py-3 text-center border border-border-glass"
-                >
-                  <div
-                    className={
-                      "text-2xl sm:text-3xl font-bold font-mono " +
-                      (isDeadlineSoon
-                        ? "text-amber-400"
-                        : "bg-gradient-to-r from-cyan to-purple bg-clip-text text-transparent")
-                    }
-                  >
-                    {String(Math.max(0, unit.value)).padStart(2, "0")}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-widest text-text-muted mt-0.5">
-                    {unit.label}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {/* Scholarship Availability */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            className="glass rounded-2xl p-6 mb-6"
-          >
-            <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <Users className="w-5 h-5 text-cyan" />
-              {t("seat.title")}
-            </h3>
-            {scholarship.total_seats ? (
-              scholarship.seats_available === 0 ? (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold">
-                  {t("seat.fullMsg")}
-                </div>
-              ) : (
-                <>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span
-                      className={
-                        (scholarship.seats_available ?? 0) <= 5
-                          ? "text-amber-400 font-semibold"
-                          : "text-emerald-400 font-semibold"
-                      }
-                    >
-                      {scholarship.seats_available === 1
-                        ? t("seat.oneLeft")
-                        : t("seat.left", {
-                            n: scholarship.seats_available ?? 0,
-                          })}
-                    </span>
-                    <span className="text-text-muted">
-                      {scholarship.seats_filled}/{scholarship.total_seats}
-                    </span>
-                  </div>
-                  <div className="h-2.5 rounded-full bg-white/10 overflow-hidden">
-                    <div
-                      className={
-                        "h-full rounded-full " +
-                        ((scholarship.seats_available ?? 0) <= 5
-                          ? "bg-gradient-to-r from-amber-400 to-red-400"
-                          : "bg-gradient-to-r from-cyan to-emerald-400")
-                      }
-                      style={{
-                        width:
-                          Math.round(
-                            ((scholarship.seats_filled || 0) /
-                              scholarship.total_seats) *
-                              100
-                          ) + "%",
-                      }}
-                    />
-                  </div>
-                </>
-              )
-            ) : (
-              <p className="text-sm text-text-muted">{t("seat.unknown")}</p>
-            )}
-          </motion.div>
-
-          {scholarship.description && (
-            <p className="text-text-secondary leading-relaxed mb-6">
-              <AutoText text={scholarship.description} />
-            </p>
-          )}
-
-          {/* Apply & Documents Section */}
-          {!isDeadlinePassed && (
-            <div className="mt-4">
-              <div className="flex flex-wrap gap-3">
-                {scholarship.application_link && (
-                  <a
-                    href={scholarship.application_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 btn-gradient px-6 py-3 rounded-xl"
-                  >
-                    <span className="flex items-center gap-2">
-                      {t("det.applyNow")}
-                      <ExternalLink className="w-4 h-4" />
-                    </span>
-                  </a>
+          <div className="flex items-center gap-3">
+            {parsed.agencyCode && (
+              <button
+                onClick={() => handleCopyCode(parsed.agencyCode!)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition-all cursor-pointer"
+                title="Copier le code officiel de l'agence pour le portail CSC"
+              >
+                <span>Code CSC: <strong>{parsed.agencyCode}</strong></span>
+                {copiedCode ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-amber-400" />
                 )}
-                <Link
-                  href={`/apply/${scholarship.university.id}`}
-                  className="inline-flex items-center gap-2 glass px-6 py-3 rounded-xl text-text-primary hover:text-cyan hover:border-cyan/40 transition-all border border-border-glass font-medium text-sm"
-                >
-                  <Send className="w-4 h-4 text-emerald-400" />
-                  <span>{t("det.guideRoadmap")}</span>
-                </Link>
+              </button>
+            )}
 
-                {/* Interactive Tracker CRM Button */}
+            <div className="flex items-center gap-2 pl-2 border-l border-white/10">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
+                {(user?.username || "M").charAt(0).toUpperCase()}
+              </div>
+              <span className="text-xs font-bold text-slate-200 hidden md:block">
+                {user?.username || "mehdi12"}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Body */}
+        <main className="flex-1 px-4 sm:px-8 py-6 max-w-6xl mx-auto w-full">
+          {/* ─────────────────────────────────────────────────────────────
+              3. HERO CARD (Clean, Eye-Friendly Header with Emblem)
+          ───────────────────────────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-3xl bg-gradient-to-br ${theme.cardGlow} bg-[#0c1424]/90 backdrop-blur-xl border ${theme.borderClass} p-6 sm:p-8 shadow-2xl mb-6 relative overflow-hidden`}
+          >
+            <div className="flex flex-col lg:flex-row items-start justify-between gap-6 relative z-10">
+              <div className="flex items-start gap-4 sm:gap-5 flex-1 min-w-0">
+                {/* Custom Vector Emblem */}
+                <ScholarshipEmblem themeKey={theme.key} size={64} className="mt-1" />
+
+                <div className="flex-1 min-w-0">
+                  {/* Category & Eligibility Pills */}
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${theme.badgeClass}`}
+                    >
+                      {theme.badgeLabel}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple/20 text-purple-300 border border-purple/30 uppercase">
+                      🎓 {scholarship.level}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                      <span>🇲🇦</span>
+                      <span>Éligible Candidats Marocains</span>
+                    </span>
+                  </div>
+
+                  {/* Scholarship Title */}
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white leading-tight tracking-tight mb-2">
+                    {scholarship.title}
+                  </h1>
+
+                  {/* University & City */}
+                  <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-300">
+                    <Link
+                      href={`/university/${scholarship.university?.id || ""}`}
+                      className="flex items-center gap-1.5 text-cyan hover:underline font-semibold"
+                    >
+                      <Building2 className="w-4 h-4" />
+                      <span>{scholarship.university?.name || scholarship.university_name}</span>
+                    </Link>
+                    <span>•</span>
+                    <span className="flex items-center gap-1 text-slate-400">
+                      <MapPin className="w-3.5 h-3.5 text-cyan" />
+                      {scholarship.university?.city || scholarship.university_city}, China
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Deadline & Availability Capsule */}
+              <div className="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-3 flex-shrink-0">
+                {/* Deadline pill */}
+                <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-3 sm:px-4 text-left">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    <Clock className="w-3.5 h-3.5 text-cyan" />
+                    <span>Date Limite</span>
+                  </div>
+                  <div className="text-sm font-extrabold text-white">{deadlineFormatted}</div>
+                  {showCountdown && (
+                    <div className="text-[11px] text-amber-400 font-semibold mt-0.5">
+                      ⏳ {daysLeft > 0 ? `${daysLeft} jours restants` : "Clôture imminente"}
+                    </div>
+                  )}
+                </div>
+
+                {/* Seat availability */}
+                {scholarship.total_seats && (
+                  <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-3 sm:px-4">
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="text-slate-400 font-medium">Disponibilité</span>
+                      <span className="text-emerald-400 font-bold">
+                        {scholarship.seats_available} places libres
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-cyan to-emerald-400 rounded-full"
+                        style={{
+                          width: `${Math.round(
+                            ((scholarship.seats_filled || 0) / scholarship.total_seats) * 100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 4 Clean Visual Financial Benefit Cards (No dense walls of text!) */}
+            <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-3.5 text-left hover:border-emerald-500/30 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-2">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Frais de Scolarité</div>
+                <div className="text-xs sm:text-sm font-black text-white mt-0.5">{parsed.benefits.tuition}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Pris en charge à 100%</div>
+              </div>
+
+              <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-3.5 text-left hover:border-cyan/30 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-cyan/20 text-cyan flex items-center justify-center mb-2">
+                  <Home className="w-4 h-4" />
+                </div>
+                <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Hébergement Campus</div>
+                <div className="text-xs sm:text-sm font-black text-white mt-0.5">{parsed.benefits.dorm}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Chambre universitaire</div>
+              </div>
+
+              <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-3.5 text-left hover:border-amber-500/30 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-2">
+                  <Banknote className="w-4 h-4" />
+                </div>
+                <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Allocation Mensuelle</div>
+                <div className="text-xs sm:text-sm font-black text-white mt-0.5">{parsed.benefits.stipend}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Versée chaque mois</div>
+              </div>
+
+              <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-3.5 text-left hover:border-purple/30 transition-all">
+                <div className="w-8 h-8 rounded-xl bg-purple/20 text-purple-300 flex items-center justify-center mb-2">
+                  <HeartPulse className="w-4 h-4" />
+                </div>
+                <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Assurance Santé</div>
+                <div className="text-xs sm:text-sm font-black text-white mt-0.5">{parsed.benefits.insurance}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Hospitalisation & soins</div>
+              </div>
+            </div>
+
+            {/* Quick Action Buttons */}
+            <div className="mt-6 pt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                {parsed.cleanIntro}
+              </p>
+
+              <div className="flex items-center gap-2.5 flex-shrink-0">
                 {trackedItem ? (
                   <Link
                     href="/tracker"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-semibold text-sm shadow-md"
+                    className="px-4 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-2 hover:bg-emerald-500/30 transition-all"
                   >
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>{t("det.inPipeline")} ({trackedItem.status.replace("_", " ")})</span>
+                    <span>Dans votre suivi ({trackedItem.status})</span>
                   </Link>
                 ) : (
                   <button
                     onClick={handleAddToTracker}
                     disabled={trackingLoading}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all font-semibold text-sm cursor-pointer shadow-md"
+                    className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
                   >
-                    <Layers className="w-4 h-4 text-emerald-400" />
-                    <span>{trackingLoading ? t("det.saving") : t("det.addToPipeline")}</span>
+                    <Layers className="w-4 h-4 text-cyan" />
+                    <span>{trackingLoading ? "Sauvegarde..." : "Ajouter à mes candidatures"}</span>
                   </button>
                 )}
 
-                <button
-                  onClick={() => {
-                    setShowDocs(!showDocs);
-                    if (!showDocs) loadDocs();
-                  }}
-                  className="inline-flex items-center gap-2 glass px-6 py-3 rounded-xl text-text-primary hover:bg-white/5 transition-all border border-border-glass cursor-pointer"
-                >
-                  <Upload className="w-4 h-4 text-cyan" />
-                  {t("det.attachDocs")}
-                </button>
-              </div>
-
-              {trackSuccessMsg && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold"
-                >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>{trackSuccessMsg}</span>
-                  <Link href="/tracker" className="underline ml-1 text-white hover:text-emerald-200">
-                    {t("det.openKanban")}
-                  </Link>
-                </motion.div>
-              )}
-
-              {/* Document Upload Panel */}
-              {showDocs && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="mt-4 glass rounded-2xl p-6"
-                >
-                  <h3 className="text-base font-semibold text-text-primary mb-4">
-                    {t("det.uploadTitle")}
-                  </h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                    <input
-                      type="text"
-                      value={docTitle}
-                      onChange={(e) => setDocTitle(e.target.value)}
-                      placeholder={t("det.docTitlePh")}
-                      className="glass rounded-xl py-2.5 px-4 text-sm text-text-primary placeholder:text-text-muted outline-none input-glow"
-                    />
-                    <select
-                      value={docType}
-                      onChange={(e) => setDocType(e.target.value)}
-                      className="glass rounded-xl py-2.5 px-4 text-sm text-text-primary outline-none input-glow bg-transparent"
-                    >
-                      {docTypes.map((dt) => (
-                        <option key={dt.value} value={dt.value} className="bg-surface">
-                          {dt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div
-                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                    onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      const file = e.dataTransfer.files?.[0];
-                      if (file) handleUpload(file);
-                    }}
-                    onClick={() => fileRef.current?.click()}
-                    className="mb-4 rounded-xl border-2 border-dashed border-border-glass hover:border-cyan/40 bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer p-8 flex flex-col items-center gap-3"
+                {scholarship.application_link ? (
+                  <a
+                    href={scholarship.application_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan text-white text-xs font-extrabold shadow-lg shadow-blue-600/30 hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-cyan/20 to-purple/20 flex items-center justify-center">
-                      <Upload className="w-7 h-7 text-cyan" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-text-primary font-medium">
-                        {uploading ? t("det.uploading") : t("det.dropFiles")}
-                      </p>
-                      <p className="text-xs text-text-muted mt-1">
-                        {t("det.fileHint")}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          cameraRef.current?.click();
-                        }}
-                        disabled={!docTitle.trim() || uploading}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-text-secondary hover:text-purple hover:bg-purple/10 transition-all"
-                      >
-                        <Camera className="w-3.5 h-3.5" />
-                        {t("det.scanCamera")}
-                      </button>
-                    </div>
+                    <span>Postuler sur le portail</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                ) : (
+                  <Link
+                    href={`/apply/${scholarship.university?.id || ""}`}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan text-white text-xs font-extrabold shadow-lg shadow-blue-600/30 hover:opacity-95 transition-all flex items-center gap-1.5"
+                  >
+                    <span>Guide de candidature</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ─────────────────────────────────────────────────────────────
+              4. EYE-FRIENDLY TAB NAVIGATION (Zero Cognitive Overload)
+          ───────────────────────────────────────────────────────────── */}
+          <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-6 overflow-x-auto scrollbar-none">
+            {[
+              { id: "overview", label: "🌟 Aperçu & Financement", icon: DollarSign },
+              { id: "eligibility", label: "🎯 Critères d'Éligibilité", icon: CheckCircle2 },
+              { id: "documents", label: `📋 Pièces & Dossier (${docs.length})`, icon: FileText },
+              { id: "roadmap", label: "🗺️ Étapes de Candidature", icon: Send },
+              { id: "contact", label: "🏛️ Université & Contacts", icon: Building2 },
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as DetailTab)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ─────────────────────────────────────────────────────────────
+              TAB 1: OVERVIEW & FUNDING
+          ───────────────────────────────────────────────────────────── */}
+          {activeTab === "overview" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              {/* Program Quick Facts */}
+              <div className="rounded-3xl bg-[#0c1424]/80 backdrop-blur-xl border border-white/10 p-6">
+                <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-cyan" />
+                  <span>Détails Clés du Programme</span>
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Durée</span>
+                    <span className="text-sm font-extrabold text-white mt-1 block">
+                      {scholarship.duration || "3 à 4 années académiques"}
+                    </span>
                   </div>
 
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                    className="hidden"
-                    onChange={(e) => handleUpload(e.target.files?.[0] || null)}
-                  />
-                  <input
-                    ref={cameraRef}
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={(e) => handleUpload(e.target.files?.[0] || null)}
-                  />
+                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Langue d'Enseignement</span>
+                    <span className="text-sm font-extrabold text-white mt-1 block">
+                      {scholarship.language || "Anglais / Chinois"}
+                    </span>
+                  </div>
 
-                  {/* Uploaded docs list */}
-                  {documents.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-text-muted">
-                        {t("det.yourDocs")}
-                      </p>
-                      {documents.map((doc) => (
-                        <div
-                          key={doc.id}
-                          className="flex items-center justify-between glass-light rounded-lg px-3 py-2"
-                        >
-                          <div className="flex items-center gap-2 text-sm">
-                            <FileText className="w-4 h-4 text-cyan" />
-                            <span className="text-text-primary">{doc.title}</span>
-                            <span className="text-xs text-text-muted">
-                              ({doc.file_name})
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => deleteDoc(doc.id)}
-                            className="text-text-muted hover:text-red-400 transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ))}
+                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Niveau d'Études Requis</span>
+                    <span className="text-sm font-extrabold text-white mt-1 block">
+                      {scholarship.required_education_level || "Baccalauréat / Licence"}
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Statut Examen CSCA</span>
+                    <span className="text-sm font-extrabold text-cyan mt-1 block">
+                      {theme.cscaRequired ? "🚨 CSCA Requis (Licence)" : "✅ CSCA Non Requis"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Interactive Currency Converter & Detailed Breakdown */}
+              <FundingBreakdownCard
+                scholarshipTitle={scholarship.title}
+                level={scholarship.level}
+                type={scholarship.type}
+                stipendAmount={scholarship.stipend_amount}
+              />
+            </motion.div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────
+              TAB 2: ELIGIBILITY CRITERIA
+          ───────────────────────────────────────────────────────────── */}
+          {activeTab === "eligibility" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              {/* Structured Requirement Cards */}
+              <div className="rounded-3xl bg-[#0c1424]/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-white">Conditions & Critères d'Admission</h3>
+                    <p className="text-xs text-slate-400">
+                      Vérifiez votre conformité avant de soumettre votre dossier officiel.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {eligibilityItems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 sm:p-5 flex items-start gap-3.5 hover:border-cyan/30 transition-all"
+                    >
+                      <span className="text-2xl select-none flex-shrink-0 mt-0.5">{item.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-white mb-1">{item.title}</h4>
+                        <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">
+                          {item.desc}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </motion.div>
-              )}
-            </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Realistic Acceptance Odds Meter */}
+              <AcceptanceOddsMeter
+                scholarshipTitle={scholarship.title}
+                universityName={scholarship.university?.name || scholarship.university_name || ""}
+                level={scholarship.level}
+                minGpa={scholarship.minimum_gpa}
+              />
+            </motion.div>
           )}
-        </motion.div>
 
-        {/* Feature 2: Line-by-Line Funding Breakdown & Local Currency Converter (WeMakeScholars Style) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.08 }}
-        >
-          <FundingBreakdownCard
-            scholarshipTitle={scholarship.title}
-            level={scholarship.level}
-            type={scholarship.type}
-            stipendAmount={scholarship.stipend_amount}
-            className="mb-6"
-          />
-        </motion.div>
-
-        {/* Feature 3: Realistic Acceptance Odds Meter & Past Admits Benchmark (Yocket Style) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <AcceptanceOddsMeter
-            scholarshipTitle={scholarship.title}
-            universityName={scholarship.university?.name || scholarship.university_name || ""}
-            level={scholarship.level}
-            minGpa={scholarship.minimum_gpa}
-            className="mb-6"
-          />
-        </motion.div>
-
-        {/* Official Application Roadmap for Moroccan Students */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.12 }}
-          className="glass rounded-3xl p-6 sm:p-8 mb-6 border border-border-glass"
-        >
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple/20 border border-purple/40 flex items-center justify-center text-purple">
-                <Send className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                  <span>{t("roadmap.title")}</span>
-                  <span className="text-base">🇲🇦</span>
-                </h3>
-                <p className="text-xs text-text-muted">
-                  {t("roadmap.subtitle")}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {/* Step 1 */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-cyan/40 transition-all">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-cyan/20 border border-cyan/40 text-cyan text-xs font-bold flex items-center justify-center">
-                  1
-                </div>
-                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step1Title")}</h4>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                {t("roadmap.step1Desc")}
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-purple/40 transition-all">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-purple/20 border border-purple/40 text-purple text-xs font-bold flex items-center justify-center">
-                  2
-                </div>
-                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step2Title")}</h4>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                {t("roadmap.step2Desc")}
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-emerald-500/40 transition-all">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center justify-center">
-                  3
-                </div>
-                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step3Title")}</h4>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                {t("roadmap.step3Desc")}
-              </p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-amber-500/40 transition-all">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold flex items-center justify-center">
-                  4
-                </div>
-                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step4Title")}</h4>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                {t("roadmap.step4Desc")}
-              </p>
-            </div>
-
-            {/* Step 5 */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-blue/40 transition-all">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-blue/20 border border-blue/40 text-blue text-xs font-bold flex items-center justify-center">
-                  5
-                </div>
-                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step5Title")}</h4>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                {t("roadmap.step5Desc")}
-              </p>
-            </div>
-
-            {/* Step 6 */}
-            <div className="glass-light rounded-2xl p-4 border border-border-glass hover:border-rose-500/40 transition-all">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold flex items-center justify-center">
-                  6
-                </div>
-                <h4 className="text-sm font-bold text-text-primary">{t("roadmap.step6Title")}</h4>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                {t("roadmap.step6Desc")}
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Portals Links row */}
-          <div className="mt-5 pt-4 border-t border-border-glass flex flex-wrap gap-3">
-            {scholarship.application_link && (
-              <a
-                href={scholarship.application_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-cyan/20 hover:bg-cyan/30 border border-cyan/40 text-cyan transition-all"
-              >
-                <Building2 className="w-4 h-4" />
-                <span>{t("roadmap.linkUni")}</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            )}
-            <a
-              href="https://studyinchina.csc.edu.cn/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-purple/20 hover:bg-purple/30 border border-purple/40 text-purple transition-all"
+          {/* ─────────────────────────────────────────────────────────────
+              TAB 3: REQUIRED DOCUMENTS & CHECKLIST
+          ───────────────────────────────────────────────────────────── */}
+          {activeTab === "documents" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-3xl bg-[#0c1424]/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 space-y-6"
             >
-              <Globe className="w-4 h-4" />
-              <span>{t("roadmap.linkCsc")}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-            <a
-              href="http://ma.china-embassy.gov.cn/fra/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 border border-white/20 text-text-secondary transition-all"
-            >
-              <Plane className="w-4 h-4" />
-              <span>{t("roadmap.linkEmbassy")}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </motion.div>
-
-        {/* Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* Program Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="glass rounded-2xl p-6"
-          >
-            <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-cyan" />
-              {t("det.programDetails")}
-            </h3>
-            <div className="space-y-3">
-              {scholarship.duration && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-muted">{t("det.duration")}</span>
-                  <span className="text-text-primary">
-                    <AutoText text={scholarship.duration} />
-                  </span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                <div>
+                  <h3 className="text-lg font-black text-white flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-purple-400" />
+                    <span>Dossier de Candidature Requis</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Cochez chaque pièce justificative préparée pour suivre l'avancement de votre dossier.
+                  </p>
                 </div>
-              )}
-              <div className="flex justify-between text-sm">
-                <span className="text-text-muted">{t("det.language")}</span>
-                <span className="text-text-primary">
-                  {scholarship.language ? (
-                    lang === "ar"
-                      ? (scholarship.language.toLowerCase().includes("english") ? "الإنجليزية" : scholarship.language.toLowerCase().includes("chinese") ? "الصينية" : scholarship.language)
-                      : scholarship.language
-                  ) : t("det.english")}
-                </span>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-slate-300">
+                    {doneCount}/{docs.length} prêts ({docsPct}%)
+                  </span>
+                  <button
+                    onClick={resetChecklist}
+                    className="text-xs text-slate-400 hover:text-rose-400 transition-colors"
+                  >
+                    Réinitialiser
+                  </button>
+                </div>
               </div>
-              {scholarship.required_education_level && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-muted">{t("det.requiredLevel")}</span>
-                  <span className="text-text-primary">
-                    <AutoText text={scholarship.required_education_level} />
-                  </span>
-                </div>
-              )}
-            </div>
-          </motion.div>
 
-          {/* Dates */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="glass rounded-2xl p-6"
-          >
-            <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-cyan" />
-              {t("det.dates")}
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-text-muted">{t("det.deadline")}</span>
-                <span
-                  className={
-                    isDeadlineSoon || isDeadlinePassed
-                      ? "text-amber-400 font-semibold"
-                      : "text-text-primary"
-                  }
-                >
-                  {hasDeadline
-                    ? new Date(
-                        scholarship.application_deadline
-                      ).toLocaleDateString(lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                    : t("det.rolling")}
-                </span>
-              </div>
-              {scholarship.start_date && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-muted">{t("det.startDate")}</span>
-                  <span className="text-text-primary">
-                    {new Date(scholarship.start_date).toLocaleDateString(
-                      lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US",
-                      { year: "numeric", month: "long" }
-                    )}
-                  </span>
-                </div>
-              )}
-              {scholarship.end_date && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-muted">{t("det.endDate")}</span>
-                  <span className="text-text-primary">
-                    {new Date(scholarship.end_date).toLocaleDateString(
-                      lang === "ar" ? "ar-MA" : lang === "fr" ? "fr-FR" : "en-US",
-                      { year: "numeric", month: "long" }
-                    )}
-                  </span>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Eligibility */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="glass rounded-2xl p-6 mb-6"
-        >
-          <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            {t("det.eligibility")}
-          </h3>
-          <div className="text-text-secondary leading-relaxed whitespace-pre-line">
-            <AutoText
-              text={scholarship.eligibility_criteria || t("det.notSpecified")}
-            />
-          </div>
-          {scholarship.minimum_gpa && (
-            <div className="mt-3 text-sm">
-              <span className="text-text-muted">{t("det.minGpa")}</span>
-              <span className="text-cyan font-semibold">
-                {scholarship.minimum_gpa}
-              </span>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Tuition & Fees */}
-        {scholarship.tuition_info && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className="glass rounded-2xl p-6 mb-6"
-          >
-            <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-cyan" />
-              {t("det.tuition")}
-            </h3>
-            <div className="text-text-secondary leading-relaxed whitespace-pre-line">
-              <AutoText text={scholarship.tuition_info} />
-            </div>
-          </motion.div>
-        )}
-
-        {/* Relevant Admission Announcements */}
-        {relevantAnnouncements.length > 0 && (
-          <AdmissionAnnouncements announcements={relevantAnnouncements} />
-        )}
-
-        {/* Required Documents â€” interactive checklist */}
-        {docs.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="glass rounded-2xl p-6 mb-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                <FileText className="w-5 h-5 text-purple" />
-                {t("det.checklist")}
-              </h3>
-              <button
-                onClick={resetChecklist}
-                className="text-xs text-text-muted hover:text-cyan transition-colors"
-              >
-                {t("com.reset")}
-              </button>
-            </div>
-
-            {/* Progress bar */}
-            <div className="mb-5">
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-text-muted">
-                  {t("det.ofReady", { done: doneCount, total: docs.length })}
-                </span>
-                <span
-                  className={
-                    allDocsDone
-                      ? "text-emerald-400 font-bold"
-                      : "text-cyan font-semibold"
-                  }
-                >
-                  {docsPct}%
-                </span>
-              </div>
-              <div className="h-2.5 rounded-full bg-white/10 overflow-hidden">
-                <motion.div
-                  className={
-                    "h-full rounded-full " +
-                    (allDocsDone
-                      ? "bg-gradient-to-r from-emerald-400 to-cyan"
-                      : "bg-gradient-to-r from-cyan to-purple")
-                  }
-                  initial={{ width: 0 }}
-                  animate={{ width: docsPct + "%" }}
-                  transition={{ type: "spring", stiffness: 120, damping: 20 }}
+              {/* Progress bar */}
+              <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-cyan to-emerald-400 rounded-full transition-all duration-500"
+                  style={{ width: `${docsPct}%` }}
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {docs.map((doc, i) => {
-                const isChecked = !!checkedDocs[i];
-                return (
-                  <button
-                    key={i}
-                    onClick={() => toggleDoc(i)}
-                    className={
-                      "flex items-center gap-3 text-sm rounded-xl px-3 py-2.5 border transition-all text-left " +
-                      (isChecked
-                        ? "border-emerald-500/40 bg-emerald-500/10"
-                        : "border-border-glass bg-white/[0.02] hover:border-purple/40 hover:bg-white/[0.04]")
-                    }
-                  >
-                    <span
-                      className={
-                        "w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all " +
-                        (isChecked
-                          ? "bg-emerald-500 border-emerald-500"
-                          : "border-white/25")
-                      }
-                    >
-                      {isChecked && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                      )}
-                    </span>
-                    <span
-                      className={
+              {/* Document List */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {docs.map((doc, idx) => {
+                  const isChecked = !!checkedDocs[idx];
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => toggleDoc(idx)}
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
                         isChecked
-                          ? "line-through text-text-muted"
-                          : "text-text-secondary"
-                      }
+                          ? "bg-emerald-500/10 border-emerald-500/40 text-slate-300"
+                          : "bg-white/[0.02] border-white/5 hover:border-white/20 text-white"
+                      }`}
                     >
-                      {translatedDocs?.[i] ?? doc}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                      <div
+                        className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
+                          isChecked
+                            ? "bg-emerald-500 border-emerald-500 text-white"
+                            : "border-white/30"
+                        }`}
+                      >
+                        {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      </div>
+                      <span className={`text-xs leading-relaxed ${isChecked ? "line-through text-slate-400" : ""}`}>
+                        {doc}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
-            {allDocsDone && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="mt-4 flex items-center gap-2 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3"
-              >
-                <Sparkles className="w-4 h-4" />
-                {t("det.allReady")}
-              </motion.div>
-            )}
-          </motion.div>
-        )}
+              {/* Ready banner */}
+              {allDocsDone && (
+                <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-3 text-emerald-300 text-xs font-bold">
+                  <Sparkles className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                  <span>
+                    Félicitations ! Toutes les pièces requises sont prêtes. Vous pouvez procéder au dépôt officiel sur le portail CSC.
+                  </span>
+                </div>
+              )}
+            </motion.div>
+          )}
 
-        {/* Application Instructions */}
-        {scholarship.application_instructions && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="glass rounded-2xl p-6 mb-6"
-          >
-            <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-cyan" />
-              {t("det.instructions")}
-            </h3>
-            <div className="text-text-secondary leading-relaxed whitespace-pre-line">
-              <AutoText text={scholarship.application_instructions} />
-            </div>
-          </motion.div>
-        )}
+          {/* ─────────────────────────────────────────────────────────────
+              TAB 4: HOW TO APPLY (Step-by-Step Roadmap)
+          ───────────────────────────────────────────────────────────── */}
+          {activeTab === "roadmap" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-3xl bg-[#0c1424]/80 backdrop-blur-xl border border-white/10 p-6 sm:p-8 space-y-6"
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-white/10">
+                <div className="w-10 h-10 rounded-2xl bg-blue-600/20 text-cyan flex items-center justify-center">
+                  <Send className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">Guide des Étapes Officielles</h3>
+                  <p className="text-xs text-slate-400">
+                    Marche à suivre pas à pas pour les étudiants marocains (CSC Type A / Type B).
+                  </p>
+                </div>
+              </div>
 
-        {/* More at this university */}
-        {related.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.55 }}
-            className="mb-6"
-          >
-            <h3 className="text-lg font-semibold text-text-primary mb-4">
-              {t("sch.moreAt", { name: scholarship.university.name })}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {related.map((s, i) => (
-                <ScholarshipCard key={s.id} scholarship={s} index={i} />
-              ))}
-            </div>
-          </motion.div>
-        )}
+              {parsedSteps.length > 0 ? (
+                <div className="space-y-4">
+                  {parsedSteps.map((step) => (
+                    <div
+                      key={step.number}
+                      className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 sm:p-5 hover:border-cyan/30 transition-all flex items-start gap-4"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-cyan/20 border border-cyan/40 text-cyan font-black text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                        {step.number}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-white mb-2">{step.title}</h4>
+                        <ul className="space-y-1.5 text-xs text-slate-300">
+                          {step.bullets.map((b, bIdx) => (
+                            <li key={bIdx} className="flex items-start gap-2">
+                              <span className="text-cyan font-bold">•</span>
+                              <span>{b}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Fallback clean 5 steps */
+                <div className="space-y-4">
+                  {[
+                    {
+                      num: 1,
+                      title: "Inscription sur le portail officiel CSC (campus china)",
+                      desc: "Créez votre compte sur studyinchina.csc.edu.cn et sélectionnez la Catégorie Type B.",
+                    },
+                    {
+                      num: 2,
+                      title: "Renseignement du Code de l'Agence Universitaire",
+                      desc: `Indiquez le code officiel de l'université ${parsed.agencyCode ? `(Code: ${parsed.agencyCode})` : ""} pour lier votre dossier.`,
+                    },
+                    {
+                      num: 3,
+                      title: "Légalisation et Traduction Assermentée",
+                      desc: "Préparez les traductions assermentées de vos diplômes et relevés de notes marocains en anglais ou chinois.",
+                    },
+                    {
+                      num: 4,
+                      title: "Entretien Académique & Évaluation",
+                      desc: "Passage de l'entretien en ligne avec les professeurs de l'université sélectionnée.",
+                    },
+                    {
+                      num: 5,
+                      title: "Visa X1 & Départ",
+                      desc: "Réception de l'Admission Notice & JW201/JW202, puis dépôt du visa à l'Ambassade de Chine à Rabat.",
+                    },
+                  ].map((s) => (
+                    <div
+                      key={s.num}
+                      className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 flex items-start gap-3.5"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-cyan/20 text-cyan font-bold text-xs flex items-center justify-center flex-shrink-0">
+                        {s.num}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white">{s.title}</h4>
+                        <p className="text-xs text-slate-400 mt-1">{s.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-        {/* Official Admissions Desk & Interactive Contact Hub */}
-        <ContactInformationCard
-          universityName={scholarship.university.name}
-          universityId={
-            typeof scholarship.university === "object"
-              ? scholarship.university.id
-              : undefined
-          }
-          contactEmail={scholarship.contact_email}
-          contactPhone={scholarship.contact_phone}
-          scholarshipTitle={scholarship.title}
-          className="mb-8"
-        />
+              {/* Direct links row */}
+              <div className="pt-4 border-t border-white/10 flex flex-wrap gap-3">
+                {scholarship.application_link && (
+                  <a
+                    href={scholarship.application_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-cyan/20 border border-cyan/40 text-cyan hover:bg-cyan/30 transition-all"
+                  >
+                    <Building2 className="w-4 h-4" />
+                    <span>Portail de l'Université</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+                <a
+                  href="https://studyinchina.csc.edu.cn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-purple/20 border border-purple/40 text-purple-300 hover:bg-purple/30 transition-all"
+                >
+                  <Globe className="w-4 h-4" />
+                  <span>Portail Officiel CSC</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href="http://ma.china-embassy.gov.cn/fra/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-all"
+                >
+                  <Plane className="w-4 h-4" />
+                  <span>Ambassade de Chine à Rabat</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────
+              TAB 5: UNIVERSITY & CONTACT DESK
+          ───────────────────────────────────────────────────────────── */}
+          {activeTab === "contact" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <ContactInformationCard
+                universityName={scholarship.university?.name || scholarship.university_name || ""}
+                universityId={
+                  typeof scholarship.university === "object"
+                    ? scholarship.university?.id
+                    : undefined
+                }
+                contactEmail={scholarship.contact_email}
+                contactPhone={scholarship.contact_phone}
+                scholarshipTitle={scholarship.title}
+              />
+
+              {/* Related scholarships at same university */}
+              {related.length > 0 && (
+                <div className="rounded-3xl bg-[#0c1424]/80 backdrop-blur-xl border border-white/10 p-6">
+                  <h3 className="text-base font-bold text-white mb-4">
+                    Autres bourses disponibles dans cette université
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {related.map((s, i) => (
+                      <ScholarshipCard key={s.id} scholarship={s} index={i} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </main>
       </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          TOAST NOTIFICATION CONFIRMATION
+      ───────────────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl bg-slate-950/95 border border-cyan/40 text-white text-xs font-bold shadow-2xl shadow-cyan/20 backdrop-blur-xl flex items-center gap-2"
+          >
+            <span>{toastMessage}</span>
+            <button
+              onClick={() => setToastMessage(null)}
+              className="ml-2 text-slate-400 hover:text-white"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
