@@ -74,8 +74,14 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     );
   }
 
-  // Dedicated Dashboard Layout for Student Portal (matching Image 3)
-  if (pathname === "/student-portal" || pathname === "/student-portal/") {
+  // Dedicated Dashboard Layout with Left Sidebar (matching Screenshot 1)
+  if (
+    pathname === "/student-portal" ||
+    pathname === "/student-portal/" ||
+    pathname === "/scholarships" ||
+    pathname === "/scholarships/" ||
+    pathname.startsWith("/scholarships/")
+  ) {
     return (
       <>
         <main className="relative z-10 min-h-screen bg-transparent">{children}</main>

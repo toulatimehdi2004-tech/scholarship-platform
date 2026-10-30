@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Filter,
@@ -16,18 +16,35 @@ import {
   Crown,
   Award,
   ExternalLink,
-  AlertTriangle,
+  Heart,
+  Bell,
+  Clock,
+  Layers,
+  Building2,
+  ChevronDown,
+  User as UserIcon,
+  BookOpen,
+  DollarSign,
+  Home as HomeIcon,
+  ShieldCheck,
+  Check,
+  Info,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import ScholarshipCard from "@/components/ScholarshipCard";
+import StudentSidebar from "@/components/StudentSidebar";
+import ScholarshipEmblem, {
+  getScholarshipTheme,
+  type ScholarshipThemeInfo,
+} from "@/components/ScholarshipEmblem";
 import AuthGateModal from "@/components/AuthGateModal";
 import LifetimePassModal from "@/components/LifetimePassModal";
 import {
   fetchApi,
   getCurrentUser,
   getToken,
+  clearToken,
   type Scholarship,
   type University,
   type User,
@@ -35,25 +52,7 @@ import {
 import { useLang } from "@/lib/i18n";
 import { REAL_SCHOLARSHIPS } from "@/data/scholarshipsData";
 
-const FREE_TRIAL_LIMIT = 2;
-
-const levelValues = ["All Levels", "bachelor", "master", "phd", "other"];
-const levelLabelKeys: Record<string, string> = {
-  "All Levels": "sch.lvlAll",
-  bachelor: "sch.bachelor",
-  master: "sch.master",
-  phd: "sch.phd",
-  other: "sch.language",
-};
-
-const typeValues = ["All Types", "full", "partial", "living", "research"];
-const typeLabelKeys: Record<string, string> = {
-  "All Types": "sch.typeAll",
-  full: "sch.full",
-  partial: "sch.partial",
-  living: "sch.living",
-  research: "sch.research",
-};
+const FREE_TRIAL_LIMIT = 4;
 
 interface UniEntry {
   id: number;
@@ -62,6 +61,79 @@ interface UniEntry {
   country: string;
   verified: boolean;
   count: number;
+}
+
+const CAMPUS_PHOTO_MAP: Record<string, string> = {
+  "chang'an": "campus-1.jpg",
+  "tsinghua": "gate-1.jpg",
+  "peking": "lake-1.jpg",
+  "zhejiang": "library-1.jpg",
+  "fudan": "tower-1.jpg",
+  "beihang": "aerial-1.jpg",
+  "shanghai jiao tong": "auditorium-1.jpg",
+  "nanjing": "garden-1.jpg",
+  "wuhan": "lake-2.jpg",
+  "harbin": "quad-1.jpg",
+  "tongji": "hall-1.jpg",
+  "sun yat-sen": "gate-2.jpg",
+  "beijing normal": "library-2.jpg",
+  "sichuan": "life-1.jpg",
+  "xiamen": "museum-1.jpg",
+  "tianjin": "sports-1.jpg",
+  "xi'an jiaotong": "tower-2.jpg",
+  "huazhong": "campus-2.jpg",
+};
+
+const CAMPUS_PHOTOS_LIST = [
+  "campus-1.jpg",
+  "gate-1.jpg",
+  "lake-1.jpg",
+  "library-1.jpg",
+  "tower-1.jpg",
+  "auditorium-1.jpg",
+  "quad-1.jpg",
+  "aerial-1.jpg",
+  "garden-1.jpg",
+  "campus-2.jpg",
+  "gate-2.jpg",
+  "hall-1.jpg",
+  "lake-2.jpg",
+  "library-2.jpg",
+  "life-1.jpg",
+  "museum-1.jpg",
+  "sports-1.jpg",
+  "tower-2.jpg",
+];
+
+function getUniversityCampusPhoto(name: string, id: number, basePath: string): string {
+  const lower = (name || "").toLowerCase();
+  for (const [key, filename] of Object.entries(CAMPUS_PHOTO_MAP)) {
+    if (lower.includes(key)) {
+      return `${basePath}/images/campus/${filename}`;
+    }
+  }
+  const index = Math.abs(id) % CAMPUS_PHOTOS_LIST.length;
+  return `${basePath}/images/campus/${CAMPUS_PHOTOS_LIST[index]}`;
+}
+
+function getUniversityAvatarColor(name: string): { bg: string; letter: string } {
+  const cleanName = (name || "U").trim();
+  const letter = cleanName.charAt(0).toUpperCase();
+  const colors = [
+    "from-blue-600 to-cyan",
+    "from-purple-600 to-indigo-600",
+    "from-rose-600 to-red-600",
+    "from-indigo-600 to-blue-700",
+    "from-emerald-600 to-teal-600",
+    "from-amber-600 to-orange-600",
+    "from-sky-500 to-blue-600",
+    "from-pink-600 to-rose-600",
+    "from-teal-500 to-emerald-600",
+    "from-violet-600 to-purple-700",
+  ];
+  const charCode = letter.charCodeAt(0) || 65;
+  const bg = colors[charCode % colors.length];
+  return { bg, letter };
 }
 
 export default function ScholarshipsPage() {
@@ -76,11 +148,30 @@ export default function ScholarshipsPage() {
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [selectedUni, setSelectedUni] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [showAuthGate, setShowAuthGate] = useState(false);
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
+  const [savedFavorites, setSavedFavorites] = useState<number[]>([1, 2, 3]);
+  const [filterSavedOnly, setFilterSavedOnly] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Sync city & uni selection from URL and support browser Back button
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
+  // Load Saved Favorites from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("saved_favorite_unis");
+        if (saved) {
+          setSavedFavorites(JSON.parse(saved));
+        }
+      } catch {}
+    }
+  }, []);
+
+  // Sync city, uni & saved selection from URL
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -88,6 +179,10 @@ export default function ScholarshipsPage() {
       if (cityParam) setSelectedCity(cityParam);
       const uniParam = params.get("uni");
       if (uniParam) setSelectedUni(Number(uniParam));
+      const savedParam = params.get("saved");
+      if (savedParam === "true") setFilterSavedOnly(true);
+      const queryParam = params.get("query");
+      if (queryParam) setSearchQuery(queryParam);
     } catch {}
 
     const onPopState = () => {
@@ -97,25 +192,14 @@ export default function ScholarshipsPage() {
         setSelectedCity(cityParam);
         const uniParam = params.get("uni");
         setSelectedUni(uniParam ? Number(uniParam) : null);
+        setFilterSavedOnly(params.get("saved") === "true");
       } catch {}
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  const handleSelectCity = (city: string) => {
-    setSelectedCity(city);
-    try {
-      const url = new URL(window.location.href);
-      if (city !== "All Cities") {
-        url.searchParams.set("city", city);
-      } else {
-        url.searchParams.delete("city");
-      }
-      window.history.pushState({ city }, "", url.toString());
-    } catch {}
-  };
-
+  // Load scholarships & user
   useEffect(() => {
     async function loadScholarships() {
       setLoading(true);
@@ -137,26 +221,20 @@ export default function ScholarshipsPage() {
       }
       if (userRes.data) {
         setUser(userRes.data);
-      } else if (!getToken()) {
-        setShowAuthGate(true);
+      } else if (typeof window !== "undefined") {
+        const stored = localStorage.getItem("user");
+        if (stored) {
+          try {
+            setUser(JSON.parse(stored));
+          } catch {}
+        }
       }
       setLoading(false);
     }
     loadScholarships();
   }, []);
 
-  // Pick up a search query sent from the homepage hero
-  useEffect(() => {
-    try {
-      const q = sessionStorage.getItem("home-query");
-      if (q) {
-        setSearchQuery(q);
-        sessionStorage.removeItem("home-query");
-      }
-    } catch {}
-  }, []);
-
-  // Step 1: each university exactly once, with its scholarship count
+  // Unique list of universities
   const universities = useMemo<UniEntry[]>(() => {
     const map = new Map<number, UniEntry>();
     for (const s of allScholarships) {
@@ -164,16 +242,15 @@ export default function ScholarshipsPage() {
       const info = uniInfo.get(id);
       const entry = map.get(id) || {
         id,
-        name: s.university_name || info?.name || "Unknown University",
-        city: s.university_city || info?.city || "Other",
-        country: (s as any).university_country || info?.country || "",
-        verified: info?.is_verified || false,
+        name: s.university_name || info?.name || "Chinese University",
+        city: s.university_city || info?.city || "China",
+        country: (s as any).university_country || info?.country || "China",
+        verified: info?.is_verified || true,
         count: 0,
       };
       entry.count += 1;
       if (s.university_name) entry.name = s.university_name;
       if (s.university_city) entry.city = s.university_city;
-      if (info?.is_verified) entry.verified = true;
       map.set(id, entry);
     }
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
@@ -189,6 +266,9 @@ export default function ScholarshipsPage() {
 
   const filteredUnis = useMemo(() => {
     let r = universities;
+    if (filterSavedOnly) {
+      r = r.filter((u) => savedFavorites.includes(u.id));
+    }
     if (selectedCity !== "All Cities") {
       r = r.filter((u) => u.city === selectedCity);
     }
@@ -201,9 +281,8 @@ export default function ScholarshipsPage() {
       );
     }
     return r;
-  }, [universities, selectedCity, searchQuery]);
+  }, [universities, filterSavedOnly, savedFavorites, selectedCity, searchQuery]);
 
-  // Step 2: scholarships of the chosen university
   const selectedUniEntry = useMemo(
     () => universities.find((u) => u.id === selectedUni) || null,
     [universities, selectedUni]
@@ -219,10 +298,10 @@ export default function ScholarshipsPage() {
       r = r.filter((s) => s.title.toLowerCase().includes(q));
     }
     if (selectedLevel !== "All Levels") {
-      r = r.filter((s) => s.level === selectedLevel);
+      r = r.filter((s) => s.level.toLowerCase() === selectedLevel.toLowerCase());
     }
     if (selectedType !== "All Types") {
-      r = r.filter((s) => s.type === selectedType);
+      r = r.filter((s) => s.type.toLowerCase() === selectedType.toLowerCase());
     }
     return r;
   }, [allScholarships, selectedUni, searchQuery, selectedLevel, selectedType]);
@@ -242,17 +321,13 @@ export default function ScholarshipsPage() {
   );
 
   const selectUni = (id: number) => {
-    if (!getToken()) {
-      setShowAuthGate(true);
-      return;
-    }
     setSelectedUni(id);
-    setSearchQuery("");
     try {
       const url = new URL(window.location.href);
       url.searchParams.set("uni", String(id));
       window.history.pushState({ uni: id }, "", url.toString());
     } catch {}
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const backToUnis = () => {
@@ -264,624 +339,889 @@ export default function ScholarshipsPage() {
     } catch {}
   };
 
-  const activeFilters =
-    (selectedLevel !== "All Levels" && selectedUni !== null ? 1 : 0) +
-    (selectedType !== "All Types" && selectedUni !== null ? 1 : 0) +
-    (selectedCity !== "All Cities" && selectedUni === null ? 1 : 0);
-
-  const clearFilters = () => {
-    setSelectedLevel("All Levels");
-    setSelectedType("All Types");
-    handleSelectCity("All Cities");
-    setSearchQuery("");
+  const toggleFavorite = (id: number, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setSavedFavorites((prev) => {
+      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      try {
+        localStorage.setItem("saved_favorite_unis", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
+  const addToTracker = (sch: Scholarship, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    try {
+      const existing = JSON.parse(localStorage.getItem("student_applications") || "[]");
+      const found = existing.some((item: any) => item.id === sch.id);
+      if (!found) {
+        existing.push({
+          id: sch.id,
+          title: sch.title,
+          university: sch.university_name || selectedUniEntry?.name,
+          city: sch.university_city || selectedUniEntry?.city,
+          deadline: sch.application_deadline,
+          status: "In Progress",
+          dateAdded: new Date().toISOString(),
+        });
+        localStorage.setItem("student_applications", JSON.stringify(existing));
+        setToastMessage(`✅ ${lang === "ar" ? "أضيفت المنحة إلى قائمة طلباتي بنجاح!" : "Bourse ajoutée avec succès à vos candidatures !"}`);
+      } else {
+        setToastMessage(`ℹ️ ${lang === "ar" ? "هذه المنحة موجودة بالفعل في ملف المتابعة" : "Cette bourse est déjà dans votre suivi de candidatures"}`);
+      }
+      setTimeout(() => setToastMessage(null), 3500);
+    } catch {}
+  };
+
+  const handleLogout = () => {
+    clearToken();
+    try {
+      localStorage.removeItem("user");
+      localStorage.removeItem("portal_role");
+    } catch {}
+    router.push("/");
+  };
+
+  const studentUsername = user?.username || "mehdi12";
+
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-2">
-            {t("sch.browseA")} <span className="gradient-text">{t("sch.browseB")}</span>
-          </h1>
-          <p className="text-text-secondary">
-            {t("sch.subtitle")}
-          </p>
-        </motion.div>
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      {/* ─────────────────────────────────────────────────────────────
+          1. LEFT SIDEBAR MENU (Identical to Screenshot 1)
+      ───────────────────────────────────────────────────────────── */}
+      <StudentSidebar activeTab={filterSavedOnly ? "saved" : "scholarships"} />
 
-        {/* Premium Upgrade Banner */}
-        {!isPremium && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple/10 to-cyan/10 border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-purple flex items-center justify-center flex-shrink-0">
-                <Lock className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-text-primary">
-                  {t("sch.freeA", { n: allScholarships.length })}
-                </p>
-                <p className="text-xs text-text-muted">
-                  {t("sch.freeB")}
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-purple text-white text-sm font-semibold hover:opacity-90 transition-opacity flex-shrink-0"
-            >
-              <Sparkles className="w-4 h-4" />
-              {t("com.upgrade")}
-            </Link>
-          </motion.div>
-        )}
-
-        {/* CSCA Exam Notice for Undergraduate / Bachelor applicants */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-rose-500/15 via-purple/15 to-cyan/15 border border-rose-500/30 flex flex-col sm:flex-row items-center justify-between gap-4"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
-              <Award className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                  {lang === "ar" ? "إعلان إجباري للبكالوريوس" : "Obligatoire pour Bachelor"}
-                </span>
-                <span className="text-xs font-bold text-text-primary">
-                  {lang === "ar" ? "امتحان CSCA الوطني المعتمد (csca.cn)" : "Examen National CSCA (China Scholastic Assessment)"}
-                </span>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                {lang === "ar"
-                  ? "جميع المتقدمين لدرجة البكالوريوس (Licence) ملزمون باجتياز اختبار CSCA أونلاين وإرفاق الشهادة مع ملف المنحة."
-                  : "Les bacheliers postulant en Licence doivent passer le test CSCA en ligne et joindre l'attestation à leur dossier CSC."}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5 flex-shrink-0 self-end sm:self-auto">
-            <Link
-              href="/csca#major-matcher"
-              className="text-xs font-bold text-cyan hover:underline transition-all"
-            >
-              {lang === "ar" ? "محاكي التخصصات (Software, E-Commerce...) ➔" : "Simulateur par Filière (Software, E-Commerce...) ➔"}
-            </Link>
-            <a
-              href="https://www.csca.cn"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl btn-gradient text-xs font-bold shadow-sm shadow-cyan/20 cursor-pointer"
-            >
-              <span>{lang === "ar" ? "حجز موعد csca.cn" : "Rendez-vous csca.cn"}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </motion.div>
-
-        {/* Search Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="glass rounded-2xl p-2 mb-8 flex items-center gap-2"
-        >
-          <Search className="w-5 h-5 text-text-muted ml-3" />
-          <input
-            type="text"
-            placeholder={t("sch.searchPh")}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted outline-none py-3 px-2"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="p-2 text-text-muted hover:text-text-primary"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="md:hidden p-3 rounded-xl glass hover:bg-white/10 transition-all text-text-secondary"
-          >
-            <SlidersHorizontal className="w-5 h-5" />
-          </button>
-        </motion.div>
-
-        {/* Moroccan Degree Level & Funding Quick Chips Bar */}
-        <div className="mb-6 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
-          {[
-            { value: "All Levels", label: `🌟 ${t("sch.lvlAll")}` },
-            { value: "bachelor", label: `🎓 ${t("sch.bachelor")}` },
-            { value: "master", label: `🎓 ${t("sch.master")}` },
-            { value: "phd", label: `🎓 ${t("sch.phd")}` },
-            { value: "other", label: `🇨🇳 ${t("sch.language")}` },
-          ].map((lvl) => (
-            <button
-              key={lvl.value}
-              onClick={() => setSelectedLevel(lvl.value)}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
-                selectedLevel === lvl.value
-                  ? "bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan text-white shadow-lg shadow-emerald-500/25 scale-102"
-                  : "glass text-text-secondary hover:text-white hover:bg-white/10 border border-border-glass"
-              }`}
-            >
-              <span>{lvl.label}</span>
-            </button>
-          ))}
-          <div className="h-6 w-px bg-white/20 mx-1 flex-shrink-0" />
-          {[
-            { value: "All Types", label: t("sch.typeAll") },
-            { value: "full", label: `💰 ${t("sch.full")}` },
-            { value: "partial", label: `💎 ${t("sch.partial")}` },
-          ].map((tp) => (
-            <button
-              key={tp.value}
-              onClick={() => setSelectedType(tp.value)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
-                selectedType === tp.value
-                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold"
-                  : "glass text-text-muted hover:text-white border border-border-glass"
-              }`}
-            >
-              <span>{tp.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Step 2 header */}
-        {selectedUni !== null && selectedUniEntry && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
-            <button
-              onClick={backToUnis}
-              className="flex items-center gap-2 text-text-muted hover:text-cyan transition-colors mb-3 group"
-            >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              <span>← {t("sch.backToUnis")}</span>
-            </button>
-            <h2 className="text-2xl font-bold text-text-primary">
-              {t("sch.availableAt", { name: selectedUniEntry.name })}
-            </h2>
-            <p className="text-sm text-text-muted mt-1 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
-              {selectedUniEntry.city}
-              {selectedUniEntry.country ? ", " + selectedUniEntry.country : ""}
-            </p>
-          </motion.div>
-        )}
-
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <motion.aside
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className={`glass rounded-2xl p-6 lg:w-72 flex-shrink-0 h-fit ${
-              showFilters ? "block" : "hidden lg:block"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5 text-cyan" />
-                <h3 className="text-lg font-semibold text-text-primary">
-                  {t("sch.filters")}
-                </h3>
-                {activeFilters > 0 && (
-                  <span className="text-xs bg-cyan/20 text-cyan px-2 py-0.5 rounded-full">
-                    {activeFilters}
-                  </span>
-                )}
-              </div>
-              {activeFilters > 0 && (
+      {/* ─────────────────────────────────────────────────────────────
+          2. MAIN CONTENT AREA (Translucent Glass Shell)
+      ───────────────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        {/* TOP SEARCH & USER BAR (Matching Screenshot 1) */}
+        <header className="sticky top-0 z-30 w-full px-4 sm:px-8 py-3.5 bg-[#0a101d]/90 backdrop-blur-xl border-b border-white/5 flex items-center justify-between gap-4">
+          {/* Search Box with Inline Filters Button */}
+          <div className="relative flex-1 max-w-2xl">
+            <div className="flex items-center w-full bg-[#111927]/90 hover:bg-[#152033] border border-white/10 focus-within:border-cyan/50 focus-within:ring-2 focus-within:ring-cyan/20 rounded-2xl px-3.5 py-2 transition-all">
+              <Search className="w-4 h-4 text-slate-400 mr-2.5 flex-shrink-0" />
+              <input
+                type="text"
+                placeholder={lang === "ar" ? "ابحث عن المنح، الجامعات، التخصصات..." : "Search scholarships, universities, programs..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-sm text-white placeholder-slate-400 focus:outline-none"
+              />
+              {searchQuery && (
                 <button
-                  onClick={clearFilters}
-                  className="text-xs text-text-muted hover:text-red-400 transition-colors"
+                  onClick={() => setSearchQuery("")}
+                  className="p-1 text-slate-400 hover:text-white mr-1 cursor-pointer"
                 >
-                  {t("sch.clearAll")}
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                  showFilters
+                    ? "bg-cyan text-slate-950 font-black"
+                    : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/5"
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Filters</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Right Header Capsule: Notifications Bell & User Profile */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {/* Notification Bell with Red Badge */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer relative"
+              >
+                <Bell className="w-4 h-4" />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[#0a101d]" />
+              </button>
+
+              {/* Notifications Popover */}
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#0a101d]/95 backdrop-blur-2xl border border-white/10 p-4 shadow-2xl z-50 text-xs"
+                  >
+                    <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                      <span className="font-bold text-white text-sm">Notifications</span>
+                      <span className="text-[10px] text-cyan font-semibold">3 New Updates</span>
+                    </div>
+                    <div className="space-y-3 mt-3">
+                      <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20">
+                        <p className="font-bold text-rose-300 flex items-center gap-1.5">
+                          <Award className="w-3.5 h-3.5" /> CSCA Exam 2026/27
+                        </p>
+                        <p className="text-slate-300 text-[11px] mt-0.5">
+                          Test obligatoire pour les bacheliers. Simulateur disponible sur ScholarChina.
+                        </p>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                        <p className="font-bold text-amber-300 flex items-center gap-1.5">
+                          <Crown className="w-3.5 h-3.5" /> Bourses CSC Type B
+                        </p>
+                        <p className="text-slate-300 text-[11px] mt-0.5">
+                          Appels à candidatures ouverts dans plus de 100 universités partenaires.
+                        </p>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-cyan/10 border border-cyan/20">
+                        <p className="font-bold text-cyan flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5" /> Route de la Soie
+                        </p>
+                        <p className="text-slate-300 text-[11px] mt-0.5">
+                          Exemption 100% + allocation 3,000 RMB/mois pour les étudiants internationaux.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            <div className="space-y-6">
-              {selectedUni === null ? (
-                /* Step 1: City Filter */
-                <div>
-                  <label className="text-sm font-medium text-text-secondary mb-3 block">
-                    {t("sch.city")}
-                  </label>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
+            {/* User Capsule (Avatar 'M' + mehdi12 / Student + Chevron) */}
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-2.5 pl-1.5 pr-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 transition-all cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
+                  {studentUsername.charAt(0).toUpperCase()}
+                </div>
+                <div className="text-left hidden sm:block">
+                  <div className="text-xs font-bold text-white leading-tight">{studentUsername}</div>
+                  <div className="text-[10px] text-slate-400 font-medium leading-tight">Student</div>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+              </button>
+
+              {/* User Dropdown Menu */}
+              <AnimatePresence>
+                {showProfileMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-52 rounded-2xl bg-[#0a101d]/95 backdrop-blur-2xl border border-white/10 p-2 shadow-2xl z-50 text-xs font-semibold"
+                  >
+                    <div className="px-3 py-2 border-b border-white/5 mb-1">
+                      <p className="text-white font-bold">{studentUsername}</p>
+                      <p className="text-[10px] text-slate-400">Moroccan Applicant</p>
+                    </div>
+                    <Link
+                      href="/student-portal"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5"
+                    >
+                      <HomeIcon className="w-3.5 h-3.5" /> Student Dashboard
+                    </Link>
+                    <Link
+                      href="/tracker"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5"
+                    >
+                      <Layers className="w-3.5 h-3.5" /> My Applications
+                    </Link>
+                    <Link
+                      href="/profile"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5"
+                    >
+                      <UserIcon className="w-3.5 h-3.5" /> Profile Settings
+                    </Link>
+                    <div className="border-t border-white/5 my-1" />
                     <button
-                      onClick={() => handleSelectCity("All Cities")}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 cursor-pointer text-left"
+                    >
+                      Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </header>
+
+        {/* ─────────────────────────────────────────────────────────────
+            3. CSCA NOTICE BANNER (Matching Screenshot 1)
+        ───────────────────────────────────────────────────────────── */}
+        <div className="px-4 sm:px-8 pt-5">
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl bg-gradient-to-r from-rose-950/80 via-purple-950/60 to-[#0c152b]/90 border border-rose-500/30 p-3.5 sm:p-4 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg shadow-rose-950/40 backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-3 text-left">
+              <span className="flex-shrink-0 px-2.5 py-1 rounded-full bg-rose-500/25 border border-rose-500/40 text-rose-300 text-[11px] font-black tracking-wider uppercase flex items-center gap-1">
+                🚨 CSCA EXAM 2026/27
+              </span>
+              <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
+                {lang === "ar"
+                  ? "مرشح للبكالوريوس (Licence)؟ اكتشف المواد الإلزامية لاختبار CSCA الوطني حسب شعبتك واحجز موعدك."
+                  : "Candidat Bachelor ? Découvrez les épreuves obligatoires du test CSCA selon votre filière et prenez RDV."}
+              </p>
+            </div>
+            <Link
+              href="/csca"
+              className="flex-shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold text-xs shadow-md shadow-rose-500/30 flex items-center gap-1.5 transition-all transform hover:scale-102"
+            >
+              <span>{lang === "ar" ? "محاكي CSCA ➔" : "Simulateur CSCA ➔"}</span>
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────
+            4. COLLAPSIBLE FILTERS PANEL
+        ───────────────────────────────────────────────────────────── */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="px-4 sm:px-8 pt-4 overflow-hidden"
+            >
+              <div className="rounded-2xl bg-[#0a101d]/95 backdrop-blur-2xl border border-white/10 p-5 space-y-4 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-cyan" />
+                    <span className="text-sm font-bold text-white">Filter Opportunities</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedLevel("All Levels");
+                      setSelectedType("All Types");
+                      setSelectedCity("All Cities");
+                      setFilterSavedOnly(false);
+                      setSearchQuery("");
+                    }}
+                    className="text-xs text-slate-400 hover:text-rose-400 transition-colors"
+                  >
+                    Reset all filters
+                  </button>
+                </div>
+
+                {/* City chips */}
+                <div>
+                  <span className="text-xs text-slate-400 block mb-2 font-medium">Select City:</span>
+                  <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto scrollbar-none">
+                    <button
+                      onClick={() => setSelectedCity("All Cities")}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                         selectedCity === "All Cities"
-                          ? "bg-cyan/10 text-cyan border border-cyan/20"
-                          : "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                          ? "bg-cyan text-slate-950 font-bold"
+                          : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5"
                       }`}
                     >
-                      <span>{t("uni.allCities")}</span>
-                      <span className="text-xs text-text-muted">
-                        {universities.length}
-                      </span>
+                      All Cities ({universities.length})
                     </button>
-                    {cities.map(([city, count]) => (
+                    {cities.map(([c, count]) => (
                       <button
-                        key={city}
-                        onClick={() => handleSelectCity(city)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${
-                          selectedCity === city
-                            ? "bg-cyan/10 text-cyan border border-cyan/20"
-                            : "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                        key={c}
+                        onClick={() => setSelectedCity(c)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                          selectedCity === c
+                            ? "bg-cyan text-slate-950 font-bold"
+                            : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5"
                         }`}
                       >
-                        <span>{city}</span>
-                        <span className="text-xs text-text-muted">{count}</span>
+                        {c} ({count})
                       </button>
                     ))}
                   </div>
                 </div>
-              ) : (
-                <>
-                  {/* Step 2: Level Filter */}
-                  <div>
-                    <label className="text-sm font-medium text-text-secondary mb-3 block">
-                      {t("sch.eduLevel")}
-                    </label>
-                    <div className="space-y-2">
-                      {levelValues.map((value) => (
-                        <button
-                          key={value}
-                          onClick={() => setSelectedLevel(value)}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                            selectedLevel === value
-                              ? "bg-purple/10 text-purple border border-purple/20"
-                              : "text-text-secondary hover:text-text-primary hover:bg-white/5"
-                          }`}
-                        >
-                          {t(levelLabelKeys[value])}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-                  {/* Step 2: Type Filter */}
-                  <div>
-                    <label className="text-sm font-medium text-text-secondary mb-3 block">
-                      {t("sch.schType")}
-                    </label>
-                    <div className="space-y-2">
-                      {typeValues.map((value) => (
-                        <button
-                          key={value}
-                          onClick={() => setSelectedType(value)}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                            selectedType === value
-                              ? "bg-blue/10 text-blue border border-blue/20"
-                              : "text-text-secondary hover:text-text-primary hover:bg-white/5"
-                          }`}
-                        >
-                          {t(typeLabelKeys[value])}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </motion.aside>
-
-          {/* Results */}
-          <div className="flex-1">
-            {selectedUni === null ? (
-              <>
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                  <p className="text-sm text-text-muted">
-                    {t("com.showing")}{" "}
-                    <span className="text-text-primary font-medium">
-                      {isPremium
-                        ? filteredUnis.length
-                        : Math.min(filteredUnis.length, FREE_TRIAL_LIMIT)}
-                    </span>{" "}
-                    {t("com.of")} {universities.length} {t("uni.exploreB")}
-                    {!isPremium && (
-                      <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                        <Lock className="w-3 h-3" /> {lang === "ar" ? `نسخة تجريبية (${FREE_TRIAL_LIMIT} جامعات)` : `Free Trial (${FREE_TRIAL_LIMIT} Universities)`}
-                      </span>
-                    )}
+        {/* ─────────────────────────────────────────────────────────────
+            5. MAIN BODY CONTENT
+        ───────────────────────────────────────────────────────────── */}
+        <main className="flex-1 px-4 sm:px-8 py-6">
+          {selectedUni === null ? (
+            /* ─────────────────────────────────────────────────────────
+               STEP 1: UNIVERSITIES DIRECTORY (Matching Screenshot 1)
+            ───────────────────────────────────────────────────────── */
+            <div>
+              {/* Section Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    {filterSavedOnly
+                      ? lang === "ar" ? "جامعاتي المفضلة" : "My Saved Universities"
+                      : "Recommended for you"}
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                    {filterSavedOnly
+                      ? lang === "ar" ? "قائمة الجامعات التي قمت بحفظها للمقارنة والتقديم." : "Opportunities you saved to your favorites."
+                      : "Opportunities selected based on your profile & official Moroccan-China CSC agreements."}
                   </p>
-
-                  {!isPremium && (
-                    <button
-                      onClick={() => {
-                        if (!user) setShowAuthGate(true);
-                        else setShowLifetimeModal(true);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-purple/20 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-all"
-                    >
-                      <Crown className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{lang === "ar" ? "افتح أكثر من 100 جامعة (29$ دفعة واحدة)" : "Unlock All 100+ ($29 One-Time)"}</span>
-                    </button>
-                  )}
                 </div>
 
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="glass rounded-2xl p-6 h-40 animate-pulse"
-                      >
-                        <div className="h-5 bg-white/10 rounded w-3/4 mb-3" />
-                        <div className="h-4 bg-white/10 rounded w-1/2" />
-                      </div>
-                    ))}
-                  </div>
-                ) : filteredUnis.length === 0 ? (
-                  <div className="glass rounded-2xl p-16 text-center">
-                    <p className="text-text-secondary text-lg mb-2">
-                      {t("uni.noRes")}
-                    </p>
-                    <p className="text-text-muted text-sm mb-4">
-                      {t("uni.noResSub")}
-                    </p>
-                    <button
-                      onClick={clearFilters}
-                      className="btn-gradient text-sm px-4 py-2 rounded-lg"
-                    >
-                      <span>{t("sch.clearFilters")}</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    {/* Unlocked / Free Trial Universities */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {(isPremium
-                        ? filteredUnis
-                        : filteredUnis.slice(0, FREE_TRIAL_LIMIT)
-                      ).map((u, i) => (
-                        <motion.button
-                          key={u.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.4, delay: Math.min(i, 8) * 0.04 }}
-                          onClick={() => selectUni(u.id)}
-                          className="glass rounded-2xl p-6 card-hover group text-left h-full flex flex-col"
-                        >
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center flex-shrink-0">
-                              <GraduationCap className="w-6 h-6 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-base font-semibold text-text-primary group-hover:text-cyan transition-colors line-clamp-1">
-                                {u.name}
-                              </h3>
-                              <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5">
-                                <MapPin className="w-3 h-3" />
-                                {u.city}
-                              </p>
-                            </div>
-                            {u.verified && (
-                              <span className="flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full flex-shrink-0">
-                                <CheckCircle2 className="w-3 h-3" />
-                                {t("com.verified")}
-                              </span>
-                            )}
-                          </div>
-                          <span className="mt-auto flex items-center justify-between text-sm font-medium text-cyan group-hover:text-purple transition-colors">
-                            {u.count} {t("uni.scholarships")}
-                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                          </span>
-                        </motion.button>
-                      ))}
-                    </div>
-
-                    {/* Foggy Locked Section for Free Trial Users */}
-                    {!isPremium && filteredUnis.length > FREE_TRIAL_LIMIT && (
-                      <div className="relative mt-8 pt-4">
-                        {/* Blurred foggy background preview */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 filter blur-md opacity-30 select-none pointer-events-none">
-                          {filteredUnis.slice(FREE_TRIAL_LIMIT, FREE_TRIAL_LIMIT + 6).map((u, i) => (
-                            <div
-                              key={u.id}
-                              className="glass rounded-2xl p-6 text-left h-full flex flex-col"
-                            >
-                              <div className="flex items-center gap-3 mb-3">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center flex-shrink-0">
-                                  <GraduationCap className="w-6 h-6 text-white" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-base font-semibold text-text-primary line-clamp-1">
-                                    {u.name}
-                                  </h3>
-                                  <p className="text-xs text-text-muted flex items-center gap-1 mt-0.5">
-                                    <MapPin className="w-3 h-3" />
-                                    {u.city}
-                                  </p>
-                                </div>
-                              </div>
-                              <span className="mt-auto flex items-center justify-between text-sm font-medium text-cyan">
-                                {u.count} {t("uni.scholarships")}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Imposing VIP Upgrade Box Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4">
-                          <div className="glass rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-amber-500/40 shadow-2xl shadow-amber-500/20 text-center bg-slate-950/90 backdrop-blur-xl">
-                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-purple flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/30">
-                              <Crown className="w-7 h-7 text-white" />
-                            </div>
-                            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-2">
-                              {lang === "ar" ? "دفع لمرة واحدة • بدون اشتراكات شهرية" : "One-Time Payment • No Subscriptions"}
-                            </span>
-                            <h3 className="text-xl sm:text-2xl font-extrabold text-text-primary mb-2">
-                              {lang === "ar" ? "افتح جميع الجامعات الـ 100+ وأكثر من 400 منحة" : "Unlock All 100+ Universities & 400+ Scholarships"}
-                            </h3>
-                            <p className="text-xs sm:text-sm text-text-secondary mb-5 max-w-md mx-auto leading-relaxed">
-                              {lang === "ar"
-                                ? `أنت تشاهد حالياً جامعتين (2) تجريبيتين مجانيتين. قم بالترقية لمرة واحدة لفتح كل الجامعات الصينية (بكين، شنغهاي، غوانزو، تشنغدو وغيرها) وأكثر من 400 منحة كاملة وجزئية.`
-                                : "You are viewing 2 Free Trial Universities. Upgrade once to unlock all 100+ Universities (Chengdu, Beijing, Guangzhou, Shanghai, Wuhan, Xi'an) and 400+ Full & Partial Scholarships."}
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-                              <div className="text-center sm:text-left">
-                                <div className="flex items-baseline justify-center sm:justify-start gap-1">
-                                  <span className="text-3xl font-black text-text-primary">$29</span>
-                                  <span className="text-xs text-text-muted line-through">$99</span>
-                                  <span className="text-xs font-bold text-amber-300 ml-1">
-                                    {lang === "ar" ? "دفع لمرة واحدة" : "Pay Once"}
-                                  </span>
-                                </div>
-                                <p className="text-[11px] text-text-muted">
-                                  {lang === "ar" ? "وصول مدى الحياة، بدون دفع متكرر" : "Lifetime access, never pay again"}
-                                </p>
-                              </div>
-
-                              <button
-                                onClick={() => {
-                                  if (!user) setShowAuthGate(true);
-                                  else setShowLifetimeModal(true);
-                                }}
-                                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white font-extrabold text-sm shadow-xl shadow-amber-500/25 hover:opacity-95 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-                              >
-                                <Crown className="w-4 h-4 text-amber-200" />
-                                <span>{lang === "ar" ? "افتح الوصول مدى الحياة (29$)" : "Unlock Lifetime Access ($29)"}</span>
-                              </button>
-                            </div>
-
-                            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-text-muted pt-3 border-t border-white/10">
-                              <span className="flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> {lang === "ar" ? "+100 جامعة" : "100+ Universities"}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-cyan" /> {lang === "ar" ? "+400 منحة" : "400+ Scholarships"}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-purple" /> {lang === "ar" ? "تمويل كامل وجزئي" : "Full & Partial Funding"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                  <p className="text-sm text-text-muted">
-                    {t("com.showing")}{" "}
-                    <span className="text-text-primary font-medium">
-                      {uniScholarships.length}
-                    </span>{" "}
-                    {t("com.of")} {t("uni.scholarships")}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setFilterSavedOnly(!filterSavedOnly)}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      filterSavedOnly
+                        ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                        : "bg-white/5 text-slate-300 hover:bg-white/10 border-white/5"
+                    }`}
+                  >
+                    <Heart className={`w-3.5 h-3.5 ${filterSavedOnly ? "fill-rose-500 text-rose-500" : ""}`} />
+                    <span>{filterSavedOnly ? "Show All Universities" : `Saved (${savedFavorites.length})`}</span>
+                  </button>
 
                   {!isPremium && (
-                    <button
-                      onClick={() => {
-                        if (!user) setShowAuthGate(true);
-                        else setShowLifetimeModal(true);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-purple/20 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-all"
-                    >
-                      <Crown className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Unlock All 400+ Scholarships ($29)</span>
-                    </button>
-                  )}
-                </div>
-
-                {!isPremium && (
-                  <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple/10 to-cyan/10 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-purple flex items-center justify-center flex-shrink-0">
-                        <Lock className="w-4 h-4 text-white" />
-                      </div>
-                      <p className="text-xs sm:text-sm text-text-secondary">
-                        Viewing <strong className="text-text-primary">{selectedUniEntry?.name}</strong>. Unlock all <strong className="text-text-primary">100+ Universities</strong> and <strong className="text-text-primary">400+ Scholarships</strong> with the Scholar Lifetime VIP Pass.
-                      </p>
-                    </div>
                     <button
                       onClick={() => setShowLifetimeModal(true)}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-purple text-white text-xs font-bold hover:opacity-90 transition-opacity flex-shrink-0 flex items-center gap-1.5"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400/20 to-purple/20 border border-amber-500/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition-all cursor-pointer"
                     >
-                      <Crown className="w-3.5 h-3.5" />
-                      <span>$29 Pay Once</span>
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Unlock All 100+ ($29)</span>
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
+              </div>
 
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[...Array(4)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="glass rounded-2xl p-6 h-64 animate-pulse"
-                      >
-                        <div className="h-4 bg-white/10 rounded w-20 mb-4" />
-                        <div className="h-5 bg-white/10 rounded w-3/4 mb-3" />
-                      </div>
-                    ))}
-                  </div>
-                ) : uniScholarships.length === 0 ? (
-                  <div className="glass rounded-2xl p-16 text-center">
-                    <p className="text-text-secondary text-lg mb-2">
-                      {t("sch.noRes")}
-                    </p>
-                    <p className="text-text-muted text-sm mb-4">
-                      {t("sch.noResSub")}
-                    </p>
-                    <button
-                      onClick={clearFilters}
-                      className="btn-gradient text-sm px-4 py-2 rounded-lg"
+              {/* Quick Degree / Funding Pills Bar */}
+              <div className="mb-6 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
+                {[
+                  { value: "All Levels", label: "🌟 All Levels" },
+                  { value: "bachelor", label: "🎓 Bachelor" },
+                  { value: "master", label: "🎓 Master" },
+                  { value: "phd", label: "🎓 PhD" },
+                  { value: "other", label: "🇨🇳 Chinese Language / Other" },
+                ].map((lvl) => (
+                  <button
+                    key={lvl.value}
+                    onClick={() => setSelectedLevel(lvl.value)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer ${
+                      selectedLevel === lvl.value
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                        : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-white/5"
+                    }`}
+                  >
+                    <span>{lvl.label}</span>
+                  </button>
+                ))}
+                <div className="h-5 w-px bg-white/10 mx-1 flex-shrink-0" />
+                {[
+                  { value: "All Types", label: "All Types" },
+                  { value: "full", label: "💰 Full Scholarship" },
+                  { value: "partial", label: "💎 Partial Scholarship" },
+                ].map((tp) => (
+                  <button
+                    key={tp.value}
+                    onClick={() => setSelectedType(tp.value)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer ${
+                      selectedType === tp.value
+                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold"
+                        : "bg-white/5 text-slate-400 hover:text-white border border-white/5"
+                    }`}
+                  >
+                    <span>{tp.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Loading State */}
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[...Array(8)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 h-72 animate-pulse flex flex-col justify-between"
                     >
-                      <span>{t("sch.clearFilters")}</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {uniScholarships.map((scholarship, i) => (
-                      <ScholarshipCard
-                        key={scholarship.id}
-                        scholarship={scholarship}
-                        index={i}
-                      />
-                    ))}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/10" />
+                        <div className="space-y-2 flex-1">
+                          <div className="h-4 bg-white/10 rounded w-3/4" />
+                          <div className="h-3 bg-white/10 rounded w-1/2" />
+                        </div>
+                      </div>
+                      <div className="h-36 bg-white/10 rounded-xl" />
+                      <div className="h-4 bg-white/10 rounded w-1/3" />
+                    </div>
+                  ))}
+                </div>
+              ) : filteredUnis.length === 0 ? (
+                /* Empty state */
+                <div className="rounded-3xl bg-white/[0.02] border border-white/10 p-16 text-center max-w-lg mx-auto">
+                  <Building2 className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                  <p className="text-white font-bold text-lg mb-1">No universities found</p>
+                  <p className="text-xs text-slate-400 mb-5">
+                    No results matched your search or filters. Try adjusting your search query.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSelectedCity("All Cities");
+                      setSearchQuery("");
+                      setSelectedLevel("All Levels");
+                      setSelectedType("All Types");
+                      setFilterSavedOnly(false);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs"
+                  >
+                    Reset All Filters
+                  </button>
+                </div>
+              ) : (
+                /* Universities Grid (Cards matching Screenshot 1) */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredUnis.map((uni, idx) => {
+                    const avatar = getUniversityAvatarColor(uni.name);
+                    const campusPhoto = getUniversityCampusPhoto(uni.name, uni.id, basePath);
+                    const isFav = savedFavorites.includes(uni.id);
+
+                    return (
+                      <motion.div
+                        key={uni.id}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: Math.min(idx, 12) * 0.03 }}
+                        onClick={() => selectUni(uni.id)}
+                        className="rounded-2xl bg-[#0d1527]/80 hover:bg-[#111c33]/90 border border-white/10 hover:border-cyan/50 hover:shadow-2xl hover:shadow-cyan/10 transition-all duration-300 group flex flex-col cursor-pointer overflow-hidden relative"
+                      >
+                        {/* Top Row: Avatar Initial, University Name, City, Heart Favorite */}
+                        <div className="p-4 pb-3 flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            {/* Dual-Gradient Initial Badge */}
+                            <div
+                              className={`w-9 h-9 rounded-full bg-gradient-to-tr ${avatar.bg} flex items-center justify-center text-white font-black text-sm flex-shrink-0 shadow-md`}
+                            >
+                              {avatar.letter}
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="text-sm font-bold text-white group-hover:text-cyan transition-colors truncate leading-tight">
+                                {uni.name}
+                              </h3>
+                              <p className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3 text-cyan flex-shrink-0" />
+                                {uni.city}, {uni.country || "China"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Heart Favorite Button */}
+                          <button
+                            onClick={(e) => toggleFavorite(uni.id, e)}
+                            className="p-1.5 rounded-full hover:bg-white/10 text-slate-400 transition-colors flex-shrink-0 cursor-pointer"
+                            title={isFav ? "Remove from saved" : "Save to favorites"}
+                          >
+                            <Heart
+                              className={`w-4 h-4 transition-colors ${
+                                isFav
+                                  ? "fill-rose-500 text-rose-500"
+                                  : "text-slate-400 group-hover:text-rose-400"
+                              }`}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Middle: Real High-Res Campus Photo */}
+                        <div className="relative px-3">
+                          <div className="relative h-44 sm:h-48 w-full rounded-xl overflow-hidden bg-slate-900">
+                            <img
+                              src={campusPhoto}
+                              alt={uni.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              loading="lazy"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = `${basePath}/images/campus/campus-1.jpg`;
+                              }}
+                            />
+                            {/* Dark gradient overlay for bottom badge visibility */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0a101d]/90 via-transparent to-black/20" />
+
+                            {/* Top Left: Verified / Tier Tag */}
+                            <div className="absolute top-2.5 left-2.5">
+                              <span className="px-2 py-0.5 rounded-full bg-slate-950/70 backdrop-blur-md border border-white/10 text-[10px] font-bold text-cyan flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                Double First Class
+                              </span>
+                            </div>
+
+                            {/* Bottom: Scholarship count badge */}
+                            <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-xs">
+                              <span className="px-2.5 py-1 rounded-xl bg-blue-600/90 text-white font-extrabold text-[11px] backdrop-blur-md shadow-md">
+                                ✨ {uni.count} {lang === "ar" ? "منح متاحة" : "Scholarships"}
+                              </span>
+                              <span className="text-[11px] font-bold text-white/90 drop-shadow flex items-center gap-0.5">
+                                Explore ➔
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Bottom Row: Degree Level Tags & Action */}
+                        <div className="p-3 pt-3 mt-auto flex items-center justify-between border-t border-white/5 text-[11px]">
+                          <div className="flex items-center gap-1.5 text-slate-400 font-medium">
+                            <span className="px-2 py-0.5 rounded-md bg-white/5">Bachelor</span>
+                            <span className="px-2 py-0.5 rounded-md bg-white/5">Master</span>
+                            <span className="px-2 py-0.5 rounded-md bg-white/5">PhD</span>
+                          </div>
+                          <span className="text-cyan font-bold group-hover:underline flex items-center gap-0.5">
+                            Details <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                          </span>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* ─────────────────────────────────────────────────────────
+               STEP 2: SCHOLARSHIPS OF CHOSEN UNIVERSITY (With Emblems)
+            ───────────────────────────────────────────────────────── */
+            <div>
+              {/* Back button & Selected University Spotlight Banner */}
+              <div className="mb-6">
+                <button
+                  onClick={backToUnis}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/5 text-xs font-bold transition-all mb-4 group cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                  <span>{lang === "ar" ? "← العودة إلى قائمة الجامعات" : "← Back to all universities"}</span>
+                </button>
+
+                {selectedUniEntry && (
+                  <div className="rounded-3xl bg-gradient-to-r from-[#0c1a33]/90 via-[#101f3d]/80 to-[#0c1527]/90 border border-white/10 p-5 sm:p-7 relative overflow-hidden shadow-2xl backdrop-blur-xl">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                      <div className="flex items-center gap-4">
+                        {/* Avatar */}
+                        {(() => {
+                          const av = getUniversityAvatarColor(selectedUniEntry.name);
+                          return (
+                            <div
+                              className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${av.bg} flex items-center justify-center text-white font-black text-2xl flex-shrink-0 shadow-lg`}
+                            >
+                              {av.letter}
+                            </div>
+                          );
+                        })()}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h2 className="text-xl sm:text-2xl font-black text-white">
+                              {selectedUniEntry.name}
+                            </h2>
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                              Accredited
+                            </span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-1.5 mt-1">
+                            <MapPin className="w-3.5 h-3.5 text-cyan" />
+                            {selectedUniEntry.city}, {selectedUniEntry.country || "China"}
+                            <span className="text-slate-500">•</span>
+                            <span className="text-amber-300 font-semibold">
+                              {uniScholarships.length} Official Scholarships Available
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => toggleFavorite(selectedUniEntry.id, e)}
+                          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                            savedFavorites.includes(selectedUniEntry.id)
+                              ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                              : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10"
+                          }`}
+                        >
+                          <Heart
+                            className={`w-4 h-4 ${
+                              savedFavorites.includes(selectedUniEntry.id) ? "fill-rose-500 text-rose-500" : ""
+                            }`}
+                          />
+                          <span>{savedFavorites.includes(selectedUniEntry.id) ? "Saved" : "Save University"}</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
-              </>
-            )}
-          </div>
-        </div>
+              </div>
+
+              {/* Sub-Filters for scholarships */}
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
+                  {[
+                    { value: "All Levels", label: "All Levels" },
+                    { value: "bachelor", label: "🎓 Bachelor" },
+                    { value: "master", label: "🎓 Master" },
+                    { value: "phd", label: "🎓 PhD" },
+                    { value: "other", label: "🇨🇳 Language" },
+                  ].map((l) => (
+                    <button
+                      key={l.value}
+                      onClick={() => setSelectedLevel(l.value)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        selectedLevel === l.value
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                          : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5"
+                      }`}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                  <div className="h-4 w-px bg-white/10 mx-1" />
+                  {[
+                    { value: "All Types", label: "All Types" },
+                    { value: "full", label: "💰 Full Funding" },
+                    { value: "partial", label: "💎 Partial" },
+                  ].map((t) => (
+                    <button
+                      key={t.value}
+                      onClick={() => setSelectedType(t.value)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        selectedType === t.value
+                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                          : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+
+                <span className="text-xs text-slate-400 font-medium">
+                  Showing <strong className="text-white">{uniScholarships.length}</strong> scholarship opportunities
+                </span>
+              </div>
+
+              {/* Scholarships List with Unique Symbols & Emblems */}
+              {uniScholarships.length === 0 ? (
+                <div className="rounded-2xl bg-white/[0.02] border border-white/10 p-12 text-center max-w-md mx-auto">
+                  <BookOpen className="w-10 h-10 text-slate-500 mx-auto mb-2" />
+                  <p className="text-white font-bold text-sm">No scholarships match the selected filters</p>
+                  <p className="text-xs text-slate-400 mt-1 mb-4">Try clearing the level or funding filters.</p>
+                  <button
+                    onClick={() => {
+                      setSelectedLevel("All Levels");
+                      setSelectedType("All Types");
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  {uniScholarships.map((sch, i) => {
+                    const theme = getScholarshipTheme(sch);
+                    const deadlineFormatted = sch.application_deadline
+                      ? new Date(sch.application_deadline).toLocaleDateString(
+                          lang === "ar" ? "ar-MA" : "fr-FR",
+                          { month: "short", day: "numeric", year: "numeric" }
+                        )
+                      : "Rolling Admission 2026/27";
+
+                    return (
+                      <motion.div
+                        key={sch.id}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: i * 0.04 }}
+                        className={`rounded-3xl bg-gradient-to-br ${theme.cardGlow} bg-[#0c1424]/90 backdrop-blur-xl border ${theme.borderClass} p-5 sm:p-6 shadow-xl flex flex-col justify-between group transition-all duration-300 hover:shadow-2xl relative overflow-hidden`}
+                      >
+                        <div>
+                          {/* Top Header: Unique Emblem Symbol, Prestige Badge, Deadline */}
+                          <div className="flex items-start justify-between gap-3 mb-4">
+                            <div className="flex items-center gap-3">
+                              {/* Dedicated SVG Symbol Emblem */}
+                              <ScholarshipEmblem themeKey={theme.key} size={54} />
+
+                              <div>
+                                <span
+                                  className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${theme.badgeClass}`}
+                                >
+                                  {theme.badgeLabel}
+                                </span>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                  {theme.name}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Deadline Capsule */}
+                            <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/5 text-[11px] text-slate-300 font-medium flex items-center gap-1 flex-shrink-0">
+                              <Clock className="w-3 h-3 text-cyan" />
+                              {deadlineFormatted}
+                            </span>
+                          </div>
+
+                          {/* Scholarship Title */}
+                          <h3 className="text-base sm:text-lg font-black text-white group-hover:text-cyan transition-colors leading-snug mb-2">
+                            {sch.title}
+                          </h3>
+
+                          {/* Subtitle / Program scope */}
+                          <p className="text-xs text-slate-400 font-medium mb-4 flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-md bg-white/5 text-slate-300 font-bold uppercase text-[10px]">
+                              {sch.level}
+                            </span>
+                            <span>•</span>
+                            <span className="text-slate-300">{selectedUniEntry?.name}</span>
+                          </p>
+
+                          {/* 4 Financial Coverage Metric Capsules */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                            <div className="rounded-xl bg-white/[0.04] border border-white/5 p-2.5 text-center">
+                              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Tuition</span>
+                              <span className="text-xs font-black text-emerald-400 mt-0.5 block truncate">
+                                100% Free
+                              </span>
+                            </div>
+
+                            <div className="rounded-xl bg-white/[0.04] border border-white/5 p-2.5 text-center">
+                              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Dorm / Logement</span>
+                              <span className="text-xs font-black text-cyan mt-0.5 block truncate">
+                                Campus Free
+                              </span>
+                            </div>
+
+                            <div className="rounded-xl bg-white/[0.04] border border-white/5 p-2.5 text-center">
+                              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Stipend / Bourse</span>
+                              <span className="text-xs font-black text-amber-300 mt-0.5 block truncate">
+                                {theme.stipendText.split("/")[0]}
+                              </span>
+                            </div>
+
+                            <div className="rounded-xl bg-white/[0.04] border border-white/5 p-2.5 text-center">
+                              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Assurance</span>
+                              <span className="text-xs font-black text-purple-300 mt-0.5 block truncate">
+                                800 RMB Inclus
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* CSCA Status Indicator */}
+                          <div className="mb-4">
+                            {theme.cscaRequired ? (
+                              <div className="rounded-xl bg-rose-500/15 border border-rose-500/30 p-2.5 flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                  <Award className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                                  <span className="text-rose-200 font-semibold text-[11px]">
+                                    🚨 CSCA Requis (Examen National Obligatoire pour Bacheliers)
+                                  </span>
+                                </div>
+                                <Link
+                                  href="/csca"
+                                  className="text-[11px] font-bold text-cyan hover:underline flex-shrink-0 ml-2"
+                                >
+                                  Simulateur ➔
+                                </Link>
+                              </div>
+                            ) : (
+                              <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-2.5 flex items-center gap-2 text-xs text-emerald-300">
+                                <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                                <span className="text-[11px] font-medium">
+                                  ✅ CSCA Non Requis pour ce cycle (Admission sur dossier académique)
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons Row */}
+                        <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2.5 mt-auto">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => addToTracker(sch, e)}
+                              className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Layers className="w-3.5 h-3.5 text-cyan" />
+                              <span>{lang === "ar" ? "إضافة للمتابعة" : "Add to Tracker"}</span>
+                            </button>
+
+                            <Link
+                              href={`/scholarships/${sch.id}`}
+                              className="px-3 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-semibold transition-all hover:bg-white/5"
+                            >
+                              Details & Guide ➔
+                            </Link>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {sch.application_link ? (
+                              <a
+                                href={sch.application_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan text-white text-xs font-extrabold shadow-md shadow-blue-600/30 hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <span>{lang === "ar" ? "تقديم رسمي" : "Apply Now"}</span>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </a>
+                            ) : (
+                              <Link
+                                href={`/scholarships/${sch.id}`}
+                                className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan text-white text-xs font-extrabold shadow-md shadow-blue-600/30 hover:opacity-95 transition-all flex items-center gap-1.5"
+                              >
+                                <span>{lang === "ar" ? "دليل التقديم" : "Application Dossier"}</span>
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </main>
       </div>
 
-      {/* Auth & Lifetime Modals */}
+      {/* ─────────────────────────────────────────────────────────────
+          TOAST NOTIFICATION CONFIRMATION
+      ───────────────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl bg-slate-950/95 border border-cyan/40 text-white text-xs font-bold shadow-2xl shadow-cyan/20 backdrop-blur-xl flex items-center gap-2"
+          >
+            <span>{toastMessage}</span>
+            <button onClick={() => setToastMessage(null)} className="ml-2 text-slate-400 hover:text-white">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─────────────────────────────────────────────────────────────
+          AUTH GATE & LIFETIME MODALS
+      ───────────────────────────────────────────────────────────── */}
       <AuthGateModal
         isOpen={showAuthGate}
-        onClose={() => router.push("/")}
+        onClose={() => setShowAuthGate(false)}
         onBackToRoles={() => router.push("/")}
-        canClose={false}
+        canClose={true}
         role="student"
         title={lang === "ar" ? "تسجيل دخول الطلاب المغاربة" : "Moroccan Student Sign In"}
-        subtitle={lang === "ar" ? "سجل الدخول أو أنشئ حسابك لاستكشاف أكثر من 100 جامعة صينية وأكثر من 400 منحة CSC للطلاب المغاربة" : "Sign in or register your account to explore 100+ Chinese Universities & 400+ CSC Scholarships for Moroccans"}
+        subtitle={lang === "ar" ? "سجل الدخول لاستكشاف أكثر من 100 جامعة صينية وأكثر من 400 منحة CSC" : "Sign in or register your account to explore 100+ Chinese Universities & 400+ CSC Scholarships for Moroccans"}
       />
 
       <LifetimePassModal
