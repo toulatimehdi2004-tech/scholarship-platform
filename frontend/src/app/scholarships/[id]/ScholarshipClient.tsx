@@ -63,6 +63,7 @@ import ScholarshipEmblem, {
   getScholarshipTheme,
   type ScholarshipThemeInfo,
 } from "@/components/ScholarshipEmblem";
+import FinancialHonestyLedger from "@/components/FinancialHonestyLedger";
 import AdmissionAnnouncements, {
   type Announcement,
 } from "@/components/AdmissionAnnouncements";
@@ -810,6 +811,9 @@ export default function ScholarshipClient() {
                   </div>
                 </div>
               </div>
+
+              {/* Complete Financial Honesty & Out-of-Pocket Cost Ledger */}
+              <FinancialHonestyLedger scholarship={scholarship} />
 
               {/* Interactive Currency Converter & Detailed Breakdown */}
               <FundingBreakdownCard

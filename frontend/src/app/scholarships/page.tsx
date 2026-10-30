@@ -1083,7 +1083,7 @@ export default function ScholarshipsPage() {
                           </p>
 
                           {/* 4 Financial Coverage Metric Capsules */}
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
                             <div className="rounded-xl bg-white/[0.04] border border-white/5 p-2.5 text-center">
                               <span className="text-[10px] text-slate-400 uppercase font-semibold block">Tuition</span>
                               <span className="text-xs font-black text-emerald-400 mt-0.5 block truncate">
@@ -1094,14 +1094,14 @@ export default function ScholarshipsPage() {
                             <div className="rounded-xl bg-white/[0.04] border border-white/5 p-2.5 text-center">
                               <span className="text-[10px] text-slate-400 uppercase font-semibold block">Dorm / Logement</span>
                               <span className="text-xs font-black text-cyan mt-0.5 block truncate">
-                                Campus Free
+                                {sch.type === "full" ? "Campus Free" : "Subventionné"}
                               </span>
                             </div>
 
                             <div className="rounded-xl bg-white/[0.04] border border-white/5 p-2.5 text-center">
                               <span className="text-[10px] text-slate-400 uppercase font-semibold block">Stipend / Bourse</span>
                               <span className="text-xs font-black text-amber-300 mt-0.5 block truncate">
-                                {theme.stipendText.split("/")[0]}
+                                {sch.type === "full" ? theme.stipendText.split("/")[0] : "Bourse Mérite"}
                               </span>
                             </div>
 
@@ -1111,6 +1111,29 @@ export default function ScholarshipsPage() {
                                 800 RMB Inclus
                               </span>
                             </div>
+                          </div>
+
+                          {/* Honest Transparency Out-of-Pocket Pill */}
+                          <div className="mb-4">
+                            {sch.type === "full" ? (
+                              <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between text-xs">
+                                <span className="font-bold text-emerald-300 flex items-center gap-1.5 text-[11px]">
+                                  <span>👑</span> Bourse Complète : Zéro DH à payer pour les cours & la chambre
+                                </span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-extrabold uppercase">
+                                  0 DH / an
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between text-xs">
+                                <span className="font-bold text-amber-300 flex items-center gap-1.5 text-[11px]">
+                                  <span>⚠️</span> Bourse Partielle : Cours gratuits • Reste ~1,200 DH/mois à prévoir (vie & dortoir)
+                                </span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-extrabold uppercase">
+                                  Frais de vie
+                                </span>
+                              </div>
+                            )}
                           </div>
 
                           {/* CSCA Status Indicator */}

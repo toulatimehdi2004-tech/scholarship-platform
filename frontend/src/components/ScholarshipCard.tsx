@@ -133,9 +133,24 @@ export default function ScholarshipCard({
           )}
         </div>
 
-        <h3 className="text-base font-bold text-text-primary group-hover:text-cyan transition-colors leading-snug line-clamp-2 mb-4 tracking-tight">
+        <h3 className="text-base font-bold text-text-primary group-hover:text-cyan transition-colors leading-snug line-clamp-2 mb-2 tracking-tight">
           {scholarship.title}
         </h3>
+
+        {/* Financial Honesty Badge */}
+        <div className="mb-3">
+          {scholarship.type === "full" ? (
+            <div className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg flex items-center justify-between">
+              <span>👑 Bourse Complète (Full Ride)</span>
+              <span className="text-[10px] uppercase font-black">0 DH Scolarité</span>
+            </div>
+          ) : (
+            <div className="text-[11px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg flex items-center justify-between">
+              <span>⚠️ Bourse Partielle (Scolarité Offerte)</span>
+              <span className="text-[10px] uppercase font-black">Vie à prévoir</span>
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center justify-between pt-3.5 border-t border-border-glass mt-auto">
           <span
