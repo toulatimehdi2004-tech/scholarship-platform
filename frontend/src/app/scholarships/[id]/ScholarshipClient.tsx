@@ -64,6 +64,7 @@ import ScholarshipEmblem, {
   type ScholarshipThemeInfo,
 } from "@/components/ScholarshipEmblem";
 import FinancialHonestyLedger from "@/components/FinancialHonestyLedger";
+import LanguageHonestySelector from "@/components/LanguageHonestySelector";
 import AdmissionAnnouncements, {
   type Announcement,
 } from "@/components/AdmissionAnnouncements";
@@ -712,24 +713,26 @@ export default function ScholarshipClient() {
                   </button>
                 )}
 
-                {scholarship.application_link ? (
+                <Link
+                  href={`/apply/${scholarship.university?.id || 1}?scholarshipId=${scholarship.id}`}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan text-white text-xs font-extrabold shadow-lg shadow-blue-600/30 hover:opacity-95 transition-all flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>Postuler & Diagnostic Réel</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+
+                {scholarship.application_link && (
                   <a
                     href={scholarship.application_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan text-white text-xs font-extrabold shadow-lg shadow-blue-600/30 hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                    title="Accès direct au portail officiel"
                   >
-                    <span>Postuler sur le portail</span>
-                    <ExternalLink className="w-4 h-4" />
+                    <span>Portail Officiel</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
                   </a>
-                ) : (
-                  <Link
-                    href={`/apply/${scholarship.university?.id || ""}`}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan text-white text-xs font-extrabold shadow-lg shadow-blue-600/30 hover:opacity-95 transition-all flex items-center gap-1.5"
-                  >
-                    <span>Guide de candidature</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
                 )}
               </div>
             </div>
@@ -815,6 +818,13 @@ export default function ScholarshipClient() {
               {/* Complete Financial Honesty & Out-of-Pocket Cost Ledger */}
               <FinancialHonestyLedger scholarship={scholarship} />
 
+              {/* Language Diagnostic & Real Cost Honesty (Moroccan Students) */}
+              <LanguageHonestySelector
+                degreeLevel={scholarship.level}
+                universityName={scholarship.university?.name || scholarship.university_name || ""}
+                className="mt-6"
+              />
+
               {/* Interactive Currency Converter & Detailed Breakdown */}
               <FundingBreakdownCard
                 scholarshipTitle={scholarship.title}
@@ -865,6 +875,12 @@ export default function ScholarshipClient() {
                   ))}
                 </div>
               </div>
+
+              {/* Language Transparency & Requirements Diagnostic */}
+              <LanguageHonestySelector
+                degreeLevel={scholarship.level}
+                universityName={scholarship.university?.name || scholarship.university_name || ""}
+              />
 
               {/* Realistic Acceptance Odds Meter */}
               <AcceptanceOddsMeter
@@ -977,6 +993,24 @@ export default function ScholarshipClient() {
                   <h3 className="text-lg font-black text-white">Guide des Étapes Officielles</h3>
                   <p className="text-xs text-slate-400">
                     Marche à suivre pas à pas pour les étudiants marocains (CSC Type A / Type B).
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 0: Language Honesty Diagnostic Card */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-900/30 via-cyan/10 to-transparent border border-cyan/30 flex items-start gap-3.5">
+                <div className="w-8 h-8 rounded-xl bg-cyan/20 border border-cyan/40 text-cyan flex items-center justify-center flex-shrink-0 font-black text-sm">
+                  0
+                </div>
+                <div className="flex-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-cyan block mb-0.5">
+                    Étape Préalable Obligatoire • Transparence
+                  </span>
+                  <h4 className="text-sm font-bold text-white">
+                    Validation du Profil Linguistique & Calcul des Frais Réels
+                  </h4>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Avant de commencer votre dossier, choisissez votre profil : débutant complet (bénéficiant de l'année préparatoire CSC gratuite si rattachée à un diplôme), détenteur HSK 3/4 (bourse Confucius 100% ou entrée directe), ou cursus 100% en anglais.
                   </p>
                 </div>
               </div>

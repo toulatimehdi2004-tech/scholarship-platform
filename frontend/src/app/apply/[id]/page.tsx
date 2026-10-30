@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import ApplyClient from "./ApplyClient";
 
 export function generateStaticParams() {
@@ -5,5 +6,9 @@ export function generateStaticParams() {
 }
 
 export default function Page() {
-  return <ApplyClient />;
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <ApplyClient />
+    </Suspense>
+  );
 }
