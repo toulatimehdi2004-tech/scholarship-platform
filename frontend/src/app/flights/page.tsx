@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plane,
@@ -24,6 +24,11 @@ import {
   ArrowLeftRight,
   Check,
   RefreshCw,
+  Users,
+  ChevronDown,
+  X,
+  Wifi,
+  Coffee,
 } from "lucide-react";
 import Link from "next/link";
 import SmartBack from "@/components/SmartBack";
@@ -37,6 +42,43 @@ import {
   buildTripComUrl,
 } from "@/data/flightsData";
 
+// Helper: Calculate 7-day strip centered on departureDate
+function getNearbyDays(baseDateStr: string) {
+  try {
+    const parts = baseDateStr.split("-").map(Number);
+    if (parts.length !== 3) return [];
+    const [y, m, d] = parts;
+    const base = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+    const days = [];
+    for (let offset = -3; offset <= 3; offset++) {
+      const target = new Date(base.getTime() + offset * 86400000);
+      const yyyy = target.getUTCFullYear();
+      const mm = String(target.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(target.getUTCDate()).padStart(2, "0");
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+
+      const dayName = target.toLocaleDateString("fr-FR", { weekday: "short", timeZone: "UTC" });
+      const monthName = target.toLocaleDateString("fr-FR", { month: "short", timeZone: "UTC" });
+      const isSelected = dateStr === baseDateStr;
+      const dayOfWeek = target.getUTCDay(); // 2 is Tue, 3 is Wed
+      const isBestDay = dayOfWeek === 2 || dayOfWeek === 3;
+
+      days.push({
+        dateStr,
+        dayNum: dd,
+        dayName,
+        monthName,
+        isSelected,
+        isBestDay,
+        label: isSelected ? "Sélectionné" : isBestDay ? "Moins cher" : undefined,
+      });
+    }
+    return days;
+  } catch {
+    return [];
+  }
+}
+
 export default function FlightsPage() {
   const { lang } = useLang();
 
@@ -44,14 +86,36 @@ export default function FlightsPage() {
   const [selectedOrigin, setSelectedOrigin] = useState("CMN");
   const [selectedDest, setSelectedDest] = useState("PEK");
   const [tripType, setTripType] = useState<"oneway" | "roundtrip">("oneway");
+  const [cabinClass, setCabinClass] = useState<"economy" | "student">("student");
+  const [passengerCount, setPassengerCount] = useState(1);
 
   // Default to upcoming August 2026 departure (typical student arrival window)
   const [departureDate, setDepartureDate] = useState("2026-08-25");
   const [returnDate, setReturnDate] = useState("2027-07-15");
   const [activeFilterTag, setActiveFilterTag] = useState<"all" | "student_fav" | "baggage_pro" | "fastest">("all");
 
+  // Selection Modal states
+  const [showOriginModal, setShowOriginModal] = useState(false);
+  const [showDestModal, setShowDestModal] = useState(false);
+
+  // Hidden native date input ref for direct trigger
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const returnDateInputRef = useRef<HTMLInputElement>(null);
+
   const currentOrigin = ORIGIN_AIRPORTS.find((o) => o.code === selectedOrigin) || ORIGIN_AIRPORTS[0];
   const currentDest = DEST_AIRPORTS.find((d) => d.code === selectedDest) || DEST_AIRPORTS[0];
+
+  // 7-day fare matrix strip
+  const nearbyDays = useMemo(() => getNearbyDays(departureDate), [departureDate]);
+
+  // Swap Origin and Destination
+  const handleSwapAirports = () => {
+    // If destination exists in origins, swap; otherwise cycle to CMN
+    const prevOrigin = selectedOrigin;
+    const prevDest = selectedDest;
+    setSelectedOrigin(prevDest);
+    setSelectedDest(prevOrigin);
+  };
 
   // Filter flights matching the destination
   const matchedFlights = useMemo(() => {
@@ -76,29 +140,19 @@ export default function FlightsPage() {
   const formattedDateDisplay = useMemo(() => {
     if (!departureDate) return "";
     try {
-      const d = new Date(departureDate + "T00:00:00");
+      const parts = departureDate.split("-").map(Number);
+      const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], 12, 0, 0));
       return d.toLocaleDateString("fr-FR", {
-        weekday: "short",
+        weekday: "long",
         day: "numeric",
         month: "long",
         year: "numeric",
+        timeZone: "UTC",
       });
     } catch {
       return departureDate;
     }
   }, [departureDate]);
-
-  // Quick Date adjusters (+/- 1 day, +/- 3 days)
-  const adjustDays = (days: number) => {
-    try {
-      const current = new Date(departureDate + "T00:00:00");
-      current.setDate(current.getDate() + days);
-      const yyyy = current.getFullYear();
-      const mm = String(current.getMonth() + 1).padStart(2, "0");
-      const dd = String(current.getDate()).padStart(2, "0");
-      setDepartureDate(`${yyyy}-${mm}-${dd}`);
-    } catch {}
-  };
 
   // Live Deep Search Links
   const liveTripUrl = buildTripComUrl({
@@ -122,7 +176,7 @@ export default function FlightsPage() {
   return (
     <div className="min-h-screen px-4 sm:px-6 py-8 max-w-7xl mx-auto space-y-8">
       {/* ─────────────────────────────────────────────────────────────
-          1. HEADER & HONEST TRANSPARENCY NOTICE
+          1. HEADER & AIRLINE BOOKING TITLE
       ───────────────────────────────────────────────────────────── */}
       <div>
         <SmartBack fallback="/" label={lang === "ar" ? "الرئيسية" : "Retour"} />
@@ -132,190 +186,245 @@ export default function FlightsPage() {
               <Plane className="w-3.5 h-3.5" />
               <span>
                 {lang === "ar"
-                  ? "البحث الحي لرحلات الطيران — المغرب إلى الصين"
-                  : "Moteur de Vols Direct & Flexible — Maroc ➔ Chine"}
+                  ? "محرك حجز وبحث الطيران المباشر — المغرب إلى الصين"
+                  : "Moteur de Vols Direct & Dynamique — Maroc ➔ Chine"}
               </span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
               {lang === "ar"
-                ? "رحلات الطيران الحقيقية وأسعارها اللحظية (Trip.com & Skyscanner)"
-                : "Trouvez les Vrais Vols Disponibles pour Votre Date Exacte"}
+                ? "ابحث عن رحلتك الحقيقية إلى الصين للتاريخ المحدد"
+                : "Recherchez Votre Vol pour la Chine à Votre Date Exacte"}
             </h1>
             <p className="text-xs sm:text-base text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
               {lang === "ar"
-                ? "اختر اليوم والشهر بدقة لعرض جداول الرحلات المعتمدة والخطوط الجوية العاملة فعلياً، وافتح الرابط المباشر في Trip.com و Skyscanner لمعرفة السعر الحقيقي دون تزييف."
-                : "Choisissez librement votre jour et mois de voyage. Nous listons les compagnies réelles opérant sur cet itinéraire avec redirection directe vers Trip.com & Skyscanner pour obtenir le prix réel du jour à la seconde près."}
+                ? "منصة ديناميكية على غرار مواقع الطيران الكبرى: اختر يومك المفضل، وتحقق من الخطوط الجوية المعتمدة، ثم احصل على السعر اللحظي الرسمي على Trip.com و Skyscanner."
+                : "Interface dynamique inspirée des grandes compagnies aériennes : sélectionnez librement votre jour, comparez les lignes régulières et accédez en direct aux prix réels sur Trip.com & Skyscanner."}
             </p>
           </div>
         </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          2. HONESTY GUARANTEE BANNER (Zero Fake Fixed Prices)
+          2. THE AIRLINE-STYLE INTERACTIVE BOOKING CONSOLE
       ───────────────────────────────────────────────────────────── */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-950/40 via-blue-950/40 to-slate-900 border border-amber-500/30 backdrop-blur-xl flex items-start gap-3.5">
-        <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <ShieldCheck className="w-5 h-5" />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-xs sm:text-sm font-black text-white">
-            {lang === "ar"
-              ? "التزامنا بالشفافية المطلقة حول أسعار التذاكر"
-              : "Notre Engagement de Transparence sur les Prix des Billets"}
-          </h3>
-          <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-            {lang === "ar"
-              ? "أسعار تذاكر الطيران تتغير باستمرار حسب يوم السفر، وموسم الذروة الجامعية (غشت وشتنبر)، ومستوى امتلاء الطائرة. نحن لا نعرض أسعاراً ثابتة وهمية : بمجرد اختيار تاريخك، تفتح الروابط الرسمية المحدثة في Trip.com و Skyscanner لحجز التذكرة بالسعر الحقيقي الرسمي."
-              : "Les prix des billets varient d'heure en heure selon le jour précis, la saisonnalité (haute saison de rentrée fin août/début septembre) et le remplissage des vols. Aucun faux prix statique : choisissez votre jour, et les liens officiels Trip.com et Skyscanner vous affichent le tarif 100% réel en temps réel."}
-          </p>
-        </div>
-      </div>
+      <div className="rounded-3xl bg-gradient-to-b from-[#0e1c38] via-[#091122] to-[#070d1a] border border-cyan/40 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl space-y-6 relative overflow-hidden">
+        {/* Glow ambient background accent */}
+        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
 
-      {/* ─────────────────────────────────────────────────────────────
-          3. INTERACTIVE FLEXIBLE SEARCH WIDGET (Day + Month + Year)
-      ───────────────────────────────────────────────────────────── */}
-      <div className="rounded-3xl p-6 sm:p-8 bg-[#091122]/95 border border-cyan/40 backdrop-blur-xl shadow-2xl space-y-6">
-        {/* Top Controls: Trip Type (One-way / Round-trip) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-white/10">
-          <div className="flex items-center gap-2">
+        {/* Top Control Bar: Tabs & Cabin Selector */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-white/10 relative z-10">
+          {/* Trip Type Radios */}
+          <div className="flex items-center gap-2 p-1 bg-white/[0.04] border border-white/10 rounded-2xl">
             <button
               onClick={() => setTripType("oneway")}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                 tripType === "oneway"
-                  ? "bg-cyan text-slate-950 shadow-md shadow-cyan/20"
-                  : "bg-white/5 text-slate-400 hover:text-white"
+                  ? "bg-cyan text-slate-950 shadow-lg shadow-cyan/25"
+                  : "text-slate-300 hover:text-white"
               }`}
             >
-              {lang === "ar" ? "ذهاب فقط (Aller Simple)" : "Aller Simple (Étudiants)"}
+              <span>{lang === "ar" ? "ذهاب فقط" : "Aller Simple"}</span>
+              <span className="text-[10px] opacity-75 font-bold">(Étudiants)</span>
             </button>
             <button
               onClick={() => setTripType("roundtrip")}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                 tripType === "roundtrip"
-                  ? "bg-cyan text-slate-950 shadow-md shadow-cyan/20"
-                  : "bg-white/5 text-slate-400 hover:text-white"
+                  ? "bg-cyan text-slate-950 shadow-lg shadow-cyan/25"
+                  : "text-slate-300 hover:text-white"
               }`}
             >
-              {lang === "ar" ? "ذهاب وعودة (Aller-Retour)" : "Aller-Retour"}
+              <span>{lang === "ar" ? "ذهاب وعودة" : "Aller-Retour"}</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
-            <CalendarIcon className="w-3.5 h-3.5 text-cyan" />
-            <span>Date sélectionnée : <strong className="text-white">{formattedDateDisplay}</strong></span>
+          {/* Passenger & Baggage Pill */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-bold text-slate-200">
+              <Users className="w-4 h-4 text-cyan" />
+              <span>1 Étudiant (Tarif Boursier)</span>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-300">
+              <Luggage className="w-4 h-4 text-emerald-400" />
+              <span>Franchise 2 x 23 kg en Soute</span>
+            </div>
           </div>
         </div>
 
-        {/* Origin / Destination / Date Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Origin */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-cyan" />
-              <span>{lang === "ar" ? "من (المغرب) :" : "Départ (Maroc) :"}</span>
-            </label>
-            <select
-              value={selectedOrigin}
-              onChange={(e) => setSelectedOrigin(e.target.value)}
-              className="w-full px-3.5 py-3 rounded-2xl bg-white/[0.05] border border-white/15 text-white font-bold text-xs focus:outline-none focus:border-cyan transition-all"
-            >
-              {ORIGIN_AIRPORTS.map((o) => (
-                <option key={o.code} value={o.code} className="bg-slate-900 text-white">
-                  {o.name}
-                </option>
-              ))}
-            </select>
+        {/* ─────────────────────────────────────────────────────────────
+            MAIN AIRLINE TILES GRID (From ⇄ To ➔ Dates)
+        ───────────────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 relative z-10 items-stretch">
+          {/* Tile 1: Departure Airport (CMN) */}
+          <div
+            onClick={() => setShowOriginModal(true)}
+            className="lg:col-span-3 rounded-2xl p-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-cyan/40 transition-all cursor-pointer flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase tracking-wider">
+              <span className="flex items-center gap-1 text-cyan">
+                <MapPin className="w-3 h-3" />
+                <span>Départ (Maroc)</span>
+              </span>
+              <span className="text-[10px] group-hover:text-cyan transition-colors">Modifier ▾</span>
+            </div>
+            <div className="my-1.5">
+              <div className="text-3xl font-black text-white font-mono tracking-wider group-hover:text-cyan transition-colors">
+                {currentOrigin.code}
+              </div>
+              <div className="text-xs font-bold text-slate-200 truncate">{currentOrigin.city}</div>
+            </div>
+            <div className="text-[10px] text-slate-400 truncate">{currentOrigin.name}</div>
           </div>
 
-          {/* Destination */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{lang === "ar" ? "إلى (الصين) :" : "Destination (Chine) :"}</span>
-            </label>
-            <select
-              value={selectedDest}
-              onChange={(e) => setSelectedDest(e.target.value)}
-              className="w-full px-3.5 py-3 rounded-2xl bg-white/[0.05] border border-white/15 text-white font-bold text-xs focus:outline-none focus:border-cyan transition-all"
+          {/* Swap Button (Floating Center Icon) */}
+          <div className="lg:col-span-1 flex items-center justify-center -my-2 lg:my-0">
+            <button
+              type="button"
+              onClick={handleSwapAirports}
+              title="Inverser Départ et Destination"
+              className="w-10 h-10 rounded-full bg-cyan/20 hover:bg-cyan/30 border border-cyan/50 text-cyan flex items-center justify-center transition-all hover:scale-110 active:rotate-180 duration-300 shadow-lg shadow-cyan/20 cursor-pointer"
             >
-              {DEST_AIRPORTS.map((d) => (
-                <option key={d.code} value={d.code} className="bg-slate-900 text-white">
-                  {d.name}
-                </option>
-              ))}
-            </select>
+              <ArrowLeftRight className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Exact Departure Date Picker */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-              <CalendarIcon className="w-3.5 h-3.5 text-purple-400" />
-              <span>{lang === "ar" ? "تاريخ السفر (اليوم والشهر) :" : "Date de Départ :"}</span>
-            </label>
+          {/* Tile 2: Arrival Airport (PEK / PVG / CAN...) */}
+          <div
+            onClick={() => setShowDestModal(true)}
+            className="lg:col-span-3 rounded-2xl p-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-emerald-400/40 transition-all cursor-pointer flex flex-col justify-between group"
+          >
+            <div className="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase tracking-wider">
+              <span className="flex items-center gap-1 text-emerald-400">
+                <Building2 className="w-3 h-3" />
+                <span>Arrivée (Chine)</span>
+              </span>
+              <span className="text-[10px] group-hover:text-emerald-400 transition-colors">Modifier ▾</span>
+            </div>
+            <div className="my-1.5">
+              <div className="text-3xl font-black text-emerald-400 font-mono tracking-wider group-hover:text-white transition-colors">
+                {currentDest.code}
+              </div>
+              <div className="text-xs font-bold text-slate-200 truncate">{currentDest.city}</div>
+            </div>
+            <div className="text-[10px] text-slate-400 truncate">{currentDest.name}</div>
+          </div>
+
+          {/* Tile 3: Departure Date (Day + Month + Year) */}
+          <div
+            onClick={() => dateInputRef.current?.showPicker ? dateInputRef.current?.showPicker() : dateInputRef.current?.focus()}
+            className={`${
+              tripType === "roundtrip" ? "lg:col-span-3" : "lg:col-span-5"
+            } rounded-2xl p-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-purple/40 transition-all cursor-pointer flex flex-col justify-between group relative`}
+          >
+            <div className="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase tracking-wider">
+              <span className="flex items-center gap-1 text-purple-400">
+                <CalendarIcon className="w-3 h-3" />
+                <span>Date de Départ (Aller)</span>
+              </span>
+              <span className="text-[10px] text-purple-300 group-hover:text-white transition-colors">Choisir le jour ▾</span>
+            </div>
+
+            <div className="my-1.5">
+              <div className="text-xl sm:text-2xl font-black text-white group-hover:text-purple-300 transition-colors">
+                {departureDate}
+              </div>
+              <div className="text-xs font-bold text-slate-300 capitalize">{formattedDateDisplay}</div>
+            </div>
+
+            <div className="text-[10px] text-slate-400 flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>Cliquez pour changer librement le jour ou le mois</span>
+            </div>
+
+            {/* Hidden native date input to trigger calendar picker */}
             <input
+              ref={dateInputRef}
               type="date"
               value={departureDate}
               onChange={(e) => setDepartureDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.05] border border-white/15 text-white font-bold text-xs focus:outline-none focus:border-cyan transition-all cursor-pointer"
+              className="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto w-full h-full"
             />
           </div>
 
-          {/* Return Date (if Round-trip) or Quick Day Adjusters */}
-          {tripType === "roundtrip" ? (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                <ArrowLeftRight className="w-3.5 h-3.5 text-amber-400" />
-                <span>{lang === "ar" ? "تاريخ العودة :" : "Date de Retour :"}</span>
-              </label>
+          {/* Tile 4 (Optional): Return Date for Round-Trip */}
+          {tripType === "roundtrip" && (
+            <div
+              onClick={() => returnDateInputRef.current?.showPicker ? returnDateInputRef.current?.showPicker() : returnDateInputRef.current?.focus()}
+              className="lg:col-span-2 rounded-2xl p-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-amber-400/40 transition-all cursor-pointer flex flex-col justify-between group relative"
+            >
+              <div className="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase tracking-wider">
+                <span className="flex items-center gap-1 text-amber-400">
+                  <CalendarIcon className="w-3 h-3" />
+                  <span>Retour</span>
+                </span>
+                <span className="text-[10px] text-amber-300">Modifier ▾</span>
+              </div>
+              <div className="my-1.5">
+                <div className="text-lg font-black text-white">{returnDate}</div>
+                <div className="text-xs text-slate-300">Juillet 2027</div>
+              </div>
+              <div className="text-[10px] text-slate-400 truncate">Vacances d'été</div>
+
               <input
+                ref={returnDateInputRef}
                 type="date"
                 value={returnDate}
                 onChange={(e) => setReturnDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.05] border border-white/15 text-white font-bold text-xs focus:outline-none focus:border-cyan transition-all cursor-pointer"
+                className="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto w-full h-full"
               />
             </div>
-          ) : (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                <RefreshCw className="w-3.5 h-3.5 text-cyan" />
-                <span>Flexibilité (+/- Jours) :</span>
-              </label>
-              <div className="grid grid-cols-4 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => adjustDays(-3)}
-                  className="py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all cursor-pointer"
-                  title="3 jours plus tôt"
-                >
-                  -3j
-                </button>
-                <button
-                  type="button"
-                  onClick={() => adjustDays(-1)}
-                  className="py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all cursor-pointer"
-                  title="1 jour plus tôt"
-                >
-                  -1j
-                </button>
-                <button
-                  type="button"
-                  onClick={() => adjustDays(1)}
-                  className="py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all cursor-pointer"
-                  title="1 jour plus tard"
-                >
-                  +1j
-                </button>
-                <button
-                  type="button"
-                  onClick={() => adjustDays(3)}
-                  className="py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all cursor-pointer"
-                  title="3 jours plus tard"
-                >
-                  +3j
-                </button>
-              </div>
-            </div>
           )}
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────
+            3. DYNAMIC 7-DAY FARE STRIP (Like Google Flights / Skyscanner)
+        ───────────────────────────────────────────────────────────── */}
+        <div className="pt-2">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-bold mb-2.5">
+            <span className="flex items-center gap-1.5 text-white font-extrabold">
+              <Clock className="w-3.5 h-3.5 text-cyan" />
+              <span>Matrice Dynamique des 7 Jours (+/- 3 jours) :</span>
+            </span>
+            <span className="text-[11px] text-slate-400 hidden sm:inline-block">
+              Cliquez sur un jour pour mettre à jour instantanément les vols
+            </span>
+          </div>
+
+          <div className="grid grid-cols-7 gap-2 overflow-x-auto pb-1">
+            {nearbyDays.map((day) => (
+              <button
+                key={day.dateStr}
+                onClick={() => setDepartureDate(day.dateStr)}
+                className={`rounded-2xl p-2.5 sm:p-3 text-center border transition-all duration-200 cursor-pointer flex flex-col items-center justify-between min-w-[75px] ${
+                  day.isSelected
+                    ? "bg-cyan text-slate-950 font-black border-cyan shadow-xl shadow-cyan/30 scale-105 z-10"
+                    : day.isBestDay
+                    ? "bg-white/[0.05] hover:bg-white/[0.08] border-emerald-500/40 text-white"
+                    : "bg-white/[0.02] hover:bg-white/[0.06] border-white/10 text-slate-300"
+                }`}
+              >
+                <span className={`text-[10px] font-bold uppercase tracking-wider block ${day.isSelected ? "text-slate-900" : "text-slate-400"}`}>
+                  {day.dayName}
+                </span>
+                <span className="text-base sm:text-lg font-black my-0.5 block">
+                  {day.dayNum} {day.monthName}
+                </span>
+                <span
+                  className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md mt-1 block truncate w-full ${
+                    day.isSelected
+                      ? "bg-slate-950 text-cyan"
+                      : day.isBestDay
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {day.label || "Vol dispo"}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* ─────────────────────────────────────────────────────────────
@@ -357,7 +466,7 @@ export default function FlightsPage() {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          4. REAL OPERATING AIRLINES & ROUTE SCHEDULES
+          4. AIRLINE CARDS (Boarding Pass Ticket Style)
       ───────────────────────────────────────────────────────────── */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -581,55 +690,117 @@ export default function FlightsPage() {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          5. REALISTIC SEASONAL PRICE GUIDE (Honest benchmarks)
+          5. MODALS FOR SELECTING ORIGIN & DESTINATION AIRPORTS
       ───────────────────────────────────────────────────────────── */}
-      <div className="rounded-3xl p-6 sm:p-8 bg-[#091122]/90 border border-white/10 backdrop-blur-xl shadow-2xl space-y-5">
-        <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-          <div className="w-10 h-10 rounded-2xl bg-cyan/20 text-cyan flex items-center justify-center font-bold">
-            📊
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-black text-white">
-              Repères Réels de Prix Selon la Saison (Maroc ➔ Chine)
-            </h3>
-            <p className="text-xs text-slate-400">
-              Pour vous aider à prévoir votre budget réel sans mauvaise surprise.
-            </p>
-          </div>
-        </div>
+      {/* Origin Airport Modal */}
+      <AnimatePresence>
+        {showOriginModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-lg rounded-3xl bg-[#0b1426] border border-cyan/40 p-6 shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-cyan" />
+                  <h3 className="text-base font-black text-white">Sélectionnez l'Aéroport de Départ (Maroc)</h3>
+                </div>
+                <button
+                  onClick={() => setShowOriginModal(false)}
+                  className="p-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-white/[0.03] border border-emerald-500/30 space-y-1">
-            <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider block">
-              Basse Saison (Novembre à Mars)
-            </span>
-            <div className="text-lg font-black text-white">~6 000 à 8 500 DH</div>
-            <p className="text-xs text-slate-300">
-              Période la plus économique de l'année. Les compagnies proposent des promotions régulières avec escales courtes.
-            </p>
+              <div className="space-y-2">
+                {ORIGIN_AIRPORTS.map((o) => (
+                  <button
+                    key={o.code}
+                    onClick={() => {
+                      setSelectedOrigin(o.code);
+                      setShowOriginModal(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                      selectedOrigin === o.code
+                        ? "bg-cyan/15 border-cyan text-white ring-2 ring-cyan/30"
+                        : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-300 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-cyan font-black flex items-center justify-center font-mono">
+                        {o.code}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-white">{o.city}</div>
+                        <div className="text-xs text-slate-400">{o.name}</div>
+                      </div>
+                    </div>
+                    {selectedOrigin === o.code && <Check className="w-5 h-5 text-cyan" />}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
           </div>
+        )}
+      </AnimatePresence>
 
-          <div className="p-4 rounded-2xl bg-white/[0.03] border border-cyan/30 space-y-1">
-            <span className="text-[10px] font-black uppercase text-cyan tracking-wider block">
-              Moyenne Saison (Avril à Juin)
-            </span>
-            <div className="text-lg font-black text-white">~7 500 à 9 800 DH</div>
-            <p className="text-xs text-slate-300">
-              Période intermédiaire avec bonne disponibilité sur Saudia, Etihad et Qatar Airways.
-            </p>
-          </div>
+      {/* Destination Airport Modal */}
+      <AnimatePresence>
+        {showDestModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-lg rounded-3xl bg-[#0b1426] border border-emerald-500/40 p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-emerald-400" />
+                  <h3 className="text-base font-black text-white">Sélectionnez la Destination (Chine)</h3>
+                </div>
+                <button
+                  onClick={() => setShowDestModal(false)}
+                  className="p-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-          <div className="p-4 rounded-2xl bg-white/[0.03] border border-amber-500/30 space-y-1">
-            <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider block">
-              Haute Saison Rentrée (Août à Mi-Septembre)
-            </span>
-            <div className="text-lg font-black text-white">~9 500 à 15 000+ DH</div>
-            <p className="text-xs text-slate-300">
-              Période de rentrée scolaire mondiale. La demande explose. Réservez impérativement 45 à 60 jours avant pour éviter les tarifs de dernière minute.
-            </p>
+              <div className="space-y-2 overflow-y-auto flex-1 pr-1">
+                {DEST_AIRPORTS.map((d) => (
+                  <button
+                    key={d.code}
+                    onClick={() => {
+                      setSelectedDest(d.code);
+                      setShowDestModal(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                      selectedDest === d.code
+                        ? "bg-emerald-500/15 border-emerald-400 text-white ring-2 ring-emerald-500/30"
+                        : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-300 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-black flex items-center justify-center font-mono">
+                        {d.code}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-white">{d.city}</div>
+                        <div className="text-xs text-slate-400">{d.name}</div>
+                      </div>
+                    </div>
+                    {selectedDest === d.code && <Check className="w-5 h-5 text-emerald-400" />}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
           </div>
-        </div>
-      </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
