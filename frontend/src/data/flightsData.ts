@@ -1,357 +1,409 @@
-export interface FlightOffer {
-  id: string;
-  airline: string;
-  airlineCode: string;
-  airlineLogo: string; // Emoji / Symbol
-  originCity: string;
-  originCode: string;
-  destCity: string;
-  destCode: string;
-  departureTime: string;
-  arrivalTime: string;
-  duration: string;
-  stops: number;
-  layover: string;
-  priceMad: number;
-  priceUsd: number;
-  priceRmb: number;
-  baggage: string;
-  studentPerk: string;
-  provider: "trip" | "skyscanner" | "both";
-  dealTag?: "cheapest" | "fastest" | "best_value" | "student_choice";
-}
-
 export interface AirportOption {
   code: string;
   city: string;
   country: string;
   name: string;
+  citySlug: string;
 }
 
 export const ORIGIN_AIRPORTS: AirportOption[] = [
-  { code: "CMN", city: "Casablanca", country: "Maroc", name: "Aéroport Mohammed V (CMN)" },
-  { code: "RAK", city: "Marrakech", country: "Maroc", name: "Aéroport Menara (RAK)" },
-  { code: "RBA", city: "Rabat", country: "Maroc", name: "Aéroport Rabat-Salé (RBA)" },
-  { code: "TNG", city: "Tanger", country: "Maroc", name: "Aéroport Ibn Battouta (TNG)" },
+  { code: "CMN", city: "Casablanca", country: "Maroc", name: "Aéroport Mohammed V (CMN)", citySlug: "casablanca" },
+  { code: "RAK", city: "Marrakech", country: "Maroc", name: "Aéroport Menara (RAK)", citySlug: "marrakech" },
+  { code: "RBA", city: "Rabat", country: "Maroc", name: "Aéroport Rabat-Salé (RBA)", citySlug: "rabat" },
+  { code: "TNG", city: "Tanger", country: "Maroc", name: "Aéroport Ibn Battouta (TNG)", citySlug: "tangier" },
 ];
 
 export const DEST_AIRPORTS: AirportOption[] = [
-  { code: "PEK", city: "Pékin (Beijing)", country: "Chine", name: "Beijing Capital / Daxing (PEK/PKX)" },
-  { code: "PVG", city: "Shanghai", country: "Chine", name: "Shanghai Pudong / Hongqiao (PVG/SHA)" },
-  { code: "CAN", city: "Guangzhou (Canton)", country: "Chine", name: "Guangzhou Baiyun (CAN)" },
-  { code: "TFU", city: "Chengdu", country: "Chine", name: "Chengdu Tianfu (TFU)" },
-  { code: "HGH", city: "Hangzhou", country: "Chine", name: "Hangzhou Xiaoshan (HGH)" },
-  { code: "WUH", city: "Wuhan", country: "Chine", name: "Wuhan Tianhe (WUH)" },
-  { code: "XIY", city: "Xi'an", country: "Chine", name: "Xi'an Xianyang (XIY)" },
-  { code: "NKG", city: "Nanjing", country: "Chine", name: "Nanjing Lukou (NKG)" },
+  { code: "PEK", city: "Pékin (Beijing)", country: "Chine", name: "Beijing Capital / Daxing (PEK/PKX)", citySlug: "beijing" },
+  { code: "PVG", city: "Shanghai", country: "Chine", name: "Shanghai Pudong / Hongqiao (PVG/SHA)", citySlug: "shanghai" },
+  { code: "CAN", city: "Guangzhou (Canton)", country: "Chine", name: "Guangzhou Baiyun (CAN)", citySlug: "guangzhou" },
+  { code: "TFU", city: "Chengdu", country: "Chine", name: "Chengdu Tianfu (TFU)", citySlug: "chengdu" },
+  { code: "HGH", city: "Hangzhou", country: "Chine", name: "Hangzhou Xiaoshan (HGH)", citySlug: "hangzhou" },
+  { code: "WUH", city: "Wuhan", country: "Chine", name: "Wuhan Tianhe (WUH)", citySlug: "wuhan" },
+  { code: "XIY", city: "Xi'an", country: "Chine", name: "Xi'an Xianyang (XIY)", citySlug: "xian" },
+  { code: "NKG", city: "Nanjing", country: "Chine", name: "Nanjing Lukou (NKG)", citySlug: "nanjing" },
+  { code: "SZX", city: "Shenzhen", country: "Chine", name: "Shenzhen Bao'an (SZX)", citySlug: "shenzhen" },
 ];
 
-export const REAL_STUDENT_FLIGHTS: FlightOffer[] = [
-  // ── 1. CASABLANCA ➔ PÉKIN (BEIJING) ──
+export interface RealScheduledFlight {
+  id: string;
+  airline: string;
+  airlineCode: string;
+  airlineLogo: string;
+  flightNumbers: string;
+  hub: string;
+  aircraft: string;
+  standardDuration: string;
+  layoverDuration: string;
+  originCode: string;
+  originCity: string;
+  destCode: string;
+  destCity: string;
+  destAirportName: string;
+  baggageAllowance: string;
+  transitVisaRequired: boolean;
+  transitVisaNote: string;
+  studentPerk: string;
+  operatingDays: string;
+  airlineOfficialUrl: string;
+  tag: "student_fav" | "fastest" | "baggage_pro" | "popular";
+}
+
+export const REAL_SCHEDULED_FLIGHTS: RealScheduledFlight[] = [
+  // ── QATAR AIRWAYS ──
   {
-    id: "cmn-pek-saudia",
+    id: "qr-cmn-pek",
+    airline: "Qatar Airways",
+    airlineCode: "QR",
+    airlineLogo: "🇶🇦",
+    flightNumbers: "QR 1396 / QR 1400 ➔ QR 892",
+    hub: "Doha (DOH - Hamad International)",
+    aircraft: "Boeing 787-9 Dreamliner / Airbus A350-1000",
+    standardDuration: "~16h 30m à 17h 15m",
+    layoverDuration: "2h30 à 3h15 à Doha",
+    originCode: "CMN",
+    originCity: "Casablanca",
+    destCode: "PEK",
+    destCity: "Pékin (Beijing)",
+    destAirportName: "Beijing Daxing (PKX)",
+    baggageAllowance: "2 x 23 kg en soute + 7 kg cabine",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit sans visa dans la zone internationale de Doha.",
+    studentPerk: "Qatar Student Club : +10 kg gratuits (ou 3ème bagage), 10-20% de remise, Wifi haut débit offert.",
+    operatingDays: "Vol Quotidien (7j/7)",
+    airlineOfficialUrl: "https://www.qatarairways.com",
+    tag: "student_fav",
+  },
+  {
+    id: "qr-cmn-pvg",
+    airline: "Qatar Airways",
+    airlineCode: "QR",
+    airlineLogo: "🇶🇦",
+    flightNumbers: "QR 1396 / QR 1400 ➔ QR 870",
+    hub: "Doha (DOH)",
+    aircraft: "Boeing 777-300ER / Airbus A350",
+    standardDuration: "~17h 10m",
+    layoverDuration: "2h45 à Doha",
+    originCode: "CMN",
+    originCity: "Casablanca",
+    destCode: "PVG",
+    destCity: "Shanghai",
+    destAirportName: "Shanghai Pudong (PVG)",
+    baggageAllowance: "2 x 23 kg en soute + 7 kg cabine",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit sans visa dans la zone internationale de Doha.",
+    studentPerk: "Flexibilité date gratuite avec le statut étudiant.",
+    operatingDays: "Vol Quotidien (7j/7)",
+    airlineOfficialUrl: "https://www.qatarairways.com",
+    tag: "student_fav",
+  },
+  {
+    id: "qr-cmn-can",
+    airline: "Qatar Airways",
+    airlineCode: "QR",
+    airlineLogo: "🇶🇦",
+    flightNumbers: "QR 1396 ➔ QR 874",
+    hub: "Doha (DOH)",
+    aircraft: "Boeing 777-300ER",
+    standardDuration: "~17h 30m",
+    layoverDuration: "2h50 à Doha",
+    originCode: "CMN",
+    originCity: "Casablanca",
+    destCode: "CAN",
+    destCity: "Guangzhou (Canton)",
+    destAirportName: "Guangzhou Baiyun (CAN)",
+    baggageAllowance: "2 x 23 kg en soute",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit international sans visa à Doha.",
+    studentPerk: "Franchise bagage élargie avec inscription Student Club.",
+    operatingDays: "Tous les jours",
+    airlineOfficialUrl: "https://www.qatarairways.com",
+    tag: "popular",
+  },
+
+  // ── SAUDIA ──
+  {
+    id: "sv-cmn-pek",
     airline: "Saudia (Saudi Arabian Airlines)",
     airlineCode: "SV",
     airlineLogo: "🇸🇦",
-    originCity: "Casablanca",
+    flightNumbers: "SV 373 / SV 375 ➔ SV 886",
+    hub: "Djeddah (JED - King Abdulaziz Terminal 1)",
+    aircraft: "Boeing 787-9 Dreamliner / Boeing 777-300",
+    standardDuration: "~16h 50m à 17h 40m",
+    layoverDuration: "2h50 à 3h45 à Djeddah",
     originCode: "CMN",
-    destCity: "Pékin (Beijing)",
+    originCity: "Casablanca",
     destCode: "PEK",
-    departureTime: "14:15",
-    arrivalTime: "14:30 (+1j)",
-    duration: "17h 15m",
-    stops: 1,
-    layover: "1 escale à Djeddah (JED) • 3h10",
-    priceMad: 4350,
-    priceUsd: 435,
-    priceRmb: 3150,
-    baggage: "2 x 23 kg en soute + 7 kg cabine",
-    studentPerk: "Bagage généreux 46 kg idéal pour installation universitaire",
-    provider: "both",
-    dealTag: "cheapest",
+    destCity: "Pékin (Beijing)",
+    destAirportName: "Beijing Daxing (PKX)",
+    baggageAllowance: "2 x 23 kg en soute GARANTIS d'office",
+    transitVisaRequired: false,
+    transitVisaNote: "Aucun visa requis pour transit international à l'aéroport de Djeddah.",
+    studentPerk: "46 kg en soute d'office dans tous les billets économiques (parfait pour déménagement).",
+    operatingDays: "4 à 6 vols par semaine",
+    airlineOfficialUrl: "https://www.saudia.com",
+    tag: "baggage_pro",
   },
   {
-    id: "cmn-pek-etihad",
-    airline: "Etihad Airways",
-    airlineCode: "EY",
-    airlineLogo: "🇦🇪",
-    originCity: "Casablanca",
+    id: "sv-cmn-can",
+    airline: "Saudia",
+    airlineCode: "SV",
+    airlineLogo: "🇸🇦",
+    flightNumbers: "SV 373 ➔ SV 884",
+    hub: "Djeddah (JED)",
+    aircraft: "Boeing 777-300ER",
+    standardDuration: "~17h 45m",
+    layoverDuration: "3h15 à Djeddah",
     originCode: "CMN",
-    destCity: "Pékin (Beijing)",
-    destCode: "PEK",
-    departureTime: "10:30",
-    arrivalTime: "09:45 (+1j)",
-    duration: "16h 15m",
-    stops: 1,
-    layover: "1 escale à Abu Dhabi (AUH) • 2h30",
-    priceMad: 4650,
-    priceUsd: 465,
-    priceRmb: 3370,
-    baggage: "2 x 23 kg + 7 kg cabine",
-    studentPerk: "Escale courte à Abu Dhabi & Wifi à bord",
-    provider: "trip",
-    dealTag: "best_value",
-  },
-  {
-    id: "cmn-pek-qatar",
-    airline: "Qatar Airways",
-    airlineCode: "QR",
-    airlineLogo: "🇶🇦",
     originCity: "Casablanca",
-    originCode: "CMN",
-    destCity: "Pékin (Beijing)",
-    destCode: "PEK",
-    departureTime: "14:40",
-    arrivalTime: "14:50 (+1j)",
-    duration: "17h 10m",
-    stops: 1,
-    layover: "1 escale à Doha (DOH) • 2h45",
-    priceMad: 5200,
-    priceUsd: 520,
-    priceRmb: 3770,
-    baggage: "2 x 23 kg + Carte Qatar Student Club (+10 kg gratuit)",
-    studentPerk: "Qatar Student Club : Bagage supplémentaire + Wifi gratuit",
-    provider: "both",
-    dealTag: "student_choice",
+    destCode: "CAN",
+    destCity: "Guangzhou (Canton)",
+    destAirportName: "Guangzhou Baiyun (CAN)",
+    baggageAllowance: "2 x 23 kg en soute inclus",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit international sans visa.",
+    studentPerk: "Repas certifiés 100% Halal et grande franchise de bagages.",
+    operatingDays: "5 vols par semaine",
+    airlineOfficialUrl: "https://www.saudia.com",
+    tag: "baggage_pro",
   },
+
+  // ── TURKISH AIRLINES ──
   {
-    id: "cmn-pek-turkish",
+    id: "tk-cmn-pek",
     airline: "Turkish Airlines",
     airlineCode: "TK",
     airlineLogo: "🇹🇷",
-    originCity: "Casablanca",
+    flightNumbers: "TK 618 / TK 620 ➔ TK 196",
+    hub: "Istanbul (IST - Grand Aéroport d'Istanbul)",
+    aircraft: "Airbus A350-900 / Boeing 777-300ER",
+    standardDuration: "~15h 45m à 16h 20m",
+    layoverDuration: "2h15 à 3h à Istanbul",
     originCode: "CMN",
-    destCity: "Pékin (Beijing)",
+    originCity: "Casablanca",
     destCode: "PEK",
-    departureTime: "16:45",
-    arrivalTime: "15:35 (+1j)",
-    duration: "15h 50m",
-    stops: 1,
-    layover: "1 escale à Istanbul (IST) • 2h15",
-    priceMad: 5400,
-    priceUsd: 540,
-    priceRmb: 3910,
-    baggage: "2 x 23 kg + 8 kg cabine",
-    studentPerk: "Trajet le plus rapide avec repas chauds certifiés Halal",
-    provider: "skyscanner",
-    dealTag: "fastest",
+    destCity: "Pékin (Beijing)",
+    destAirportName: "Beijing Capital (PEK)",
+    baggageAllowance: "2 x 23 kg en soute + 8 kg cabine",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit sans visa en zone internationale à l'aéroport IST.",
+    studentPerk: "Programme Miles&Smiles Student : 10-15% de rabais + 40 kg ou 2x23kg garantis.",
+    operatingDays: "Vol Quotidien (7j/7)",
+    airlineOfficialUrl: "https://www.turkishairlines.com",
+    tag: "fastest",
+  },
+  {
+    id: "tk-cmn-pvg",
+    airline: "Turkish Airlines",
+    airlineCode: "TK",
+    airlineLogo: "🇹🇷",
+    flightNumbers: "TK 618 ➔ TK 26",
+    hub: "Istanbul (IST)",
+    aircraft: "Boeing 777-300ER",
+    standardDuration: "~16h 15m",
+    layoverDuration: "2h30 à Istanbul",
+    originCode: "CMN",
+    originCity: "Casablanca",
+    destCode: "PVG",
+    destCity: "Shanghai",
+    destAirportName: "Shanghai Pudong (PVG)",
+    baggageAllowance: "2 x 23 kg en soute + 8 kg cabine",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit sans visa à Istanbul.",
+    studentPerk: "L'un des temps de vol total les plus courts pour Shanghai.",
+    operatingDays: "Vol Quotidien",
+    airlineOfficialUrl: "https://www.turkishairlines.com",
+    tag: "fastest",
   },
 
-  // ── 2. CASABLANCA ➔ SHANGHAI (PVG) ──
+  // ── EMIRATES ──
   {
-    id: "cmn-pvg-etihad",
-    airline: "Etihad Airways",
-    airlineCode: "EY",
-    airlineLogo: "🇦🇪",
-    originCity: "Casablanca",
-    originCode: "CMN",
-    destCity: "Shanghai",
-    destCode: "PVG",
-    departureTime: "10:30",
-    arrivalTime: "10:50 (+1j)",
-    duration: "17h 20m",
-    stops: 1,
-    layover: "1 escale à Abu Dhabi (AUH) • 2h40",
-    priceMad: 4420,
-    priceUsd: 442,
-    priceRmb: 3200,
-    baggage: "2 x 23 kg en soute",
-    studentPerk: "Meilleur tarif Shanghai enregistré sur Trip.com",
-    provider: "trip",
-    dealTag: "cheapest",
-  },
-  {
-    id: "cmn-pvg-saudia",
-    airline: "Saudia",
-    airlineCode: "SV",
-    airlineLogo: "🇸🇦",
-    originCity: "Casablanca",
-    originCode: "CMN",
-    destCity: "Shanghai",
-    destCode: "PVG",
-    departureTime: "15:20",
-    arrivalTime: "15:10 (+1j)",
-    duration: "16h 50m",
-    stops: 1,
-    layover: "1 escale à Djeddah (JED) • 2h55",
-    priceMad: 4580,
-    priceUsd: 458,
-    priceRmb: 3320,
-    baggage: "2 x 23 kg + 7 kg cabine",
-    studentPerk: "Franchise 46 kg garantie pour étudiants",
-    provider: "both",
-    dealTag: "best_value",
-  },
-  {
-    id: "cmn-pvg-emirates",
+    id: "ek-cmn-pek",
     airline: "Emirates",
     airlineCode: "EK",
     airlineLogo: "🇦🇪",
-    originCity: "Casablanca",
+    flightNumbers: "EK 752 / EK 754 ➔ EK 306 / EK 308",
+    hub: "Dubaï (DXB - Terminal 3)",
+    aircraft: "Airbus A380-800 / Boeing 777-300ER",
+    standardDuration: "~17h 25m",
+    layoverDuration: "3h10 à Dubaï",
     originCode: "CMN",
-    destCity: "Shanghai",
+    originCity: "Casablanca",
+    destCode: "PEK",
+    destCity: "Pékin (Beijing)",
+    destAirportName: "Beijing Capital (PEK)",
+    baggageAllowance: "2 x 23 kg (ou 40 kg avec code promo étudiant)",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit sans visa en zone internationale de Dubaï.",
+    studentPerk: "Offre Étudiant Emirates (Code STUDENT) : 10% de rabais + 10 kg de bagages supplémentaires offerts.",
+    operatingDays: "Vol Quotidien",
+    airlineOfficialUrl: "https://www.emirates.com",
+    tag: "student_fav",
+  },
+  {
+    id: "ek-cmn-pvg",
+    airline: "Emirates",
+    airlineCode: "EK",
+    airlineLogo: "🇦🇪",
+    flightNumbers: "EK 752 ➔ EK 302 / EK 304",
+    hub: "Dubaï (DXB)",
+    aircraft: "Airbus A380-800",
+    standardDuration: "~17h 30m",
+    layoverDuration: "3h00 à Dubaï",
+    originCode: "CMN",
+    originCity: "Casablanca",
     destCode: "PVG",
-    departureTime: "15:05",
-    arrivalTime: "15:30 (+1j)",
-    duration: "17h 25m",
-    stops: 1,
-    layover: "1 escale à Dubaï (DXB) • 3h15",
-    priceMad: 5600,
-    priceUsd: 560,
-    priceRmb: 4060,
-    baggage: "2 x 23 kg (Offre Étudiant Emirates avec code promo)",
-    studentPerk: "Réduction étudiant Emirates 10% + 10 kg supplémentaires",
-    provider: "both",
-    dealTag: "student_choice",
+    destCity: "Shanghai",
+    destAirportName: "Shanghai Pudong (PVG)",
+    baggageAllowance: "2 x 23 kg en soute",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit sans visa à Dubaï.",
+    studentPerk: "Vol sur le géant des airs Airbus A380 avec grand confort.",
+    operatingDays: "Vol Quotidien",
+    airlineOfficialUrl: "https://www.emirates.com",
+    tag: "popular",
   },
 
-  // ── 3. CASABLANCA ➔ GUANGZHOU (CAN) ──
+  // ── ETIHAD AIRWAYS ──
   {
-    id: "cmn-can-egyptair",
-    airline: "EgyptAir",
-    airlineCode: "MS",
-    airlineLogo: "🇪🇬",
-    originCity: "Casablanca",
-    originCode: "CMN",
-    destCity: "Guangzhou (Canton)",
-    destCode: "CAN",
-    departureTime: "13:30",
-    arrivalTime: "15:15 (+1j)",
-    duration: "18h 45m",
-    stops: 1,
-    layover: "1 escale au Caire (CAI) • 3h30",
-    priceMad: 4190,
-    priceUsd: 419,
-    priceRmb: 3040,
-    baggage: "2 x 23 kg en soute inclus",
-    studentPerk: "Le billet le plus économique vers le sud de la Chine",
-    provider: "skyscanner",
-    dealTag: "cheapest",
-  },
-  {
-    id: "cmn-can-saudia",
-    airline: "Saudia",
-    airlineCode: "SV",
-    airlineLogo: "🇸🇦",
-    originCity: "Casablanca",
-    originCode: "CMN",
-    destCity: "Guangzhou (Canton)",
-    destCode: "CAN",
-    departureTime: "14:15",
-    arrivalTime: "16:00 (+1j)",
-    duration: "18h 45m",
-    stops: 1,
-    layover: "1 escale à Djeddah (JED) • 3h45",
-    priceMad: 4490,
-    priceUsd: 449,
-    priceRmb: 3250,
-    baggage: "2 x 23 kg + 7 kg cabine",
-    studentPerk: "Connexion directe fluide vers Baiyun International",
-    provider: "both",
-    dealTag: "best_value",
-  },
-
-  // ── 4. CASABLANCA ➔ CHENGDU (TFU) ──
-  {
-    id: "cmn-tfu-qatar",
-    airline: "Qatar Airways",
-    airlineCode: "QR",
-    airlineLogo: "🇶🇦",
-    originCity: "Casablanca",
-    originCode: "CMN",
-    destCity: "Chengdu",
-    destCode: "TFU",
-    departureTime: "14:40",
-    arrivalTime: "14:55 (+1j)",
-    duration: "17h 15m",
-    stops: 1,
-    layover: "1 escale à Doha (DOH) • 2h35",
-    priceMad: 4890,
-    priceUsd: 489,
-    priceRmb: 3540,
-    baggage: "2 x 23 kg (Extension Student Club)",
-    studentPerk: "Liaison directe Doha-Tianfu très moderne",
-    provider: "both",
-    dealTag: "student_choice",
-  },
-
-  // ── 5. CASABLANCA ➔ WUHAN (WUH) / HANGZHOU (HGH) ──
-  {
-    id: "cmn-wuh-turkish",
-    airline: "Turkish Airlines + China Southern",
-    airlineCode: "TK-CZ",
-    airlineLogo: "🇹🇷",
-    originCity: "Casablanca",
-    originCode: "CMN",
-    destCity: "Wuhan",
-    destCode: "WUH",
-    departureTime: "16:45",
-    arrivalTime: "17:30 (+1j)",
-    duration: "17h 45m",
-    stops: 1,
-    layover: "1 escale à Istanbul (IST) • 3h10",
-    priceMad: 4790,
-    priceUsd: 479,
-    priceRmb: 3470,
-    baggage: "2 x 23 kg en soute",
-    studentPerk: "Idéal pour universités de Wuhan & HUST",
-    provider: "both",
-    dealTag: "best_value",
-  },
-  {
-    id: "cmn-hgh-etihad",
+    id: "ey-cmn-pek",
     airline: "Etihad Airways",
     airlineCode: "EY",
     airlineLogo: "🇦🇪",
-    originCity: "Casablanca",
+    flightNumbers: "EY 614 ➔ EY 888",
+    hub: "Abu Dhabi (AUH - Terminal Zayed International)",
+    aircraft: "Boeing 787-9 Dreamliner",
+    standardDuration: "~16h 40m",
+    layoverDuration: "2h40 à Abu Dhabi",
     originCode: "CMN",
-    destCity: "Hangzhou",
-    destCode: "HGH",
-    departureTime: "10:30",
-    arrivalTime: "11:15 (+1j)",
-    duration: "17h 45m",
-    stops: 1,
-    layover: "1 escale à Abu Dhabi (AUH) • 2h50",
-    priceMad: 4620,
-    priceUsd: 462,
-    priceRmb: 3350,
-    baggage: "2 x 23 kg inclus",
-    studentPerk: "Arrivée directe à Hangzhou (Zhejiang University)",
-    provider: "trip",
-    dealTag: "cheapest",
+    originCity: "Casablanca",
+    destCode: "PEK",
+    destCity: "Pékin (Beijing)",
+    destAirportName: "Beijing Daxing (PKX)",
+    baggageAllowance: "2 x 23 kg en soute",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit sans visa dans le nouveau terminal d'Abu Dhabi.",
+    studentPerk: "Wifi à bord et correspondances très bien synchronisées.",
+    operatingDays: "5 vols par semaine",
+    airlineOfficialUrl: "https://www.etihad.com",
+    tag: "popular",
+  },
+  {
+    id: "ey-cmn-pvg",
+    airline: "Etihad Airways",
+    airlineCode: "EY",
+    airlineLogo: "🇦🇪",
+    flightNumbers: "EY 614 ➔ EY 862",
+    hub: "Abu Dhabi (AUH)",
+    aircraft: "Boeing 787-9 Dreamliner",
+    standardDuration: "~17h 15m",
+    layoverDuration: "2h35 à Abu Dhabi",
+    originCode: "CMN",
+    originCity: "Casablanca",
+    destCode: "PVG",
+    destCity: "Shanghai",
+    destAirportName: "Shanghai Pudong (PVG)",
+    baggageAllowance: "2 x 23 kg en soute",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit sans visa à Abu Dhabi.",
+    studentPerk: "Souvent parmi les options les plus compétitives sur Trip.com.",
+    operatingDays: "5 vols par semaine",
+    airlineOfficialUrl: "https://www.etihad.com",
+    tag: "popular",
+  },
+
+  // ── EGYPTAIR ──
+  {
+    id: "ms-cmn-can",
+    airline: "EgyptAir",
+    airlineCode: "MS",
+    airlineLogo: "🇪🇬",
+    flightNumbers: "MS 848 ➔ MS 958",
+    hub: "Le Caire (CAI - Terminal 3)",
+    aircraft: "Boeing 777-300ER / Boeing 787",
+    standardDuration: "~18h 30m",
+    layoverDuration: "3h30 au Caire",
+    originCode: "CMN",
+    originCity: "Casablanca",
+    destCode: "CAN",
+    destCity: "Guangzhou (Canton)",
+    destAirportName: "Guangzhou Baiyun (CAN)",
+    baggageAllowance: "2 x 23 kg en soute inclus",
+    transitVisaRequired: false,
+    transitVisaNote: "Transit international sans visa au Caire.",
+    studentPerk: "Franchise 2 x 23 kg incluse dans tous les billets de base.",
+    operatingDays: "4 vols par semaine",
+    airlineOfficialUrl: "https://www.egyptair.com",
+    tag: "baggage_pro",
   },
 ];
 
 /**
- * Generates an active, pre-filled search link on Skyscanner.
+ * Builds exact deep search link for Skyscanner with exact date.
  */
 export function buildSkyscannerUrl(params: {
   originCode: string;
   destCode: string;
-  date?: string;
+  departureDate: string; // YYYY-MM-DD
+  returnDate?: string;   // YYYY-MM-DD
+  tripType?: "oneway" | "roundtrip";
 }): string {
   const origin = (params.originCode || "cmn").toLowerCase();
   let dest = (params.destCode || "bjs").toLowerCase();
-  if (dest === "pek" || dest === "pkx") dest = "bjs"; // All Beijing airports
-  if (dest === "pvg" || dest === "sha") dest = "sha"; // All Shanghai airports
+  if (dest === "pek" || dest === "pkx") dest = "bjs";
+  if (dest === "pvg" || dest === "sha") dest = "sha";
+  if (dest === "tfu") dest = "ctu";
 
-  // Skyscanner format
+  // Format date to YYMMDD for Skyscanner legacy path or query
+  const depParts = params.departureDate.split("-");
+  let formattedDep = "";
+  if (depParts.length === 3) {
+    formattedDep = `${depParts[0].slice(2)}${depParts[1]}${depParts[2]}`;
+  }
+
+  if (params.tripType === "roundtrip" && params.returnDate) {
+    const retParts = params.returnDate.split("-");
+    let formattedRet = "";
+    if (retParts.length === 3) {
+      formattedRet = `${retParts[0].slice(2)}${retParts[1]}${retParts[2]}`;
+    }
+    if (formattedDep && formattedRet) {
+      return `https://www.skyscanner.net/transport/flights/${origin}/${dest}/${formattedDep}/${formattedRet}/?adultsv2=1&cabinclass=economy&childrenv2=&ref=scholar_china_student`;
+    }
+  }
+
+  if (formattedDep) {
+    return `https://www.skyscanner.net/transport/flights/${origin}/${dest}/${formattedDep}/?adultsv2=1&cabinclass=economy&childrenv2=&ref=scholar_china_student`;
+  }
+
   return `https://www.skyscanner.net/transport/flights/${origin}/${dest}/?adultsv2=1&cabinclass=economy&childrenv2=&ref=scholar_china_student`;
 }
 
 /**
- * Generates an active, pre-filled search link on Trip.com.
+ * Builds exact deep search link for Trip.com with exact date.
  */
 export function buildTripComUrl(params: {
   originCode: string;
   destCode: string;
   originCity?: string;
   destCity?: string;
+  departureDate: string; // YYYY-MM-DD
+  returnDate?: string;   // YYYY-MM-DD
+  tripType?: "oneway" | "roundtrip";
 }): string {
   const origin = (params.originCode || "cmn").toLowerCase();
-  const dest = (params.destCode || "bjs").toLowerCase();
-  const originCitySlug = (params.originCity || "casablanca").toLowerCase().replace(/[^a-z0-9]/g, "-");
-  const destCitySlug = (params.destCity || "beijing").toLowerCase().replace(/[^a-z0-9]/g, "-");
+  let dest = (params.destCode || "bjs").toLowerCase();
+  if (dest === "pek" || dest === "pkx") dest = "bjs";
+  if (dest === "pvg" || dest === "sha") dest = "sha";
+  if (dest === "tfu") dest = "ctu";
 
-  return `https://www.trip.com/flights/${originCitySlug}-to-${destCitySlug}/tickets-${origin}-${dest}/?dcity=${origin}&acity=${dest}&ref=scholar_china_student`;
+  const originSlug = (params.originCity || "casablanca").toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const destSlug = (params.destCity || "beijing").toLowerCase().replace(/[^a-z0-9]/g, "-");
+
+  const isRoundTrip = params.tripType === "roundtrip" && !!params.returnDate;
+  const tripTypeParam = isRoundTrip ? "&tripType=RT" : "&tripType=OW";
+  const rdateParam = isRoundTrip ? `&rdate=${params.returnDate}` : "";
+
+  return `https://www.trip.com/flights/${originSlug}-to-${destSlug}/tickets-${origin}-${dest}?dcity=${origin}&acity=${dest}&ddate=${params.departureDate}${rdateParam}${tripTypeParam}&class=y&quantity=1&ref=scholar_china_student`;
 }
