@@ -21,6 +21,7 @@ import {
   X,
   Stethoscope,
   Stamp,
+  Plane,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import { useLang } from "@/lib/i18n";
@@ -33,6 +34,7 @@ export type SidebarActiveTab =
   | "universities"
   | "tracker"
   | "services"
+  | "flights"
   | "saved"
   | "documents"
   | "medical"
@@ -101,6 +103,13 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
       href: "/services",
       label: lang === "ar" ? "الخدمات" : "Services",
       icon: LayoutGrid,
+    },
+    {
+      id: "flights",
+      href: "/flights",
+      label: lang === "ar" ? "تذاكر الطيران" : "Vols Chine",
+      icon: Plane,
+      badge: "Cheapest",
     },
     {
       id: "saved",

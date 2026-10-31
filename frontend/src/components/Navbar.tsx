@@ -39,6 +39,7 @@ const navKeys: { href: string; key: string; badge?: string; customLabel?: string
   { href: "/student-portal", key: "nav.home" },
   { href: "/scholarships", key: "nav.scholarships" },
   { href: "/universities", key: "nav.universities" },
+  { href: "/flights", key: "nav.flights", customLabel: "✈️ Vols Chine", badge: "Cheapest" },
   { href: "/medical-guide", key: "nav.medical", customLabel: "Visite Médicale", badge: "CSC" },
   { href: "/morocco-guide", key: "nav.morocco", customLabel: "Guide Maroc" },
   { href: "/csca", key: "nav.csca", badge: "NEW" },

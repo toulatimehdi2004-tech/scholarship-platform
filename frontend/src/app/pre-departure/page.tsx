@@ -10,7 +10,9 @@ import {
   Luggage,
   MapPinned,
   CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { translateCached } from "@/components/AutoText";
@@ -232,6 +234,35 @@ export default function PreDeparturePage() {
           </h1>
           <p className="text-text-secondary">{t("dep.subtitle")}</p>
         </motion.div>
+
+        {/* Flight Booking Banner */}
+        <Link
+          href="/flights"
+          className="block mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-blue-950/70 via-slate-900 to-[#091122] border border-cyan/40 hover:border-cyan shadow-xl backdrop-blur-xl group transition-all"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-cyan/20 border border-cyan/40 text-cyan flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <Plane className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan/20 text-cyan border border-cyan/40">
+                  Nouveau • Comparateur Trip.com & Skyscanner
+                </span>
+                <h3 className="text-base sm:text-lg font-black text-white mt-1 group-hover:text-cyan transition-colors">
+                  Trouvez votre Vol Maroc ➔ Chine au Meilleur Prix
+                </h3>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Vols directs et 1 escale depuis Casablanca avec 2 valises de 23 kg incluses à partir de 4 190 DH.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-black text-cyan group-hover:translate-x-1 transition-transform flex-shrink-0">
+              <span>Comparer les vols</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </Link>
 
         <div className="glass rounded-2xl p-5 mb-8">
           <div className="flex justify-between text-xs mb-1.5">

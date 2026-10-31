@@ -158,10 +158,18 @@ export default function ServicesPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-center">
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+            <Link
+              href="/flights"
+              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-cyan/15 hover:bg-cyan/25 text-cyan border border-cyan/40 flex items-center gap-2 transition-all shadow-lg shadow-cyan/10"
+            >
+              <Plane className="w-4 h-4 text-cyan" />
+              <span>✈️ Vols Étudiants (Trip & Skyscanner)</span>
+            </Link>
+
             <Link
               href="/provider-portal"
-              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-cyan border border-cyan/30 flex items-center gap-2 transition-all shadow-lg shadow-cyan/10"
+              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 flex items-center gap-2 transition-all shadow-sm"
             >
               <span>💼 Provider Bureau Desk</span>
             </Link>
