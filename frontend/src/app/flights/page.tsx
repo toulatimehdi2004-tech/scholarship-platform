@@ -29,6 +29,7 @@ import {
   X,
   Wifi,
   Coffee,
+  GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
 import SmartBack from "@/components/SmartBack";
@@ -84,10 +85,8 @@ export default function FlightsPage() {
 
   // Search & Flexible Date States
   const [selectedOrigin, setSelectedOrigin] = useState("CMN");
-  const [selectedDest, setSelectedDest] = useState("PEK");
+  const [selectedDest, setSelectedDest] = useState("TFU"); // Default to Chengdu Tianfu
   const [tripType, setTripType] = useState<"oneway" | "roundtrip">("oneway");
-  const [cabinClass, setCabinClass] = useState<"economy" | "student">("student");
-  const [passengerCount, setPassengerCount] = useState(1);
 
   // Default to upcoming August 2026 departure (typical student arrival window)
   const [departureDate, setDepartureDate] = useState("2026-08-25");
@@ -97,6 +96,8 @@ export default function FlightsPage() {
   // Selection Modal states
   const [showOriginModal, setShowOriginModal] = useState(false);
   const [showDestModal, setShowDestModal] = useState(false);
+  const [destSearchQuery, setDestSearchQuery] = useState("");
+  const [destCategoryFilter, setDestCategoryFilter] = useState<"all" | "multi" | "hubs" | "univ">("all");
 
   // Hidden native date input ref for direct trigger
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -110,7 +111,6 @@ export default function FlightsPage() {
 
   // Swap Origin and Destination
   const handleSwapAirports = () => {
-    // If destination exists in origins, swap; otherwise cycle to CMN
     const prevOrigin = selectedOrigin;
     const prevDest = selectedDest;
     setSelectedOrigin(prevDest);
@@ -124,8 +124,30 @@ export default function FlightsPage() {
       if (flight.originCode !== selectedOrigin && selectedOrigin !== "all") {
         return false;
       }
-      // Destination match
-      if (selectedDest !== "all" && flight.destCode !== selectedDest) {
+      // Destination match (handle multi-airport city grouping)
+      if (selectedDest !== "all") {
+        if (flight.destCode === selectedDest) return true;
+        // Group Chengdu airports (Tianfu TFU & Shuangliu CTU)
+        if (
+          (selectedDest === "TFU" || selectedDest === "CTU") &&
+          (flight.destCode === "TFU" || flight.destCode === "CTU")
+        ) {
+          return true;
+        }
+        // Group Beijing airports (Daxing PKX & Capital PEK)
+        if (
+          (selectedDest === "PKX" || selectedDest === "PEK") &&
+          (flight.destCode === "PKX" || flight.destCode === "PEK")
+        ) {
+          return true;
+        }
+        // Group Shanghai airports (Pudong PVG & Hongqiao SHA)
+        if (
+          (selectedDest === "PVG" || selectedDest === "SHA") &&
+          (flight.destCode === "PVG" || flight.destCode === "SHA")
+        ) {
+          return true;
+        }
         return false;
       }
       // Tag filter
@@ -135,6 +157,38 @@ export default function FlightsPage() {
       return true;
     });
   }, [selectedOrigin, selectedDest, activeFilterTag]);
+
+  // Filter destination airports for the modal
+  const filteredDestAirports = useMemo(() => {
+    return DEST_AIRPORTS.filter((d) => {
+      // category filter
+      if (destCategoryFilter === "multi" && !d.isMultiAirport) return false;
+      if (
+        destCategoryFilter === "hubs" &&
+        (d.isMultiAirport ||
+          (d.province !== "Guangdong" &&
+            d.province !== "Chongqing" &&
+            d.province !== "Hubei" &&
+            d.province !== "Zhejiang"))
+      ) {
+        return false;
+      }
+      if (destCategoryFilter === "univ" && d.isMultiAirport) return false;
+
+      // search query
+      if (destSearchQuery.trim()) {
+        const q = destSearchQuery.toLowerCase();
+        const matchCity = d.city.toLowerCase().includes(q);
+        const matchName = d.name.toLowerCase().includes(q);
+        const matchCode = d.code.toLowerCase().includes(q);
+        const matchChinese = d.chineseName.toLowerCase().includes(q);
+        const matchUniv = (d.majorUniversities || "").toLowerCase().includes(q);
+        const matchProv = (d.province || "").toLowerCase().includes(q);
+        return matchCity || matchName || matchCode || matchChinese || matchUniv || matchProv;
+      }
+      return true;
+    });
+  }, [destSearchQuery, destCategoryFilter]);
 
   // Formatted human-readable date
   const formattedDateDisplay = useMemo(() => {
@@ -192,13 +246,13 @@ export default function FlightsPage() {
             </div>
             <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
               {lang === "ar"
-                ? "ابحث عن رحلتك الحقيقية إلى الصين للتاريخ المحدد"
+                ? "ابحث عن رحلتك الحقيقية إلى الصين للتاريخ والمطار المحدد"
                 : "Recherchez Votre Vol pour la Chine à Votre Date Exacte"}
             </h1>
             <p className="text-xs sm:text-base text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
               {lang === "ar"
-                ? "منصة ديناميكية على غرار مواقع الطيران الكبرى: اختر يومك المفضل، وتحقق من الخطوط الجوية المعتمدة، ثم احصل على السعر اللحظي الرسمي على Trip.com و Skyscanner."
-                : "Interface dynamique inspirée des grandes compagnies aériennes : sélectionnez librement votre jour, comparez les lignes régulières et accédez en direct aux prix réels sur Trip.com & Skyscanner."}
+                ? "تشمل الصين مدناً كبرى تمتلك أكثر من مطار دولي (مثل تشنغدو التي تضم تيانفو وشوانغليو، وبكين وشانغهاي). اختر المطار الدقيق لجامعتك وتحقق من الأسعار الحية على Trip.com و Skyscanner."
+                : "Les métropoles chinoises disposent de plusieurs aéroports majeurs (ex: Chengdu avec Tianfu TFU & Shuangliu CTU, Pékin avec Daxing & Capital, Shanghai avec Pudong & Hongqiao). Sélectionnez l'aéroport le plus proche de votre campus et obtenez le tarif réel en direct."}
             </p>
           </div>
         </div>
@@ -238,6 +292,13 @@ export default function FlightsPage() {
               <span>{lang === "ar" ? "ذهاب وعودة" : "Aller-Retour"}</span>
             </button>
           </div>
+
+          {/* Multi-Airport City Badge */}
+          {currentDest.isMultiAirport && (
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-bold">
+              <span>🏙️ Ville Multi-Aéroports ({currentDest.city})</span>
+            </div>
+          )}
 
           {/* Passenger & Baggage Pill */}
           <div className="flex items-center gap-3">
@@ -290,7 +351,7 @@ export default function FlightsPage() {
             </button>
           </div>
 
-          {/* Tile 2: Arrival Airport (PEK / PVG / CAN...) */}
+          {/* Tile 2: Arrival Airport (PEK / PVG / TFU / CTU / CAN...) */}
           <div
             onClick={() => setShowDestModal(true)}
             className="lg:col-span-3 rounded-2xl p-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-emerald-400/40 transition-all cursor-pointer flex flex-col justify-between group"
@@ -300,11 +361,20 @@ export default function FlightsPage() {
                 <Building2 className="w-3 h-3" />
                 <span>Arrivée (Chine)</span>
               </span>
-              <span className="text-[10px] group-hover:text-emerald-400 transition-colors">Modifier ▾</span>
+              <span className="text-[10px] group-hover:text-emerald-400 transition-colors">
+                Choisir ({DEST_AIRPORTS.length} aéroports) ▾
+              </span>
             </div>
             <div className="my-1.5">
-              <div className="text-3xl font-black text-emerald-400 font-mono tracking-wider group-hover:text-white transition-colors">
-                {currentDest.code}
+              <div className="flex items-center gap-2">
+                <span className="text-3xl font-black text-emerald-400 font-mono tracking-wider group-hover:text-white transition-colors">
+                  {currentDest.code}
+                </span>
+                {currentDest.isMultiAirport && (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                    Multi-Hub
+                  </span>
+                )}
               </div>
               <div className="text-xs font-bold text-slate-200 truncate">{currentDest.city}</div>
             </div>
@@ -313,7 +383,11 @@ export default function FlightsPage() {
 
           {/* Tile 3: Departure Date (Day + Month + Year) */}
           <div
-            onClick={() => dateInputRef.current?.showPicker ? dateInputRef.current?.showPicker() : dateInputRef.current?.focus()}
+            onClick={() =>
+              dateInputRef.current?.showPicker
+                ? dateInputRef.current?.showPicker()
+                : dateInputRef.current?.focus()
+            }
             className={`${
               tripType === "roundtrip" ? "lg:col-span-3" : "lg:col-span-5"
             } rounded-2xl p-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-purple/40 transition-all cursor-pointer flex flex-col justify-between group relative`}
@@ -323,7 +397,9 @@ export default function FlightsPage() {
                 <CalendarIcon className="w-3 h-3" />
                 <span>Date de Départ (Aller)</span>
               </span>
-              <span className="text-[10px] text-purple-300 group-hover:text-white transition-colors">Choisir le jour ▾</span>
+              <span className="text-[10px] text-purple-300 group-hover:text-white transition-colors">
+                Choisir le jour ▾
+              </span>
             </div>
 
             <div className="my-1.5">
@@ -351,7 +427,11 @@ export default function FlightsPage() {
           {/* Tile 4 (Optional): Return Date for Round-Trip */}
           {tripType === "roundtrip" && (
             <div
-              onClick={() => returnDateInputRef.current?.showPicker ? returnDateInputRef.current?.showPicker() : returnDateInputRef.current?.focus()}
+              onClick={() =>
+                returnDateInputRef.current?.showPicker
+                  ? returnDateInputRef.current?.showPicker()
+                  : returnDateInputRef.current?.focus()
+              }
               className="lg:col-span-2 rounded-2xl p-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 hover:border-amber-400/40 transition-all cursor-pointer flex flex-col justify-between group relative"
             >
               <div className="flex items-center justify-between text-slate-400 text-[10px] font-black uppercase tracking-wider">
@@ -405,7 +485,11 @@ export default function FlightsPage() {
                     : "bg-white/[0.02] hover:bg-white/[0.06] border-white/10 text-slate-300"
                 }`}
               >
-                <span className={`text-[10px] font-bold uppercase tracking-wider block ${day.isSelected ? "text-slate-900" : "text-slate-400"}`}>
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider block ${
+                    day.isSelected ? "text-slate-900" : "text-slate-400"
+                  }`}
+                >
                   {day.dayName}
                 </span>
                 <span className="text-base sm:text-lg font-black my-0.5 block">
@@ -432,9 +516,15 @@ export default function FlightsPage() {
         ───────────────────────────────────────────────────────────── */}
         <div className="pt-4 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-xs text-slate-300">
-            Itinéraire sélectionné : <strong className="text-cyan">{currentOrigin.city} ({currentOrigin.code})</strong> ➔{" "}
-            <strong className="text-emerald-400">{currentDest.city} ({currentDest.code})</strong> le{" "}
-            <strong className="text-white">{departureDate}</strong>
+            Itinéraire sélectionné :{" "}
+            <strong className="text-cyan">
+              {currentOrigin.city} ({currentOrigin.code})
+            </strong>{" "}
+            ➔{" "}
+            <strong className="text-emerald-400">
+              {currentDest.name}
+            </strong>{" "}
+            le <strong className="text-white">{departureDate}</strong>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -459,7 +549,7 @@ export default function FlightsPage() {
             >
               <Plane className="w-4 h-4 text-slate-950" />
               <span>Comparer les Prix sur Skyscanner</span>
-              <ExternalLink className="w-4 h-4 text-slate-950" />
+              <ExternalLink className="w-4 h-4" />
             </a>
           </div>
         </div>
@@ -472,13 +562,13 @@ export default function FlightsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-              <span>Compagnies Aériennes Régulières Opérant sur cette Ligne</span>
+              <span>Compagnies Aériennes Régulières pour {currentDest.city}</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan/15 text-cyan border border-cyan/30">
-                {matchedFlights.length} compagnies disponibles
+                {matchedFlights.length} liaisons disponibles
               </span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Ces vols sont programmés régulièrement. Cliquez sur chaque compagnie pour vérifier la place disponible pour votre date :
+              Ces vols sont programmés régulièrement. Cliquez sur chaque compagnie pour vérifier la disponibilité exacte à votre date :
             </p>
           </div>
 
@@ -599,9 +689,7 @@ export default function FlightsPage() {
                       <span className="text-[10px] uppercase font-bold text-slate-400 block">
                         Escale de Correspondance
                       </span>
-                      <span className="text-sm font-bold text-cyan">
-                        {flight.hub}
-                      </span>
+                      <span className="text-sm font-bold text-cyan">{flight.hub}</span>
                       <span className="text-[10px] text-slate-400 block">{flight.layoverDuration}</span>
                     </div>
 
@@ -610,7 +698,7 @@ export default function FlightsPage() {
                         Arrivée en Chine
                       </span>
                       <span className="text-sm font-extrabold text-emerald-400">
-                        {flight.destCity} ({flight.destAirportName})
+                        {flight.destAirportName}
                       </span>
                     </div>
                   </div>
@@ -640,9 +728,7 @@ export default function FlightsPage() {
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-block mb-1">
                       Tarif Live du {departureDate}
                     </span>
-                    <div className="text-xs text-slate-300">
-                      Vérification en 1 clic :
-                    </div>
+                    <div className="text-xs text-slate-300">Vérification en 1 clic :</div>
                   </div>
 
                   {/* CTAs */}
@@ -747,7 +833,7 @@ export default function FlightsPage() {
         )}
       </AnimatePresence>
 
-      {/* Destination Airport Modal */}
+      {/* Destination Airport Modal (With Search & Multi-Airport Categorization) */}
       <AnimatePresence>
         {showDestModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
@@ -755,12 +841,18 @@ export default function FlightsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg rounded-3xl bg-[#0b1426] border border-emerald-500/40 p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col"
+              className="w-full max-w-2xl rounded-3xl bg-[#0b1426] border border-emerald-500/40 p-6 shadow-2xl space-y-4 max-h-[88vh] flex flex-col"
             >
+              {/* Modal Header */}
               <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-emerald-400" />
-                  <h3 className="text-base font-black text-white">Sélectionnez la Destination (Chine)</h3>
+                  <div>
+                    <h3 className="text-base font-black text-white">Sélectionnez la Destination en Chine</h3>
+                    <p className="text-[11px] text-slate-400">
+                      Villes avec plusieurs aéroports (Chengdu, Pékin, Shanghai) et grands hubs universitaires
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setShowDestModal(false)}
@@ -770,32 +862,93 @@ export default function FlightsPage() {
                 </button>
               </div>
 
-              <div className="space-y-2 overflow-y-auto flex-1 pr-1">
-                {DEST_AIRPORTS.map((d) => (
+              {/* Instant Search Bar */}
+              <div className="relative flex-shrink-0">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Rechercher par ville, aéroport ou université (ex: Chengdu, Shuangliu, Tianfu, Daxing, Harbin, HIT...)"
+                  value={destSearchQuery}
+                  onChange={(e) => setDestSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/[0.05] border border-white/15 text-white placeholder-slate-400 text-xs focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Category Filter Pills */}
+              <div className="flex flex-wrap items-center gap-1.5 flex-shrink-0">
+                {[
+                  { id: "all", label: `Tous (${DEST_AIRPORTS.length})` },
+                  { id: "multi", label: "🏙️ Multi-Aéroports (Chengdu, Pékin, Shanghai)" },
+                  { id: "hubs", label: "🌟 Grands Hubs (Guangzhou, Shenzhen, Wuhan, Hangzhou)" },
+                  { id: "univ", label: "🎓 Villes Universitaires (Xi'an, Harbin, Changsha...)" },
+                ].map((cat) => (
                   <button
-                    key={d.code}
-                    onClick={() => {
-                      setSelectedDest(d.code);
-                      setShowDestModal(false);
-                    }}
-                    className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all text-left cursor-pointer ${
-                      selectedDest === d.code
-                        ? "bg-emerald-500/15 border-emerald-400 text-white ring-2 ring-emerald-500/30"
-                        : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-300 hover:text-white"
+                    key={cat.id}
+                    onClick={() => setDestCategoryFilter(cat.id as any)}
+                    className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                      destCategoryFilter === cat.id
+                        ? "bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/25"
+                        : "bg-white/[0.03] border border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.06]"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-black flex items-center justify-center font-mono">
-                        {d.code}
-                      </div>
-                      <div>
-                        <div className="text-sm font-bold text-white">{d.city}</div>
-                        <div className="text-xs text-slate-400">{d.name}</div>
-                      </div>
-                    </div>
-                    {selectedDest === d.code && <Check className="w-5 h-5 text-emerald-400" />}
+                    {cat.label}
                   </button>
                 ))}
+              </div>
+
+              {/* Scrollable Airports List */}
+              <div className="space-y-2 overflow-y-auto flex-1 pr-1">
+                {filteredDestAirports.length > 0 ? (
+                  filteredDestAirports.map((d) => (
+                    <button
+                      key={d.code}
+                      onClick={() => {
+                        setSelectedDest(d.code);
+                        setShowDestModal(false);
+                      }}
+                      className={`w-full flex items-start justify-between p-3.5 rounded-2xl border transition-all text-left cursor-pointer ${
+                        selectedDest === d.code
+                          ? "bg-emerald-500/15 border-emerald-400 text-white ring-2 ring-emerald-500/30"
+                          : "bg-white/[0.03] border-white/10 hover:border-white/20 text-slate-300 hover:text-white hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-black flex items-center justify-center font-mono text-base flex-shrink-0">
+                          {d.code}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-extrabold text-white">{d.name}</span>
+                            <span className="text-xs text-slate-400 font-normal">({d.chineseName})</span>
+                            {d.isMultiAirport && (
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                Multi-Aéroport
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-300 mt-0.5">
+                            Ville : <strong>{d.city}</strong> {d.province ? `• Province du ${d.province}` : ""}
+                          </div>
+                          {d.majorUniversities && (
+                            <div className="text-[11px] text-cyan mt-1 flex items-center gap-1">
+                              <GraduationCap className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate max-w-md">Universités : {d.majorUniversities}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {selectedDest === d.code && (
+                        <div className="w-6 h-6 rounded-full bg-emerald-400 text-slate-950 flex items-center justify-center flex-shrink-0 font-bold text-xs mt-1">
+                          ✓
+                        </div>
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-slate-400 text-xs">
+                    Aucun aéroport trouvé pour "{destSearchQuery}". Essayez un autre mot-clé (ex: Chengdu, Tianfu, Shuangliu, Pékin, Harbin...).
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
