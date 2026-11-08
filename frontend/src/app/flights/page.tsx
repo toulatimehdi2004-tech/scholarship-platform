@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import SmartBack from "@/components/SmartBack";
+import StudentSidebar from "@/components/StudentSidebar";
 import { useLang } from "@/lib/i18n";
 import {
   ORIGIN_AIRPORTS,
@@ -228,12 +229,15 @@ export default function FlightsPage() {
   });
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-8 max-w-7xl mx-auto space-y-8">
-      {/* ─────────────────────────────────────────────────────────────
-          1. HEADER & AIRLINE BOOKING TITLE
-      ───────────────────────────────────────────────────────────── */}
-      <div>
-        <SmartBack fallback="/" label={lang === "ar" ? "الرئيسية" : "Retour"} />
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="flights" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-7xl w-full mx-auto space-y-8">
+          {/* ─────────────────────────────────────────────────────────────
+              1. HEADER & AIRLINE BOOKING TITLE
+          ───────────────────────────────────────────────────────────── */}
+          <div>
+            <SmartBack fallback="/" label={lang === "ar" ? "الرئيسية" : "Retour"} />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-cyan/15 text-cyan border border-cyan/30 mb-2.5">
@@ -954,6 +958,8 @@ export default function FlightsPage() {
           </div>
         )}
       </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 }

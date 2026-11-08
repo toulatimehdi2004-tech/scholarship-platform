@@ -38,6 +38,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SmartBack from "@/components/SmartBack";
 import { useLang } from "@/lib/i18n";
+import StudentSidebar from "@/components/StudentSidebar";
 import AuthGateModal from "@/components/AuthGateModal";
 import ApplicationTraceabilityModal, {
   OFFICIAL_MILESTONES,
@@ -543,9 +544,15 @@ export default function ApplicationTrackerPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-8 max-w-[1600px] mx-auto">
-      {/* Toast */}
-      <AnimatePresence>
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      {/* 1. LEFT SIDEBAR MENU (Identical to Student Portal / Scholarships) */}
+      <StudentSidebar activeTab="tracker" />
+
+      {/* 2. MAIN CONTENT AREA */}
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-6 max-w-[1600px] w-full mx-auto">
+          {/* Toast */}
+          <AnimatePresence>
         {toast && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -1486,6 +1493,8 @@ export default function ApplicationTrackerPage() {
           window.location.reload();
         }}
       />
+        </div>
+      </div>
     </div>
   );
 }

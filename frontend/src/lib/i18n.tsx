@@ -12,8 +12,12 @@ export type Lang = 'en' | 'fr' | 'ar';
 
 const dictionaries: Record<Lang, Record<string, string>> = {
   en: {
+    'nav.home': 'Home',
     'nav.scholarships': 'Scholarships',
     'nav.universities': 'Universities',
+    'nav.flights': 'Vols Chine',
+    'nav.medical': 'Visite Médicale',
+    'nav.morocco': 'Guide Maroc',
     'nav.csca': 'CSCA Exam',
     'nav.tracker': 'Tracker CRM',
     'nav.explore': 'Explore',
@@ -564,8 +568,12 @@ const dictionaries: Record<Lang, Record<string, string>> = {
     'footer.statusLive': 'CSC 2026/2027 Admissions Live',
   },
   fr: {
+    'nav.home': 'Accueil',
     'nav.scholarships': 'Bourses',
     'nav.universities': 'Universités',
+    'nav.flights': 'Vols Chine',
+    'nav.medical': 'Visite Médicale',
+    'nav.morocco': 'Guide Maroc',
     'nav.csca': 'Examen CSCA',
     'nav.tracker': 'Suivi Candidatures',
     'nav.explore': 'Explorer',
@@ -1116,8 +1124,12 @@ const dictionaries: Record<Lang, Record<string, string>> = {
     'footer.statusLive': 'Portail Bourses CSC 2026/2027 Actif',
   },
   ar: {
+    'nav.home': 'الرئيسية',
     'nav.scholarships': 'المنح الدراسية',
     'nav.universities': 'الجامعات',
+    'nav.flights': 'تذاكر الصين',
+    'nav.medical': 'الفحص الطبي',
+    'nav.morocco': 'دليل المغرب',
     'nav.csca': 'امتحان CSCA',
     'nav.tracker': 'متابعة الطلبات',
     'nav.explore': 'استكشف',

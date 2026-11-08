@@ -137,11 +137,17 @@ export default function Navbar() {
         { href: "/scholarships", label: t("nav.scholarships") },
       ];
     }
-    return navKeys.map((link) => ({
-      href: link.href,
-      label: link.customLabel || t(link.key),
-      badge: link.badge,
-    }));
+    return navKeys.map((link) => {
+      let label = link.customLabel || t(link.key);
+      if (label === "nav.home") {
+        label = lang === "ar" ? "الرئيسية" : lang === "fr" ? "Accueil" : "Home";
+      }
+      return {
+        href: link.href,
+        label,
+        badge: link.badge,
+      };
+    });
   };
 
   return (

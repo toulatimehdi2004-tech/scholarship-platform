@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import StudentSidebar from "@/components/StudentSidebar";
 import { fetchApi, uploadApi, getToken, getApiBaseUrl } from "@/lib/api";
 
 interface DocumentItem {
@@ -179,9 +180,11 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="documents" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-6xl w-full mx-auto">
+          <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 flex items-start justify-between"
@@ -550,6 +553,7 @@ export default function DocumentsPage() {
             </motion.div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
