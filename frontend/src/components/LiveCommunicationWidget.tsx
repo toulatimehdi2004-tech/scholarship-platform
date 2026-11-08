@@ -544,104 +544,108 @@ export default function LiveCommunicationWidget() {
             exit={{ opacity: 0, y: 30, scale: 0.96 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
             className={`fixed z-50 bottom-20 ${
-              lang === "ar" ? "left-4 sm:left-6" : "right-4 sm:right-6"
-            } w-[calc(100vw-2rem)] sm:w-[420px] max-h-[82vh] h-[640px] flex flex-col rounded-3xl bg-slate-900/98 text-slate-100 border border-slate-700/80 shadow-2xl backdrop-blur-2xl overflow-hidden`}
+              lang === "ar" ? "left-3 sm:left-6" : "right-3 sm:right-6"
+            } w-[calc(100vw-1.5rem)] sm:w-[440px] max-w-[calc(100vw-1.5rem)] sm:max-w-[440px] max-h-[85vh] h-[640px] flex flex-col rounded-3xl bg-slate-900/98 text-slate-100 border border-slate-700/80 shadow-2xl backdrop-blur-2xl overflow-hidden`}
           >
             {/* Header: Team & Status */}
-            <div className="p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 border-b border-white/10 relative">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan text-slate-950 flex items-center justify-center font-black text-sm shadow-md">
+            <div className="p-3.5 sm:p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 border-b border-white/10 relative">
+              <div className="flex items-center justify-between gap-2.5">
+                {/* Left: Avatar + Title + Status (flex-1 with min-w-0 to prevent pushing right buttons) */}
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                  <div className="relative flex-shrink-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan text-slate-950 flex items-center justify-center font-black text-xs sm:text-sm shadow-md">
                       SC
                     </div>
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-900" />
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-400 border-2 border-slate-900" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-sm font-black text-white">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <h3 className="text-xs sm:text-sm font-black text-white truncate">
                         {lang === "ar" ? "مكتب الإرشاد والتواصل المباشر" : "Desk d'Assistance & Orientation"}
                       </h3>
-                      <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">
+                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase flex-shrink-0">
                         LIVE
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-300 flex items-center gap-1.5 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-                      <span>{lang === "ar" ? "مستشارو الرباط وبكين متصلون الآن" : "Conseillers Rabat & Pékin en ligne"}</span>
+                    <p className="text-[10px] sm:text-[11px] text-slate-300 flex items-center gap-1.5 mt-0.5 truncate">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse flex-shrink-0" />
+                      <span className="truncate">{lang === "ar" ? "مستشارو الرباط وبكين متصلون الآن" : "Conseillers Rabat & Pékin en ligne"}</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1">
+                {/* Right: Actions (Volume, Reset, Close X) - flex-shrink-0 guaranteed 100% visible */}
+                <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 pl-1">
                   <button
                     onClick={() => setSoundEnabled(!soundEnabled)}
                     title={soundEnabled ? "Couper le son" : "Activer le son"}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-1.5 sm:p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                   >
                     {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
                   </button>
                   <button
                     onClick={clearChatHistory}
                     title={lang === "ar" ? "إعادة بدء المحادثة" : "Réinitialiser la discussion"}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-1.5 sm:p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                    title={lang === "ar" ? "إغلاق النافذة" : "Fermer la fenêtre"}
+                    className="p-1.5 sm:p-2 rounded-xl bg-white/10 hover:bg-rose-500/30 text-white hover:text-rose-200 border border-white/15 transition-all cursor-pointer shadow-sm flex items-center justify-center ml-0.5"
+                    aria-label="Fermer le desk d'assistance"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4 stroke-[2.5]" />
                   </button>
                 </div>
               </div>
 
-              {/* Navigation Tabs */}
-              <div className="grid grid-cols-4 gap-1 mt-3 p-1 rounded-xl bg-slate-950/70 border border-white/5 text-[11px] font-bold">
+              {/* Navigation Tabs (4 columns with truncate to guarantee last tab Tickets is visible) */}
+              <div className="grid grid-cols-4 gap-1 mt-3 p-1 rounded-xl bg-slate-950/70 border border-white/5 text-[10px] sm:text-[11px] font-bold">
                 <button
                   onClick={() => setActiveTab("chat")}
-                  className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+                  className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 min-w-0 ${
                     activeTab === "chat"
                       ? "bg-emerald-500 text-slate-950 font-black shadow-sm"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  <MessageSquare className="w-3 h-3" />
-                  <span>{lang === "ar" ? "الدردشة" : "Chat"}</span>
+                  <MessageSquare className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{lang === "ar" ? "الدردشة" : "Chat"}</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("whatsapp")}
-                  className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+                  className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 min-w-0 ${
                     activeTab === "whatsapp"
                       ? "bg-emerald-500 text-slate-950 font-black shadow-sm"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  <Phone className="w-3 h-3" />
-                  <span>WhatsApp</span>
+                  <Phone className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">WhatsApp</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("callback")}
-                  className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+                  className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 min-w-0 ${
                     activeTab === "callback"
                       ? "bg-emerald-500 text-slate-950 font-black shadow-sm"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  <Headphones className="w-3 h-3" />
-                  <span>{lang === "ar" ? "اتصال" : "Rappel"}</span>
+                  <Headphones className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{lang === "ar" ? "اتصال" : "Rappel"}</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("tickets")}
-                  className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+                  className={`py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 min-w-0 ${
                     activeTab === "tickets"
                       ? "bg-emerald-500 text-slate-950 font-black shadow-sm"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  <FileText className="w-3 h-3" />
-                  <span>{lang === "ar" ? "طلباتي" : "Tickets"}</span>
+                  <FileText className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{lang === "ar" ? "طلباتي" : "Tickets"}</span>
                 </button>
               </div>
             </div>
