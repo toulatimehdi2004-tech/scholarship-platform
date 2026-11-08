@@ -505,16 +505,16 @@ export default function LiveCommunicationWidget() {
           whileTap={{ scale: 0.95 }}
           onClick={toggleOpen}
           aria-label="Open Live Communication Desk"
-          className="relative px-4 py-3 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan text-white shadow-xl shadow-emerald-500/25 border border-emerald-400/40 flex items-center gap-2.5 cursor-pointer group"
+          className="relative px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan text-white shadow-2xl shadow-emerald-500/30 border border-emerald-400/40 flex items-center gap-2 cursor-pointer group"
         >
           {/* Pulsing indicator */}
-          <span className="relative flex h-3 w-3">
+          <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-300" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-emerald-300" />
           </span>
 
-          <div className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
             <span className="text-xs sm:text-sm font-extrabold tracking-wide hidden sm:inline-block">
               {isOpen
                 ? lang === "ar"
@@ -528,7 +528,7 @@ export default function LiveCommunicationWidget() {
 
           {/* Unread badge */}
           {hasUnread && !isOpen && (
-            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-500 text-white rounded-full text-[10px] font-black flex items-center justify-center border-2 border-slate-900 animate-bounce">
+            <span className="absolute -top-1 -right-1 sm:-top-1.5 sm:-right-1.5 w-4 h-4 sm:w-5 sm:h-5 bg-rose-500 text-white rounded-full text-[9px] sm:text-[10px] font-black flex items-center justify-center border-2 border-slate-900 animate-bounce">
               1
             </span>
           )}
@@ -538,16 +538,35 @@ export default function LiveCommunicationWidget() {
       {/* Main Slide-in Chat / Communication Window */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.96 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className={`fixed z-50 bottom-20 ${
-              lang === "ar" ? "left-3 sm:left-6" : "right-3 sm:right-6"
-            } w-[calc(100vw-1.5rem)] sm:w-[440px] max-w-[calc(100vw-1.5rem)] sm:max-w-[440px] max-h-[85vh] h-[640px] flex flex-col rounded-3xl bg-slate-900/98 text-slate-100 border border-slate-700/80 shadow-2xl backdrop-blur-2xl overflow-hidden`}
-          >
-            {/* Header: Team & Status */}
+          <>
+            {/* Mobile Backdrop Overlay - closes on tap outside on phone */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm sm:hidden z-50"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className={`fixed z-50 bottom-0 inset-x-0 sm:bottom-20 sm:inset-x-auto ${
+                lang === "ar" ? "sm:left-6" : "sm:right-6"
+              } w-full sm:w-[440px] max-w-full sm:max-w-[440px] h-[92dvh] sm:h-[640px] max-h-[92dvh] sm:max-h-[85vh] flex flex-col rounded-t-[32px] sm:rounded-3xl bg-slate-900/98 text-slate-100 border-t sm:border border-slate-700/80 shadow-2xl backdrop-blur-2xl overflow-hidden pb-[env(safe-area-inset-bottom,0px)]`}
+            >
+              {/* Mobile Grabber Bar - native app pull down feeling */}
+              <div
+                className="sm:hidden flex justify-center pt-2.5 pb-1 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 cursor-grab active:cursor-grabbing"
+                onClick={() => setIsOpen(false)}
+                title="Glisser vers le bas pour fermer"
+              >
+                <div className="w-10 h-1.5 rounded-full bg-white/25 active:bg-white/40" />
+              </div>
+
+              {/* Header: Team & Status */}
             <div className="p-3.5 sm:p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 border-b border-white/10 relative">
               <div className="flex items-center justify-between gap-2.5">
                 {/* Left: Avatar + Title + Status (flex-1 with min-w-0 to prevent pushing right buttons) */}
@@ -1174,6 +1193,7 @@ export default function LiveCommunicationWidget() {
               </div>
             )}
           </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

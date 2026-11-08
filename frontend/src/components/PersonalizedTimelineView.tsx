@@ -721,44 +721,44 @@ export default function PersonalizedTimelineView({
       </div>
 
       {/* Sub-View Switcher (Timeline vs Calendar) & Status Filters */}
-      <div className="glass rounded-2xl p-3 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Sub-View Toggle */}
-        <div className="flex items-center gap-1.5">
+      <div className="glass rounded-2xl p-2.5 sm:p-3 border border-slate-200 dark:border-white/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* Sub-View Toggle (Full-width grid on mobile, inline on desktop) */}
+        <div className="grid grid-cols-2 sm:flex items-center gap-1.5 w-full md:w-auto">
           <button
             onClick={() => setSubView("timeline")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               subView === "timeline"
                 ? "btn-gradient text-white shadow-md shadow-cyan/20"
                 : "text-slate-600 dark:text-text-secondary hover:bg-white/5"
             }`}
           >
             <Clock className="w-4 h-4" />
-            <span>Vue Chronologique (Timeline)</span>
+            <span>Timeline</span>
           </button>
 
           <button
             onClick={() => setSubView("calendar")}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               subView === "calendar"
                 ? "btn-gradient text-white shadow-md shadow-cyan/20"
                 : "text-slate-600 dark:text-text-secondary hover:bg-white/5"
             }`}
           >
             <CalendarIcon className="w-4 h-4" />
-            <span>Vue Calendrier Mensuel</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-cyan/20 text-cyan">
+            <span>Calendrier</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black bg-cyan/20 text-cyan">
               Grille
             </span>
           </button>
         </div>
 
         {/* Status Filter Buttons & Search */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Status Buttons */}
-          <div className="flex items-center gap-1 bg-slate-900/30 p-1 rounded-xl border border-white/5 text-xs font-semibold">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+          {/* Status Buttons (Horizontal scroll with touch snap on mobile) */}
+          <div className="flex items-center gap-1 bg-slate-900/30 p-1 rounded-xl border border-white/5 text-xs font-semibold overflow-x-auto scrollbar-none">
             <button
               onClick={() => setStatusFilter("all")}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ${
+              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
                 statusFilter === "all"
                   ? "bg-white/15 text-text-primary font-bold shadow-sm"
                   : "text-text-muted hover:text-text-primary"
@@ -769,7 +769,7 @@ export default function PersonalizedTimelineView({
 
             <button
               onClick={() => setStatusFilter("overdue")}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap ${
                 statusFilter === "overdue"
                   ? "bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30"
                   : "text-rose-400 hover:bg-rose-500/10"
@@ -781,7 +781,7 @@ export default function PersonalizedTimelineView({
 
             <button
               onClick={() => setStatusFilter("upcoming")}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap ${
                 statusFilter === "upcoming"
                   ? "bg-cyan/20 text-cyan font-bold border border-cyan/30"
                   : "text-cyan hover:bg-cyan/10"
@@ -793,7 +793,7 @@ export default function PersonalizedTimelineView({
 
             <button
               onClick={() => setStatusFilter("completed")}
-              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap ${
                 statusFilter === "completed"
                   ? "bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30"
                   : "text-emerald-400 hover:bg-emerald-500/10"
@@ -805,14 +805,14 @@ export default function PersonalizedTimelineView({
           </div>
 
           {/* Quick Search */}
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
               value={taskSearch}
               onChange={(e) => setTaskSearch(e.target.value)}
               placeholder="Rechercher étape..."
-              className="pl-8 pr-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-text-primary placeholder:text-text-muted outline-none focus:border-cyan/50 w-36 sm:w-44 transition-all"
+              className="w-full sm:w-44 pl-8 pr-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-text-primary placeholder:text-text-muted outline-none focus:border-cyan/50 transition-all"
             />
           </div>
         </div>
@@ -839,7 +839,7 @@ export default function PersonalizedTimelineView({
               </button>
             </div>
           ) : (
-            <div className="relative pl-6 sm:pl-8 before:content-[''] before:absolute before:left-3 sm:before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-gradient-to-b before:from-cyan before:via-purple before:to-emerald-500">
+            <div className="relative pl-6 sm:pl-8 before:content-[''] before:absolute before:left-2.5 sm:before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-gradient-to-b before:from-cyan before:via-purple before:to-emerald-500">
               {filteredMilestones.map((m, idx) => {
                 const targetApp = applications.find((a) => a.id === m.appId) || currentApp;
 
@@ -849,7 +849,7 @@ export default function PersonalizedTimelineView({
                     initial={{ opacity: 0, x: -15 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.04 }}
-                    className={`relative mb-6 p-5 sm:p-6 rounded-3xl glass border transition-all ${
+                    className={`relative mb-5 sm:mb-6 p-4 sm:p-6 rounded-2xl sm:rounded-3xl glass border transition-all ${
                       m.isCompleted
                         ? "border-emerald-500/30 bg-emerald-500/5"
                         : m.isOverdue
@@ -861,7 +861,7 @@ export default function PersonalizedTimelineView({
                     <button
                       onClick={() => handleToggle(m)}
                       title={m.isCompleted ? "Marquer non terminé" : "Valider cette étape"}
-                      className={`absolute -left-[35px] sm:-left-[43px] top-6 w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 cursor-pointer shadow-md ${
+                      className={`absolute -left-[31px] sm:-left-[43px] top-5 sm:top-6 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 cursor-pointer shadow-md ${
                         m.isCompleted
                           ? "bg-emerald-500 text-slate-950 ring-4 ring-emerald-500/20"
                           : m.isOverdue
@@ -870,21 +870,22 @@ export default function PersonalizedTimelineView({
                       }`}
                     >
                       {m.isCompleted ? (
-                        <Check className="w-4 h-4 stroke-[3]" />
+                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3]" />
                       ) : m.isOverdue ? (
-                        <AlertTriangle className="w-3.5 h-3.5" />
+                        <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       ) : (
                         <span className="text-[10px] font-black">{idx + 1}</span>
                       )}
                     </button>
 
                     {/* Milestone Card Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                      <div className="flex items-start gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 mb-3">
+                      <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
                         {/* Checkbox */}
                         <button
                           onClick={() => handleToggle(m)}
-                          className="mt-0.5 text-text-muted hover:text-cyan transition-colors cursor-pointer"
+                          className="mt-0.5 text-text-muted hover:text-cyan transition-colors cursor-pointer flex-shrink-0"
+                          aria-label={m.isCompleted ? "Marquer comme incomplet" : "Marquer comme fait"}
                         >
                           {m.isCompleted ? (
                             <CheckSquare className="w-5 h-5 text-emerald-400" />
@@ -893,10 +894,10 @@ export default function PersonalizedTimelineView({
                           )}
                         </button>
 
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                             <h3
-                              className={`text-base sm:text-lg font-extrabold ${
+                              className={`text-sm sm:text-lg font-extrabold leading-snug ${
                                 m.isCompleted
                                   ? "line-through text-text-muted"
                                   : "text-text-primary"
@@ -918,25 +919,25 @@ export default function PersonalizedTimelineView({
                       </div>
 
                       {/* Status & Deadline Badge */}
-                      <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 self-start sm:self-auto">
                         {m.isCompleted ? (
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
-                            <Check className="w-3.5 h-3.5" />
+                          <span className="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                            <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                             <span>Validé</span>
                           </span>
                         ) : m.isOverdue ? (
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30 flex items-center gap-1.5 animate-pulse">
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            <span>En retard de {Math.abs(m.daysRemaining)} jours</span>
+                          <span className="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30 flex items-center gap-1 animate-pulse">
+                            <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            <span>En retard ({Math.abs(m.daysRemaining)}j)</span>
                           </span>
                         ) : (
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-cyan/15 text-cyan border border-cyan/30 flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>Dans {m.daysRemaining} jours</span>
+                          <span className="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-cyan/15 text-cyan border border-cyan/30 flex items-center gap-1">
+                            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            <span>Dans {m.daysRemaining}j</span>
                           </span>
                         )}
 
-                        <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-900/60 border border-white/10 text-text-secondary whitespace-nowrap">
+                        <span className="px-2 py-1 rounded-xl text-[11px] sm:text-xs font-semibold bg-slate-900/60 border border-white/10 text-text-secondary whitespace-nowrap">
                           Échéance : <strong>{m.targetDate}</strong>
                         </span>
                       </div>
@@ -948,9 +949,9 @@ export default function PersonalizedTimelineView({
                     </p>
 
                     {/* Moroccan Procedural Tips Box */}
-                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-cyan/5 to-transparent border border-amber-500/20 text-xs space-y-1 mb-3">
+                    <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500/10 via-cyan/5 to-transparent border border-amber-500/20 text-xs space-y-1 mb-3">
                       <div className="flex items-center gap-1.5 font-bold text-amber-300">
-                        <Info className="w-3.5 h-3.5" />
+                        <Info className="w-3.5 h-3.5 flex-shrink-0" />
                         <span>Conseil Pratique Étudiant Marocain :</span>
                       </div>
                       <p className="text-text-secondary leading-relaxed pl-5">
@@ -958,20 +959,20 @@ export default function PersonalizedTimelineView({
                       </p>
                     </div>
 
-                    {/* Footer Actions */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    {/* Footer Actions (Touch-friendly stacked buttons on mobile, inline on desktop) */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-white/5">
                       <span className="text-[11px] font-medium text-text-muted flex items-center gap-1">
-                        <ShieldCheck className="w-3.5 h-3.5 text-cyan" />
-                        <span>{m.requiredFor}</span>
+                        <ShieldCheck className="w-3.5 h-3.5 text-cyan flex-shrink-0" />
+                        <span className="truncate">{m.requiredFor}</span>
                       </span>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
                         {m.actionUrl && (
                           <a
                             href={m.actionUrl}
                             target={m.actionUrl.startsWith("http") ? "_blank" : undefined}
                             rel="noreferrer"
-                            className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-cyan hover:text-white transition-colors flex items-center gap-1.5"
+                            className="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-cyan hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <span>{m.actionLabel || "Accéder"}</span>
                             <ExternalLink className="w-3 h-3" />
@@ -980,14 +981,14 @@ export default function PersonalizedTimelineView({
 
                         <button
                           onClick={() => handleToggle(m)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                          className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                             m.isCompleted
                               ? "bg-white/5 text-text-muted hover:bg-white/10"
                               : "btn-gradient text-white shadow-sm"
                           }`}
                         >
                           <Check className="w-3.5 h-3.5" />
-                          <span>{m.isCompleted ? "Réouvrir l'étape" : "Marquer comme fait"}</span>
+                          <span>{m.isCompleted ? "Réouvrir" : "Marquer fait"}</span>
                         </button>
                       </div>
                     </div>
@@ -1055,8 +1056,8 @@ export default function PersonalizedTimelineView({
               <span>Dim</span>
             </div>
 
-            {/* Calendar cells grid */}
-            <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+            {/* Calendar cells grid (compact & touch-friendly on mobile) */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
               {calendarMonthData.cells.map((cell, idx) => {
                 const hasMilestones = cell.milestones.length > 0;
                 const hasOverdue = cell.milestones.some((m) => m.isOverdue);
@@ -1070,8 +1071,8 @@ export default function PersonalizedTimelineView({
                     onClick={() => {
                       setSelectedCalendarDay(cell.dateStr);
                     }}
-                    className={`min-h-[75px] sm:min-h-[90px] p-2 rounded-2xl text-left transition-all relative flex flex-col justify-between cursor-pointer border ${
-                      cell.isCurrentMonth ? "opacity-100" : "opacity-35"
+                    className={`min-h-[54px] sm:min-h-[90px] p-1 sm:p-2 rounded-xl sm:rounded-2xl text-left transition-all relative flex flex-col justify-between cursor-pointer border ${
+                      cell.isCurrentMonth ? "opacity-100" : "opacity-30"
                     } ${
                       isSelected
                         ? "ring-2 ring-cyan bg-cyan/15 border-cyan"
@@ -1083,9 +1084,9 @@ export default function PersonalizedTimelineView({
                     }`}
                   >
                     {/* Top Day Number & Today indicator */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between w-full">
                       <span
-                        className={`text-xs font-black rounded-lg px-1.5 py-0.5 ${
+                        className={`text-[11px] sm:text-xs font-black rounded-lg px-1 sm:px-1.5 py-0.5 ${
                           cell.isToday
                             ? "bg-cyan text-slate-950"
                             : "text-text-primary"
@@ -1095,13 +1096,34 @@ export default function PersonalizedTimelineView({
                       </span>
 
                       {hasOverdue && (
-                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-rose-500 animate-ping flex-shrink-0" />
                       )}
                     </div>
 
-                    {/* Milestones Chips */}
+                    {/* Mobile Dot Indicators (< sm) - Sleek Native Calendar Look */}
                     {hasMilestones && (
-                      <div className="space-y-1 mt-1">
+                      <div className="flex sm:hidden items-center justify-center gap-1 mt-auto pt-1 flex-wrap">
+                        {cell.milestones.slice(0, 3).map((m) => (
+                          <span
+                            key={m.id}
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              m.isCompleted
+                                ? "bg-emerald-400"
+                                : m.isOverdue
+                                ? "bg-rose-500 animate-pulse"
+                                : "bg-cyan"
+                            }`}
+                          />
+                        ))}
+                        {cell.milestones.length > 3 && (
+                          <span className="text-[8px] font-black text-cyan leading-none">+</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Desktop Milestones Chips (sm:block) */}
+                    {hasMilestones && (
+                      <div className="hidden sm:block space-y-1 mt-1">
                         {cell.milestones.slice(0, 2).map((m) => (
                           <div
                             key={m.id}

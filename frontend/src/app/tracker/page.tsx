@@ -611,10 +611,10 @@ export default function ApplicationTrackerPage() {
 
       {/* View Switcher: Kanban vs Timeline/Calendar vs Traceability */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 p-2 rounded-2xl glass border border-slate-200 dark:border-white/10 shadow-sm">
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full sm:w-auto">
           <button
             onClick={() => setViewMode("kanban")}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               viewMode === "kanban"
                 ? "btn-gradient text-white shadow-md shadow-cyan/20"
                 : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary hover:bg-white/5"
@@ -626,14 +626,14 @@ export default function ApplicationTrackerPage() {
 
           <button
             onClick={() => setViewMode("timeline")}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               viewMode === "timeline"
                 ? "btn-gradient text-white shadow-md shadow-cyan/20"
                 : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary hover:bg-white/5"
             }`}
           >
             <Calendar className="w-4 h-4 text-cyan" />
-            <span>{lang === "ar" ? "الجدول الزمني والتقويم (Timeline)" : "Timeline & Calendrier"}</span>
+            <span>{lang === "ar" ? "الجدول والتقويم" : "Timeline & Calendrier"}</span>
             <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-cyan text-slate-950 uppercase tracking-wider shadow-sm">
               NOUVEAU
             </span>
@@ -641,14 +641,14 @@ export default function ApplicationTrackerPage() {
 
           <button
             onClick={() => setViewMode("traceability")}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
               viewMode === "traceability"
                 ? "btn-gradient text-white shadow-md shadow-cyan/20"
                 : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary hover:bg-white/5"
             }`}
           >
             <Activity className="w-4 h-4 text-emerald-400" />
-            <span>{lang === "ar" ? "مسار التتبع والتوثيق (Traçabilité)" : "Traçabilité Détaillée & Chronologie"}</span>
+            <span>{lang === "ar" ? "مسار التوثيق" : "Traçabilité"}</span>
             <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500 text-slate-950 uppercase tracking-wider animate-pulse">
               LIVE
             </span>
