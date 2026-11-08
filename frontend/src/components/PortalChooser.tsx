@@ -107,7 +107,14 @@ export default function PortalChooser({
   }
 
   function handleSignInClick() {
-    setChosenRoleForAuth("student");
+    let savedRole: PortalRole = "student";
+    try {
+      const stored = localStorage.getItem("portal_role") as PortalRole | null;
+      if (stored === "university" || stored === "provider" || stored === "student") {
+        savedRole = stored;
+      }
+    } catch {}
+    setChosenRoleForAuth(savedRole);
     setAuthModalOpen(true);
   }
 
@@ -329,7 +336,14 @@ export default function PortalChooser({
         subtitle="Sign in to access your customized ScholarChina workspace."
         onSuccess={() => {
           setAuthModalOpen(false);
-          onSelectRole(chosenRoleForAuth);
+          let finalRole: PortalRole = chosenRoleForAuth;
+          try {
+            const stored = localStorage.getItem("portal_role") as PortalRole | null;
+            if (stored === "university" || stored === "provider" || stored === "student") {
+              finalRole = stored;
+            }
+          } catch {}
+          onSelectRole(finalRole);
         }}
       />
     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -68,6 +68,7 @@ export default function AuthGateModal({
 }: AuthGateModalProps) {
   const router = useRouter();
   const { t, lang } = useLang();
+  const [activeRole, setActiveRole] = useState<PortalAuthRole>(role);
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -78,10 +79,40 @@ export default function AuthGateModal({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setActiveRole(role);
+  }, [role]);
+
+  // Auto-detect role when typing an institutional or known email/username
+  const handleUsernameChange = (val: string) => {
+    setUsername(val);
+    const lower = val.toLowerCase().trim();
+    if (
+      lower.includes('@pku') ||
+      lower.includes('@tsinghua') ||
+      lower.includes('@fudan') ||
+      lower.includes('.edu.cn') ||
+      lower.includes('admissions.office') ||
+      lower === 'admission_officer'
+    ) {
+      if (activeRole !== 'university') {
+        setActiveRole('university');
+      }
+    } else if (
+      lower === 'moroccan_translator' ||
+      lower.includes('translator') ||
+      lower.includes('traducteur')
+    ) {
+      if (activeRole !== 'provider') {
+        setActiveRole('provider');
+      }
+    }
+  };
+
   // Compute email to test for live verification
   const emailToValidate = tab === 'register' ? email : (username.includes('@') ? username : email);
   const isEmailFormat = Boolean(emailToValidate && emailToValidate.includes('@') && emailToValidate.length > 5);
-  const liveVerification = role === 'university' && isEmailFormat
+  const liveVerification = activeRole === 'university' && isEmailFormat
     ? verifyUniversityEmail(emailToValidate, selectedUniId)
     : null;
 
@@ -156,10 +187,10 @@ export default function AuthGateModal({
         ? (lang === "ar" ? "تسجيل الدخول لمكتب الخدمات" : 'Sign In to Provider Desk')
         : (lang === "ar" ? "تسجيل حساب مزود خدمة" : 'Register Service Provider Account'),
     },
-  }[role];
+  }[activeRole];
 
-  const modalTitle = title || roleConfig.defaultTitle;
-  const modalSubtitle = subtitle || roleConfig.defaultSubtitle;
+  const modalTitle = (title && activeRole === role) ? title : roleConfig.defaultTitle;
+  const modalSubtitle = (subtitle && activeRole === role) ? subtitle : roleConfig.defaultSubtitle;
   const RoleIcon = roleConfig.icon;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -169,7 +200,7 @@ export default function AuthGateModal({
 
     try {
       // Strict institutional email gate for universities
-      if (role === 'university') {
+      if (activeRole === 'university') {
         const emailToCheck = tab === 'register' ? email : (username.includes('@') ? username : email);
         
         // Demo exception for standard testing account
@@ -200,7 +231,7 @@ export default function AuthGateModal({
         try {
           const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
           const existingRole = registry[cleanUsername.toLowerCase()];
-          if (existingRole && existingRole !== role) {
+          if (existingRole && existingRole !== activeRole) {
             const roleLabels: Record<string, string> = {
               student: 'Étudiant Marocain',
               university: 'Université Chinoise',
@@ -208,7 +239,7 @@ export default function AuthGateModal({
             };
             setError(
               `Accès refusé : Le compte "${cleanUsername}" est enregistré comme profil ${roleLabels[existingRole] || existingRole}. ` +
-              `Vous ne pouvez pas vous connecter via le portail ${roleLabels[role] || role}.`
+              `Vous ne pouvez pas vous connecter via le portail ${roleLabels[activeRole] || activeRole}.`
             );
             setLoading(false);
             return;
@@ -218,7 +249,7 @@ export default function AuthGateModal({
         const res = await loginUser({
           username: cleanUsername,
           password,
-          role,
+          role: activeRole,
           university_id: selectedUniId || undefined,
         });
 
@@ -230,14 +261,14 @@ export default function AuthGateModal({
           } catch {}
           setToken(res.data.token);
           localStorage.setItem('user', JSON.stringify(res.data.user));
-          const effectiveRole = res.data.role || role || 'student';
+          const effectiveRole = res.data.role || activeRole || 'student';
           localStorage.setItem('portal_role', effectiveRole);
           try {
             const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
             registry[username.trim().toLowerCase()] = effectiveRole;
             localStorage.setItem('user_role_registry', JSON.stringify(registry));
           } catch {}
-          if (role === 'university') {
+          if (activeRole === 'university') {
             const matchedUni = liveVerification?.university || ACCREDITED_UNIVERSITIES.find((u) => u.id === selectedUniId);
             if (matchedUni) {
               localStorage.setItem('university_accredited', JSON.stringify(matchedUni));
@@ -257,7 +288,7 @@ export default function AuthGateModal({
           }
         } else if (res.error && (res.error.toLowerCase().includes('fetch') || res.error.toLowerCase().includes('network'))) {
           // Seamless client fallback if offline
-          const effectiveRole = role || 'student';
+          const effectiveRole = activeRole || 'student';
           const fallbackUser = {
             id: 1,
             username: cleanUsername,
@@ -298,7 +329,7 @@ export default function AuthGateModal({
           password,
           first_name: firstName,
           last_name: lastName,
-          role,
+          role: activeRole,
           university_id: selectedUniId || undefined,
         });
 
@@ -310,14 +341,14 @@ export default function AuthGateModal({
           } catch {}
           setToken(res.data.token);
           localStorage.setItem('user', JSON.stringify(res.data.user));
-          const effectiveRole = res.data.role || role || 'student';
+          const effectiveRole = res.data.role || activeRole || 'student';
           localStorage.setItem('portal_role', effectiveRole);
           try {
             const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
             registry[username.trim().toLowerCase()] = effectiveRole;
             localStorage.setItem('user_role_registry', JSON.stringify(registry));
           } catch {}
-          if (role === 'university') {
+          if (activeRole === 'university') {
             const matchedUni = liveVerification?.university || ACCREDITED_UNIVERSITIES.find((u) => u.id === selectedUniId);
             if (matchedUni) {
               localStorage.setItem('university_accredited', JSON.stringify(matchedUni));
@@ -337,7 +368,7 @@ export default function AuthGateModal({
           }
         } else if (res.error && (res.error.toLowerCase().includes('fetch') || res.error.toLowerCase().includes('network'))) {
           // Seamless client fallback if offline
-          const effectiveRole = role || 'student';
+          const effectiveRole = activeRole || 'student';
           const fallbackUser = {
             id: 1,
             username: username.trim() || 'StudentUser',
@@ -365,7 +396,7 @@ export default function AuthGateModal({
     } catch (err: any) {
       console.warn("Auth network fallback triggered:", err);
       const cleanUsername = username.trim() || 'User';
-      const effectiveRole = role || 'student';
+      const effectiveRole = activeRole || 'student';
       const fallbackUser = {
         id: 1,
         username: cleanUsername,
@@ -470,6 +501,67 @@ export default function AuthGateModal({
             ))}
           </div>
 
+          {/* Account Type / Role Selector Pills */}
+          <div className="mb-5">
+            <div className="text-[11px] font-semibold text-white/60 mb-2 flex items-center justify-between px-1">
+              <span>{lang === "ar" ? "اختر نوع الحساب / الدور:" : "Sélectionner le Type de Compte :"}</span>
+              <span className="text-[10px] text-cyan font-mono font-bold">
+                {activeRole === 'student'
+                  ? (lang === "ar" ? "🎓 طالب مغربي" : "🎓 Étudiant")
+                  : activeRole === 'university'
+                  ? (lang === "ar" ? "🏛️ جامعة صينية" : "🏛️ Université")
+                  : (lang === "ar" ? "💼 مزود خدمة معتمد" : "💼 Prestataire")}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-white/5 border border-white/10">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveRole('student');
+                  setError('');
+                }}
+                className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer ${
+                  activeRole === 'student'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 border border-blue-400/40'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <GraduationCap className="w-4 h-4 flex-shrink-0" />
+                <span>{lang === "ar" ? "طالب" : "Étudiant"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveRole('university');
+                  setError('');
+                }}
+                className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer ${
+                  activeRole === 'university'
+                    ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/30 border border-amber-400/40'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Building2 className="w-4 h-4 flex-shrink-0" />
+                <span>{lang === "ar" ? "جامعة" : "Université"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveRole('provider');
+                  setError('');
+                }}
+                className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer ${
+                  activeRole === 'provider'
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30 border border-purple-400/40'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Briefcase className="w-4 h-4 flex-shrink-0" />
+                <span>{lang === "ar" ? "مزود خدمة" : "Prestataire"}</span>
+              </button>
+            </div>
+          </div>
+
           {/* Sign In / Create Account Tabs */}
           <div className="flex rounded-xl bg-white/5 p-1 mb-5 border border-white/10">
             <button
@@ -505,7 +597,7 @@ export default function AuthGateModal({
           </div>
 
           {/* University Accreditation Test Selector */}
-          {role === 'university' && (
+          {activeRole === 'university' && (
             <div className="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col gap-2.5 text-xs">
               <div className="flex items-center justify-between text-[11px] text-amber-300 font-bold">
                 <span className="flex items-center gap-1.5">
@@ -600,13 +692,13 @@ export default function AuthGateModal({
           )}
 
           {/* Quick Demo Fill for Student / Provider */}
-          {role !== 'university' && tab === 'login' && (
+          {activeRole !== 'university' && tab === 'login' && (
             <div className="mb-4 p-2.5 rounded-xl bg-white/5 border border-emerald-500/20 flex items-center justify-between gap-2 text-xs">
               <span className="text-white/70 text-[11px]">{lang === "ar" ? "هل تجرّب المنصة؟" : "Testing platform?"}</span>
               <button
                 type="button"
                 onClick={() => {
-                  if (role === 'provider') {
+                  if (activeRole === 'provider') {
                     setUsername('moroccan_translator');
                     setPassword('provider123456');
                   } else {
@@ -618,7 +710,7 @@ export default function AuthGateModal({
                 className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-bold transition-all text-xs flex items-center gap-1 cursor-pointer active:scale-95"
               >
                 <span>{lang === "ar" ? "⚡ تعبئة تجريبية:" : "⚡ Quick Fill Demo:"}</span>
-                <span className="underline">{role === 'provider' ? (lang === "ar" ? "مترجم محلف" : "Sworn Translator") : (lang === "ar" ? "ياسين (الدار البيضاء)" : "Yassine (Casablanca)")}</span>
+                <span className="underline">{activeRole === 'provider' ? (lang === "ar" ? "مترجم محلف (الدار البيضاء)" : "Sworn Translator (Casablanca)") : (lang === "ar" ? "ياسين (طالب مغربي)" : "Yassine (Moroccan Student)")}</span>
               </button>
             </div>
           )}
@@ -633,7 +725,7 @@ export default function AuthGateModal({
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3.5">
             {/* University Selection Dropdown for University Desk */}
-            {role === 'university' && (
+            {activeRole === 'university' && (
               <div>
                 <label className="block text-xs font-semibold text-white/70 mb-1 flex items-center justify-between">
                   <span className="flex items-center gap-1">
@@ -679,8 +771,8 @@ export default function AuthGateModal({
               <div>
                 <label className="block text-xs font-semibold text-white/70 mb-1">
                   {lang === "ar"
-                    ? (role === 'university' ? 'اسم مسؤول القبول / اللقب' : 'الاسم الكامل (الاسم العائلي والشخصي)')
-                    : (role === 'university' ? 'Nom du Responsable des Admissions / Titre' : 'Full Name (Nom & Prénom)')}
+                    ? (activeRole === 'university' ? 'اسم مسؤول القبول / اللقب' : 'الاسم الكامل (الاسم العائلي والشخصي)')
+                    : (activeRole === 'university' ? 'Nom du Responsable des Admissions / Titre' : 'Full Name (Nom & Prénom)')}
                 </label>
                 <input
                   type="text"
@@ -689,8 +781,8 @@ export default function AuthGateModal({
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder={
                     lang === "ar"
-                      ? (role === 'university' ? 'مثال: المدير تشانغ وي (مكتب القبول)' : 'مثال: ياسين بنعلي')
-                      : (role === 'university' ? 'e.g. Director Zhang Wei (Admissions Desk)' : 'e.g. Yassine Benali')
+                      ? (activeRole === 'university' ? 'مثال: المدير تشانغ وي (مكتب القبول)' : 'مثال: ياسين بنعلي')
+                      : (activeRole === 'university' ? 'e.g. Director Zhang Wei (Admissions Desk)' : 'e.g. Yassine Benali')
                   }
                   className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-400 text-sm"
                 />
@@ -701,14 +793,14 @@ export default function AuthGateModal({
               <label className="block text-xs font-semibold text-white/70 mb-1 flex items-center justify-between">
                 <span>
                   {lang === "ar"
-                    ? (role === 'university' && tab === 'login'
+                    ? (activeRole === 'university' && tab === 'login'
                         ? 'المعرف أو بريد Gmail / البريد الرسمي'
                         : 'اسم المستخدم (Username)')
-                    : (role === 'university' && tab === 'login'
+                    : (activeRole === 'university' && tab === 'login'
                         ? 'Identifiant ou Gmail / Email Officiel'
                         : 'Nom d\'utilisateur (Username)')}
                 </span>
-                {role === 'university' && tab === 'login' && (
+                {activeRole === 'university' && tab === 'login' && (
                   <span className="text-[10px] text-amber-400">{lang === "ar" ? "البريد أو اسم المستخدم" : "Email ou Nom d'utilisateur"}</span>
                 )}
               </label>
@@ -716,9 +808,9 @@ export default function AuthGateModal({
                 type="text"
                 required
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => handleUsernameChange(e.target.value)}
                 placeholder={
-                  role === 'university' && tab === 'login'
+                  activeRole === 'university' && tab === 'login'
                     ? 'ex: pku.admissions.office@gmail.com'
                     : (lang === "ar" ? "اختر اسم مستخدم" : 'Choose a username')
                 }
@@ -727,20 +819,20 @@ export default function AuthGateModal({
             </div>
 
             {/* Email Field for Registration or University Desk */}
-            {(tab === 'register' || (role === 'university' && !username.includes('@'))) && (
+            {(tab === 'register' || (activeRole === 'university' && !username.includes('@'))) && (
               <div>
                 <label className="block text-xs font-semibold text-white/70 mb-1 flex items-center justify-between">
                   <span className="flex items-center gap-1">
                     <Mail className="w-3.5 h-3.5 text-emerald-400" />
                     {lang === "ar"
-                      ? (role === 'university'
+                      ? (activeRole === 'university'
                           ? 'البريد المؤسسي أو بريد Gmail الرسمي للقبول'
                           : 'عنوان البريد الإلكتروني')
-                      : (role === 'university'
+                      : (activeRole === 'university'
                           ? 'Email Institutionnel ou Gmail Officiel d\'Admissions'
                           : 'Email Address')}
                   </span>
-                  {role === 'university' && (
+                  {activeRole === 'university' && (
                     <span className="text-[10px] text-amber-400 font-bold">{lang === "ar" ? "التحقق إلزامي" : "Vérification Obligatoire"}</span>
                   )}
                 </label>
@@ -750,7 +842,7 @@ export default function AuthGateModal({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={
-                    role === 'university'
+                    activeRole === 'university'
                       ? 'ex: pku.admissions.office@gmail.com ou study@pku.edu.cn'
                       : 'your.email@example.com'
                   }
@@ -760,7 +852,7 @@ export default function AuthGateModal({
             )}
 
             {/* LIVE UNIVERSITY ACCREDITATION STATUS BADGE */}
-            {role === 'university' && isEmailFormat && (
+            {activeRole === 'university' && isEmailFormat && (
               <div className="mt-1">
                 {liveVerification?.isVerified ? (
                   <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs flex items-start gap-2.5 shadow-md shadow-emerald-500/10">
@@ -805,7 +897,7 @@ export default function AuthGateModal({
               </div>
             )}
 
-            {tab === 'register' && role === 'student' && (
+            {tab === 'register' && activeRole === 'student' && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-white/70 mb-1">
@@ -850,11 +942,13 @@ export default function AuthGateModal({
 
             <button
               type="submit"
-              disabled={loading || (role === 'university' && isEmailFormat && liveVerification?.isVerified === false)}
+              disabled={loading || (activeRole === 'university' && isEmailFormat && liveVerification?.isVerified === false)}
               className={`w-full py-3.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 mt-5 shadow-lg transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-                role === 'university'
+                activeRole === 'university'
                   ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:brightness-110 text-slate-950 font-black'
-                  : 'bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:brightness-110 text-white'
+                  : activeRole === 'provider'
+                  ? 'bg-gradient-to-r from-purple-500 via-fuchsia-600 to-pink-600 hover:brightness-110 text-white font-black'
+                  : 'bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:brightness-110 text-white font-black'
               }`}
             >
               {loading ? (
