@@ -49,6 +49,8 @@ interface CallbackRequest {
   preferredTime: string;
   createdAt: string;
   status: "pending" | "contacted";
+  channel?: "call" | "whatsapp";
+  note?: string;
 }
 
 // Web Audio API friendly notification sound
@@ -128,6 +130,14 @@ export default function LiveCommunicationWidget() {
   const [callbackSubmitted, setCallbackSubmitted] = useState(false);
   const [myTickets, setMyTickets] = useState<CallbackRequest[]>([]);
 
+  // WhatsApp Message Request Form states
+  const [whatsappName, setWhatsappName] = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("");
+  const [whatsappTopic, setWhatsappTopic] = useState("CSC Scholarship Application");
+  const [whatsappNote, setWhatsappNote] = useState("");
+  const [whatsappSubmitted, setWhatsappSubmitted] = useState(false);
+  const [whatsappSubmittedTicket, setWhatsappSubmittedTicket] = useState<string | null>(null);
+
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -168,6 +178,7 @@ export default function LiveCommunicationWidget() {
           if (res.data) {
             setUser(res.data);
             setCallbackName(res.data.username || "");
+            setWhatsappName(res.data.username || "");
             if (res.data.email) setCallbackPhone(res.data.email);
           }
         });
@@ -341,6 +352,62 @@ export default function LiveCommunicationWidget() {
       setCallbackSubmitted(false);
       setActiveTab("chat");
     }, 2800);
+  };
+
+  // WhatsApp Number Submission Handler (We send them a WhatsApp message)
+  const handleWhatsAppSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!whatsappPhone.trim()) return;
+
+    // Clean and format phone number with Moroccan country code if needed
+    let cleanPhone = whatsappPhone.trim();
+    if (cleanPhone.startsWith("0") && cleanPhone.length === 10) {
+      cleanPhone = "+212 " + cleanPhone.slice(1);
+    } else if (!cleanPhone.startsWith("+") && cleanPhone.length >= 9) {
+      cleanPhone = "+212 " + cleanPhone;
+    }
+
+    const ticketNumber = "WA-MA-" + Math.floor(100000 + Math.random() * 900000);
+    const newTicket: CallbackRequest = {
+      id: ticketNumber,
+      fullName: whatsappName.trim() || user?.username || (lang === "ar" ? "طالب مرشح" : "Étudiant Candidat"),
+      phone: cleanPhone,
+      topic: whatsappTopic,
+      preferredTime: lang === "ar" ? "مراسلة عبر واتساب (خلال 15 دقيقة)" : "Message WhatsApp (sous 15 min)",
+      createdAt:
+        new Date().toLocaleDateString() +
+        " " +
+        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      status: "pending",
+      channel: "whatsapp",
+      note: whatsappNote.trim() || undefined,
+    };
+
+    const nextTickets = [newTicket, ...myTickets];
+    setMyTickets(nextTickets);
+    try {
+      localStorage.setItem("scholarchina_callback_tickets", JSON.stringify(nextTickets));
+    } catch {}
+
+    setWhatsappSubmitted(true);
+    setWhatsappSubmittedTicket(ticketNumber);
+
+    // Also add confirmation to the chat thread
+    const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const ticketMsg: ChatMessage = {
+      id: "adv-wa-" + Date.now(),
+      sender: "advisor",
+      text:
+        lang === "ar"
+          ? `✅ تم تسجيل رقمك على واتساب بنجاح! رقم التذكرة: **${ticketNumber}**.\n\nسيقوم مستشارنا بمراسلتك مباشرة عبر واتساب على الرقم **${cleanPhone}** خلال 15 دقيقة لمساعدتك بخصوص: *${whatsappTopic}*.`
+          : `✅ Votre numéro WhatsApp a bien été enregistré ! Référence : **${ticketNumber}**.\n\nNotre conseiller d'admission va vous envoyer un message WhatsApp directement au **${cleanPhone}** dans les 15 minutes concernant votre demande (*${whatsappTopic}*).`,
+      timestamp: timeStr,
+      status: "read",
+      isTicketConfirmation: true,
+      ticketId: ticketNumber,
+    };
+
+    setMessages((prev) => [...prev, ticketMsg]);
   };
 
   const clearChatHistory = () => {
@@ -719,54 +786,195 @@ export default function LiveCommunicationWidget() {
               </>
             )}
 
-            {/* TAB CONTENT 2: WHATSAPP DIRECT */}
+            {/* TAB CONTENT 2: WHATSAPP DIRECT (WE SEND THEM A MESSAGE) */}
             {activeTab === "whatsapp" && (
-              <div className="p-6 flex-1 flex flex-col justify-between overflow-y-auto text-center">
-                <div className="space-y-4">
-                  <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
-                    <Phone className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <h4 className="text-base font-black text-white">
-                      {lang === "ar" ? "التواصل الفوري عبر واتساب" : "Support Direct sur WhatsApp"}
-                    </h4>
-                    <p className="text-xs text-slate-300 mt-1 max-w-xs mx-auto leading-relaxed">
-                      {lang === "ar"
-                        ? "تواصل مع مكتب الاستشارات بالرباط عبر واتساب لإرسال كشوف النقاط أو مراجعة وثائقك مباشرة."
-                        : "Échangez directement avec un conseiller dédié sur WhatsApp pour poser vos questions, envoyer vos relevés de notes ou vérifier vos pièces."}
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-left space-y-2 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">{lang === "ar" ? "رقم الدعم الرسمي:" : "Ligne Directe Maroc :"}</span>
-                      <span className="font-mono font-bold text-emerald-400">+212 6 60 12 34 56</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">{lang === "ar" ? "أوقات العمل:" : "Disponibilité :"}</span>
-                      <span className="text-slate-200">7j / 7 (9h00 - 21h00)</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400">{lang === "ar" ? "اللغات المدعومة:" : "Langues :"}</span>
-                      <span className="text-slate-200">Darija 🇲🇦 / Français / English</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 space-y-2">
-                  <a
-                    href={getWhatsAppUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 transition-all cursor-pointer"
+              <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between overflow-y-auto">
+                {whatsappSubmitted ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-center space-y-3.5 my-auto"
                   >
-                    <Phone className="w-4 h-4" />
-                    <span>{lang === "ar" ? "فتح واتساب مع مستشار القبول ➔" : "Ouvrir WhatsApp avec le Conseiller ➔"}</span>
-                  </a>
-                  <p className="text-[11px] text-slate-400">
-                    {lang === "ar" ? "سيتم فتح التطبيق مباشرة مع رسالة مجهزة مسبقاً" : "L'application s'ouvrira avec votre message pré-rempli"}
-                  </p>
-                </div>
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+                      <Check className="w-8 h-8 stroke-[3]" />
+                    </div>
+
+                    <div>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 uppercase">
+                        Réf : {whatsappSubmittedTicket}
+                      </span>
+                      <h4 className="text-base font-black text-white mt-2">
+                        {lang === "ar" ? "تم تسجيل رقمك بنجاح !" : "Numéro Enregistré avec Succès !"}
+                      </h4>
+                      <p className="text-xs text-slate-200 mt-1 leading-relaxed">
+                        {lang === "ar"
+                          ? `سيقوم مستشار القبول بمراسلتك عبر واتساب على الرقم ${whatsappPhone} خلال 15 دقيقة لمساعدتك في طلبك.`
+                          : `Notre conseiller d'admission va vous envoyer un message WhatsApp directement au ${whatsappPhone} dans les 15 minutes.`}
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-900/60 border border-white/10 text-xs text-left text-slate-300 space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-400">{lang === "ar" ? "الموضوع:" : "Sujet :"}</span>
+                        <span className="font-semibold text-emerald-300">{whatsappTopic}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-400">{lang === "ar" ? "وقت الاستجابة:" : "Délai de réponse :"}</span>
+                        <span className="text-white font-mono font-bold">&lt; 15 min (7j/7, 9h-21h)</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-1">
+                      <button
+                        onClick={() => {
+                          setWhatsappSubmitted(false);
+                          setWhatsappPhone("");
+                          setWhatsappNote("");
+                        }}
+                        className="w-full py-2.5 px-3 rounded-xl glass hover:bg-white/10 text-xs font-bold text-slate-200 cursor-pointer transition-colors"
+                      >
+                        {lang === "ar" ? "إرسال رقم آخر" : "Envoyer un autre numéro"}
+                      </button>
+
+                      <a
+                        href={getWhatsAppUrl()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-2.5 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <span>{lang === "ar" ? "أو افتح واتساب الآن بنفسك ➔" : "Ou ouvrir WhatsApp maintenant vous-même ➔"}</span>
+                      </a>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleWhatsAppSubmit} className="space-y-3">
+                    <div className="text-center pb-1">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-2 shadow-md shadow-emerald-500/20">
+                        <MessageSquare className="w-6 h-6" />
+                      </div>
+                      <h4 className="text-sm font-black text-white">
+                        {lang === "ar"
+                          ? "سنرسل لك رسالة عبر واتساب"
+                          : "Nous vous envoyons un message WhatsApp"}
+                      </h4>
+                      <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+                        {lang === "ar"
+                          ? "أدخل رقم هاتفك وسيقوم مستشارنا بمراسلتك فوراً عبر واتساب للإجابة عن أسئلتك ومراجعة ملفك."
+                          : "Entrez votre numéro et notre équipe d'admission vous écrira sur WhatsApp dans les 15 minutes."}
+                      </p>
+                    </div>
+
+                    {/* Nom & Prénom */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                        {lang === "ar" ? "الاسم الكامل" : "Nom & Prénom"}
+                      </label>
+                      <input
+                        type="text"
+                        value={whatsappName}
+                        onChange={(e) => setWhatsappName(e.target.value)}
+                        placeholder="Ex: Yassine El Amrani"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/10 text-xs text-white placeholder:text-slate-500 outline-none focus:border-emerald-500"
+                      />
+                    </div>
+
+                    {/* Numéro WhatsApp */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                        {lang === "ar" ? "رقم الواتساب المغربي أو الدولي *" : "Numéro WhatsApp (Maroc ou International) *"}
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3 text-xs font-mono font-bold text-emerald-400 select-none flex items-center gap-1">
+                          <span>🇲🇦</span>
+                          <span>+212</span>
+                        </span>
+                        <input
+                          type="tel"
+                          required
+                          value={whatsappPhone}
+                          onChange={(e) => setWhatsappPhone(e.target.value)}
+                          placeholder="06 12 34 56 78 ou 07..."
+                          className="w-full pl-20 pr-3 py-2 rounded-xl bg-slate-800 border border-emerald-500/40 text-xs text-white placeholder:text-slate-500 outline-none focus:border-emerald-500 font-mono"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        {lang === "ar"
+                          ? "يقبل أرقام 06 أو 07 أو +212 أو الأرقام الدولية"
+                          : "Numéros 06, 07 ou format international acceptés"}
+                      </p>
+                    </div>
+
+                    {/* Sujet de la question */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                        {lang === "ar" ? "ما الذي ترغب بالاستفسار عنه؟" : "Objet de votre demande"}
+                      </label>
+                      <select
+                        value={whatsappTopic}
+                        onChange={(e) => setWhatsappTopic(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/10 text-xs text-white outline-none focus:border-emerald-500"
+                      >
+                        <option value="Bourse Complète CSC (Gouvernement Chinois)">
+                          Bourse Complète CSC (Exemption 100% + Logement + Salaire)
+                        </option>
+                        <option value="Préparation Test CSCA 2026/2027">
+                          Examen National CSCA (Matières, inscription & cours)
+                        </option>
+                        <option value="Apostille.ma & Traduction Assermentée">
+                          Légalisation Apostille & Traduction des diplômes
+                        </option>
+                        <option value="Choix de l'Université & Programme">
+                          Choix de l'université (Tsinghua, PKU, SJTU...) & Filière
+                        </option>
+                        <option value="Procédure Visa Étudiant X1 & JW202">
+                          Formulaire JW202 et Visa X1 à Rabat
+                        </option>
+                        <option value="Autre demande urgente">Autre demande urgente</option>
+                      </select>
+                    </div>
+
+                    {/* Note facultative */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                        {lang === "ar" ? "رسالة أو تفاصيل سريعة (اختياري)" : "Précision ou question rapide (facultatif)"}
+                      </label>
+                      <input
+                        type="text"
+                        value={whatsappNote}
+                        onChange={(e) => setWhatsappNote(e.target.value)}
+                        placeholder="Ex: J'ai un Bac SM 16/20, je veux étudier le Génie Logiciel"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/10 text-xs text-white placeholder:text-slate-500 outline-none focus:border-emerald-500"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      disabled={!whatsappPhone.trim()}
+                      className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 transition-all cursor-pointer mt-1"
+                    >
+                      <Phone className="w-4 h-4" />
+                      <span>
+                        {lang === "ar"
+                          ? "إرسال رقمي — تواصلوا معي عبر واتساب ➔"
+                          : "Envoyer mon numéro — Écrivez-moi sur WhatsApp ➔"}
+                      </span>
+                    </button>
+
+                    {/* Alternative link */}
+                    <div className="pt-1.5 text-center">
+                      <a
+                        href={getWhatsAppUrl()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-emerald-400 hover:underline flex items-center justify-center gap-1 font-semibold"
+                      >
+                        <span>{lang === "ar" ? "أو فتح واتساب مباشرة مع المستشار الآن" : "Ou ouvrir directement WhatsApp maintenant"}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </form>
+                )}
               </div>
             )}
 
@@ -889,17 +1097,33 @@ export default function LiveCommunicationWidget() {
                 </div>
 
                 {myTickets.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400">
-                    <FileText className="w-10 h-10 mx-auto mb-2 opacity-30 text-slate-500" />
-                    <p className="text-xs">
-                      {lang === "ar" ? "لا توجد طلبات سابقة حتى الآن." : "Aucune demande de rappel enregistrée pour le moment."}
-                    </p>
-                    <button
-                      onClick={() => setActiveTab("callback")}
-                      className="mt-3 px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30"
-                    >
-                      {lang === "ar" ? "طلب مكالمة الآن" : "Créer une demande de rappel"}
-                    </button>
+                  <div className="text-center py-10 text-slate-400 space-y-3">
+                    <FileText className="w-10 h-10 mx-auto opacity-30 text-slate-500" />
+                    <div>
+                      <p className="text-xs font-semibold text-white">
+                        {lang === "ar" ? "لا توجد طلبات سابقة حتى الآن." : "Aucune demande enregistrée pour le moment."}
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        {lang === "ar"
+                          ? "سجل رقمك وسنتواصل معك عبر واتساب أو الهاتف."
+                          : "Laissez votre numéro pour être contacté par message WhatsApp ou appel."}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 pt-1">
+                      <button
+                        onClick={() => setActiveTab("whatsapp")}
+                        className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-md shadow-emerald-500/20"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>{lang === "ar" ? "مراسلة عبر واتساب" : "Message WhatsApp"}</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("callback")}
+                        className="px-3.5 py-2 rounded-xl glass hover:bg-white/10 text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        {lang === "ar" ? "طلب مكالمة" : "Rappel vocal"}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   myTickets.map((t) => (
@@ -908,14 +1132,36 @@ export default function LiveCommunicationWidget() {
                       className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 text-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-mono font-bold text-emerald-400">{t.id}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-emerald-400">{t.id}</span>
+                          {t.channel === "whatsapp" ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                              <span>WhatsApp</span>
+                              <MessageSquare className="w-2.5 h-2.5" />
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                              <span>Appel</span>
+                              <Phone className="w-2.5 h-2.5" />
+                            </span>
+                          )}
+                        </div>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                          {t.status === "pending" ? "En attente d'appel" : "Traité"}
+                          {t.status === "pending"
+                            ? t.channel === "whatsapp"
+                              ? (lang === "ar" ? "في انتظار الرسالة" : "Message à envoyer")
+                              : (lang === "ar" ? "في انتظار الاتصال" : "En attente d'appel")
+                            : (lang === "ar" ? "تم التواصل" : "Traité")}
                         </span>
                       </div>
                       <p className="text-white font-semibold">{t.topic}</p>
+                      {t.note && (
+                        <p className="text-[11px] text-slate-300 italic bg-white/5 p-1.5 rounded-lg border border-white/5">
+                          « {t.note} »
+                        </p>
+                      )}
                       <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                        <span>{t.phone}</span>
+                        <span className="font-mono text-emerald-400 font-bold">{t.phone}</span>
                         <span>{t.createdAt}</span>
                       </div>
                     </div>
@@ -941,6 +1187,24 @@ function generateAdvisorResponse(
 ): { text: string; isTicket?: boolean; ticketId?: string } {
   const lower = message.toLowerCase();
   const isAr = lang === "ar" || /[\u0600-\u06FF]/.test(message);
+
+  // 0. WhatsApp Direct Contact Question
+  if (lower.includes("whatsapp") || lower.includes("واتساب") || lower.includes("ecrivez") || lower.includes("écrivez") || lower.includes("راسلوني") || lower.includes("mon numero") || lower.includes("mon numéro") || lower.includes("رقمي")) {
+    if (isAr) {
+      return {
+        text: `### 📲 التواصل المباشر عبر واتساب:
+يسعدنا مراسلتك مباشرة! يمكنك إدخال رقم هاتفك المغربي (+212) أو الدولي في تبويب **WhatsApp** بأعلى هذه النافذة، وسيقوم أحد مستشارينا المعتمدين بإرسال رسالة إليك خلال 15 دقيقة لمواكبتك في ملفك مجاناً.
+
+أو يمكنك أيضاً النقر مباشرة على زر WhatsApp لبدء المحادثة فوراً!`,
+      };
+    }
+    return {
+      text: `### 📲 Contact Direct sur WhatsApp :
+Nous pouvons vous écrire directement sur WhatsApp ! Rendez-vous sur l'onglet **WhatsApp** juste au-dessus pour laisser votre numéro de téléphone marocain (+212) ou international. Notre équipe d'admission vous enverra un message personnalisé d'ici 15 minutes.
+
+Vous pouvez également cliquer sur l'onglet WhatsApp pour ouvrir directement la discussion !`,
+    };
+  }
 
   // 1. CSCA Exam Question
   if (lower.includes("csca") || lower.includes("examen") || lower.includes("امتحان") || lower.includes("اختبار")) {
