@@ -84,6 +84,8 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     pathname === "/tracker" ||
     pathname === "/tracker/" ||
     pathname.startsWith("/tracker/") ||
+    pathname.startsWith("/universities") ||
+    pathname.startsWith("/services") ||
     pathname.startsWith("/medical-guide") ||
     pathname.startsWith("/morocco-guide") ||
     pathname.startsWith("/flights") ||

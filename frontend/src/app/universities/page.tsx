@@ -19,6 +19,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import StudentSidebar from "@/components/StudentSidebar";
 import { fetchApi, getCurrentUser, getToken, type University, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import UniversityCard from "@/components/UniversityCard";
@@ -164,9 +165,11 @@ export default function UniversitiesPage() {
   const hiddenCount = Math.max(0, filtered.length - FREE_TRIAL_LIMIT);
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="universities" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-7xl w-full mx-auto">
+          {/* Page Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -452,6 +455,7 @@ export default function UniversitiesPage() {
         isOpen={showLifetimeModal}
         onClose={() => setShowLifetimeModal(false)}
       />
+      </div>
     </div>
   );
 }

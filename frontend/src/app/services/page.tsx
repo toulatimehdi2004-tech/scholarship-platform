@@ -25,6 +25,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SmartBack from "@/components/SmartBack";
+import StudentSidebar from "@/components/StudentSidebar";
 import { useLang } from "@/lib/i18n";
 import { getToken } from "@/lib/api";
 import AuthGateModal from "@/components/AuthGateModal";
@@ -132,8 +133,11 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-8 max-w-7xl mx-auto space-y-8">
-      {/* Header */}
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="services" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-7xl w-full mx-auto space-y-8">
+          {/* Header */}
       <div>
         <SmartBack fallback="/" label={lang === "ar" ? "الرئيسية" : "Home"} />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4">
@@ -294,6 +298,8 @@ export default function ServicesPage() {
           window.location.reload();
         }}
       />
+        </div>
+      </div>
     </div>
   );
 }

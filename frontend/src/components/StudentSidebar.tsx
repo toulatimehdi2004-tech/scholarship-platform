@@ -105,13 +105,6 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
       icon: LayoutGrid,
     },
     {
-      id: "flights",
-      href: "/flights",
-      label: lang === "ar" ? "تذاكر الطيران" : "Vols Chine",
-      icon: Plane,
-      badge: "Cheapest",
-    },
-    {
       id: "saved",
       href: "/scholarships?saved=true",
       label: lang === "ar" ? "المفضلة" : "Saved",
@@ -125,19 +118,6 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
       href: "/documents",
       label: lang === "ar" ? "الوثائق" : "Documents",
       icon: FileCheck,
-    },
-    {
-      id: "medical",
-      href: "/medical-guide",
-      label: lang === "ar" ? "الفحص الطبي" : "Visite Médicale",
-      icon: Stethoscope,
-      badge: "CSC",
-    },
-    {
-      id: "morocco",
-      href: "/morocco-guide",
-      label: lang === "ar" ? "دليل المغرب" : "Guide Maroc (Apostille)",
-      icon: Stamp,
     },
     {
       id: "messages",
