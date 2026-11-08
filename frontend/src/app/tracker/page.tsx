@@ -32,6 +32,7 @@ import {
   Truck,
   Copy,
   RotateCcw,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -42,6 +43,7 @@ import ApplicationTraceabilityModal, {
   OFFICIAL_MILESTONES,
   type TraceabilityMilestone,
 } from "@/components/ApplicationTraceabilityModal";
+import PersonalizedTimelineView from "@/components/PersonalizedTimelineView";
 import {
   getToken,
   getTrackedApplications,
@@ -231,8 +233,9 @@ export default function ApplicationTrackerPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [restrictedRole, setRestrictedRole] = useState<string | null>(null);
 
-  // View Mode: Kanban vs Traceability
-  const [viewMode, setViewMode] = useState<"kanban" | "traceability">("kanban");
+  // View Mode: Kanban vs Timeline/Calendar vs Traceability
+  const [viewMode, setViewMode] = useState<"kanban" | "timeline" | "traceability">("kanban");
+  const [timelineSelectedAppId, setTimelineSelectedAppId] = useState<number | null>(null);
   const [traceabilityApp, setTraceabilityApp] = useState<ApplicationTrackerItem | null>(null);
   const [copiedTrackingId, setCopiedTrackingId] = useState<string | null>(null);
 
@@ -242,13 +245,20 @@ export default function ApplicationTrackerPage() {
   const [editPortalId, setEditPortalId] = useState("");
   const [savingNote, setSavingNote] = useState(false);
 
-  // Check URL query param for view=traceability
+  // Check URL query param for view mode
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
         const params = new URLSearchParams(window.location.search);
-        if (params.get("view") === "traceability") {
+        const v = params.get("view");
+        if (v === "traceability") {
           setViewMode("traceability");
+        } else if (v === "timeline" || v === "calendar") {
+          setViewMode("timeline");
+        }
+        const appParam = params.get("appId");
+        if (appParam) {
+          setTimelineSelectedAppId(parseInt(appParam, 10));
         }
       } catch {}
     }
@@ -391,6 +401,35 @@ export default function ApplicationTrackerPage() {
     setSavingNote(false);
     setEditingItem(null);
     showToast("✓ Notes et numéro de dossier sauvegardés");
+  };
+
+  // Update scholarship deadline (Admin / Counselor override)
+  const handleUpdateDeadline = (appId: number, newDeadline: string) => {
+    const target = applications.find((a) => a.id === appId);
+    if (!target) return;
+
+    const deadlineDate = new Date(newDeadline);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffMs = deadlineDate.getTime() - today.getTime();
+    const days = Math.ceil(diffMs / (24 * 3600 * 1000));
+
+    const updated = applications.map((a) =>
+      a.id === appId
+        ? {
+            ...a,
+            scholarship: {
+              ...a.scholarship,
+              application_deadline: newDeadline,
+              days_until_deadline: Math.max(0, days),
+              is_deadline_passed: days < 0,
+              is_deadline_urgent: days <= 14 && days >= 0,
+            },
+            updated_at: new Date().toISOString(),
+          }
+        : a
+    );
+    syncLocal(updated);
   };
 
   // Remove application from tracker
@@ -570,9 +609,9 @@ export default function ApplicationTrackerPage() {
         </div>
       </div>
 
-      {/* View Switcher: Kanban vs Traceability */}
+      {/* View Switcher: Kanban vs Timeline/Calendar vs Traceability */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 p-2 rounded-2xl glass border border-slate-200 dark:border-white/10 shadow-sm">
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setViewMode("kanban")}
             className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
@@ -583,6 +622,21 @@ export default function ApplicationTrackerPage() {
           >
             <ListTodo className="w-4 h-4" />
             <span>{lang === "ar" ? "لوحة كانبان (المراحل)" : "Pipeline Kanban"}</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode("timeline")}
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              viewMode === "timeline"
+                ? "btn-gradient text-white shadow-md shadow-cyan/20"
+                : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary hover:bg-white/5"
+            }`}
+          >
+            <Calendar className="w-4 h-4 text-cyan" />
+            <span>{lang === "ar" ? "الجدول الزمني والتقويم (Timeline)" : "Timeline & Calendrier"}</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-cyan text-slate-950 uppercase tracking-wider shadow-sm">
+              NOUVEAU
+            </span>
           </button>
 
           <button
@@ -604,6 +658,11 @@ export default function ApplicationTrackerPage() {
         <div className="text-xs text-text-muted px-2">
           {viewMode === "kanban" ? (
             <span>💡 {lang === "ar" ? "اسحب وانقل بين المراحل" : "Déplacez vos candidatures d'une phase à l'autre"}</span>
+          ) : viewMode === "timeline" ? (
+            <span className="text-cyan font-semibold flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>{lang === "ar" ? "مخطط زمني تنازلي محسوب من الموعد النهائي" : "Rétroplanning automatique basé sur les dates officielles"}</span>
+            </span>
           ) : (
             <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -955,15 +1014,30 @@ export default function ApplicationTrackerPage() {
 
                           {/* Action buttons footer */}
                           <div className="pt-2 border-t border-slate-200/80 dark:border-white/5 flex items-center justify-between gap-1 text-xs">
-                            {/* Live Traceability Button */}
-                            <button
-                              onClick={() => setTraceabilityApp(app)}
-                              className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 transition-colors border border-emerald-200/80 dark:border-emerald-500/30 flex items-center gap-1 font-bold cursor-pointer"
-                              title={lang === "ar" ? "عرض مسار التتبع والتوثيق المباشر" : "Ouvrir la traçabilité détaillée en direct"}
-                            >
-                              <Activity className="w-3.5 h-3.5 text-emerald-500" />
-                              <span className="hidden xl:inline text-[10px]">{lang === "ar" ? "تتبع" : "Traçabilité"}</span>
-                            </button>
+                            <div className="flex items-center gap-1">
+                              {/* Live Traceability Button */}
+                              <button
+                                onClick={() => setTraceabilityApp(app)}
+                                className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 transition-colors border border-emerald-200/80 dark:border-emerald-500/30 flex items-center gap-1 font-bold cursor-pointer"
+                                title={lang === "ar" ? "عرض مسار التتبع والتوثيق المباشر" : "Ouvrir la traçabilité détaillée en direct"}
+                              >
+                                <Activity className="w-3.5 h-3.5 text-emerald-500" />
+                                <span className="hidden xl:inline text-[10px]">{lang === "ar" ? "تتبع" : "Traçabilité"}</span>
+                              </button>
+
+                              {/* Timeline & Calendar Button */}
+                              <button
+                                onClick={() => {
+                                  setTimelineSelectedAppId(app.id);
+                                  setViewMode("timeline");
+                                }}
+                                className="p-1.5 rounded-lg bg-blue-50 dark:bg-cyan/15 hover:bg-blue-100 dark:hover:bg-cyan/25 text-blue-700 dark:text-cyan transition-colors border border-blue-200/80 dark:border-cyan/30 flex items-center gap-1 font-bold cursor-pointer"
+                                title="Ouvrir la timeline et le calendrier personnalisé"
+                              >
+                                <Calendar className="w-3.5 h-3.5 text-cyan" />
+                                <span className="hidden xl:inline text-[10px]">Timeline</span>
+                              </button>
+                            </div>
 
                             {/* Portal external link */}
                             {app.scholarship.application_link ? (
@@ -1055,6 +1129,16 @@ export default function ApplicationTrackerPage() {
             );
           })}
         </div>
+      ) : viewMode === "timeline" ? (
+        <PersonalizedTimelineView
+          applications={filteredApps}
+          selectedAppId={timelineSelectedAppId}
+          onSelectApp={(id) => setTimelineSelectedAppId(id)}
+          onToggleMilestone={handleToggleChecklist}
+          onUpdateDeadline={handleUpdateDeadline}
+          lang={lang as "fr" | "ar" | "en"}
+          showToast={showToast}
+        />
       ) : (
         /* Dedicated Traceability Timeline View */
         <div className="space-y-6">
