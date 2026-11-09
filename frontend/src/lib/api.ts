@@ -124,7 +124,7 @@ export interface ScholarshipDetail {
 export interface University {
   id: number;
   name: string;
-  logo: string;
+  logo?: string;
   country: string;
   city: string;
   address?: string | null;
@@ -135,6 +135,12 @@ export interface University {
   about?: string | null;
   website?: string | null;
   is_verified: boolean;
+  degrees?: ("bachelor" | "master" | "phd" | "language")[];
+  majors?: string[];
+  popular_programs?: string[];
+  tier?: "c9" | "985" | "211" | "national";
+  tierLabel?: string;
+  scholarships_count?: number;
 }
 
 export interface ChatMessage {

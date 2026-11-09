@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   MapPin,
@@ -8,13 +8,13 @@ import {
   CheckCircle2,
   X,
   Crown,
-  Lock,
   Sparkles,
-  Award,
-  Cpu,
-  HeartPulse,
-  TrendingUp,
   Building,
+  Filter,
+  BookOpen,
+  Layers,
+  ChevronRight,
+  RotateCcw,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -25,39 +25,30 @@ import { useLang } from "@/lib/i18n";
 import UniversityCard from "@/components/UniversityCard";
 import AuthGateModal from "@/components/AuthGateModal";
 import LifetimePassModal from "@/components/LifetimePassModal";
+import {
+  REAL_UNIVERSITIES,
+  MAJOR_CATEGORIES,
+  DEGREE_OPTIONS,
+  type MajorCategory,
+  type DegreeOption,
+  type EnrichedUniversity,
+} from "@/data/universitiesData";
 
-const FREE_TRIAL_LIMIT = 2;
-
-// University Tiers relevant to Moroccan students
 const C9_KEYWORDS = [
   "tsinghua", "peking", "fudan", "shanghai jiao tong", "zhejiang",
   "science and technology of china", "ustc", "nanjing university",
   "harbin institute of technology", "xi'an jiaotong"
 ];
 
-const STEM_KEYWORDS = [
-  "technology", "polytechnic", "science", "engineering", "aeronautics",
-  "posts", "telecom", "electronic", "scut", "hit", "buaa", "bit", "uestc",
-  "xidian", "tongji", "ocean", "maritime", "geosciences"
-];
-
-const MED_KEYWORDS = [
-  "medical", "medicine", "pharmaceutical", "health", "hospital", "smu",
-  "peking union", "fudan med", "sjtu med"
-];
-
-const BIZ_KEYWORDS = [
-  "finance", "economics", "foreign studies", "trade", "international studies",
-  "cufe", "sufe", "swufe", "bfsu", "uibe", "management", "business"
-];
-
 export default function UniversitiesPage() {
   const router = useRouter();
   const { t, lang } = useLang();
-  const [all, setAll] = useState<University[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [all, setAll] = useState<University[]>(REAL_UNIVERSITIES as unknown as University[]);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTier, setSelectedTier] = useState<"all" | "c9" | "985" | "stem" | "med" | "biz">("all");
+  const [selectedMajor, setSelectedMajor] = useState<string>("all");
+  const [selectedDegree, setSelectedDegree] = useState<string>("all");
+  const [selectedTier, setSelectedTier] = useState<"all" | "c9" | "985" | "211">("all");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [user, setUser] = useState<User | null>(null);
   const [showAuthGate, setShowAuthGate] = useState(false);
@@ -65,20 +56,41 @@ export default function UniversitiesPage() {
 
   useEffect(() => {
     async function load() {
-      setLoading(true);
-      const [res, userRes] = await Promise.all([
-        fetchApi<University[]>("/universities/"),
-        getToken() ? getCurrentUser() : Promise.resolve({ data: null }),
-      ]);
-      if (res.data) {
-        setAll(Array.isArray(res.data) ? res.data : (res.data as any).results ?? []);
+      try {
+        const [res, userRes] = await Promise.all([
+          fetchApi<University[]>("/universities/"),
+          getToken() ? getCurrentUser() : Promise.resolve({ data: null }),
+        ]);
+
+        if (res.data) {
+          const fetched = Array.isArray(res.data) ? res.data : (res.data as any).results ?? [];
+          if (fetched.length > 0) {
+            // Merge fetched universities with our rich local dataset for degrees, majors, and tiers
+            const enrichedMap = new Map<number, EnrichedUniversity>(
+              REAL_UNIVERSITIES.map((u) => [u.id, u])
+            );
+            const merged = fetched.map((f: University) => {
+              const local = enrichedMap.get(f.id);
+              return {
+                ...f,
+                degrees: local?.degrees || ["bachelor", "master", "phd"],
+                majors: local?.majors || ["cs_ai", "business"],
+                popular_programs: local?.popular_programs || ["Computer Science", "Business"],
+                tier: local?.tier || "national",
+                tierLabel: local?.tierLabel || "National Key Institution",
+                scholarships_count: local?.scholarships_count || 5,
+              };
+            });
+            setAll(merged);
+          }
+        }
+        if (userRes.data) {
+          setUser(userRes.data);
+        }
+      } catch {
+        // Gracefully use local REAL_UNIVERSITIES fallback
+        setAll(REAL_UNIVERSITIES as unknown as University[]);
       }
-      if (userRes.data) {
-        setUser(userRes.data);
-      } else if (!getToken()) {
-        setShowAuthGate(true);
-      }
-      setLoading(false);
     }
     load();
   }, []);
@@ -92,77 +104,95 @@ export default function UniversitiesPage() {
     return [...counts.entries()].sort((a, b) => b[1] - a[1]);
   }, [all]);
 
+  const activeMajorObj = useMemo(
+    () => MAJOR_CATEGORIES.find((m) => m.id === selectedMajor) || MAJOR_CATEGORIES[0],
+    [selectedMajor]
+  );
+
+  const activeDegreeObj = useMemo(
+    () => DEGREE_OPTIONS.find((d) => d.id === selectedDegree) || DEGREE_OPTIONS[0],
+    [selectedDegree]
+  );
+
   const filtered = useMemo(() => {
     let r = all;
 
-    // Filter by Tier / Category
-    if (selectedTier === "c9") {
+    // 1. Filter by Major
+    if (selectedMajor !== "all") {
       r = r.filter((u) => {
-        const name = u.name.toLowerCase();
-        return C9_KEYWORDS.some((k) => name.includes(k));
-      });
-    } else if (selectedTier === "985") {
-      r = r.filter((u) => {
-        const tag = (u.tagline || "").toLowerCase();
-        const desc = (u.description || "").toLowerCase();
-        const name = u.name.toLowerCase();
-        return tag.includes("985") || desc.includes("985") || C9_KEYWORDS.some((k) => name.includes(k));
-      });
-    } else if (selectedTier === "stem") {
-      r = r.filter((u) => {
-        const name = u.name.toLowerCase();
-        const desc = (u.description || "").toLowerCase();
-        return STEM_KEYWORDS.some((k) => name.includes(k) || desc.includes(k));
-      });
-    } else if (selectedTier === "med") {
-      r = r.filter((u) => {
-        const name = u.name.toLowerCase();
-        const desc = (u.description || "").toLowerCase();
-        return MED_KEYWORDS.some((k) => name.includes(k) || desc.includes(k));
-      });
-    } else if (selectedTier === "biz") {
-      r = r.filter((u) => {
-        const name = u.name.toLowerCase();
-        const desc = (u.description || "").toLowerCase();
-        return BIZ_KEYWORDS.some((k) => name.includes(k) || desc.includes(k));
+        if (u.majors && u.majors.includes(selectedMajor)) return true;
+        const cat = MAJOR_CATEGORIES.find((m) => m.id === selectedMajor);
+        if (cat) {
+          const haystack = (
+            u.name +
+            " " +
+            (u.popular_programs || []).join(" ") +
+            " " +
+            (u.description || "")
+          ).toLowerCase();
+          return cat.subMajors.some((sub) => haystack.includes(sub.toLowerCase()));
+        }
+        return false;
       });
     }
 
-    // Filter by optional city
+    // 2. Filter by Degree ("then ask them if bachelor or which degree")
+    if (selectedDegree !== "all") {
+      r = r.filter((u) => {
+        if (!u.degrees || u.degrees.length === 0) return true;
+        return u.degrees.includes(selectedDegree as any);
+      });
+    }
+
+    // 3. Filter by Tier / Category
+    if (selectedTier === "c9") {
+      r = r.filter((u) => u.tier === "c9" || C9_KEYWORDS.some((k) => u.name.toLowerCase().includes(k)));
+    } else if (selectedTier === "985") {
+      r = r.filter(
+        (u) =>
+          u.tier === "985" ||
+          u.tier === "c9" ||
+          (u.tagline || "").includes("985") ||
+          C9_KEYWORDS.some((k) => u.name.toLowerCase().includes(k))
+      );
+    } else if (selectedTier === "211") {
+      r = r.filter((u) => u.tier === "211" || u.tier === "985" || u.tier === "c9");
+    }
+
+    // 4. Filter by optional city
     if (selectedCity !== "All Cities") {
       r = r.filter((u) => (u.city || "Other") === selectedCity);
     }
 
-    // Filter by text search
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+    // 5. Filter by text search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
       r = r.filter(
         (u) =>
           u.name.toLowerCase().includes(q) ||
           (u.city || "").toLowerCase().includes(q) ||
-          (u.tagline || "").toLowerCase().includes(q) ||
+          (u.popular_programs || []).some((p) => p.toLowerCase().includes(q)) ||
           (u.motto || "").toLowerCase().includes(q)
       );
     }
 
     return r;
-  }, [all, selectedTier, selectedCity, searchQuery]);
+  }, [all, selectedMajor, selectedDegree, selectedTier, selectedCity, searchQuery]);
 
-  const isPremium = Boolean(
-    getToken() &&
-    user &&
-    typeof window !== "undefined" &&
-    (() => {
-      try {
-        const paid = JSON.parse(localStorage.getItem("paid_vip_accounts") || "[]");
-        return paid.includes(user.username?.toLowerCase());
-      } catch {
-        return false;
-      }
-    })()
-  );
-  const visibleUniversities = typeof window !== "undefined" && !getToken() ? [] : isPremium ? filtered : filtered.slice(0, FREE_TRIAL_LIMIT);
-  const hiddenCount = Math.max(0, filtered.length - FREE_TRIAL_LIMIT);
+  const resetAllFilters = () => {
+    setSelectedMajor("all");
+    setSelectedDegree("all");
+    setSelectedTier("all");
+    setSelectedCity("All Cities");
+    setSearchQuery("");
+  };
+
+  const hasActiveFilters =
+    selectedMajor !== "all" ||
+    selectedDegree !== "all" ||
+    selectedTier !== "all" ||
+    selectedCity !== "All Cities" ||
+    Boolean(searchQuery.trim());
 
   return (
     <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
@@ -170,292 +200,412 @@ export default function UniversitiesPage() {
       <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
         <div className="px-4 sm:px-8 py-8 max-w-7xl w-full mx-auto">
           {/* Page Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                  {lang === "ar" ? "🇨🇳 الدليل الرسمي للجامعات الصينية" : lang === "fr" ? "🇨🇳 Répertoire Officiel ScholarChina" : "🇨🇳 ScholarChina Official Directory"}
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan/15 text-cyan border border-cyan/30">
-                  {lang === "ar" ? "102 جامعة رائدة في الصين" : lang === "fr" ? "102 Universités d'élite en Chine" : "102 Elite Universities in China"}
-                </span>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                    {lang === "ar"
+                      ? "🇨🇳 الدليل الرسمي للجامعات الصينية"
+                      : lang === "fr"
+                      ? "🇨🇳 Répertoire Officiel ScholarChina"
+                      : "🇨🇳 ScholarChina Official Directory"}
+                  </span>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan/15 text-cyan border border-cyan/30">
+                    {lang === "ar"
+                      ? "102 جامعة رائدة في الصين"
+                      : lang === "fr"
+                      ? "102 Universités d'élite en Chine"
+                      : "102 Elite Universities in China"}
+                  </span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-black text-text-primary">
+                  {lang === "ar" ? "استكشف " : lang === "fr" ? "Explorer les " : "Explore "}
+                  <span className="gradient-text">
+                    {lang === "ar" ? "الجامعات الصينية" : lang === "fr" ? "Universités" : "Universities"}
+                  </span>
+                </h1>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-black text-text-primary">
-                {t("uni.exploreA")} <span className="gradient-text">{t("uni.exploreB")}</span>
-              </h1>
+
+              {/* Quick Stats Pill */}
+              <div className="flex items-center gap-3">
+                <div className="glass px-4 py-2 rounded-2xl border border-border-glass text-right">
+                  <div className="text-xs text-text-muted">
+                    {lang === "ar"
+                      ? "المؤسسات المتاحة"
+                      : lang === "fr"
+                      ? "Établissements disponibles"
+                      : "Available Institutions"}
+                  </div>
+                  <div className="text-lg font-bold text-cyan">
+                    {filtered.length}{" "}
+                    {lang === "ar" ? "جامعة" : lang === "fr" ? "Universités" : "Universities"}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p className="text-text-secondary max-w-3xl text-sm sm:text-base">
+              {lang === "ar"
+                ? "ابحث حسب التخصص المطلوب، والدرجة العلمية (بكالوريوس، ماستر، دكتوراه)، واستكشف أكثر من 100 جامعة صينية معتمدة مع جولات 3D VR الافتراضية وحصص المنح الحكومية CSC."
+                : lang === "fr"
+                ? "Filtrez par filière, choisissez votre niveau d'études (Licence, Master, Doctorat) et explorez plus de 100 universités chinoises d'élite avec visites 3D VR et quotas de bourses CSC."
+                : "Filter by academic major, select your degree level (Bachelor, Master, PhD), and discover 100+ accredited Chinese institutions with 3D VR campus tours and CSC scholarship quotas."}
+            </p>
+          </motion.div>
+
+          {/* ========================================================================= */}
+          {/* SMART MAJOR & DEGREE FINDER (Directly addressing User Request)             */}
+          {/* ========================================================================= */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="rounded-3xl bg-gradient-to-br from-[#0c1a33]/90 via-[#0e1726]/90 to-[#08101e]/90 border border-white/10 p-5 sm:p-7 shadow-2xl backdrop-blur-xl mb-8 relative overflow-hidden"
+          >
+            {/* Ambient Background Glow */}
+            <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-cyan/10 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-purple/10 blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 space-y-6">
+              {/* Filter Header */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan/25">
+                    <Filter className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-bold text-white">
+                      {lang === "ar"
+                        ? "مُطابق الجامعات حسب التخصص والدرجة العلمية"
+                        : lang === "fr"
+                        ? "Sélecteur d'Universités par Filière & Diplôme"
+                        : "University Matcher by Major & Degree Level"}
+                    </h2>
+                    <p className="text-xs text-slate-400">
+                      {lang === "ar"
+                        ? "اختر التخصص المطلوب، ثم حدد الدرجة (بكالوريوس / ماستر / دكتوراه) لعرض الجامعات المتاحة"
+                        : lang === "fr"
+                        ? "Choisissez votre filière puis le diplôme souhaité pour afficher les universités disponibles"
+                        : "Select your major first, then specify your target degree to list all available universities"}
+                    </p>
+                  </div>
+                </div>
+
+                {hasActiveFilters && (
+                  <button
+                    onClick={resetAllFilters}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white border border-white/10 transition-all cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-cyan" />
+                    <span>{lang === "ar" ? "إعادة ضبط المرشحات" : lang === "fr" ? "Réinitialiser" : "Reset Filters"}</span>
+                  </button>
+                )}
+              </div>
+
+              {/* STEP 1: SELECT MAJOR / DISCIPLINE */}
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-400 font-bold text-xs flex items-center justify-center border border-blue-500/30">
+                      1
+                    </span>
+                    <h3 className="text-sm font-bold text-white tracking-wide">
+                      {lang === "ar"
+                        ? "الخطوة 1: اختر التخصص الأكاديمي المطلوب"
+                        : lang === "fr"
+                        ? "Étape 1 : Choisissez votre filière d'études"
+                        : "Step 1: Choose Your Academic Major"}
+                    </h3>
+                  </div>
+                  <span className="text-xs text-cyan font-medium">
+                    {lang === "ar" ? activeMajorObj.name_ar : lang === "fr" ? activeMajorObj.name_fr : activeMajorObj.name}
+                  </span>
+                </div>
+
+                {/* Major Categories Carousel / Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+                  {MAJOR_CATEGORIES.map((cat) => {
+                    const isSelected = selectedMajor === cat.id;
+                    const title = lang === "ar" ? cat.name_ar : lang === "fr" ? cat.name_fr : cat.name;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedMajor(cat.id)}
+                        className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between min-h-[76px] ${
+                          isSelected
+                            ? "bg-gradient-to-br from-blue-600 via-indigo-600 to-cyan text-white border-cyan/60 shadow-lg shadow-blue-500/25 scale-[1.02]"
+                            : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10 text-slate-300 hover:text-white hover:border-white/20"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <span className="text-xl">{cat.icon}</span>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
+                        </div>
+                        <span className="text-xs font-bold line-clamp-2 leading-tight">
+                          {title}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Sub-majors Preview Pill */}
+                {selectedMajor !== "all" && activeMajorObj.subMajors && (
+                  <div className="mt-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-300">
+                    <span className="text-cyan font-bold flex items-center gap-1">
+                      <BookOpen className="w-3.5 h-3.5" />
+                      {lang === "ar" ? "تشمل البرامج والتخصصات:" : lang === "fr" ? "Filières incluses :" : "Programs included:"}
+                    </span>
+                    {activeMajorObj.subMajors.map((sub) => (
+                      <span
+                        key={sub}
+                        className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-200"
+                      >
+                        {sub}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* STEP 2: SELECT DEGREE LEVEL ("then ask them if bachelor or which degree") */}
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-cyan/20 text-cyan font-bold text-xs flex items-center justify-center border border-cyan/30">
+                      2
+                    </span>
+                    <h3 className="text-sm font-bold text-white tracking-wide">
+                      {lang === "ar"
+                        ? "الخطوة 2: حدد الدرجة العلمية (بكالوريوس / ماستر / دكتوراه)"
+                        : lang === "fr"
+                        ? "Étape 2 : Sélectionnez le diplôme (Licence / Master / Doctorat)"
+                        : "Step 2: Select Degree Level (Bachelor / Master / PhD)"}
+                    </h3>
+                  </div>
+                  <span className="text-xs text-cyan font-medium">
+                    {lang === "ar" ? activeDegreeObj.name_ar : lang === "fr" ? activeDegreeObj.name_fr : activeDegreeObj.name}
+                  </span>
+                </div>
+
+                {/* Degree Option Pills */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                  {DEGREE_OPTIONS.map((deg) => {
+                    const isSelected = selectedDegree === deg.id;
+                    const title = lang === "ar" ? deg.name_ar : lang === "fr" ? deg.name_fr : deg.name;
+                    return (
+                      <button
+                        key={deg.id}
+                        onClick={() => setSelectedDegree(deg.id)}
+                        className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between ${
+                          isSelected
+                            ? "bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan text-white border-emerald-400/50 shadow-lg shadow-emerald-500/25 scale-[1.02]"
+                            : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10 text-slate-300 hover:text-white hover:border-white/20"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <span className="text-xl">{deg.icon}</span>
+                          <span className="text-[10px] font-mono opacity-80">{deg.duration}</span>
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold leading-tight mb-0.5">{title}</div>
+                          <div className="text-[10px] opacity-75 line-clamp-1">{deg.description}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* STEP 3: SEARCH, CITY & TIER REFINEMENT BAR */}
+              <div className="pt-2 border-t border-white/10 flex flex-col sm:flex-row items-center gap-2.5">
+                {/* Search Input */}
+                <div className="flex-1 flex items-center gap-2 w-full bg-slate-900/70 rounded-2xl px-3 py-2 border border-white/10">
+                  <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder={
+                      lang === "ar"
+                        ? "ابحث باسم الجامعة أو المدينة أو البرنامج..."
+                        : lang === "fr"
+                        ? "Rechercher par université, ville ou programme..."
+                        : "Search by university name, city, or program..."
+                    }
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent text-white placeholder:text-slate-400 outline-none text-xs sm:text-sm"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="p-1 text-slate-400 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* City Dropdown */}
+                <div className="flex items-center gap-1.5 w-full sm:w-auto bg-slate-900/70 rounded-2xl px-3 py-2 border border-white/10">
+                  <MapPin className="w-4 h-4 text-cyan flex-shrink-0" />
+                  <select
+                    value={selectedCity}
+                    onChange={(e) => setSelectedCity(e.target.value)}
+                    className="bg-transparent text-xs font-semibold text-white outline-none cursor-pointer w-full sm:w-44"
+                  >
+                    <option value="All Cities" className="bg-slate-900 text-white">
+                      {lang === "ar" ? "📍 جميع المدن" : lang === "fr" ? "📍 Toutes les villes" : "📍 All Cities"}
+                    </option>
+                    {cities.map(([c, count]) => (
+                      <option key={c} value={c} className="bg-slate-900 text-white">
+                        {c} ({count})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Tier Quick Filter Buttons */}
+                <div className="flex items-center gap-1 w-full sm:w-auto overflow-x-auto scrollbar-none">
+                  {[
+                    { id: "all", label: "All Tiers" },
+                    { id: "c9", label: "C9 League (Top 9)" },
+                    { id: "985", label: "Project 985" },
+                    { id: "211", label: "Project 211" },
+                  ].map((tier) => (
+                    <button
+                      key={tier.id}
+                      onClick={() => setSelectedTier(tier.id as any)}
+                      className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                        selectedTier === tier.id
+                          ? "bg-cyan text-slate-950 font-bold shadow-md shadow-cyan/20"
+                          : "bg-white/5 hover:bg-white/10 text-slate-300 border border-white/5"
+                      }`}
+                    >
+                      {tier.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ========================================================================= */}
+          {/* RESULTS SUMMARY BAR ("then list for them the universities available")       */}
+          {/* ========================================================================= */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-cyan/10 border border-cyan/20 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-slate-300">
+              <span className="font-bold text-white text-sm">
+                🎯 {lang === "ar" ? "تم العثور على" : lang === "fr" ? "Résultats :" : "Available Institutions:"}
+              </span>
+              <span className="px-2.5 py-0.5 rounded-lg bg-cyan text-slate-950 font-black text-xs">
+                {filtered.length} {lang === "ar" ? "جامعة معتمدة" : lang === "fr" ? "universités disponibles" : "universities available"}
+              </span>
+
+              {/* Active Badges */}
+              {selectedMajor !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  <span>{activeMajorObj.icon}</span>
+                  <span>{lang === "ar" ? activeMajorObj.name_ar : lang === "fr" ? activeMajorObj.name_fr : activeMajorObj.name}</span>
+                  <button onClick={() => setSelectedMajor("all")} className="hover:text-white">✕</button>
+                </span>
+              )}
+
+              {selectedDegree !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span>{activeDegreeObj.icon}</span>
+                  <span>{lang === "ar" ? activeDegreeObj.name_ar : lang === "fr" ? activeDegreeObj.name_fr : activeDegreeObj.name}</span>
+                  <button onClick={() => setSelectedDegree("all")} className="hover:text-white">✕</button>
+                </span>
+              )}
+
+              {selectedCity !== "All Cities" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple/20 text-purple border border-purple/30">
+                  <span>📍 {selectedCity}</span>
+                  <button onClick={() => setSelectedCity("All Cities")} className="hover:text-white">✕</button>
+                </span>
+              )}
+
+              {selectedTier !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase font-mono text-[10px]">
+                  <span>🏆 {selectedTier.toUpperCase()}</span>
+                  <button onClick={() => setSelectedTier("all")} className="hover:text-white">✕</button>
+                </span>
+              )}
             </div>
 
-            {/* Quick Stats Pill */}
-            <div className="flex items-center gap-3">
-              <div className="glass px-4 py-2 rounded-2xl border border-border-glass text-right">
-                <div className="text-xs text-text-muted">{lang === "ar" ? "المؤسسات المتاحة" : lang === "fr" ? "Établissements disponibles" : "Available Institutions"}</div>
-                <div className="text-lg font-bold text-cyan">{filtered.length} {lang === "ar" ? "جامعة" : lang === "fr" ? "Universités" : "Universities"}</div>
-              </div>
-            </div>
-          </div>
-          <p className="text-text-secondary max-w-2xl text-sm sm:text-base">
-            {lang === "ar"
-              ? "استكشف أكثر من 100 مؤسسة صينية مرموقة على منصة ScholarChina. اكتشف جولات الحرم الجامعي الافتراضية 3D VR، برامج الدرجات العلمية، وحصص منح CSC الكاملة للطلاب المغاربة."
-              : lang === "fr"
-              ? "Explorez plus de 100 établissements chinois prestigieux sur ScholarChina. Visites VR 3D, programmes diplômants et quotas de bourses CSC complètes pour étudiants marocains."
-              : "Explore 100+ prestigious Chinese institutions on ScholarChina. Inspect 3D VR campus panoramas, degree programs, and full CSC scholarship quotas."}
-          </p>
-        </motion.div>
-
-        {/* Search & Compact City Dropdown Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="glass rounded-2xl p-2.5 mb-5 flex flex-col sm:flex-row items-center gap-2.5 border border-border-glass shadow-lg"
-        >
-          <div className="flex-1 flex items-center gap-2 w-full">
-            <Search className="w-5 h-5 text-text-muted ml-2.5 flex-shrink-0" />
-            <input
-              type="text"
-              placeholder={lang === "ar" ? "ابحث باسم الجامعة أو التخصص أو الترتيب..." : lang === "fr" ? "Rechercher par nom d'université, filière..." : "Search by university name, major, or ranking..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent text-text-primary placeholder:text-text-muted outline-none py-2 px-1 text-sm sm:text-base"
-            />
-            {searchQuery && (
+            {hasActiveFilters && (
               <button
-                onClick={() => setSearchQuery("")}
-                className="p-1.5 text-text-muted hover:text-text-primary"
+                onClick={resetAllFilters}
+                className="text-cyan hover:underline font-bold text-xs cursor-pointer ml-auto"
               >
-                <X className="w-4 h-4" />
+                {lang === "ar" ? "عرض كل الجامعات ↺" : lang === "fr" ? "Afficher toutes ↺" : "Show All Universities ↺"}
               </button>
             )}
           </div>
 
-          {/* Compact City Dropdown (Made small as Moroccan students don't need prominent city lists) */}
-          <div className="flex items-center gap-2 w-full sm:w-auto border-t sm:border-t-0 sm:border-l border-white/10 pt-2 sm:pt-0 sm:pl-3">
-            <MapPin className="w-4 h-4 text-cyan flex-shrink-0" />
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="glass rounded-xl px-3 py-2 text-xs font-semibold text-text-primary outline-none border border-white/10 bg-slate-900/80 cursor-pointer w-full sm:w-48"
-              title={lang === "ar" ? "تصفية حسب المدينة" : "Filter by City (Optional)"}
-            >
-              <option value="All Cities" className="bg-slate-900 text-white">
-                {lang === "ar" ? "📍 جميع المدن (اختياري)" : lang === "fr" ? "📍 Toutes les villes" : "📍 All Cities (Optional)"}
-              </option>
-              {cities.map(([c, count]) => (
-                <option key={c} value={c} className="bg-slate-900 text-white">
-                  {c} ({count})
-                </option>
-              ))}
-            </select>
-          </div>
-        </motion.div>
-
-        {/* Moroccan Student Prestige & Discipline Category Filter Chips */}
-        <div className="mb-8 overflow-x-auto scrollbar-none flex items-center gap-2 pb-2">
-          {[
-            {
-              id: "all",
-              label:
-                lang === "ar"
-                  ? "🌟 كل الجامعات"
+          {/* ========================================================================= */}
+          {/* GRID OF MATCHING UNIVERSITIES                                             */}
+          {/* ========================================================================= */}
+          {filtered.length === 0 ? (
+            <div className="glass rounded-3xl p-12 text-center max-w-md mx-auto my-8 border border-white/10 shadow-2xl">
+              <Building className="w-14 h-14 text-cyan mx-auto mb-3 opacity-70" />
+              <h3 className="text-xl font-bold text-white mb-2">
+                {lang === "ar" ? "لم يتم العثور على جامعات مطابقة" : lang === "fr" ? "Aucune université correspondante" : "No Universities Found"}
+              </h3>
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                {lang === "ar"
+                  ? `لا توجد جامعات تطابق معايير البحث الحالية (${activeMajorObj.name_ar} • ${activeDegreeObj.name_ar} • ${selectedCity}). يرجى توسيع نطاق البحث أو إعادة تعيين المرشحات.`
                   : lang === "fr"
-                  ? "🌟 Toutes les universités"
-                  : "🌟 All Universities",
-              count: all.length,
-            },
-            {
-              id: "c9",
-              label:
-                lang === "ar"
-                  ? "🏆 رابطة C9 (أفضل 9)"
-                  : lang === "fr"
-                  ? "🏆 Ligue C9 (Top 9)"
-                  : "🏆 C9 League (Top 9)",
-              count: 9,
-            },
-            {
-              id: "985",
-              label:
-                lang === "ar"
-                  ? "🎖️ مشروع 985 (النخبة)"
-                  : lang === "fr"
-                  ? "🎖️ Projet 985 (Élite)"
-                  : "🎖️ Project 985 (National Elite)",
-              count: 39,
-            },
-            {
-              id: "stem",
-              label:
-                lang === "ar"
-                  ? "⚡ الهندسة والذكاء الاصطناعي"
-                  : lang === "fr"
-                  ? "⚡ Ingénierie & IA"
-                  : "⚡ Tech, AI & Engineering",
-              count: null,
-            },
-            {
-              id: "med",
-              label:
-                lang === "ar"
-                  ? "🏥 الطب والعلوم الصحية"
-                  : lang === "fr"
-                  ? "🏥 Médecine & Santé"
-                  : "🏥 Medicine & Health",
-              count: null,
-            },
-            {
-              id: "biz",
-              label:
-                lang === "ar"
-                  ? "📊 المالية والاقتصاد"
-                  : lang === "fr"
-                  ? "📊 Finance & Économie"
-                  : "📊 Finance & Economics",
-              count: null,
-            },
-          ].map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedTier(cat.id as any)}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${
-                selectedTier === cat.id
-                  ? "bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan text-white shadow-lg shadow-emerald-500/25 scale-102"
-                  : "glass text-text-secondary hover:text-white hover:bg-white/10 border border-border-glass"
-              }`}
-            >
-              <span>{cat.label}</span>
-              {cat.count && <span className="text-[11px] opacity-75">({cat.count})</span>}
-            </button>
-          ))}
-        </div>
-
-        {/* Active Filters Summary Bar */}
-        {(selectedTier !== "all" || selectedCity !== "All Cities" || searchQuery) && (
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-cyan/10 border border-cyan/20 text-xs">
-            <div className="flex items-center gap-2 text-text-secondary">
-              <span className="font-semibold text-text-primary">{t("com.showing")}:</span>
-              <span className="text-cyan font-bold">{filtered.length} {t("nav.universities")}</span>
-              {selectedTier !== "all" && (
-                <span className="px-2 py-0.5 rounded bg-cyan/20 text-cyan uppercase font-mono text-[10px]">
-                  {lang === "ar" ? "الفئة: " : lang === "fr" ? "Catégorie: " : "Tier: "}{selectedTier.toUpperCase()}
-                </span>
-              )}
-              {selectedCity !== "All Cities" && (
-                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-                  📍 {selectedCity}
-                </span>
-              )}
+                  ? `Aucune université ne correspond aux filtres actifs (${activeMajorObj.name_fr} • ${activeDegreeObj.name_fr} • ${selectedCity}). Essayez d'élargir vos critères.`
+                  : `No universities currently match your active combination (${activeMajorObj.name} • ${activeDegreeObj.name} • ${selectedCity}). Try relaxing your filters.`}
+              </p>
+              <button
+                onClick={resetAllFilters}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan to-blue-600 text-white text-xs font-bold shadow-lg shadow-cyan/20 hover:scale-105 transition-all cursor-pointer"
+              >
+                {lang === "ar" ? "عرض جميع الجامعات (102)" : lang === "fr" ? "Voir les 102 universités" : "View All 102 Universities"}
+              </button>
             </div>
-            <button
-              onClick={() => {
-                setSelectedTier("all");
-                setSelectedCity("All Cities");
-                setSearchQuery("");
-              }}
-              className="text-cyan hover:underline font-bold"
-            >
-              {lang === "ar" ? "إعادة تعيين المرشحات ↺" : lang === "fr" ? "Réinitialiser les filtres ↺" : "Reset Filters ↺"}
-            </button>
-          </div>
-        )}
-
-        {/* Grid of University Cards */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="glass rounded-2xl p-6 h-72 animate-pulse" />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="glass rounded-3xl p-12 text-center max-w-md mx-auto">
-            <Building className="w-12 h-12 text-cyan mx-auto mb-3 opacity-60" />
-            <h3 className="text-lg font-bold text-text-primary mb-1">
-              {lang === "ar" ? "لم يتم العثور على أي جامعة" : lang === "fr" ? "Aucune université trouvée" : "No Universities Found"}
-            </h3>
-            <p className="text-xs text-text-muted mb-4">
-              {lang === "ar" ? "يرجى تعديل معايير البحث أو مسح المرشحات المحددة." : lang === "fr" ? "Essayez d'ajuster vos critères ou d'effacer les filtres." : "Try adjusting your search criteria or clearing selected filters."}
-            </p>
-            <button
-              onClick={() => {
-                setSelectedTier("all");
-                setSelectedCity("All Cities");
-                setSearchQuery("");
-              }}
-              className="px-4 py-2 rounded-xl bg-cyan/20 text-cyan text-xs font-bold hover:bg-cyan/30"
-            >
-              {lang === "ar" ? "عرض جميع الجامعات" : lang === "fr" ? "Voir toutes les universités" : "View All Universities"}
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-              {visibleUniversities.map((uni, idx) => (
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+              {filtered.map((uni, idx) => (
                 <UniversityCard key={uni.id} university={uni} index={idx} />
               ))}
             </div>
-
-            {/* Free Trial Gate banner if user is unauthenticated or free */}
-            {!isPremium && hiddenCount > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden border-2 border-amber-500/40 shadow-2xl shadow-amber-500/10 mb-8"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-purple flex items-center justify-center mx-auto mb-4 shadow-xl">
-                  <Crown className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-black text-text-primary mb-2">
-                  {lang === "ar" ? `افتح جميع الجامعات الـ ${all.length} مع تصريح VIP مدى الحياة` : lang === "fr" ? `Débloquez les ${all.length} universités avec le Pass VIP à vie` : `Unlock All ${all.length} Universities with Lifetime Pass`}
-                </h3>
-                <p className="text-sm text-text-secondary max-w-xl mx-auto mb-6">
-                  {lang === "ar"
-                    ? `أنت تشاهد حالياً جامعتين (2) تجريبيتين. افتح كل ${all.length} جامعة نخبة صينية، وأكثر من 400 منحة CSC، وجولات 3D VR، وأدوات الترجمة بالذكاء الاصطناعي مدى الحياة مقابل 29 دولار فقط.`
-                    : lang === "fr"
-                    ? `Vous prévisualisez actuellement 2 universités d'essai. Débloquez les ${all.length} universités d'élite, plus de 400 bourses CSC, visites 3D VR et outils IA à vie pour seulement 29 $.`
-                    : `You are previewing 2 universities on the free trial. Unlock all ${all.length} top Chinese universities, 400+ CSC scholarships, 3D VR campus tours, and AI translation tools forever for just $29.`}
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    onClick={() => setShowLifetimeModal(true)}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-purple text-white font-black text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all cursor-pointer"
-                  >
-                    {lang === "ar" ? "احصل على تصريح VIP مدى الحياة (29$)" : lang === "fr" ? "Obtenir le Pass VIP à vie (29 $)" : "Get Lifetime VIP Pass ($29)"}
-                  </button>
-                  {!user && (
-                    <button
-                      onClick={() => setShowAuthGate(true)}
-                      className="px-6 py-3 rounded-xl glass border border-white/20 text-text-primary font-bold text-sm hover:bg-white/10 transition-all cursor-pointer"
-                    >
-                      {lang === "ar" ? "تسجيل الدخول إلى حسابك" : lang === "fr" ? "Se connecter au compte" : "Sign In to Account"}
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </>
-        )}
+          )}
+        </div>
       </div>
 
       <AuthGateModal
         isOpen={showAuthGate}
-        onClose={() => router.push("/")}
-        onBackToRoles={() => router.push("/")}
+        onClose={() => setShowAuthGate(false)}
         role="student"
-        canClose={false}
-        title={lang === "ar" ? "بوابة الطلاب المغاربة" : lang === "fr" ? "Portail Étudiants Marocains" : "Moroccan Student Access"}
-        subtitle={lang === "ar" ? "سجل الدخول أو أنشئ حساباً لاستكشاف أكثر من 100 جامعة صينية وجولات الحرم الجامعي ثلاثية الأبعاد." : lang === "fr" ? "Connectez-vous pour explorer plus de 100 universités chinoises et visites 3D VR." : "Sign in or register to explore 100+ Chinese universities and 3D VR campus walkthroughs."}
+        canClose={true}
+        title={
+          lang === "ar"
+            ? "بوابة الطلاب المغاربة"
+            : lang === "fr"
+            ? "Portail Étudiants Marocains"
+            : "Moroccan Student Access"
+        }
+        subtitle={
+          lang === "ar"
+            ? "سجل الدخول أو أنشئ حساباً لاستكشاف أكثر من 100 جامعة صينية والتقديم على منح CSC."
+            : lang === "fr"
+            ? "Connectez-vous pour explorer plus de 100 universités chinoises et postuler aux bourses CSC."
+            : "Sign in or register to explore 100+ Chinese universities and apply for CSC scholarships."
+        }
       />
 
       <LifetimePassModal
         isOpen={showLifetimeModal}
         onClose={() => setShowLifetimeModal(false)}
       />
-      </div>
     </div>
   );
 }

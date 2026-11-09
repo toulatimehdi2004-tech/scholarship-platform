@@ -72,33 +72,83 @@ export default function UniversityCard({
       {/* Card Body */}
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="text-base font-bold text-text-primary group-hover:text-cyan transition-colors line-clamp-1 tracking-tight mb-1.5">
-            {university.name}
-          </h3>
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <h3 className="text-base font-bold text-text-primary group-hover:text-cyan transition-colors line-clamp-1 tracking-tight">
+              {university.name}
+            </h3>
+          </div>
+
+          {university.tierLabel && (
+            <div className="mb-2">
+              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                university.tier === "c9"
+                  ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                  : university.tier === "985"
+                  ? "bg-blue-500/15 text-blue-300 border-blue-500/30"
+                  : "bg-purple/15 text-purple border-purple/30"
+              }`}>
+                {university.tier === "c9" ? "🏆 " : university.tier === "985" ? "🎖️ " : "⭐ "}
+                {university.tierLabel}
+              </span>
+            </div>
+          )}
 
           {university.motto && (
-            <p className="text-xs text-text-muted italic line-clamp-1 mb-3 pl-2 border-l-2 border-cyan/40">
+            <p className="text-xs text-text-muted italic line-clamp-1 mb-2.5 pl-2 border-l-2 border-cyan/40">
               “{university.motto}”
             </p>
           )}
 
-          {university.address && (
-            <p className="text-[11px] text-text-muted line-clamp-1 mb-2">
-              {university.address}
-            </p>
+          {/* Degrees Pills */}
+          {university.degrees && university.degrees.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {university.degrees.map((d) => (
+                <span
+                  key={d}
+                  className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white/[0.04] border border-white/10 text-slate-300"
+                >
+                  {d === "bachelor" ? "🎓 Bachelor" : d === "master" ? "📜 Master" : d === "phd" ? "🎖️ PhD" : "🈯 Language"}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Key Programs Tags */}
+          {university.popular_programs && university.popular_programs.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {university.popular_programs.slice(0, 2).map((prog) => (
+                <span
+                  key={prog}
+                  className="px-2 py-0.5 rounded text-[10px] font-medium bg-cyan/10 border border-cyan/25 text-cyan"
+                >
+                  {prog}
+                </span>
+              ))}
+            </div>
           )}
         </div>
 
         {/* Footer CTA */}
         <div className="mt-3 pt-3 border-t border-border-glass flex items-center justify-between text-xs font-bold text-cyan group-hover:text-purple transition-colors">
-          <span>
-            {selectable
-              ? selected
-                ? "✓ " + university.name
-                : t("exp.viewScholarships")
-              : t("uni.viewDetails")}
-          </span>
-          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <div className="flex items-center gap-1.5">
+            {university.scholarships_count ? (
+              <span className="text-[11px] font-semibold text-emerald-400">
+                ✨ {university.scholarships_count} {lang === "ar" ? "منحة" : lang === "fr" ? "bourses" : "grants"}
+              </span>
+            ) : (
+              <span>
+                {selectable
+                  ? selected
+                    ? "✓ " + university.name
+                    : t("exp.viewScholarships")
+                  : t("uni.viewDetails")}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-cyan">
+            <span className="text-[11px] font-bold">{t("uni.viewDetails")}</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
       </div>
     </>
