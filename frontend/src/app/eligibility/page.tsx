@@ -6,6 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { fetchApi } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import StudentSidebar from "@/components/StudentSidebar";
 
 interface MatchItem {
   id: number;
@@ -47,8 +48,10 @@ export default function EligibilityPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="discover" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-5xl w-full mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -213,6 +216,7 @@ export default function EligibilityPage() {
           <Link href="/scholarships" className="hover:text-cyan transition-colors">
             {t("det.backToSch")} →
           </Link>
+        </div>
         </div>
       </div>
     </div>

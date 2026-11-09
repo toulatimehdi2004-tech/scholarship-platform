@@ -8,6 +8,7 @@ import { fetchApi, type ScholarshipDetail } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { getCompareIds, clearCompareIds } from "@/lib/compare";
 import AutoText from "@/components/AutoText";
+import StudentSidebar from "@/components/StudentSidebar";
 
 export default function ComparePage() {
   const { t, lang } = useLang();
@@ -48,21 +49,24 @@ export default function ComparePage() {
 
   if (!loading && items.length === 0) {
     return (
-      <div className="min-h-screen px-4 py-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
-            {t("cmp.title")}
-          </h1>
-          <p className="text-text-secondary mb-6">{t("cmp.subtitle")}</p>
-          <div className="glass rounded-2xl p-12">
-            <Scale className="w-10 h-10 text-text-muted mx-auto mb-4" />
-            <p className="text-text-secondary">{t("cmp.empty")}</p>
-            <Link
-              href="/scholarships"
-              className="btn-gradient text-sm px-4 py-2 rounded-lg inline-block mt-6"
-            >
-              <span>{t("det.backToSch")}</span>
-            </Link>
+      <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+        <StudentSidebar activeTab="scholarships" />
+        <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+          <div className="px-4 sm:px-8 py-8 max-w-3xl w-full mx-auto text-center">
+            <h1 className="text-3xl font-bold text-text-primary mb-2">
+              {t("cmp.title")}
+            </h1>
+            <p className="text-text-secondary mb-6">{t("cmp.subtitle")}</p>
+            <div className="glass rounded-2xl p-12">
+              <Scale className="w-10 h-10 text-text-muted mx-auto mb-4" />
+              <p className="text-text-secondary">{t("cmp.empty")}</p>
+              <Link
+                href="/scholarships"
+                className="btn-gradient text-sm px-4 py-2 rounded-lg inline-block mt-6"
+              >
+                <span>{t("det.backToSch")}</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -144,9 +148,11 @@ export default function ComparePage() {
   ];
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="scholarships" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-6xl w-full mx-auto">
+          <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-text-primary">
               {t("cmp.title")}
@@ -231,6 +237,7 @@ export default function ComparePage() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

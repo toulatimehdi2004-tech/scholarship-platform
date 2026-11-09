@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useMemo } from "react";
+import StudentSidebar from "@/components/StudentSidebar";
 import { useLang } from "@/lib/i18n";
 
 interface SubjectDetail {
@@ -876,8 +877,11 @@ export default function CscaPage() {
   const bacFeeUsd = Math.round(bacFeeRmb * 0.14);
 
   return (
-    <div className="min-h-screen px-4 py-8 max-w-7xl mx-auto">
-      {/* Top Breadcrumb & Back Link */}
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="discover" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-7xl w-full mx-auto">
+          {/* Top Breadcrumb & Back Link */}
       <div className="mb-6 flex items-center justify-between">
         <Link
           href="/student-portal"
@@ -2006,6 +2010,8 @@ export default function CscaPage() {
           </Link>
         </div>
       </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

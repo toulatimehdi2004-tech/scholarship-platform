@@ -23,6 +23,7 @@ import { fetchApi, type Scholarship, getToken } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { getUniversityCoverImage } from "@/lib/campusImages";
 import ContactInformationCard from "@/components/ContactInformationCard";
+import StudentSidebar from "@/components/StudentSidebar";
 
 interface UniversityDetail {
   id: number;
@@ -83,10 +84,13 @@ export default function UniversityClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass rounded-2xl p-8 animate-pulse">
-          <div className="h-6 bg-white/10 rounded w-48 mb-4" />
-          <div className="h-4 bg-white/10 rounded w-64" />
+      <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+        <StudentSidebar activeTab="universities" />
+        <div className="flex-1 flex items-center justify-center min-h-screen bg-[#060a14]/65">
+          <div className="glass rounded-2xl p-8 animate-pulse">
+            <div className="h-6 bg-white/10 rounded w-48 mb-4" />
+            <div className="h-4 bg-white/10 rounded w-64" />
+          </div>
         </div>
       </div>
     );
@@ -94,32 +98,37 @@ export default function UniversityClient() {
 
   if (!university) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass rounded-2xl p-12 text-center">
+      <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+        <StudentSidebar activeTab="universities" />
+        <div className="flex-1 flex items-center justify-center min-h-screen bg-[#060a14]/65">
+          <div className="glass rounded-2xl p-12 text-center">
             <p className="text-text-secondary text-lg mb-4">
               {t("ud.notFound")}
             </p>
             <Link
-              href="/scholarships"
+              href="/universities"
               className="text-cyan hover:text-purple transition-colors"
             >
               {t("ud.backToSch")}
             </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
-          <SmartBack fallback="/universities" label={t("ud.back")} />
-        </motion.div>
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="universities" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-6xl w-full mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <SmartBack fallback="/universities" label={t("ud.back")} />
+          </motion.div>
 
         {/* University Header with Campus Banner */}
         <motion.div
@@ -331,6 +340,7 @@ export default function UniversityClient() {
             </div>
           )}
         </motion.div>
+        </div>
       </div>
     </div>
   );

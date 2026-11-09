@@ -73,6 +73,11 @@ const quickActions = [
 
 export default function DashboardPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/student-portal");
+  }, [router]);
+
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [trackerData, setTrackerData] = useState<TrackerResponse | null>(null);

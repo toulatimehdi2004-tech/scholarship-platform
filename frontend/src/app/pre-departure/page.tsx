@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { translateCached } from "@/components/AutoText";
+import StudentSidebar from "@/components/StudentSidebar";
 
 const SECTIONS: { key: string; icon: any; items: string[] }[] = [
   {
@@ -220,8 +221,10 @@ export default function PreDeparturePage() {
   const pct = total ? Math.round((done / total) * 100) : 0;
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="documents" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 max-w-5xl w-full mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -295,6 +298,7 @@ export default function PreDeparturePage() {
               lang={lang}
             />
           ))}
+        </div>
         </div>
       </div>
     </div>

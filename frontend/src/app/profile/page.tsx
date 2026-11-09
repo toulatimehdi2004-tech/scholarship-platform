@@ -39,6 +39,7 @@ import {
   type StudentProfile,
 } from "@/lib/api";
 import LifetimePassModal from "@/components/LifetimePassModal";
+import StudentSidebar from "@/components/StudentSidebar";
 import StudentVisaProcessCard from "@/components/StudentVisaProcessCard";
 
 const MOROCCAN_CITIES = [
@@ -279,9 +280,11 @@ export default function ProfilePage() {
   const isPremium = user?.student_profile?.is_premium;
 
   return (
-    <div className="min-h-screen px-4 py-8 sm:py-12">
-      <div className="max-w-5xl mx-auto">
-        {/* Top Breadcrumb & Navigation */}
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="profile" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-8 sm:py-12 max-w-5xl w-full mx-auto">
+          {/* Top Breadcrumb & Navigation */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2 text-xs text-text-muted mb-1">
@@ -965,6 +968,7 @@ export default function ProfilePage() {
           });
         }}
       />
+      </div>
     </div>
   );
 }

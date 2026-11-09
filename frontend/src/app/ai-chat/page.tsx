@@ -30,6 +30,7 @@ import {
 import { useLang } from "@/lib/i18n";
 import ArabicKeyboard from "@/components/ArabicKeyboard";
 import MarkdownContent from "@/components/MarkdownContent";
+import StudentSidebar from "@/components/StudentSidebar";
 
 export default function AiChatPage() {
   const router = useRouter();
@@ -499,8 +500,10 @@ export default function AiChatPage() {
   const starterPrompts = getStarterPrompts();
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-background-base">
-      {/* Header Bar */}
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="messages" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] h-screen overflow-hidden">
+        {/* Header Bar */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -815,6 +818,7 @@ export default function AiChatPage() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

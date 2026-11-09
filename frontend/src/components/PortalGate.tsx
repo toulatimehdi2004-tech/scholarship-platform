@@ -77,19 +77,27 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
   // Dedicated Dashboard Layout with Left Sidebar (matching Screenshot 1)
   if (
     pathname === "/student-portal" ||
-    pathname === "/student-portal/" ||
-    pathname === "/scholarships" ||
-    pathname === "/scholarships/" ||
-    pathname.startsWith("/scholarships/") ||
-    pathname === "/tracker" ||
-    pathname === "/tracker/" ||
-    pathname.startsWith("/tracker/") ||
+    pathname.startsWith("/student-portal") ||
+    pathname.startsWith("/scholarships") ||
+    pathname.startsWith("/scholarship") ||
+    pathname.startsWith("/tracker") ||
     pathname.startsWith("/universities") ||
+    pathname.startsWith("/university") ||
     pathname.startsWith("/services") ||
     pathname.startsWith("/medical-guide") ||
     pathname.startsWith("/morocco-guide") ||
     pathname.startsWith("/flights") ||
-    pathname.startsWith("/documents")
+    pathname.startsWith("/documents") ||
+    pathname.startsWith("/csca") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/ai-chat") ||
+    pathname.startsWith("/apply") ||
+    pathname.startsWith("/compare") ||
+    pathname.startsWith("/pricing") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/sop") ||
+    pathname.startsWith("/pre-departure") ||
+    pathname.startsWith("/eligibility")
   ) {
     return (
       <>

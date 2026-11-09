@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import LifetimePassModal from "@/components/LifetimePassModal";
 import AuthGateModal from "@/components/AuthGateModal";
+import StudentSidebar from "@/components/StudentSidebar";
 import { getToken, getCurrentUser, type User } from "@/lib/api";
 import { useEffect } from "react";
 
@@ -110,9 +111,11 @@ export default function PricingPage() {
   const currentPrice = CURRENCY_CONFIG[currency];
 
   return (
-    <div className="min-h-screen px-4 py-12 sm:py-16">
-      <div className="max-w-6xl mx-auto">
-        {/* Header Section */}
+    <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
+      <StudentSidebar activeTab="services" />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
+        <div className="px-4 sm:px-8 py-12 sm:py-16 max-w-6xl w-full mx-auto">
+          {/* Header Section */}
         <div className="text-center mb-12 sm:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -491,6 +494,7 @@ export default function PricingPage() {
             </button>
           </div>
         </motion.div>
+        </div>
       </div>
 
       {/* Global Modals */}
