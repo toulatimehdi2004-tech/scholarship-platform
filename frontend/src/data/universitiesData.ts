@@ -32,6 +32,7 @@ export interface EnrichedUniversity {
   scholarships_count: number;
   degrees: ("bachelor" | "master" | "phd" | "language")[];
   majors: string[];
+  major_degrees?: Record<string, ("bachelor" | "master" | "phd" | "language")[]>;
   popular_programs: string[];
   website: string;
   tagline: string;
@@ -267,7 +268,29 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.tsinghuauniversity.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Beijing",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 2,
@@ -300,7 +323,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.shanghaijiaotonguniversity.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Shanghai",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 3,
@@ -329,7 +369,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chineseacademyofsciencesucascasfellowships.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 4,
@@ -367,7 +419,35 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.pekinguniversity.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Beijing",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "law_ir": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 5,
@@ -400,7 +480,25 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.beijinginstituteoftechnology.edu.cn",
     "tagline": "Project 985 National Elite • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 6,
@@ -427,7 +525,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.beihanguniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 7,
@@ -454,7 +564,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.beijingnormaluniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 8,
@@ -484,7 +602,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.ucas.edu.cn",
     "tagline": "National Key Institution • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 9,
@@ -510,7 +640,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chinaagriculturaluniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "agriculture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 10,
@@ -540,7 +677,20 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.cufe.edu.cn",
     "tagline": "National Key Institution • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 11,
@@ -567,7 +717,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.bfsu.edu.cn",
     "tagline": "National Key Institution • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 12,
@@ -600,7 +758,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.cugb.edu.cn",
     "tagline": "National Key Institution • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 13,
@@ -633,7 +808,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.fudanuniversity.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Shanghai",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 14,
@@ -662,7 +854,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.tongjiuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Shanghai",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 15,
@@ -689,7 +893,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.ecnu.edu.cn",
     "tagline": "National Key Institution • Located in Shanghai",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 16,
@@ -717,7 +929,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.shanghaiuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Shanghai",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 17,
@@ -745,7 +969,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.donghuauniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Shanghai",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 18,
@@ -772,7 +1008,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.shanghaimaritimeuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Shanghai",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 19,
@@ -799,7 +1042,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.sisu.edu.cn",
     "tagline": "National Key Institution • Located in Shanghai",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shanghai. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 20,
@@ -826,7 +1077,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.sunyatsenuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 21,
@@ -861,7 +1119,30 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.scut.edu.cn",
     "tagline": "National Key Institution • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 22,
@@ -888,7 +1169,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.jinanuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 23,
@@ -915,7 +1204,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.scnu.edu.cn",
     "tagline": "National Key Institution • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 24,
@@ -945,7 +1242,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.gdut.edu.cn",
     "tagline": "National Key Institution • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 25,
@@ -972,7 +1281,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.gmu.edu.cn",
     "tagline": "National Key Institution • Located in Dongguan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Dongguan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Dongguan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 26,
@@ -1002,7 +1318,20 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.nanjinguniversity.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Nanjing",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 27,
@@ -1034,7 +1363,25 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southeastuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Nanjing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 28,
@@ -1067,7 +1414,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.njust.edu.cn",
     "tagline": "National Key Institution • Located in Nanjing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 29,
@@ -1097,7 +1461,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.njupt.edu.cn",
     "tagline": "National Key Institution • Located in Nanjing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 30,
@@ -1124,7 +1500,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.hohaiuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Nanjing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 31,
@@ -1154,7 +1537,20 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.nnu.edu.cn",
     "tagline": "National Key Institution • Located in Nanjing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 33,
@@ -1180,7 +1576,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.wuhanuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Wuhan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "law_ir": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 34,
@@ -1207,7 +1610,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.ccnu.edu.cn",
     "tagline": "National Key Institution • Located in Wuhan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 35,
@@ -1239,7 +1650,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.whut.edu.cn",
     "tagline": "National Key Institution • Located in Wuhan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "law_ir": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 36,
@@ -1265,7 +1693,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.hzau.edu.cn",
     "tagline": "National Key Institution • Located in Wuhan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "agriculture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 37,
@@ -1297,7 +1732,25 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.zuel.edu.cn",
     "tagline": "National Key Institution • Located in Wuhan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "law_ir": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 38,
@@ -1324,7 +1777,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.sichuanuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Chengdu",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 39,
@@ -1357,7 +1817,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.uestc.edu.cn",
     "tagline": "National Key Institution • Located in Chengdu",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 41,
@@ -1384,7 +1861,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.sufe.edu.cn",
     "tagline": "National Key Institution • Located in Chengdu",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 42,
@@ -1417,7 +1901,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.cdut.edu.cn",
     "tagline": "National Key Institution • Located in Chengdu",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 44,
@@ -1447,7 +1948,20 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.heu.edu.cn",
     "tagline": "National Key Institution • Located in Harbin",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Harbin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Harbin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 45,
@@ -1473,7 +1987,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.nefu.edu.cn",
     "tagline": "National Key Institution • Located in Harbin",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Harbin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Harbin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "agriculture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 46,
@@ -1501,7 +2022,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.hlju.edu.cn",
     "tagline": "National Key Institution • Located in Harbin",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Harbin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Harbin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 47,
@@ -1528,7 +2061,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.xianjiaotonguniversity.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Xi'an",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 48,
@@ -1558,7 +2098,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.npu.edu.cn",
     "tagline": "National Key Institution • Located in Xi'an",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 49,
@@ -1583,7 +2135,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.nwafu.edu.cn",
     "tagline": "National Key Institution • Located in Yangling",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Yangling. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Yangling. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "agriculture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 50,
@@ -1608,7 +2167,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.tianjinuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Tianjin",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Tianjin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Tianjin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 51,
@@ -1640,7 +2206,25 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.nankaiuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Tianjin",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Tianjin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Tianjin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 52,
@@ -1669,7 +2253,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.tmu.edu.cn",
     "tagline": "National Key Institution • Located in Tianjin",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Tianjin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Tianjin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 53,
@@ -1699,7 +2295,20 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.centralsouthuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Changsha",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Changsha. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Changsha. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 54,
@@ -1727,7 +2336,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.hunanuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Changsha",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Changsha. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Changsha. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 55,
@@ -1757,7 +2378,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.nudt.edu.cn",
     "tagline": "National Key Institution • Located in Changsha",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Changsha. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Changsha. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 56,
@@ -1787,7 +2420,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.zhejianguniversity.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Hangzhou",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Hangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Hangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 57,
@@ -1823,7 +2468,30 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chinaacademyofart.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Hangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Hangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Hangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 58,
@@ -1850,7 +2518,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.dmu.edu.cn",
     "tagline": "National Key Institution • Located in Dalian",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Dalian. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Dalian. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 59,
@@ -1877,7 +2552,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.jilinuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Changchun",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Changchun. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Changchun. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 60,
@@ -1903,7 +2586,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.ouc.edu.cn",
     "tagline": "National Key Institution • Located in Qingdao",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Qingdao. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Qingdao. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "agriculture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 61,
@@ -1931,7 +2621,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.qingdaouniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Qingdao",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Qingdao. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Qingdao. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 62,
@@ -1958,7 +2660,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.yunnanuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Kunming",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Kunming. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Kunming. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 63,
@@ -1991,7 +2701,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.kmust.edu.cn",
     "tagline": "National Key Institution • Located in Kunming",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Kunming. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Kunming. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 64,
@@ -2019,7 +2746,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chongqinguniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Chongqing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chongqing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chongqing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 65,
@@ -2046,7 +2785,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southwestuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Chongqing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chongqing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chongqing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 66,
@@ -2079,7 +2826,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.ustc.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Hefei",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Hefei. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Hefei. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 67,
@@ -2109,7 +2873,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.hfut.edu.cn",
     "tagline": "National Key Institution • Located in Hefei",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Hefei. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Hefei. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 68,
@@ -2137,7 +2913,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.lanzhouuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Lanzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Lanzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Lanzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 69,
@@ -2164,7 +2952,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.gdufs.edu.cn",
     "tagline": "National Key Institution • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 70,
@@ -2191,7 +2987,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.soochowuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Suzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Suzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Suzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 71,
@@ -2218,7 +3022,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chinascholarshipcouncil.edu.cn",
     "tagline": "National Key Institution • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 72,
@@ -2245,7 +3057,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chinascholarshipcouncilbilateralprogrammoroccochina.edu.cn",
     "tagline": "National Key Institution • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 73,
@@ -2281,7 +3101,30 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.huazhonguniversityofscienceandtechnology.edu.cn",
     "tagline": "Project 985 National Elite • Located in Wuhan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 74,
@@ -2308,7 +3151,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.beijinglanguageandcultureuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 75,
@@ -2341,7 +3192,25 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.dalianuniversityoftechnology.edu.cn",
     "tagline": "Project 985 National Elite • Located in Dalian",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Dalian. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Dalian. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 76,
@@ -2368,7 +3237,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southwestjiaotonguniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Chengdu",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 77,
@@ -2398,7 +3274,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.harbininstituteoftechnology.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Harbin",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Harbin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Harbin. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 78,
@@ -2426,7 +3314,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.xiamenuniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Xiamen",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Xiamen. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Xiamen. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 79,
@@ -2453,7 +3353,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.shandonguniversity.edu.cn",
     "tagline": "Project 985 National Elite • Located in Jinan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Jinan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Jinan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 80,
@@ -2480,7 +3388,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.beijinginternationalstudiesuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 81,
@@ -2506,7 +3422,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chengduneusoftuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Chengdu",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 82,
@@ -2533,7 +3456,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.changanuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Xi'an",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 83,
@@ -2564,7 +3499,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.universityofelectronicscienceandtechnologyofchinauestc.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Chengdu",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 84,
@@ -2590,7 +3542,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southwesternuniversityoffinanceandeconomicsswufe.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Chengdu",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 85,
@@ -2619,7 +3578,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chengduuniversityoftechnology.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Chengdu",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Chengdu. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 86,
@@ -2646,7 +3617,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.beijingforeignstudiesuniversitybfsu.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 87,
@@ -2671,7 +3650,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chinaagriculturaluniversitycau.edu.cn",
     "tagline": "Project 985 National Elite • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "agriculture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 88,
@@ -2700,7 +3686,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.beijinguniversityofpostsandtelecommunicationsbupt.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 89,
@@ -2726,7 +3724,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.centraluniversityoffinanceandeconomicscufe.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 90,
@@ -2755,7 +3760,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.beijinguniversityoftechnologybjut.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Beijing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Beijing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 91,
@@ -2787,7 +3804,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southchinauniversityoftechnologyscut.edu.cn",
     "tagline": "Project 985 National Elite • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 92,
@@ -2814,7 +3848,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southchinanormaluniversityscnu.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 93,
@@ -2844,7 +3886,20 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.guangdonguniversityofforeignstudiesgdufs.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 94,
@@ -2870,7 +3925,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southernmedicaluniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Guangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Guangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 95,
@@ -2897,7 +3959,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.shenzhenuniversityszu.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Shenzhen",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shenzhen. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shenzhen. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 96,
@@ -2930,7 +4004,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southernuniversityofscienceandtechnologysustech.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Shenzhen",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shenzhen. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shenzhen. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 97,
@@ -2957,7 +4048,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.chineseuniversityofhongkongshenzhencuhksz.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Shenzhen",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Shenzhen. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Shenzhen. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 98,
@@ -2988,7 +4091,24 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.wuhanuniversityoftechnologywut.edu.cn",
     "tagline": "Project 985 National Elite • Located in Wuhan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "law_ir": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 99,
@@ -3015,7 +4135,15 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.centralchinanormaluniversityccnu.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Wuhan",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Wuhan. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "language": [
+        "bachelor",
+        "master",
+        "phd",
+        "language"
+      ]
+    }
   },
   {
     "id": 100,
@@ -3042,7 +4170,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.xidianuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Xi'an",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 101,
@@ -3070,7 +4210,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.northwestuniversity.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Xi'an",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Xi'an. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "business": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 102,
@@ -3096,7 +4248,14 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.southeastuniversityseu.edu.cn",
     "tagline": "Project 985 National Elite • Located in Nanjing",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "architecture": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 103,
@@ -3125,7 +4284,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.nanjinguniversityofaeronauticsandastronauticsnuaa.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Nanjing",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Nanjing. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "science": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 104,
@@ -3155,7 +4326,19 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.hangzhoudianziuniversityhdu.edu.cn",
     "tagline": "Double First Class / Project 211 • Located in Hangzhou",
     "motto": "Excellence, Truth, and Global Vision",
-    "description": "Prestigious Chinese higher education institution situated in Hangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Hangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   },
   {
     "id": 105,
@@ -3187,6 +4370,23 @@ export const REAL_UNIVERSITIES: EnrichedUniversity[] = [
     "website": "https://www.zhejianguniversityoftechnologyzjut.edu.cn",
     "tagline": "C9 League (Top 9 in China) • Located in Hangzhou",
     "motto": "Self-Discipline, Social Commitment, Innovation",
-    "description": "Prestigious Chinese higher education institution situated in Hangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration."
+    "description": "Prestigious Chinese higher education institution situated in Hangzhou. Highly recognized for scholarship quotas, cutting-edge labs, and international student integration.",
+    "major_degrees": {
+      "cs_ai": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "engineering": [
+        "bachelor",
+        "master",
+        "phd"
+      ],
+      "medicine": [
+        "bachelor",
+        "master",
+        "phd"
+      ]
+    }
   }
 ];

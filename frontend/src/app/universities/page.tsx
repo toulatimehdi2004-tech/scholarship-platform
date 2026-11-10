@@ -75,6 +75,7 @@ export default function UniversitiesPage() {
                 ...f,
                 degrees: local?.degrees || ["bachelor", "master", "phd"],
                 majors: local?.majors || ["cs_ai", "business"],
+                major_degrees: local?.major_degrees,
                 popular_programs: local?.popular_programs || ["Computer Science", "Business"],
                 tier: local?.tier || "national",
                 tierLabel: local?.tierLabel || "National Key Institution",
@@ -117,8 +118,15 @@ export default function UniversitiesPage() {
   const filtered = useMemo(() => {
     let r = all;
 
-    // 1. Filter by Major
-    if (selectedMajor !== "all") {
+    // 1. Program-level matching: Major and Degree COMBINED
+    if (selectedMajor !== "all" && selectedDegree !== "all") {
+      r = r.filter((u) => {
+        const degs = u.major_degrees?.[selectedMajor];
+        // If the university does not offer this degree for this major (e.g. language year for CS or Medicine), reject!
+        return Boolean(degs && degs.includes(selectedDegree as any));
+      });
+    } else if (selectedMajor !== "all") {
+      // Only Major selected: check if university offers this major
       r = r.filter((u) => {
         if (u.majors && u.majors.includes(selectedMajor)) return true;
         const cat = MAJOR_CATEGORIES.find((m) => m.id === selectedMajor);
@@ -134,11 +142,14 @@ export default function UniversitiesPage() {
         }
         return false;
       });
-    }
-
-    // 2. Filter by Degree ("then ask them if bachelor or which degree")
-    if (selectedDegree !== "all") {
+    } else if (selectedDegree !== "all") {
+      // Only Degree selected (Major is "all"):
       r = r.filter((u) => {
+        if (selectedDegree === "language") {
+          // If Language degree is selected, only universities offering Chinese language prep should match
+          const langDegs = u.major_degrees?.["language"];
+          return Boolean(langDegs && langDegs.includes("language"));
+        }
         if (!u.degrees || u.degrees.length === 0) return true;
         return u.degrees.includes(selectedDegree as any);
       });
@@ -397,14 +408,19 @@ export default function UniversitiesPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                   {DEGREE_OPTIONS.map((deg) => {
                     const isSelected = selectedDegree === deg.id;
+                    const isLanguageDegree = deg.id === "language";
+                    const isNonLanguageMajor = selectedMajor !== "all" && selectedMajor !== "language";
+                    const isNotApplicable = isLanguageDegree && isNonLanguageMajor;
                     const title = lang === "ar" ? deg.name_ar : lang === "fr" ? deg.name_fr : deg.name;
                     return (
                       <button
                         key={deg.id}
                         onClick={() => setSelectedDegree(deg.id)}
-                        className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between ${
+                        className={`p-3 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between relative overflow-hidden ${
                           isSelected
                             ? "bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan text-white border-emerald-400/50 shadow-lg shadow-emerald-500/25 scale-[1.02]"
+                            : isNotApplicable
+                            ? "bg-white/[0.015] border-white/5 text-slate-400 hover:border-white/10 opacity-75"
                             : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10 text-slate-300 hover:text-white hover:border-white/20"
                         }`}
                       >
@@ -413,8 +429,16 @@ export default function UniversitiesPage() {
                           <span className="text-[10px] font-mono opacity-80">{deg.duration}</span>
                         </div>
                         <div>
-                          <div className="text-xs font-bold leading-tight mb-0.5">{title}</div>
-                          <div className="text-[10px] opacity-75 line-clamp-1">{deg.description}</div>
+                          <div className="flex items-center justify-between gap-1 mb-0.5">
+                            <span className="text-xs font-bold leading-tight">{title}</span>
+                          </div>
+                          {isNotApplicable ? (
+                            <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                              {lang === "ar" ? "خاص باللغة الصينية فقط" : lang === "fr" ? "Filière langue uniquement" : "Language major only"}
+                            </span>
+                          ) : (
+                            <div className="text-[10px] opacity-75 line-clamp-1">{deg.description}</div>
+                          )}
                         </div>
                       </button>
                     );
@@ -552,18 +576,61 @@ export default function UniversitiesPage() {
           {/* GRID OF MATCHING UNIVERSITIES                                             */}
           {/* ========================================================================= */}
           {filtered.length === 0 ? (
-            <div className="glass rounded-3xl p-12 text-center max-w-md mx-auto my-8 border border-white/10 shadow-2xl">
+            <div className="glass rounded-3xl p-8 sm:p-12 text-center max-w-lg mx-auto my-8 border border-white/10 shadow-2xl">
               <Building className="w-14 h-14 text-cyan mx-auto mb-3 opacity-70" />
               <h3 className="text-xl font-bold text-white mb-2">
                 {lang === "ar" ? "لم يتم العثور على جامعات مطابقة" : lang === "fr" ? "Aucune université correspondante" : "No Universities Found"}
               </h3>
-              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                {lang === "ar"
-                  ? `لا توجد جامعات تطابق معايير البحث الحالية (${activeMajorObj.name_ar} • ${activeDegreeObj.name_ar} • ${selectedCity}). يرجى توسيع نطاق البحث أو إعادة تعيين المرشحات.`
-                  : lang === "fr"
-                  ? `Aucune université ne correspond aux filtres actifs (${activeMajorObj.name_fr} • ${activeDegreeObj.name_fr} • ${selectedCity}). Essayez d'élargir vos critères.`
-                  : `No universities currently match your active combination (${activeMajorObj.name} • ${activeDegreeObj.name} • ${selectedCity}). Try relaxing your filters.`}
-              </p>
+
+              {selectedDegree === "language" && selectedMajor !== "all" && selectedMajor !== "language" ? (
+                <div className="my-5 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs text-left">
+                  <div className="font-bold flex items-center gap-1.5 mb-1.5 text-amber-300 text-sm">
+                    <span>💡</span>
+                    <span>
+                      {lang === "ar"
+                        ? "توضيح أكاديمي هام:"
+                        : lang === "fr"
+                        ? "Clarification académique :"
+                        : "Academic Clarification:"}
+                    </span>
+                  </div>
+                  <p className="leading-relaxed text-slate-300">
+                    {lang === "ar"
+                      ? `السنة التحضيرية للغة الصينية (فصل إلى فصلين) مخصصة فقط لدراسة اللغة الصينية واجتياز HSK، ولا تمنح شهادة جامعية في ${activeMajorObj.name_ar}. للحصول على شهادة أكاديمية في هذا التخصص، يرجى اختيار البكالوريوس، الماستر أو الدكتوراه.`
+                      : lang === "fr"
+                      ? `L'année préparatoire de langue chinoise (1-2 semestres) est strictement dédiée à l'apprentissage du chinois (HSK) et ne délivre pas de diplôme universitaire en ${activeMajorObj.name_fr}. Pour obtenir un diplôme dans cette filière, veuillez sélectionner Licence, Master ou Doctorat.`
+                      : `A Chinese Language & Preparatory year (1-2 semesters) is exclusively dedicated to Chinese language learning (HSK) and does not grant a degree qualification in ${activeMajorObj.name}. To obtain an academic degree in this field, please select Bachelor's, Master's, or PhD.`}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <button
+                      onClick={() => setSelectedDegree("bachelor")}
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan to-blue-600 text-white font-bold text-xs shadow-md shadow-cyan/20 hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      🎓 {lang === "ar" ? "عرض برامج البكالوريوس (Licence)" : lang === "fr" ? "Voir les Licences / Bachelor" : "Switch to Bachelor's Degree"}
+                    </button>
+                    <button
+                      onClick={() => setSelectedDegree("master")}
+                      className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      📜 {lang === "ar" ? "عرض برامج الماستر (Master)" : lang === "fr" ? "Voir les Masters" : "Switch to Master's Degree"}
+                    </button>
+                    <button
+                      onClick={() => setSelectedMajor("language")}
+                      className="px-3.5 py-2 rounded-xl bg-emerald-600/80 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      🇨🇳 {lang === "ar" ? "تغيير التخصص إلى اللغة الصينية" : lang === "fr" ? "Changer vers Filière Chinois" : "Switch to Chinese Language Major"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                  {lang === "ar"
+                    ? `لا توجد جامعات تطابق معايير البحث الحالية (${activeMajorObj.name_ar} • ${activeDegreeObj.name_ar} • ${selectedCity}). يرجى توسيع نطاق البحث أو إعادة تعيين المرشحات.`
+                    : lang === "fr"
+                    ? `Aucune université ne correspond aux filtres actifs (${activeMajorObj.name_fr} • ${activeDegreeObj.name_fr} • ${selectedCity}). Essayez d'élargir vos critères.`
+                    : `No universities currently match your active combination (${activeMajorObj.name} • ${activeDegreeObj.name} • ${selectedCity}). Try relaxing your filters.`}
+                </p>
+              )}
               <button
                 onClick={resetAllFilters}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan to-blue-600 text-white text-xs font-bold shadow-lg shadow-cyan/20 hover:scale-105 transition-all cursor-pointer"

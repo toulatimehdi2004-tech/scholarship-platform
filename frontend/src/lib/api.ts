@@ -137,6 +137,7 @@ export interface University {
   is_verified: boolean;
   degrees?: ("bachelor" | "master" | "phd" | "language")[];
   majors?: string[];
+  major_degrees?: Record<string, ("bachelor" | "master" | "phd" | "language")[]>;
   popular_programs?: string[];
   tier?: "c9" | "985" | "211" | "national";
   tierLabel?: string;
