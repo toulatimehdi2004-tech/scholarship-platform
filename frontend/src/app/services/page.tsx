@@ -21,6 +21,7 @@ import {
   Phone,
   DollarSign,
   Award,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -171,12 +172,13 @@ export default function ServicesPage() {
               <span>✈️ Vols Étudiants (Trip & Skyscanner)</span>
             </Link>
 
-            <Link
-              href="/provider-portal"
-              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 flex items-center gap-2 transition-all shadow-sm"
+            <div
+              className="px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white/[0.03] text-slate-400 border border-white/5 flex items-center gap-2 cursor-not-allowed opacity-60 select-none shadow-sm"
+              title={lang === "ar" ? "مكتب المزودين قريباً" : "Provider Bureau Desk (Coming Soon)"}
             >
-              <span>💼 Provider Bureau Desk</span>
-            </Link>
+              <Lock className="w-3.5 h-3.5 text-amber-400" />
+              <span>💼 {lang === "ar" ? "مكتب المزودين (قريباً)" : "Provider Desk (Coming Soon)"}</span>
+            </div>
           </div>
         </div>
       </div>

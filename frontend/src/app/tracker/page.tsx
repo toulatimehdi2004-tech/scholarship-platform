@@ -281,9 +281,7 @@ export default function ApplicationTrackerPage() {
     if (typeof window !== "undefined") {
       const role = localStorage.getItem("portal_role");
       if (role === "provider" || role === "university") {
-        setRestrictedRole(role);
-        setLoading(false);
-        return;
+        localStorage.setItem("portal_role", "student");
       }
     }
 

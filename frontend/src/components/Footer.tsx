@@ -219,12 +219,15 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/university-portal"
-                  className="text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors"
+                <div
+                  className="text-slate-500 cursor-not-allowed flex items-center gap-1.5 select-none"
+                  title={lang === "ar" ? "قريباً" : "Bientôt disponible / Coming Soon"}
                 >
-                  {t("footer.uniAdmissions")}
-                </Link>
+                  <span>{t("footer.uniAdmissions")}</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-bold border border-amber-500/30">
+                    {lang === "ar" ? "قريباً" : "Coming Soon"}
+                  </span>
+                </div>
               </li>
             </ul>
           </div>
@@ -269,12 +272,15 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/provider-portal"
-                  className="text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-cyan transition-colors"
+                <div
+                  className="text-slate-500 cursor-not-allowed flex items-center gap-1.5 select-none"
+                  title={lang === "ar" ? "قريباً" : "Bientôt disponible / Coming Soon"}
                 >
-                  {t("footer.toolsTranslations")}
-                </Link>
+                  <span>{t("footer.toolsTranslations")}</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-bold border border-amber-500/30">
+                    {lang === "ar" ? "قريباً" : "Coming Soon"}
+                  </span>
+                </div>
               </li>
               <li>
                 <Link

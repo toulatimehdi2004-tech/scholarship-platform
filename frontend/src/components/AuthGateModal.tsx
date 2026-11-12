@@ -80,33 +80,12 @@ export default function AuthGateModal({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setActiveRole(role);
+    setActiveRole('student');
   }, [role]);
 
-  // Auto-detect role when typing an institutional or known email/username
+  // Clean username input (university and provider roles are currently locked/coming soon)
   const handleUsernameChange = (val: string) => {
     setUsername(val);
-    const lower = val.toLowerCase().trim();
-    if (
-      lower.includes('@pku') ||
-      lower.includes('@tsinghua') ||
-      lower.includes('@fudan') ||
-      lower.includes('.edu.cn') ||
-      lower.includes('admissions.office') ||
-      lower === 'admission_officer'
-    ) {
-      if (activeRole !== 'university') {
-        setActiveRole('university');
-      }
-    } else if (
-      lower === 'moroccan_translator' ||
-      lower.includes('translator') ||
-      lower.includes('traducteur')
-    ) {
-      if (activeRole !== 'provider') {
-        setActiveRole('provider');
-      }
-    }
   };
 
   // Compute email to test for live verification
@@ -278,17 +257,11 @@ export default function AuthGateModal({
             onSuccess();
           } else {
             onClose();
-            if (effectiveRole === 'university') {
-              router.push('/university-portal');
-            } else if (effectiveRole === 'provider') {
-              router.push('/provider-portal');
-            } else {
-              router.push('/student-portal');
-            }
+            router.push('/student-portal');
           }
         } else if (res.error && (res.error.toLowerCase().includes('fetch') || res.error.toLowerCase().includes('network'))) {
           // Seamless client fallback if offline
-          const effectiveRole = activeRole || 'student';
+          const effectiveRole = 'student';
           const fallbackUser = {
             id: 1,
             username: cleanUsername,
@@ -305,9 +278,7 @@ export default function AuthGateModal({
             onSuccess();
           } else {
             onClose();
-            if (effectiveRole === 'university') router.push('/university-portal');
-            else if (effectiveRole === 'provider') router.push('/provider-portal');
-            else router.push('/student-portal');
+            router.push('/student-portal');
           }
         } else {
           setError(res.error || 'Identifiants invalides. Veuillez vérifier vos accès.');
@@ -358,17 +329,11 @@ export default function AuthGateModal({
             onSuccess();
           } else {
             onClose();
-            if (effectiveRole === 'university') {
-              router.push('/university-portal');
-            } else if (effectiveRole === 'provider') {
-              router.push('/provider-portal');
-            } else {
-              router.push('/student-portal');
-            }
+            router.push('/student-portal');
           }
         } else if (res.error && (res.error.toLowerCase().includes('fetch') || res.error.toLowerCase().includes('network'))) {
           // Seamless client fallback if offline
-          const effectiveRole = activeRole || 'student';
+          const effectiveRole = 'student';
           const fallbackUser = {
             id: 1,
             username: username.trim() || 'StudentUser',
@@ -385,9 +350,7 @@ export default function AuthGateModal({
             onSuccess();
           } else {
             onClose();
-            if (effectiveRole === 'university') router.push('/university-portal');
-            else if (effectiveRole === 'provider') router.push('/provider-portal');
-            else router.push('/student-portal');
+            router.push('/student-portal');
           }
         } else {
           setError(res.error || "Échec de l'enregistrement. L'adresse email ou le nom d'utilisateur est peut-être déjà utilisé.");
@@ -419,9 +382,7 @@ export default function AuthGateModal({
         onSuccess();
       } else {
         onClose();
-        if (effectiveRole === 'university') router.push('/university-portal');
-        else if (effectiveRole === 'provider') router.push('/provider-portal');
-        else router.push('/student-portal');
+        router.push('/student-portal');
       }
     } finally {
       setLoading(false);
@@ -531,33 +492,33 @@ export default function AuthGateModal({
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setActiveRole('university');
-                  setError('');
-                }}
-                className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer ${
-                  activeRole === 'university'
-                    ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/30 border border-amber-400/40'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
+                disabled
+                aria-disabled="true"
+                className="py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 cursor-not-allowed opacity-40 bg-white/[0.02] text-white/40 border border-white/5 select-none"
+                title={lang === "ar" ? "قريباً" : "Bientôt disponible / Coming Soon"}
               >
-                <Building2 className="w-4 h-4 flex-shrink-0" />
-                <span>{lang === "ar" ? "جامعة" : "Université"}</span>
+                <Building2 className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                <span className="flex items-center gap-1">
+                  <span>{lang === "ar" ? "جامعة" : "Université"}</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono font-bold">
+                    {lang === "ar" ? "قريباً" : "Soon"}
+                  </span>
+                </span>
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setActiveRole('provider');
-                  setError('');
-                }}
-                className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer ${
-                  activeRole === 'provider'
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30 border border-purple-400/40'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
+                disabled
+                aria-disabled="true"
+                className="py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 cursor-not-allowed opacity-40 bg-white/[0.02] text-white/40 border border-white/5 select-none"
+                title={lang === "ar" ? "قريباً" : "Bientôt disponible / Coming Soon"}
               >
-                <Briefcase className="w-4 h-4 flex-shrink-0" />
-                <span>{lang === "ar" ? "مزود خدمة" : "Prestataire"}</span>
+                <Briefcase className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                <span className="flex items-center gap-1">
+                  <span>{lang === "ar" ? "مزود خدمة" : "Prestataire"}</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono font-bold">
+                    {lang === "ar" ? "قريباً" : "Soon"}
+                  </span>
+                </span>
               </button>
             </div>
           </div>

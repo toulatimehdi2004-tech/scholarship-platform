@@ -16,16 +16,13 @@ export default function PortalPage() {
   }, []);
 
   function handleSelectRole(role: PortalRole) {
-    try {
-      localStorage.setItem("portal_role", role);
-    } catch {}
-    if (role === "university") {
-      router.push("/university-portal/");
-    } else if (role === "provider") {
-      router.push("/provider-portal/");
-    } else {
-      router.push("/student-portal/");
+    if (role === "university" || role === "provider") {
+      return;
     }
+    try {
+      localStorage.setItem("portal_role", "student");
+    } catch {}
+    router.push("/student-portal/");
   }
 
   return <PortalChooser onSelectRole={handleSelectRole} currentRole={currentRole} />;

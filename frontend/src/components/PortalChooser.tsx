@@ -11,6 +11,7 @@ import {
   Sun,
   Moon,
   Check,
+  Lock,
 } from "lucide-react";
 import Logo from "./Logo";
 import { useTheme } from "@/lib/ThemeContext";
@@ -57,6 +58,7 @@ export default function PortalChooser({
       btnArrowBg: "bg-blue-600/20 group-hover:bg-blue-600 text-blue-400 group-hover:text-white",
       radioBorder: "border-blue-500",
       radioDot: "bg-blue-500",
+      isComingSoon: false,
     },
     {
       id: "university" as PortalRole,
@@ -68,14 +70,15 @@ export default function PortalChooser({
           : "Connect with international students and manage your scholarship opportunities.",
       icon: Building2,
       color: "teal",
-      badgeBg: "bg-emerald-600",
-      borderClass: "border-emerald-500/30 hover:border-emerald-400/80",
-      shadowHover: "hover:shadow-[0_0_35px_rgba(16,185,129,0.28)]",
-      glowBg: "from-emerald-600/20 via-teal-900/10 to-transparent",
-      btnTextColor: "text-emerald-400 group-hover:text-emerald-300",
-      btnArrowBg: "bg-emerald-600/20 group-hover:bg-emerald-600 text-emerald-400 group-hover:text-white",
-      radioBorder: "border-emerald-500",
-      radioDot: "bg-emerald-500",
+      badgeBg: "bg-emerald-600/70",
+      borderClass: "border-emerald-500/20",
+      shadowHover: "",
+      glowBg: "from-emerald-600/10 via-teal-900/5 to-transparent",
+      btnTextColor: "text-slate-400",
+      btnArrowBg: "bg-slate-800 text-slate-400",
+      radioBorder: "border-slate-600",
+      radioDot: "bg-slate-600",
+      isComingSoon: true,
     },
     {
       id: "provider" as PortalRole,
@@ -87,18 +90,22 @@ export default function PortalChooser({
           : "Offer visa, translation, document and study-abroad services.",
       icon: Briefcase,
       color: "purple",
-      badgeBg: "bg-purple-600",
-      borderClass: "border-purple-500/30 hover:border-purple-400/80",
-      shadowHover: "hover:shadow-[0_0_35px_rgba(168,85,247,0.28)]",
-      glowBg: "from-purple-600/20 via-purple-900/10 to-transparent",
-      btnTextColor: "text-purple-400 group-hover:text-purple-300",
-      btnArrowBg: "bg-purple-600/20 group-hover:bg-purple-600 text-purple-400 group-hover:text-white",
-      radioBorder: "border-purple-500",
-      radioDot: "bg-purple-500",
+      badgeBg: "bg-purple-600/70",
+      borderClass: "border-purple-500/20",
+      shadowHover: "",
+      glowBg: "from-purple-600/10 via-purple-900/5 to-transparent",
+      btnTextColor: "text-slate-400",
+      btnArrowBg: "bg-slate-800 text-slate-400",
+      radioBorder: "border-slate-600",
+      radioDot: "bg-slate-600",
+      isComingSoon: true,
     },
   ];
 
   function handleRoleClick(role: PortalRole) {
+    if (role === "university" || role === "provider") {
+      return;
+    }
     setChosenRoleForAuth(role);
     try {
       localStorage.setItem("portal_role", role);
@@ -107,14 +114,10 @@ export default function PortalChooser({
   }
 
   function handleSignInClick() {
-    let savedRole: PortalRole = "student";
+    setChosenRoleForAuth("student");
     try {
-      const stored = localStorage.getItem("portal_role") as PortalRole | null;
-      if (stored === "university" || stored === "provider" || stored === "student") {
-        savedRole = stored;
-      }
+      localStorage.setItem("portal_role", "student");
     } catch {}
-    setChosenRoleForAuth(savedRole);
     setAuthModalOpen(true);
   }
 
@@ -201,7 +204,7 @@ export default function PortalChooser({
           </p>
         </motion.div>
 
-        {/* DESKTOP VIEW: 3 Side-by-Side Cards (Exactly matching Image 1) */}
+        {/* DESKTOP VIEW: 3 Side-by-Side Cards (Matching Image 1) */}
         <div className="hidden sm:grid sm:grid-cols-3 gap-5 sm:gap-6 w-full">
           {roles.map((r, i) => (
             <motion.div
@@ -211,47 +214,97 @@ export default function PortalChooser({
               transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
               className="h-full"
             >
-              <Link
-                href={r.href}
-                onClick={() => handleRoleClick(r.id)}
-                className={`relative h-full rounded-3xl bg-slate-900/65 backdrop-blur-xl border ${r.borderClass} ${r.shadowHover} p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 group cursor-pointer overflow-hidden block text-inherit no-underline`}
-              >
-                {/* Subtle top inner gradient */}
+              {r.isComingSoon ? (
                 <div
-                  className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${r.glowBg} pointer-events-none rounded-t-3xl`}
-                />
-
-                <div className="relative z-10">
-                  {/* Role Icon Badge */}
+                  aria-disabled="true"
+                  className={`relative h-full rounded-3xl bg-slate-900/50 backdrop-blur-xl border ${r.borderClass} p-6 sm:p-7 flex flex-col justify-between select-none cursor-not-allowed opacity-75 overflow-hidden text-inherit`}
+                >
+                  {/* Subtle top inner gradient */}
                   <div
-                    className={`w-13 h-13 rounded-2xl ${r.badgeBg} text-white flex items-center justify-center shadow-lg shadow-black/40 mb-6 group-hover:scale-105 transition-transform duration-300`}
-                  >
-                    <r.icon className="w-6 h-6 text-white" />
+                    className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${r.glowBg} pointer-events-none rounded-t-3xl`}
+                  />
+
+                  {/* Top Coming Soon Badge */}
+                  <div className="absolute top-5 right-5 z-20">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm backdrop-blur-md">
+                      <Lock className="w-3 h-3 text-amber-400" />
+                      <span>{lang === "ar" ? "قريباً" : lang === "fr" ? "Bientôt" : "Coming Soon"}</span>
+                    </span>
                   </div>
 
-                  {/* Role Title */}
-                  <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
-                    {r.title}
-                  </h3>
+                  <div className="relative z-10">
+                    {/* Role Icon Badge */}
+                    <div
+                      className={`w-13 h-13 rounded-2xl ${r.badgeBg} text-white flex items-center justify-center shadow-lg shadow-black/40 mb-6 opacity-80`}
+                    >
+                      <r.icon className="w-6 h-6 text-white" />
+                    </div>
 
-                  {/* Role Description */}
-                  <p className="text-xs text-slate-300 leading-relaxed mb-8">
-                    {r.desc}
-                  </p>
-                </div>
+                    {/* Role Title */}
+                    <h3 className="text-xl font-bold text-white/90 mb-2 tracking-tight">
+                      {r.title}
+                    </h3>
 
-                {/* Bottom Continue Row */}
-                <div className="relative z-10 flex items-center justify-between pt-2 border-t border-white/5">
-                  <span className={`text-xs sm:text-sm font-bold ${r.btnTextColor}`}>
-                    {lang === "ar" ? "متابعة" : "Continue"}
-                  </span>
-                  <div
-                    className={`w-8 h-8 rounded-full ${r.btnArrowBg} flex items-center justify-center transition-all duration-300`}
-                  >
-                    <ArrowRight className="w-4 h-4 rtl-flip" />
+                    {/* Role Description */}
+                    <p className="text-xs text-slate-400 leading-relaxed mb-8">
+                      {r.desc}
+                    </p>
+                  </div>
+
+                  {/* Bottom Coming Soon indicator */}
+                  <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-xs sm:text-sm font-semibold text-amber-400/90 flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{lang === "ar" ? "قريباً (غير متاح حالياً)" : lang === "fr" ? "Bientôt disponible" : "Coming Soon"}</span>
+                    </span>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10 uppercase">
+                      {lang === "ar" ? "مغلق" : "Locked"}
+                    </span>
                   </div>
                 </div>
-              </Link>
+              ) : (
+                <Link
+                  href={r.href}
+                  onClick={() => handleRoleClick(r.id)}
+                  className={`relative h-full rounded-3xl bg-slate-900/65 backdrop-blur-xl border ${r.borderClass} ${r.shadowHover} p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 group cursor-pointer overflow-hidden block text-inherit no-underline`}
+                >
+                  {/* Subtle top inner gradient */}
+                  <div
+                    className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${r.glowBg} pointer-events-none rounded-t-3xl`}
+                  />
+
+                  <div className="relative z-10">
+                    {/* Role Icon Badge */}
+                    <div
+                      className={`w-13 h-13 rounded-2xl ${r.badgeBg} text-white flex items-center justify-center shadow-lg shadow-black/40 mb-6 group-hover:scale-105 transition-transform duration-300`}
+                    >
+                      <r.icon className="w-6 h-6 text-white" />
+                    </div>
+
+                    {/* Role Title */}
+                    <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
+                      {r.title}
+                    </h3>
+
+                    {/* Role Description */}
+                    <p className="text-xs text-slate-300 leading-relaxed mb-8">
+                      {r.desc}
+                    </p>
+                  </div>
+
+                  {/* Bottom Continue Row */}
+                  <div className="relative z-10 flex items-center justify-between pt-2 border-t border-white/5">
+                    <span className={`text-xs sm:text-sm font-bold ${r.btnTextColor}`}>
+                      {lang === "ar" ? "متابعة" : "Continue"}
+                    </span>
+                    <div
+                      className={`w-8 h-8 rounded-full ${r.btnArrowBg} flex items-center justify-center transition-all duration-300`}
+                    >
+                      <ArrowRight className="w-4 h-4 rtl-flip" />
+                    </div>
+                  </div>
+                </Link>
+              )}
             </motion.div>
           ))}
         </div>
@@ -259,6 +312,38 @@ export default function PortalChooser({
         {/* MOBILE VIEW: Vertical List with Radio Circles (Matching Image 1 iPhone View) */}
         <div className="flex sm:hidden flex-col gap-3 w-full">
           {roles.map((r) => {
+            if (r.isComingSoon) {
+              return (
+                <div
+                  key={r.id}
+                  aria-disabled="true"
+                  className="p-4 rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-white/5 flex items-center justify-between gap-3 select-none cursor-not-allowed opacity-60"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div
+                      className={`w-11 h-11 rounded-xl ${r.badgeBg} text-white flex items-center justify-center flex-shrink-0 opacity-70`}
+                    >
+                      <r.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-white/80">{r.title}</h4>
+                      </div>
+                      <p className="text-[11px] text-slate-400 line-clamp-2 mt-0.5 leading-snug">
+                        {r.desc}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Coming Soon lock pill */}
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black uppercase flex-shrink-0">
+                    <Lock className="w-3 h-3 text-amber-400" />
+                    <span>{lang === "ar" ? "قريباً" : "Soon"}</span>
+                  </div>
+                </div>
+              );
+            }
+
             const isSelected = selectedMobileRole === r.id;
             return (
               <Link

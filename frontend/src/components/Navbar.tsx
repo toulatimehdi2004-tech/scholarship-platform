@@ -73,18 +73,7 @@ export default function Navbar() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      let role = "student";
-      try {
-        const u = localStorage.getItem("user");
-        if (u) {
-          const parsed = JSON.parse(u);
-          if (parsed.role) role = parsed.role;
-        } else {
-          const saved = localStorage.getItem("portal_role");
-          if (saved === "university" || saved === "provider") role = saved;
-        }
-      } catch {}
-      setPortalRole(role as "student" | "university" | "provider");
+      setPortalRole("student");
     }
   }, [pathname]);
 
@@ -93,9 +82,7 @@ export default function Navbar() {
       getCurrentUser().then((res) => {
         if (res.data) {
           setUser(res.data);
-          if (res.data.role) {
-            setPortalRole(res.data.role as "student" | "university" | "provider");
-          }
+          setPortalRole("student");
         }
       });
     }
