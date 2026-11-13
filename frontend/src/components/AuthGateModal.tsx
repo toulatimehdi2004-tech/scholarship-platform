@@ -242,6 +242,13 @@ export default function AuthGateModal({
           localStorage.setItem('user', JSON.stringify(res.data.user));
           const effectiveRole = res.data.role || activeRole || 'student';
           localStorage.setItem('portal_role', effectiveRole);
+          if (effectiveRole === 'student') {
+            try {
+              localStorage.removeItem("student_application_mode_chosen");
+              sessionStorage.setItem("require_application_choice", "true");
+              window.dispatchEvent(new CustomEvent("require_application_choice"));
+            } catch {}
+          }
           try {
             const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
             registry[username.trim().toLowerCase()] = effectiveRole;
@@ -274,6 +281,13 @@ export default function AuthGateModal({
           setToken(`token_${Date.now()}`);
           localStorage.setItem('user', JSON.stringify(fallbackUser));
           localStorage.setItem('portal_role', effectiveRole);
+          if (effectiveRole === 'student') {
+            try {
+              localStorage.removeItem("student_application_mode_chosen");
+              sessionStorage.setItem("require_application_choice", "true");
+              window.dispatchEvent(new CustomEvent("require_application_choice"));
+            } catch {}
+          }
           if (onSuccess) {
             onSuccess();
           } else {
@@ -314,6 +328,13 @@ export default function AuthGateModal({
           localStorage.setItem('user', JSON.stringify(res.data.user));
           const effectiveRole = res.data.role || activeRole || 'student';
           localStorage.setItem('portal_role', effectiveRole);
+          if (effectiveRole === 'student') {
+            try {
+              localStorage.removeItem("student_application_mode_chosen");
+              sessionStorage.setItem("require_application_choice", "true");
+              window.dispatchEvent(new CustomEvent("require_application_choice"));
+            } catch {}
+          }
           try {
             const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
             registry[username.trim().toLowerCase()] = effectiveRole;
@@ -346,6 +367,13 @@ export default function AuthGateModal({
           setToken(`token_${Date.now()}`);
           localStorage.setItem('user', JSON.stringify(fallbackUser));
           localStorage.setItem('portal_role', effectiveRole);
+          if (effectiveRole === 'student') {
+            try {
+              localStorage.removeItem("student_application_mode_chosen");
+              sessionStorage.setItem("require_application_choice", "true");
+              window.dispatchEvent(new CustomEvent("require_application_choice"));
+            } catch {}
+          }
           if (onSuccess) {
             onSuccess();
           } else {
@@ -372,6 +400,13 @@ export default function AuthGateModal({
       setToken(`token_${Date.now()}`);
       localStorage.setItem('user', JSON.stringify(fallbackUser));
       localStorage.setItem('portal_role', effectiveRole);
+      if (effectiveRole === 'student') {
+        try {
+          localStorage.removeItem("student_application_mode_chosen");
+          sessionStorage.setItem("require_application_choice", "true");
+          window.dispatchEvent(new CustomEvent("require_application_choice"));
+        } catch {}
+      }
       if (effectiveRole === 'university') {
         const matchedUni = liveVerification?.university || ACCREDITED_UNIVERSITIES.find((u) => u.id === selectedUniId);
         if (matchedUni) {

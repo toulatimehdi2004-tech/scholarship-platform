@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
 import LiveCommunicationWidget from "@/components/LiveCommunicationWidget";
+import MandatoryChoiceGateModal from "@/components/MandatoryChoiceGateModal";
 
 interface PortalGateProps {
   navbar: React.ReactNode;
@@ -103,6 +104,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     return (
       <>
         <main className="relative z-10 min-h-screen bg-transparent">{children}</main>
+        <MandatoryChoiceGateModal />
         <LiveCommunicationWidget />
       </>
     );
@@ -123,6 +125,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     <>
       {navbar}
       <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
+      <MandatoryChoiceGateModal />
       {footer}
       <LiveCommunicationWidget />
     </>

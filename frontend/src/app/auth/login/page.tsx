@@ -35,6 +35,10 @@ export default function LoginPage() {
       setToken(response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       localStorage.setItem("portal_role", "student");
+      try {
+        localStorage.removeItem("student_application_mode_chosen");
+        sessionStorage.setItem("require_application_choice", "true");
+      } catch {}
       router.push("/student-portal/");
     } else {
       // Check if needs verification

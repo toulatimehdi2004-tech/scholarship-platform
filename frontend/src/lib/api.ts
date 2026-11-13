@@ -51,6 +51,10 @@ export function setToken(token: string) {
 
 export function clearToken() {
   localStorage.removeItem("auth_token");
+  try {
+    localStorage.removeItem("student_application_mode_chosen");
+    sessionStorage.removeItem("require_application_choice");
+  } catch {}
 }
 
 // ── Types ──────────────────────────────────────────────────

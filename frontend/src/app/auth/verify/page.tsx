@@ -105,8 +105,13 @@ function VerifyForm() {
     if (res.data) {
       setToken(res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      setSuccess("Email verified! Redirecting...");
-      setTimeout(() => router.push("/"), 1000);
+      localStorage.setItem("portal_role", "student");
+      try {
+        localStorage.removeItem("student_application_mode_chosen");
+        sessionStorage.setItem("require_application_choice", "true");
+      } catch {}
+      setSuccess("Email verified! Redirecting to student portal...");
+      setTimeout(() => router.push("/student-portal/"), 1000);
     } else {
       setError(res.error || "Verification failed.");
     }
