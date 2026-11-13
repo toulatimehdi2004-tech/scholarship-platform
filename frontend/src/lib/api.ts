@@ -1,3 +1,5 @@
+import { generateAiChatResponse } from "@/lib/aiChatEngine";
+
 const DEFAULT_API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://proofing-harmless-mulled.ngrok-free.dev/api";
 
@@ -794,9 +796,15 @@ The CSCA is China's official standardized entrance assessment for international 
     };
   }
 
+  const aiAnswer = await generateAiChatResponse(message, undefined, language);
   return {
-    error: "Connection timeout. Please retry or ask about CSC scholarships, CSCA exam, or admissions.",
-    status: 500,
+    data: {
+      session_id: sessionId || `session_${Date.now()}`,
+      response: aiAnswer,
+      intent: "general_ai_guidance",
+      metadata: { source: "omni_intelligence_engine" },
+    },
+    status: 200,
   };
 }
 

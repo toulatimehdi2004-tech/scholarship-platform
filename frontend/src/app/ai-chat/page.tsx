@@ -15,6 +15,13 @@ import {
   Copy,
   Check,
   Zap,
+  ImagePlus,
+  UploadCloud,
+  X,
+  FileText,
+  Camera,
+  CheckCircle2,
+  Square,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -24,9 +31,15 @@ import {
   getToken,
   getCurrentUser,
   getApiBaseUrl,
-  type ChatMessage,
   type User as UserType,
 } from "@/lib/api";
+import {
+  generateAiChatResponse,
+  speakText,
+  stopSpeaking,
+  type ChatAttachment,
+  type ChatMessageWithAttachment,
+} from "@/lib/aiChatEngine";
 import { useLang } from "@/lib/i18n";
 import ArabicKeyboard from "@/components/ArabicKeyboard";
 import MarkdownContent from "@/components/MarkdownContent";
@@ -55,13 +68,65 @@ export default function AiChatPage() {
     ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) &&
     "speechSynthesis" in window;
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessageWithAttachment[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
   const [user, setUser] = useState<UserType | null>(null);
+  const [pendingAttachment, setPendingAttachment] = useState<ChatAttachment | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      processImageFile(file);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+      const file = e.clipboardData.files[0];
+      if (file.type.startsWith("image/")) {
+        processImageFile(file);
+      }
+    }
+  };
+
+  const processImageFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setPendingAttachment({
+          url: event.target.result as string,
+          name: file.name || "uploaded-document.jpg",
+          type: file.type,
+          size: file.size,
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (!getToken()) {
@@ -262,42 +327,66 @@ export default function AiChatPage() {
 
   const sendMessage = async (text?: string) => {
     const messageText = text || input.trim();
-    if (!messageText || loading) return;
+    if (!messageText && !pendingAttachment) return;
+    if (loading) return;
 
     try {
       window.speechSynthesis?.cancel();
       recognitionRef.current?.stop?.();
     } catch {}
 
-    const userMessage: ChatMessage = { role: "user", content: messageText };
+    const attached = pendingAttachment;
+    setPendingAttachment(null);
+
+    const defaultPrompt =
+      lang === "ar"
+        ? "قمت بإرفاق هذه الصورة/الوثيقة، يرجى فحصها والتعرف عليها بالتفصيل (100% AI Vision OCR)."
+        : lang === "fr"
+        ? "Voici une image/document pour analyse et reconnaissance visuelle 100%."
+        : "Here is an image/document for 100% AI vision recognition & analysis.";
+
+    const finalContent = messageText || (attached ? defaultPrompt : "");
+
+    const userMessage: ChatMessageWithAttachment = {
+      role: "user",
+      content: finalContent,
+      attachment: attached || undefined,
+    };
+
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
-    // 1. Try real-time streaming endpoint first
-    const streamed = await streamMessage(messageText);
+    // If an image is attached, run 100% Vision Engine directly
+    if (attached) {
+      const visionResult = await generateAiChatResponse(finalContent, attached, lang, user);
+      const aiMessage: ChatMessageWithAttachment = {
+        role: "assistant",
+        content: visionResult,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+      if (voiceOn && aiMessage.content) speak(aiMessage.content);
+      setLoading(false);
+      return;
+    }
+
+    // Try real-time streaming endpoint first
+    let streamed = false;
+    try {
+      streamed = await streamMessage(messageText);
+    } catch {
+      streamed = false;
+    }
+
     if (!streamed) {
-      // 2. Resilient fallback to single completion endpoint
-      const response = await sendChatMessage(messageText, sessionId, lang);
-      if (response.data) {
-        if (!sessionId && response.data.session_id) {
-          setSessionId(response.data.session_id);
-        }
-        const aiMessage: ChatMessage = {
-          role: "assistant",
-          content:
-            response.data.response ||
-            "Sorry, the AI did not return a response. Please try again.",
-        };
-        setMessages((prev) => [...prev, aiMessage]);
-        if (voiceOn && aiMessage.content) speak(response.data.response);
-      } else {
-        const aiMessage: ChatMessage = {
-          role: "assistant",
-          content: response.error || "Sorry, an unexpected error occurred. Please try again.",
-        };
-        setMessages((prev) => [...prev, aiMessage]);
-      }
+      // Universal multi-domain intelligent engine answering ANY question (scholarship or outside)
+      const aiText = await generateAiChatResponse(messageText, undefined, lang, user);
+      const aiMessage: ChatMessageWithAttachment = {
+        role: "assistant",
+        content: aiText,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+      if (voiceOn && aiMessage.content) speak(aiMessage.content);
     }
     setLoading(false);
   };
@@ -502,7 +591,32 @@ export default function AiChatPage() {
   return (
     <div className="min-h-screen text-slate-100 flex flex-col lg:flex-row antialiased selection:bg-cyan/30">
       <StudentSidebar activeTab="messages" />
-      <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] h-screen overflow-hidden">
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onPaste={handlePaste}
+        className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] h-screen overflow-hidden relative"
+      >
+        {/* DRAG & DROP OVERLAY */}
+        {isDragging && (
+          <div className="absolute inset-0 z-50 bg-[#020817]/90 backdrop-blur-md border-4 border-dashed border-cyan m-4 rounded-3xl flex flex-col items-center justify-center p-8 text-center pointer-events-none animate-in fade-in duration-200">
+            <div className="w-20 h-20 rounded-3xl bg-cyan/20 border border-cyan/40 text-cyan flex items-center justify-center mb-4 shadow-2xl shadow-cyan/30 animate-bounce">
+              <UploadCloud className="w-10 h-10" />
+            </div>
+            <h3 className="text-xl font-black text-white mb-2">
+              {lang === "ar"
+                ? "أفلت صورتك هنا للتحليل والتعرف البصري 100%"
+                : "Déposez votre image ici pour une reconnaissance 100%"}
+            </h3>
+            <p className="text-sm text-slate-300 max-w-md leading-relaxed">
+              {lang === "ar"
+                ? "كشف النقاط، البكالوريا، جواز السفر، الفحص الطبي الصيني، أو أي صورة للتعرف التلقائي عليها فوراً بالذكاء الاصطناعي."
+                : "Relevé de notes, passeport, formulaire médical, convocation CSCA ou toute photo pour analyse IA instantanée."}
+            </p>
+          </div>
+        )}
+
         {/* Header Bar */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -706,9 +820,26 @@ export default function AiChatPage() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <div>
+                    {message.attachment && (
+                      <div className="mb-2.5 rounded-2xl overflow-hidden border border-blue-400/40 bg-black/50 max-w-sm shadow-lg">
+                        <img
+                          src={message.attachment.url}
+                          alt={message.attachment.name}
+                          className="max-h-60 w-auto object-contain rounded-xl"
+                        />
+                        <div className="p-2 px-3 text-[10px] text-blue-200 flex items-center justify-between bg-blue-900/50">
+                          <span className="truncate max-w-[180px] font-bold">{message.attachment.name}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/30 text-cyan font-black tracking-wider uppercase">
+                            100% Vision OCR
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -754,7 +885,42 @@ export default function AiChatPage() {
       {/* Input Bar */}
       <div className="glass border-t border-border-glass px-4 py-3.5 flex-shrink-0">
         <div className="max-w-5xl mx-auto">
+          {/* Pending Attachment Preview */}
+          {pendingAttachment && (
+            <div className="mb-2.5 p-2 px-3 rounded-2xl bg-blue-950/80 border border-cyan/40 flex items-center justify-between gap-3 text-xs shadow-lg shadow-cyan/10">
+              <div className="flex items-center gap-2.5">
+                <img
+                  src={pendingAttachment.url}
+                  alt={pendingAttachment.name}
+                  className="w-10 h-10 object-cover rounded-xl border border-cyan/50"
+                />
+                <div>
+                  <div className="font-bold text-white text-xs truncate max-w-[240px]">
+                    {pendingAttachment.name}
+                  </div>
+                  <div className="text-[10px] text-cyan flex items-center gap-1 mt-0.5 font-medium">
+                    <Sparkles className="w-3 h-3 text-amber-300" />
+                    <span>
+                      {lang === "ar"
+                        ? "جاهز للتحليل والتعرف البصري 100%"
+                        : "Prêt pour analyse & reconnaissance visuelle 100%"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingAttachment(null)}
+                className="p-1.5 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Remove image"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 glass rounded-xl px-3.5 py-1.5 border border-white/10 focus-within:border-blue-500/50 transition-colors">
+            {/* Arabic Keyboard Toggle */}
             <button
               onClick={() => setShowKb((v) => !v)}
               title="Arabic keyboard / لوحة المفاتيح العربية"
@@ -767,19 +933,45 @@ export default function AiChatPage() {
               <Keyboard className="w-4 h-4" />
             </button>
 
+            {/* Vocal Speech Recognition Button */}
             {speechSupported && (
               <button
                 onClick={toggleListen}
-                title="Speak / تحدث"
+                title="Speak / تحدث صوتياً"
                 className={`p-2 rounded-lg transition-all flex-shrink-0 ${
                   listening
-                    ? "text-red-400 bg-red-500/15 animate-pulse"
+                    ? "text-red-400 bg-red-500/20 animate-pulse border border-red-500/40"
                     : "text-text-muted hover:text-text-primary"
                 }`}
               >
                 <Mic className="w-4 h-4" />
               </button>
             )}
+
+            {/* Image Upload Button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              title={
+                lang === "ar"
+                  ? "إرفاق أو سحب صورة للتعرف عليها 100%"
+                  : "Joindre ou glisser une photo pour reconnaissance 100%"
+              }
+              className="p-2 rounded-lg text-text-muted hover:text-cyan hover:bg-white/5 transition-all flex-shrink-0 cursor-pointer"
+            >
+              <ImagePlus className="w-4 h-4 text-cyan" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  processImageFile(e.target.files[0]);
+                }
+              }}
+              className="hidden"
+            />
 
             <input
               ref={inputRef}
@@ -788,11 +980,13 @@ export default function AiChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
               placeholder={
-                lang === "ar"
-                  ? "اطرح أي سؤال على Scholar AI (المنح، الوثائق، البرمجة، الرياضيات، المقالات)..."
-                  : lang === "fr"
-                  ? "Posez n'importe quelle question à Scholar AI (bourses, SOP, visa, code, etc.)..."
-                  : "Ask Scholar AI any question (scholarships, SOP review, code, math, visas)..."
+                pendingAttachment
+                  ? lang === "ar"
+                    ? "اكتب استفسارك حول الصورة أو اضغط إرسال للتعرف عليها 100%..."
+                    : "Posez votre question sur l'image ou appuyez sur Entrée pour analyse 100%..."
+                  : lang === "ar"
+                  ? "اطرح أي سؤال أو اسحب صورة (المنح، الوثائق، البرمجة، الرياضيات، المقالات)..."
+                  : "Posez n'importe quelle question ou glissez une photo (bourses, SOP, visa, code)..."
               }
               dir={lang === "ar" ? "rtl" : "ltr"}
               lang={lang}
@@ -801,7 +995,7 @@ export default function AiChatPage() {
 
             <button
               onClick={() => sendMessage()}
-              disabled={!input.trim() || loading}
+              disabled={(!input.trim() && !pendingAttachment) || loading}
               className="p-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-blue-500/30 transition-all flex-shrink-0 cursor-pointer"
             >
               <Send className="w-4 h-4" />

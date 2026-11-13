@@ -26,10 +26,14 @@ import {
   AlertCircle,
   MessageSquare,
   RefreshCw,
+  Mic,
+  ImagePlus,
+  UploadCloud,
 } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { getToken, getCurrentUser, type User as UserType } from "@/lib/api";
 import MarkdownContent from "@/components/MarkdownContent";
+import { analyzeChatImage, generateAiChatResponse, speakText, stopSpeaking } from "@/lib/aiChatEngine";
 
 interface ChatMessage {
   id: string;
@@ -39,6 +43,11 @@ interface ChatMessage {
   status?: "sent" | "delivered" | "read";
   isTicketConfirmation?: boolean;
   ticketId?: string;
+  attachment?: {
+    url: string;
+    name: string;
+    type?: string;
+  };
 }
 
 interface CallbackRequest {
@@ -140,6 +149,100 @@ export default function LiveCommunicationWidget() {
 
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  // Attachment & Vocal States
+  const [pendingAttachment, setPendingAttachment] = useState<{ url: string; name: string; type: string } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [listening, setListening] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      processImageFile(file);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+      const file = e.clipboardData.files[0];
+      if (file.type.startsWith("image/")) {
+        processImageFile(file);
+      }
+    }
+  };
+
+  const processImageFile = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setPendingAttachment({
+          url: event.target.result as string,
+          name: file.name || "uploaded-document.jpg",
+          type: file.type,
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const toggleListen = () => {
+    if (listening) {
+      try {
+        recognitionRef.current?.stop?.();
+      } catch {}
+      setListening(false);
+      return;
+    }
+
+    if (typeof window === "undefined") return;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+
+    try {
+      const rec = new SR();
+      rec.lang = lang === "ar" ? "ar-SA" : lang === "fr" ? "fr-FR" : "en-US";
+      rec.interimResults = true;
+      rec.continuous = false;
+
+      rec.onresult = (e: any) => {
+        let transcript = "";
+        for (const r of e.results) {
+          transcript += r[0].transcript;
+        }
+        if (transcript.trim()) {
+          setInputMessage((prev) => (prev ? prev + " " + transcript : transcript).trim());
+        }
+      };
+
+      rec.onend = () => setListening(false);
+      rec.onerror = () => setListening(false);
+
+      recognitionRef.current = rec;
+      rec.start();
+      setListening(true);
+    } catch {
+      setListening(false);
+    }
+  };
 
   // Load User & Saved History
   useEffect(() => {
@@ -232,15 +335,25 @@ export default function LiveCommunicationWidget() {
 
   const handleSendMessage = (textToSend?: string) => {
     const content = (textToSend || inputMessage).trim();
-    if (!content) return;
+    if (!content && !pendingAttachment) return;
+
+    const attached = pendingAttachment;
+    setPendingAttachment(null);
 
     const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const userMsg: ChatMessage = {
       id: "usr-" + Date.now(),
       sender: "user",
-      text: content,
+      text:
+        content ||
+        (attached
+          ? lang === "ar"
+            ? "قمت بإرفاق هذه الصورة/الوثيقة، يرجى فحصها والتعرف عليها 100%."
+            : "Voici une image/document pour analyse et reconnaissance visuelle 100%."
+          : ""),
       timestamp: timeStr,
       status: "delivered",
+      attachment: attached || undefined,
     };
 
     const updated = [...messages, userMsg];
@@ -249,19 +362,35 @@ export default function LiveCommunicationWidget() {
     setIsTyping(true);
 
     // Realistic human-advisor typing simulation
-    const replyDelay = Math.min(2400, Math.max(1200, content.length * 20));
+    const replyDelay = Math.min(1800, Math.max(900, (content || "").length * 15));
 
-    setTimeout(() => {
-      const advisorResponse = generateAdvisorResponse(content, lang, user?.username);
+    setTimeout(async () => {
+      let replyText = "";
+      let isTicket = false;
+      let ticketId: string | undefined = undefined;
+
+      if (attached) {
+        replyText = await analyzeChatImage(attached, content, lang);
+      } else {
+        const standardAdvisor = generateAdvisorResponse(content, lang, user?.username);
+        // If matched one of the specific direct topics (WhatsApp, CSCA, Full funding, Apostille, Visa)
+        if (!standardAdvisor.isTicket) {
+          replyText = standardAdvisor.text;
+        } else {
+          // If not in the 4 hardcoded topics, answer ANY question (math, coding, halal food, VPN, weather, life in China, etc.)!
+          replyText = await generateAiChatResponse(content, undefined, lang, user);
+        }
+      }
+
       const replyTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       const advisorMsg: ChatMessage = {
         id: "adv-" + Date.now(),
         sender: "advisor",
-        text: advisorResponse.text,
+        text: replyText,
         timestamp: replyTime,
         status: "read",
-        isTicketConfirmation: advisorResponse.isTicket,
-        ticketId: advisorResponse.ticketId,
+        isTicketConfirmation: isTicket,
+        ticketId: ticketId,
       };
 
       setMessages((prev) => [...prev, advisorMsg]);
@@ -672,8 +801,26 @@ export default function LiveCommunicationWidget() {
             {/* TAB CONTENT 1: LIVE CHAT */}
             {activeTab === "chat" && (
               <>
-                {/* Chat Messages Scrollable Box */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3.5 scrollbar-thin scrollbar-thumb-white/10">
+                {/* Chat Messages Scrollable Box with Drag & Drop */}
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onPaste={handlePaste}
+                  className="flex-1 overflow-y-auto p-4 space-y-3.5 scrollbar-thin scrollbar-thumb-white/10 relative"
+                >
+                  {/* Drag & Drop Visual Overlay */}
+                  {isDragging && (
+                    <div className="absolute inset-0 z-40 bg-[#020817]/90 backdrop-blur-md border-2 border-dashed border-cyan m-2 rounded-2xl flex flex-col items-center justify-center p-4 text-center pointer-events-none animate-in fade-in duration-200">
+                      <UploadCloud className="w-8 h-8 text-cyan mb-2 animate-bounce" />
+                      <span className="text-xs font-bold text-white">
+                        {lang === "ar"
+                          ? "أفلت صورتك هنا للتحليل والتعرف البصري 100%"
+                          : "Déposez votre image ici pour analyse 100%"}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Pinned Verification Notice */}
                   <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 flex items-center gap-2 text-[11px] text-slate-300">
                     <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
@@ -709,9 +856,42 @@ export default function LiveCommunicationWidget() {
                           </div>
                         )}
 
+                        {/* Attached Image Preview in Message */}
+                        {msg.attachment && (
+                          <div className="mb-2 rounded-xl overflow-hidden border border-white/20 bg-black/50 max-w-[240px]">
+                            <img
+                              src={msg.attachment.url}
+                              alt={msg.attachment.name}
+                              className="max-h-40 w-auto object-contain rounded-lg"
+                            />
+                            <div className="p-1 px-2 text-[9px] text-blue-200 flex items-center justify-between bg-blue-900/40">
+                              <span className="truncate max-w-[120px] font-bold">{msg.attachment.name}</span>
+                              <span className="px-1 py-0.2 rounded text-[8px] bg-blue-500/30 text-cyan font-black">
+                                100% Vision
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
                         <div className="prose-invert text-xs sm:text-[13px]">
                           <MarkdownContent content={msg.text} />
                         </div>
+
+                        {/* Read Aloud Button on Advisor Message */}
+                        {msg.sender === "advisor" && (
+                          <div className="flex items-center justify-between gap-2 mt-2 pt-1 border-t border-white/5 text-[10px] text-slate-400">
+                            <span className="text-[9px] text-slate-500">{msg.timestamp}</span>
+                            <button
+                              type="button"
+                              onClick={() => speakText(msg.text, lang)}
+                              className="flex items-center gap-1 text-slate-400 hover:text-emerald-300 transition-colors cursor-pointer"
+                              title="Listen / استماع صوتي"
+                            >
+                              <Volume2 className="w-3 h-3 text-emerald-400" />
+                              <span>{lang === "ar" ? "استماع" : "Écouter"}</span>
+                            </button>
+                          </div>
+                        )}
 
                         {msg.isTicketConfirmation && msg.ticketId && (
                           <div className="mt-2.5 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-[11px]">
@@ -773,28 +953,96 @@ export default function LiveCommunicationWidget() {
 
                 {/* Input Bar */}
                 <div className="p-3 bg-slate-900 border-t border-white/10">
+                  {/* Pending Attachment Preview */}
+                  {pendingAttachment && (
+                    <div className="mb-2 p-1.5 px-2.5 rounded-xl bg-blue-950/80 border border-cyan/40 flex items-center justify-between gap-2 text-xs shadow-md">
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={pendingAttachment.url}
+                          alt={pendingAttachment.name}
+                          className="w-8 h-8 object-cover rounded-lg border border-cyan/50"
+                        />
+                        <div className="truncate max-w-[180px]">
+                          <span className="text-[11px] font-bold text-white truncate block">
+                            {pendingAttachment.name}
+                          </span>
+                          <span className="text-[9px] text-cyan flex items-center gap-1">
+                            <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+                            <span>100% Vision OCR</span>
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPendingAttachment(null)}
+                        className="p-1 hover:bg-white/10 rounded-full text-slate-400 hover:text-white cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       handleSendMessage();
                     }}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1.5"
                   >
+                    {/* Vocal Microphone Button */}
+                    <button
+                      type="button"
+                      onClick={toggleListen}
+                      title="Speak / تحدث صوتياً"
+                      className={`p-2 rounded-xl transition-all flex-shrink-0 cursor-pointer ${
+                        listening
+                          ? "bg-red-500/20 text-red-400 animate-pulse border border-red-500/40"
+                          : "bg-slate-800 text-slate-400 hover:text-white border border-white/10"
+                      }`}
+                    >
+                      <Mic className="w-4 h-4" />
+                    </button>
+
+                    {/* Image / Picture Upload Button */}
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      title="Attach photo / إرفاق صورة"
+                      className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-cyan border border-white/10 transition-all flex-shrink-0 cursor-pointer"
+                    >
+                      <ImagePlus className="w-4 h-4 text-cyan" />
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          processImageFile(e.target.files[0]);
+                        }
+                      }}
+                      className="hidden"
+                    />
+
                     <input
                       ref={inputRef}
                       type="text"
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
                       placeholder={
-                        lang === "ar"
-                          ? "اكتب استفسارك هنا للمستشار..."
-                          : "Posez votre question en direct ici..."
+                        pendingAttachment
+                          ? lang === "ar"
+                            ? "اكتب سؤالك أو اضغط إرسال للتعرف عليها 100%..."
+                            : "Posez votre question ou envoyez pour reconnaissance..."
+                          : lang === "ar"
+                          ? "اكتب أي سؤال أو تحدث أو اسحب صورة..."
+                          : "Posez votre question, parlez ou glissez une image..."
                       }
-                      className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 border border-white/10 text-xs sm:text-sm text-white placeholder:text-slate-400 outline-none focus:border-emerald-500 transition-colors"
+                      className="flex-1 px-3 py-2 rounded-xl bg-slate-800 border border-white/10 text-xs sm:text-sm text-white placeholder:text-slate-400 outline-none focus:border-emerald-500 transition-colors"
                     />
                     <button
                       type="submit"
-                      disabled={!inputMessage.trim()}
+                      disabled={!inputMessage.trim() && !pendingAttachment}
                       className="p-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold disabled:opacity-40 transition-all cursor-pointer shadow-md shadow-emerald-500/20"
                     >
                       <Send className="w-4 h-4 rtl-flip" />
