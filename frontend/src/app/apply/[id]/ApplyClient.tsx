@@ -276,6 +276,32 @@ export default function ApplyClient() {
             </div>
           </div>
 
+          {/* Assisted Concierge Option Callout */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-rose-500/15 border border-amber-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-5 h-5 text-amber-400 flex-shrink-0" />
+              <div>
+                <span className="text-xs font-black text-amber-300 block">
+                  {lang === "ar"
+                    ? "هل تفضل أن يتكفل مستشارونا بملفك وضمان قبولك؟"
+                    : "Vous préférez que notre cabinet postule pour vous ?"}
+                </span>
+                <p className="text-[11px] text-slate-300">
+                  {lang === "ar"
+                    ? `فريقنا يتكفل بالترجمة المحلفة ومراسلة مكتب القبول بـ ${university.name} وضمان القبول 100%.`
+                    : `Notre équipe se charge de la traduction, du dossier et postule pour vous à ${university.name}.`}
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/assisted-service"
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs whitespace-nowrap shadow-md transition-all self-end sm:self-center"
+            >
+              {lang === "ar" ? "دعنا نقدّم لك ➔" : "Déléguer ce dossier ➔"}
+            </Link>
+          </div>
+
           {/* ─────────────────────────────────────────────────────────────
               SECTION 1: THE INTERACTIVE LANGUAGE HONESTY SELECTOR
           ───────────────────────────────────────────────────────────── */}

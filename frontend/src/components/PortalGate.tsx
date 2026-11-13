@@ -78,6 +78,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
   if (
     pathname === "/student-portal" ||
     pathname.startsWith("/student-portal") ||
+    pathname.startsWith("/assisted-service") ||
     pathname.startsWith("/scholarships") ||
     pathname.startsWith("/scholarship") ||
     pathname.startsWith("/tracker") ||

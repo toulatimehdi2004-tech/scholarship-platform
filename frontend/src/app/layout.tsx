@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,11 +7,7 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 import RouteTracker from "@/components/RouteTracker";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { LanguageProvider } from "@/lib/i18n";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+import { ApplicationModeProvider } from "@/lib/ApplicationModeContext";
 
 export const metadata: Metadata = {
   title: "ScholarChina — Chinese University Scholarships & 3D Campus Tours",
@@ -24,7 +19,7 @@ export default function RootLayout({
   children,
 }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`dark ${inter.variable} h-full`} suppressHydrationWarning>
+    <html lang="en" className="dark h-full" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -56,11 +51,13 @@ export default function RootLayout({
       <body className="min-h-full bg-[#030712] text-foreground antialiased selection:bg-cyan/30">
         <ThemeProvider>
           <LanguageProvider>
-            <RouteTracker />
-            <AnimatedBackground />
-            <PortalGate navbar={<Navbar />} footer={<Footer />}>
-              {children}
-            </PortalGate>
+            <ApplicationModeProvider>
+              <RouteTracker />
+              <AnimatedBackground />
+              <PortalGate navbar={<Navbar />} footer={<Footer />}>
+                {children}
+              </PortalGate>
+            </ApplicationModeProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

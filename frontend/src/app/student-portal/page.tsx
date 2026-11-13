@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import StudentSidebar from "@/components/StudentSidebar";
+import ApplicationChoiceBar from "@/components/ApplicationChoiceBar";
 import { getToken, getCurrentUser, clearToken, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
@@ -250,6 +251,9 @@ export default function StudentPortalPage() {
             {lang === "ar" ? "محاكي CSCA ➔" : "Simulateur CSCA ➔"}
           </Link>
         </div>
+
+        {/* Interactive Choice Bar: Self-Apply vs We Apply For You */}
+        <ApplicationChoiceBar variant="banner" />
 
         {/* Hero Banner with Chinese Pagoda Night Background (Matching Image 3) */}
         <section className="rounded-3xl overflow-hidden relative p-6 sm:p-10 border border-white/5 shadow-2xl min-h-[220px] flex flex-col justify-center">

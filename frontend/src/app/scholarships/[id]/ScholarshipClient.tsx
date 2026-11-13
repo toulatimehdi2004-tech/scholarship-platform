@@ -714,11 +714,19 @@ export default function ScholarshipClient() {
                 )}
 
                 <Link
+                  href="/assisted-service"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{lang === "ar" ? "دعنا نقدّم لك (خدمة مدارة)" : "Déléguer cette candidature"}</span>
+                </Link>
+
+                <Link
                   href={`/apply/${scholarship.university?.id || 1}?scholarshipId=${scholarship.id}`}
                   className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan text-white text-xs font-extrabold shadow-lg shadow-blue-600/30 hover:opacity-95 transition-all flex items-center gap-1.5"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Postuler & Diagnostic Réel</span>
+                  <GraduationCap className="w-4 h-4 text-cyan" />
+                  <span>{lang === "ar" ? "التقديم الذاتي بنفسي" : "Postuler par moi-même"}</span>
                   <ChevronRight className="w-4 h-4" />
                 </Link>
 
