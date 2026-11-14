@@ -34,7 +34,6 @@ import {
   Zap,
 } from "lucide-react";
 import StudentSidebar from "@/components/StudentSidebar";
-import ApplicationChoiceBar from "@/components/ApplicationChoiceBar";
 import { useApplicationMode } from "@/lib/ApplicationModeContext";
 import { useLang } from "@/lib/i18n";
 import { getToken, getCurrentUser, type User as ApiUser } from "@/lib/api";
@@ -240,9 +239,6 @@ export default function AssistedServicePage() {
           2. MAIN CONTENT AREA (Dedicated Assisted Service Flow)
       ───────────────────────────────────────────────────────────── */}
       <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
-        {/* Choice Bar at Top: Clearly Showing Mode Selection */}
-        <ApplicationChoiceBar variant="banner" />
-
         {/* Hero Header for Assisted Concierge */}
         <div className="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#1a1207] via-[#0f172a] to-[#070d1d] border border-amber-500/40 shadow-2xl overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />

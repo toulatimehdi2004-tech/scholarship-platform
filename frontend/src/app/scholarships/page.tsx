@@ -35,7 +35,6 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import StudentSidebar from "@/components/StudentSidebar";
-import ApplicationChoiceBar from "@/components/ApplicationChoiceBar";
 import ScholarshipEmblem, {
   getScholarshipTheme,
   type ScholarshipThemeInfo,
@@ -893,11 +892,6 @@ export default function ScholarshipsPage() {
             5. MAIN BODY CONTENT
         ───────────────────────────────────────────────────────────── */}
         <main className="flex-1 px-4 sm:px-8 py-6">
-          {/* Top Choice Bar: Self-Apply vs We Apply For You */}
-          <div className="mb-6">
-            <ApplicationChoiceBar variant="segmented" />
-          </div>
-
           {selectedUni === null ? (
             /* ─────────────────────────────────────────────────────────
                STEP 1: UNIVERSITIES DIRECTORY (Matching Screenshot 1)

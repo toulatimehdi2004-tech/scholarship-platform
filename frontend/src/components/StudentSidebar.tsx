@@ -69,7 +69,7 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
   const pathname = usePathname();
   const router = useRouter();
   const { lang } = useLang();
-  const { mode, setMode } = useApplicationMode();
+  const { mode, setMode, openChoiceModal } = useApplicationMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleOpenLiveChat = () => {
@@ -212,6 +212,26 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
               SCHOLAR<span className="text-blue-400">CHINA</span>
             </span>
           </Link>
+
+          {/* Orientation Quiz Button */}
+          <div className="px-1 mb-3">
+            <button
+              type="button"
+              onClick={openChoiceModal}
+              className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-blue-600/20 via-indigo-600/20 to-blue-500/20 hover:from-blue-600/30 hover:to-cyan/30 border border-blue-500/30 flex items-center justify-between text-xs font-bold text-cyan hover:text-white transition-all cursor-pointer group shadow-sm"
+              title={lang === "ar" ? "استبيان التوجيه والمنح الدراسية" : "Test d'Orientation & Bourses"}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform flex-shrink-0" />
+                <span className="truncate">
+                  {lang === "ar" ? "استبيان التوجيه الذكي" : lang === "fr" ? "Quiz d'Orientation" : "Orientation Quiz"}
+                </span>
+              </div>
+              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-cyan/20 text-cyan flex-shrink-0">
+                🎯
+              </span>
+            </button>
+          </div>
 
           {/* APPLICATION MODE TOGGLE PILL IN SIDEBAR */}
           <div className="px-1 mb-4">
@@ -408,6 +428,22 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
                 <span>{lang === "ar" ? "نحن نقدّم لك" : "On Postule Pour Vous"}</span>
               </button>
             </div>
+
+            {/* Mobile Orientation Quiz Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openChoiceModal();
+              }}
+              className="w-full py-2.5 px-3 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-between text-xs font-bold text-cyan"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>{lang === "ar" ? "استبيان التوجيه والمنح 🎯" : "Diagnostic & Orientation 🎯"}</span>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 rtl-flip" />
+            </button>
 
             {[...currentNavLinks, ...secondaryLinks].map((item) => {
               const isActive = activeTab === item.id;

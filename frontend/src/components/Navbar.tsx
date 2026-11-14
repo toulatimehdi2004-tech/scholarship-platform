@@ -56,7 +56,7 @@ export default function Navbar() {
   const [portalRole, setPortalRole] = useState<"student" | "university" | "provider">("student");
   const { theme, toggle } = useTheme();
   const { t, lang } = useLang();
-  const { mode, setMode } = useApplicationMode();
+  const { mode, setMode, openChoiceModal } = useApplicationMode();
   const [user, setUser] = useState<User | null>(null);
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
   const [showAuthGate, setShowAuthGate] = useState(false);
@@ -183,34 +183,18 @@ export default function Navbar() {
             </div>
 
             <div className="hidden md:flex items-center gap-2.5">
-              {/* Application Mode Choice Bar Capsule */}
-              <div className="flex items-center p-0.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold">
-                <button
-                  type="button"
-                  onClick={() => setMode("self")}
-                  className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
-                    mode === "self"
-                      ? "bg-blue-600 text-white shadow-sm font-black"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                  title={lang === "ar" ? "التقديم الذاتي - أنت تقدم بنفسك" : "Candidature Autonome"}
-                >
-                  {lang === "ar" ? "تقديم ذاتي" : "Autonome"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode("assisted")}
-                  className={`px-3 py-1 rounded-full transition-all cursor-pointer flex items-center gap-1 ${
-                    mode === "assisted"
-                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-sm"
-                      : "text-amber-400 hover:text-amber-300"
-                  }`}
-                  title={lang === "ar" ? "نحن نقدّم لك ونضمن قبولك" : "On postule pour vous"}
-                >
-                  <Sparkles className="w-3 h-3 text-amber-300" />
-                  <span>{lang === "ar" ? "نحن نقدّم لك" : "Assisté"}</span>
-                </button>
-              </div>
+              {/* Orientation Questionnaire Trigger */}
+              <button
+                type="button"
+                onClick={openChoiceModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-cyan hover:text-white text-xs font-bold transition-all cursor-pointer shadow-sm"
+                title={lang === "ar" ? "استبيان التوجيه والمنح الدراسية" : "Questionnaire d'Orientation"}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>
+                  {lang === "ar" ? "استبيان التوجيه 🎯" : lang === "fr" ? "Orientation 🎯" : "Orientation 🎯"}
+                </span>
+              </button>
 
               {/* Active Role Indicator Badge (Fixed - Strict Role Isolation) */}
               <div

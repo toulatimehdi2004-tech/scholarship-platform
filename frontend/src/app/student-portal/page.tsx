@@ -35,13 +35,14 @@ import {
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import StudentSidebar from "@/components/StudentSidebar";
-import ApplicationChoiceBar from "@/components/ApplicationChoiceBar";
+import { useApplicationMode } from "@/lib/ApplicationModeContext";
 import { getToken, getCurrentUser, clearToken, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
 export default function StudentPortalPage() {
   const router = useRouter();
   const { lang, t } = useLang();
+  const { openChoiceModal } = useApplicationMode();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -252,8 +253,49 @@ export default function StudentPortalPage() {
           </Link>
         </div>
 
-        {/* Interactive Choice Bar: Self-Apply vs We Apply For You */}
-        <ApplicationChoiceBar variant="banner" />
+        {/* Orientation & Smart Diagnostic Card */}
+        <div className="p-4 rounded-3xl bg-gradient-to-r from-blue-950/60 via-slate-900/80 to-[#0c1427] border border-blue-500/25 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
+              <Sparkles className="w-5 h-5 text-amber-300" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white">
+                  {lang === "ar"
+                    ? "استبيان التوجيه والمنح الدراسية الذكي"
+                    : lang === "fr"
+                    ? "Diagnostic & Orientation Personnalisée"
+                    : "Smart Scholarship Orientation Diagnostic"}
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-blue-500/20 text-cyan border border-blue-500/30">
+                  {lang === "ar" ? "توجيه مجاني" : "Orientation"}
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-0.5">
+                {lang === "ar"
+                  ? "حدد مستواك الدراسي ومعدلك بلغة مبسطة لاكتشاف المنحة الأنسب لملفك"
+                  : lang === "fr"
+                  ? "Identifiez la bourse idéale selon votre filière et vos notes en quelques clics"
+                  : "Discover the best Chinese scholarship match for your grades and field"}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={openChoiceModal}
+            className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan hover:brightness-110 text-white text-xs font-black flex items-center gap-1.5 shadow-md shadow-blue-600/25 transition-all cursor-pointer whitespace-nowrap"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>
+              {lang === "ar"
+                ? "فتح استبيان التوجيه ➔"
+                : lang === "fr"
+                ? "Lancer le questionnaire ➔"
+                : "Open Orientation Quiz ➔"}
+            </span>
+          </button>
+        </div>
 
         {/* Hero Banner with Chinese Pagoda Night Background (Matching Image 3) */}
         <section className="rounded-3xl overflow-hidden relative p-6 sm:p-10 border border-white/5 shadow-2xl min-h-[220px] flex flex-col justify-center">
