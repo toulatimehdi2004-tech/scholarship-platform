@@ -263,10 +263,9 @@ export default function PortalChooser({
                   </div>
                 </div>
               ) : (
-                <Link
-                  href={r.href}
+                <div
                   onClick={() => handleRoleClick(r.id)}
-                  className={`relative h-full rounded-3xl bg-slate-900/65 backdrop-blur-xl border ${r.borderClass} ${r.shadowHover} p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 group cursor-pointer overflow-hidden block text-inherit no-underline`}
+                  className={`relative h-full rounded-3xl bg-slate-900/65 backdrop-blur-xl border ${r.borderClass} ${r.shadowHover} p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 group cursor-pointer overflow-hidden block text-inherit`}
                 >
                   {/* Subtle top inner gradient */}
                   <div
@@ -295,7 +294,7 @@ export default function PortalChooser({
                   {/* Bottom Continue Row */}
                   <div className="relative z-10 flex items-center justify-between pt-2 border-t border-white/5">
                     <span className={`text-xs sm:text-sm font-bold ${r.btnTextColor}`}>
-                      {lang === "ar" ? "متابعة" : "Continue"}
+                      {lang === "ar" ? "متابعة كطالب" : "Continuer"}
                     </span>
                     <div
                       className={`w-8 h-8 rounded-full ${r.btnArrowBg} flex items-center justify-center transition-all duration-300`}
@@ -303,7 +302,7 @@ export default function PortalChooser({
                       <ArrowRight className="w-4 h-4 rtl-flip" />
                     </div>
                   </div>
-                </Link>
+                </div>
               )}
             </motion.div>
           ))}
@@ -346,14 +345,13 @@ export default function PortalChooser({
 
             const isSelected = selectedMobileRole === r.id;
             return (
-              <Link
+              <div
                 key={r.id}
-                href={r.href}
                 onClick={() => {
                   setSelectedMobileRole(r.id);
                   handleRoleClick(r.id);
                 }}
-                className={`p-4 rounded-2xl bg-slate-900/75 backdrop-blur-xl border transition-all duration-300 flex items-center justify-between gap-3 cursor-pointer block text-inherit no-underline ${
+                className={`p-4 rounded-2xl bg-slate-900/75 backdrop-blur-xl border transition-all duration-300 flex items-center justify-between gap-3 cursor-pointer block text-inherit ${
                   isSelected ? `${r.borderClass} shadow-lg` : "border-white/10"
                 }`}
               >
@@ -379,7 +377,7 @@ export default function PortalChooser({
                 >
                   {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

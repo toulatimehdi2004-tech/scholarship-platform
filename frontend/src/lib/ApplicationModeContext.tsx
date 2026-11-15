@@ -31,7 +31,7 @@ const ApplicationModeContext = createContext<ApplicationModeContextType>({
 
 const STORAGE_KEY = "student_application_mode";
 const CHOSEN_KEY = "student_application_mode_chosen";
-const ORIENTATION_KEY = "student_orientation_completed";
+const ORIENTATION_KEY = "student_orientation_done_v3";
 
 export function ApplicationModeProvider({
   children,

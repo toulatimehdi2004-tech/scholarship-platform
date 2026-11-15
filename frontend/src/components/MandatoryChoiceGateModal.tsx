@@ -102,7 +102,7 @@ export default function MandatoryChoiceGateModal() {
   const isImposed =
     !hasChosenMode ||
     (typeof window !== "undefined" &&
-      localStorage.getItem("student_orientation_completed") !== "true");
+      localStorage.getItem("student_orientation_done_v3") !== "true");
 
   const handleSelectLang = (selectedLang: Lang) => {
     setLang(selectedLang);
@@ -119,6 +119,7 @@ export default function MandatoryChoiceGateModal() {
 
     try {
       localStorage.setItem("student_orientation_answers", JSON.stringify({ ...answers, mode: finalMode }));
+      localStorage.setItem("student_orientation_done_v3", "true");
       localStorage.setItem("student_orientation_completed", "true");
       localStorage.setItem("portal_role", "student");
     } catch {}

@@ -25,16 +25,8 @@ export default function RootPage() {
       localStorage.setItem("portal_role", "student");
     } catch {}
 
-    const isOrientationDone =
-      typeof window !== "undefined" &&
-      localStorage.getItem("student_orientation_completed") === "true";
-
-    if (!isOrientationDone) {
-      // Impose the questionnaire immediately when they first choose student!
-      openChoiceModal();
-    } else {
-      router.push("/universities/");
-    }
+    // When they choose they are a student, immediately show/impose the questionnaire!
+    openChoiceModal();
   }
 
   return (
