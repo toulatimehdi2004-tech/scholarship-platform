@@ -13,7 +13,7 @@ interface ApplicationModeContextType {
   showChoiceModal: boolean;
   openChoiceModal: () => void;
   closeChoiceModal: () => void;
-  chooseMode: (chosenMode: ApplicationMode) => void;
+  chooseMode: (chosenMode: ApplicationMode, customPath?: string) => void;
   resetChoiceImposition: () => void;
 }
 
@@ -31,6 +31,7 @@ const ApplicationModeContext = createContext<ApplicationModeContextType>({
 
 const STORAGE_KEY = "student_application_mode";
 const CHOSEN_KEY = "student_application_mode_chosen";
+const ORIENTATION_KEY = "student_orientation_completed";
 
 export function ApplicationModeProvider({
   children,
@@ -47,8 +48,9 @@ export function ApplicationModeProvider({
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem(STORAGE_KEY) as ApplicationMode | null;
-        const chosen = localStorage.getItem(CHOSEN_KEY) === "true";
+        const orientationDone = localStorage.getItem(ORIENTATION_KEY) === "true";
         const requireChoice = sessionStorage.getItem("require_application_choice") === "true";
+        const role = localStorage.getItem("portal_role");
 
         if (stored === "assisted" || stored === "self") {
           setModeState(stored);
@@ -57,9 +59,9 @@ export function ApplicationModeProvider({
           localStorage.setItem(STORAGE_KEY, "assisted");
         }
 
-        setHasChosenMode(chosen);
+        setHasChosenMode(orientationDone);
 
-        // If not chosen yet or forced via session, open the choice modal on student pages
+        // If orientation is not done yet, or explicitly requested, impose on student paths
         const isStudentPath =
           pathname === "/student-portal" ||
           pathname?.startsWith("/student-portal") ||
@@ -68,8 +70,8 @@ export function ApplicationModeProvider({
           pathname?.startsWith("/tracker") ||
           pathname?.startsWith("/universities");
 
-        if (!chosen || requireChoice) {
-          if (isStudentPath) {
+        if (!orientationDone || requireChoice) {
+          if (isStudentPath || (pathname === "/" && role === "student")) {
             setShowChoiceModal(true);
           }
         }
@@ -130,7 +132,7 @@ export function ApplicationModeProvider({
     }
   };
 
-  const chooseMode = (chosenMode: ApplicationMode) => {
+  const chooseMode = (chosenMode: ApplicationMode, customPath?: string) => {
     setModeState(chosenMode);
     setHasChosenMode(true);
     setShowChoiceModal(false);
@@ -138,18 +140,19 @@ export function ApplicationModeProvider({
     try {
       localStorage.setItem(STORAGE_KEY, chosenMode);
       localStorage.setItem(CHOSEN_KEY, "true");
+      localStorage.setItem("student_orientation_completed", "true");
       sessionStorage.removeItem("require_application_choice");
       window.dispatchEvent(
         new CustomEvent("application_mode_changed", { detail: chosenMode })
       );
     } catch {}
 
-    if (chosenMode === "assisted") {
+    if (customPath) {
+      router.push(customPath);
+    } else if (chosenMode === "assisted") {
       router.push("/assisted-service");
     } else {
-      if (pathname?.startsWith("/assisted-service")) {
-        router.push("/student-portal");
-      }
+      router.push("/universities");
     }
   };
 

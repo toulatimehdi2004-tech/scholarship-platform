@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import StudentSidebar from "@/components/StudentSidebar";
 import { fetchApi, getCurrentUser, getToken, type University, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
+import { useApplicationMode } from "@/lib/ApplicationModeContext";
 import UniversityCard from "@/components/UniversityCard";
 import AuthGateModal from "@/components/AuthGateModal";
 import LifetimePassModal from "@/components/LifetimePassModal";
@@ -43,6 +44,7 @@ const C9_KEYWORDS = [
 export default function UniversitiesPage() {
   const router = useRouter();
   const { t, lang } = useLang();
+  const { openChoiceModal } = useApplicationMode();
   const [all, setAll] = useState<University[]>(REAL_UNIVERSITIES as unknown as University[]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,6 +55,41 @@ export default function UniversitiesPage() {
   const [user, setUser] = useState<User | null>(null);
   const [showAuthGate, setShowAuthGate] = useState(false);
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const pDegree = params.get("degree");
+        const pMajor = params.get("major");
+
+        if (pDegree && pDegree !== "all") {
+          setSelectedDegree(pDegree);
+        }
+        if (pMajor && pMajor !== "all") {
+          setSelectedMajor(pMajor);
+        }
+
+        if (!pDegree && !pMajor) {
+          const savedAnswers = localStorage.getItem("student_orientation_answers");
+          if (savedAnswers) {
+            const parsed = JSON.parse(savedAnswers);
+            if (parsed.level) setSelectedDegree(parsed.level);
+            if (parsed.field) {
+              const map: Record<string, string> = {
+                tech: "cs_ai",
+                business: "business",
+                medicine: "medicine",
+                engineering: "engineering",
+                humanities: "law_ir",
+              };
+              if (map[parsed.field]) setSelectedMajor(map[parsed.field]);
+            }
+          }
+        }
+      } catch {}
+    }
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -517,6 +554,52 @@ export default function UniversitiesPage() {
               </div>
             </div>
           </motion.div>
+
+          {/* Targeted Orientation Match Banner */}
+          {(selectedMajor !== "all" || selectedDegree !== "all") && (
+            <div className="mb-6 p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-[#0b1426] border border-cyan/40 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/25">
+                  <Sparkles className="w-6 h-6 text-amber-300" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-cyan">
+                      {lang === "ar" ? "🎯 جامعات مطابقة لاختياراتك في الاستبيان" : "🎯 Recommandation Personnalisée de l'Orientation"}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-cyan border border-blue-500/30">
+                      {activeDegreeObj.name} • {activeMajorObj.name}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-200 font-semibold mt-1">
+                    {lang === "ar"
+                      ? `تم تخصيص هذه القائمة تلقائياً: وجدنا ${filtered.length} جامعة صينية معتمدة تدرس هذا التخصص مع منح دراسية.`
+                      : `Cette liste est filtrée sur mesure : ${filtered.length} universités chinoises accréditées proposent votre filière avec bourses.`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 self-end sm:self-auto flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedMajor("all");
+                    setSelectedDegree("all");
+                  }}
+                  className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
+                >
+                  {lang === "ar" ? "عرض جميع الجامعات" : "Tout voir"}
+                </button>
+                <button
+                  type="button"
+                  onClick={openChoiceModal}
+                  className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{lang === "ar" ? "تعديل الاستبيان 🎯" : "Modifier le test 🎯"}</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* ========================================================================= */}
           {/* RESULTS SUMMARY BAR ("then list for them the universities available")       */}

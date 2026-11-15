@@ -58,6 +58,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
     return (
       <>
         <main>{children}</main>
+        <MandatoryChoiceGateModal />
         <LiveCommunicationWidget />
       </>
     );

@@ -168,6 +168,20 @@ export default function AssistedServicePage() {
           };
           setMyDossiers([demoDossier]);
         }
+
+        const savedOrientation = localStorage.getItem("student_orientation_answers");
+        if (savedOrientation) {
+          const parsed = JSON.parse(savedOrientation);
+          if (parsed.level === "bachelor") setDegree("Bachelor (البكالوريوس)");
+          else if (parsed.level === "master") setDegree("Master (الماستر)");
+          else if (parsed.level === "phd") setDegree("Doctorat / PhD (الدكتوراه)");
+          else if (parsed.level === "language") setDegree("Language Year (سنة لغة)");
+
+          if (parsed.field === "tech") setField("Software Engineering & Computer Science");
+          else if (parsed.field === "business") setField("International Business & Trade");
+          else if (parsed.field === "medicine") setField("Clinical Medicine (MBBS) & Pharmacy");
+          else if (parsed.field === "engineering") setField("Civil & Electrical Engineering");
+        }
       } catch {}
     }
   }, []);
