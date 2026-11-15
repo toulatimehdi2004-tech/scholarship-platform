@@ -151,6 +151,7 @@ export default function LiveCommunicationWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
+  const lastAttachmentRef = useRef<{ url: string; name: string; type: string } | null>(null);
 
   // Attachment & Vocal States
   const [pendingAttachment, setPendingAttachment] = useState<{ url: string; name: string; type: string } | null>(null);
@@ -370,15 +371,24 @@ export default function LiveCommunicationWidget() {
       let ticketId: string | undefined = undefined;
 
       if (attached) {
+        lastAttachmentRef.current = attached;
         replyText = await analyzeChatImage(attached, content, lang);
       } else {
-        const standardAdvisor = generateAdvisorResponse(content, lang, user?.username);
-        // If matched one of the specific direct topics (WhatsApp, CSCA, Full funding, Apostille, Visa)
-        if (!standardAdvisor.isTicket) {
-          replyText = standardAdvisor.text;
+        const isAskingAboutPreviousImage =
+          Boolean(lastAttachmentRef.current) &&
+          /\b(mean|what|explain|translate|poster|image|photo|picture|look|c['e]st quoi|explique|traduire|معنى|شنو|شرح|ترجم|هادي|صورة)\b/i.test(content);
+
+        if (isAskingAboutPreviousImage && lastAttachmentRef.current) {
+          replyText = await analyzeChatImage(lastAttachmentRef.current, content, lang);
         } else {
-          // If not in the 4 hardcoded topics, answer ANY question (math, coding, halal food, VPN, weather, life in China, etc.)!
-          replyText = await generateAiChatResponse(content, undefined, lang, user);
+          const standardAdvisor = generateAdvisorResponse(content, lang, user?.username);
+          // If matched one of the specific direct topics (WhatsApp, CSCA, Full funding, Apostille, Visa)
+          if (!standardAdvisor.isTicket) {
+            replyText = standardAdvisor.text;
+          } else {
+            // If not in the 4 hardcoded topics, answer ANY question (math, coding, halal food, VPN, weather, life in China, etc.)!
+            replyText = await generateAiChatResponse(content, undefined, lang, user);
+          }
         }
       }
 

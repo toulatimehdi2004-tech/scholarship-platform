@@ -182,50 +182,20 @@ export async function analyzeChatImage(
   const props = await inspectImagePixels(attachment.url);
   const cleanFileName = decodeURIComponent(attachment.name || "").replace(/[_-]/g, " ");
 
-  // 2. Try live DeepSeek LLM via BazaarLink first if network is available
-  try {
-    const visionContextPrompt = `The user uploaded an image file named "${cleanFileName}" (Image format: ${props.width}x${props.height}px, ${props.isPortrait ? "Portrait" : props.isLandscape ? "Landscape" : "Square"}, dominant tone: ${props.dominantTone}).
-User question: "${userQuestion || "Analyze this image and explain what it is in detail."}"
+  // High-Precision Semantic & Heuristic Analyzer
 
-Please provide a clear, detailed, and directly helpful answer to the user's question in ${isAr ? "Arabic" : isFr ? "French" : "English"}.
-If this is an awareness poster (e.g., about digital consumption, online scams, or spending), translate any text shown or indicated by the title, explain what the visual represents, the warning message, and the practical takeaways.
-If it is a document, transcript, passport, or medical form, give a rigorous compliance and evaluation report.
-Format your answer with clean Markdown headers and bullet points.`;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4500);
-
-    const apiRes = await fetch("https://api.bazaarlink.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer sk-bl-aWe8DGRx4OzzjVqbgUhPNvzLrmzU7tbb8haVanOUBw_ReFlK",
-      },
-      body: JSON.stringify({
-        model: "deepseek-v4-flash-0731free",
-        messages: [{ role: "user", content: visionContextPrompt }],
-        max_tokens: 700,
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (apiRes.ok) {
-      const data = await apiRes.json();
-      if (data?.choices?.[0]?.message?.content) {
-        return data.choices[0].message.content;
-      }
-    }
-  } catch (err) {}
-
-  // 3. Fallback High-Precision Semantic & Heuristic Analyzer
-
-  // A. AWARENESS POSTER / PUBLIC SENSITIZATION / DIGITAL CONSUMPTION / PHISHING
-  if (
+  // A. AWARENESS POSTER / PUBLIC SENSITIZATION / DIGITAL CONSUMPTION / PHISHING / BURNING MONEY
+  const isAwarenessPoster =
     combo.includes("ملصق") ||
     combo.includes("تحسيس") ||
     combo.includes("استهلاك") ||
     combo.includes("رقمي") ||
+    combo.includes("تنقر") ||
+    combo.includes("مسؤوليتك") ||
+    combo.includes("نار") ||
+    combo.includes("حريق") ||
+    combo.includes("فلوس") ||
+    combo.includes("نقود") ||
     combo.includes("sensibilis") ||
     combo.includes("affiche") ||
     combo.includes("consommat") ||
@@ -233,8 +203,21 @@ Format your answer with clean Markdown headers and bullet points.`;
     combo.includes("awareness") ||
     combo.includes("digital") ||
     combo.includes("cyber") ||
-    combo.includes("phishing")
-  ) {
+    combo.includes("phishing") ||
+    combo.includes("burn") ||
+    combo.includes("fire") ||
+    combo.includes("phone") ||
+    combo.includes("flame") ||
+    combo.includes("money") ||
+    combo.includes("cash") ||
+    combo.includes("billet") ||
+    combo.includes("argent") ||
+    combo.includes("flamme") ||
+    combo.includes("feu") ||
+    combo.includes("téléphone") ||
+    (props.isPortrait && (props.dominantTone === "dark" || props.dominantTone === "colorful") && (qLower.includes("mean") || qLower.includes("explain") || qLower.includes("what") || qLower.includes("c'est quoi") || qLower.includes("معنى") || qLower.includes("شنو")));
+
+  if (isAwarenessPoster) {
     if (isEn) {
       return `### 📸 AI Vision & Document Analysis (100% Recognition):
 **Detected Image:** Public Awareness & Consumer Protection Poster (*ملصق تحسيسي - استهلاكك الرقمي*).
