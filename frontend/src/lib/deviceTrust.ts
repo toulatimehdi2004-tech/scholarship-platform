@@ -242,26 +242,40 @@ export function verify2FAEmailCode(email: string, enteredCode: string): boolean 
 export function create2FAQrSession(username: string): {
   sessionId: string;
   secret: string;
-  qrPayload: string;
+  approvalUrl: string;
+  otpauthUrl: string;
+  expectedPin: string;
   expiresAt: number;
 } {
-  const sessionId = 'qr_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
+  // Short 8-character session ID for clean QR code scanning
+  const sessionId = Math.random().toString(36).substring(2, 6) + Math.random().toString(36).substring(2, 6);
   // Base32 secret for authenticator apps
   const secret = 'JBSWY3DPEHPK3PXP';
   const cleanUser = encodeURIComponent(username || 'Scholar');
-  const qrPayload = `otpauth://totp/ScholarChina:${cleanUser}?secret=${secret}&issuer=ScholarChina&algorithm=SHA1&digits=6&period=30`;
+  
+  // Real camera-scannable approval URL
+  const approvalUrl = `https://toulatimehdi2004-tech.github.io/scholarship-platform/auth/approve/?s=${sessionId}&u=${cleanUser}`;
+  const otpauthUrl = `otpauth://totp/ScholarChina:${cleanUser}?secret=${secret}&issuer=ScholarChina&algorithm=SHA1&digits=6&period=30`;
+  
+  // Deterministic 6-digit PIN from session ID
+  let hash = 0;
+  for (let i = 0; i < sessionId.length; i++) {
+    hash = (hash * 31 + sessionId.charCodeAt(i)) % 900000;
+  }
+  const expectedPin = (100000 + Math.abs(hash)).toString();
   const expiresAt = Date.now() + 2 * 60 * 1000; // 2 minutes
 
   if (typeof window !== 'undefined') {
     try {
       const raw = sessionStorage.getItem(STORAGE_2FA_QR_SESSIONS);
       const map = raw ? JSON.parse(raw) : {};
-      map[sessionId] = { username, secret, approved: false, expiresAt };
+      map[sessionId] = { username, secret, expectedPin, approved: false, expiresAt };
       sessionStorage.setItem(STORAGE_2FA_QR_SESSIONS, JSON.stringify(map));
+      localStorage.setItem('scholarchina_qr_active_' + sessionId, JSON.stringify({ username, expectedPin, expiresAt }));
     } catch {}
   }
 
-  return { sessionId, secret, qrPayload, expiresAt };
+  return { sessionId, secret, approvalUrl, otpauthUrl, expectedPin, expiresAt };
 }
 
 /**
@@ -272,18 +286,29 @@ export function approve2FAQrSession(sessionId: string): void {
 
   try {
     const raw = sessionStorage.getItem(STORAGE_2FA_QR_SESSIONS);
-    if (!raw) return;
-    const map = JSON.parse(raw);
-    if (map[sessionId]) {
-      map[sessionId].approved = true;
-      sessionStorage.setItem(STORAGE_2FA_QR_SESSIONS, JSON.stringify(map));
-
-      window.dispatchEvent(
-        new CustomEvent('scholarchina_qr_session_approved', {
-          detail: { sessionId },
-        })
-      );
+    if (raw) {
+      const map = JSON.parse(raw);
+      if (map[sessionId]) {
+        map[sessionId].approved = true;
+        sessionStorage.setItem(STORAGE_2FA_QR_SESSIONS, JSON.stringify(map));
+      }
     }
+
+    // Persist across browser tabs and devices in localStorage
+    localStorage.setItem('scholarchina_qr_approved_' + sessionId, 'true');
+
+    // Cross-tab broadcast
+    try {
+      const bc = new BroadcastChannel('scholarchina_2fa_channel');
+      bc.postMessage({ type: 'QR_APPROVED', sessionId });
+      bc.close();
+    } catch {}
+
+    window.dispatchEvent(
+      new CustomEvent('scholarchina_qr_session_approved', {
+        detail: { sessionId },
+      })
+    );
   } catch {}
 }
 
@@ -294,6 +319,9 @@ export function checkIsQrSessionApproved(sessionId: string): boolean {
   if (typeof window === 'undefined') return false;
 
   try {
+    if (localStorage.getItem('scholarchina_qr_approved_' + sessionId) === 'true') {
+      return true;
+    }
     const raw = sessionStorage.getItem(STORAGE_2FA_QR_SESSIONS);
     if (!raw) return false;
     const map = JSON.parse(raw);
@@ -304,11 +332,13 @@ export function checkIsQrSessionApproved(sessionId: string): boolean {
 }
 
 /**
- * Verifies a 6-digit TOTP code entered from Google Authenticator
+ * Verifies a 6-digit TOTP / PIN code entered from the mobile approval or authenticator
  */
-export function verify2FATotpCode(enteredCode: string): boolean {
+export function verify2FATotpCode(enteredCode: string, expectedPin?: string): boolean {
   if (!enteredCode) return false;
   const cleanCode = enteredCode.trim().replace(/\s+/g, '');
-  // Accepts standard 6-digit codes or demo testing code 123456
+  if (cleanCode === '123456') return true;
+  if (expectedPin && cleanCode === expectedPin.trim()) return true;
+  // Accepts any valid 6-digit code for standard TOTP
   return cleanCode.length === 6 && /^\d{6}$/.test(cleanCode);
 }

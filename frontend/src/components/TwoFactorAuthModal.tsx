@@ -69,10 +69,13 @@ export default function TwoFactorAuthModal({
   const digitInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // QR Session state
+  const [qrMode, setQrMode] = useState<'camera' | 'authenticator'>('camera');
   const [qrSession, setQrSession] = useState<{
     sessionId: string;
     secret: string;
-    qrPayload: string;
+    approvalUrl: string;
+    otpauthUrl: string;
+    expectedPin: string;
     expiresAt: number;
   } | null>(null);
   const [qrSecondsLeft, setQrSecondsLeft] = useState(120);
@@ -111,7 +114,7 @@ export default function TwoFactorAuthModal({
     }
   }, [isOpen, username, email]);
 
-  // QR countdown timer and approval poller
+  // QR countdown timer, approval poller, and cross-tab storage listener
   useEffect(() => {
     if (!isOpen || !qrSession) return;
 
@@ -126,13 +129,36 @@ export default function TwoFactorAuthModal({
         return prev - 1;
       });
 
-      // Check if session was approved by a trusted phone / simulation
+      // Check if session was approved by a trusted phone / simulation / localStorage
       if (checkIsQrSessionApproved(qrSession.sessionId)) {
         handleVerificationSuccess();
       }
-    }, 1000);
+    }, 800);
 
-    return () => clearInterval(interval);
+    // Cross-tab storage and broadcast listener
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'scholarchina_qr_approved_' + qrSession.sessionId && e.newValue === 'true') {
+        handleVerificationSuccess();
+      }
+    };
+
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('scholarchina_2fa_channel');
+      bc.onmessage = (msg) => {
+        if (msg.data?.type === 'QR_APPROVED' && msg.data?.sessionId === qrSession.sessionId) {
+          handleVerificationSuccess();
+        }
+      };
+    } catch {}
+
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorage);
+      if (bc) bc.close();
+    };
   }, [isOpen, qrSession]);
 
   // Email resend countdown timer
@@ -323,7 +349,7 @@ export default function TwoFactorAuthModal({
     setError('');
 
     setTimeout(() => {
-      const isValid = verify2FATotpCode(fullCode);
+      const isValid = verify2FATotpCode(fullCode, qrSession?.expectedPin);
       if (isValid) {
         handleVerificationSuccess();
       } else {
@@ -510,12 +536,44 @@ export default function TwoFactorAuthModal({
                   exit={{ opacity: 0, x: 10 }}
                   className="space-y-4"
                 >
+                  {/* QR Mode Switcher: Camera vs Authenticator */}
+                  <div className="flex items-center gap-1.5 p-1 bg-slate-800/80 rounded-xl border border-slate-700/80 mb-1">
+                    <button
+                      type="button"
+                      onClick={() => setQrMode('camera')}
+                      className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                        qrMode === 'camera'
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Smartphone className="w-3.5 h-3.5 text-cyan-300" />
+                      <span>{isAr ? 'كاميرا الهاتف (1-Clic)' : isEn ? 'Phone Camera (1-Click)' : 'Caméra Téléphone (1-Clic)'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setQrMode('authenticator')}
+                      className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                        qrMode === 'authenticator'
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <KeyRound className="w-3.5 h-3.5 text-indigo-300" />
+                      <span>Google Authenticator</span>
+                    </button>
+                  </div>
+
                   <div className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl bg-slate-800/40 border border-slate-700/70">
-                    {/* Visual QR Code Display */}
+                    {/* Visual 100% Genuine Scannable QR Code Display */}
                     <div className="shrink-0 flex flex-col items-center">
                       <QrCodeDisplay
-                        payload={qrSession?.qrPayload || 'otpauth://totp/ScholarChina'}
-                        size={170}
+                        payload={
+                          qrMode === 'camera'
+                            ? qrSession?.approvalUrl || 'https://toulatimehdi2004-tech.github.io/scholarship-platform/auth/approve/'
+                            : qrSession?.otpauthUrl || 'otpauth://totp/ScholarChina'
+                        }
+                        size={175}
                         showScanAnimation={true}
                       />
                       <div className="flex items-center gap-1.5 mt-2 text-[10px] text-slate-400">
@@ -535,18 +593,22 @@ export default function TwoFactorAuthModal({
                       <div className="space-y-1">
                         <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
                           <Smartphone className="w-3.5 h-3.5 text-blue-400" />
-                          {isAr
-                            ? 'امسح الرمز بهاتفك المعتمد'
-                            : isEn
-                            ? 'Scan with your approved phone'
-                            : 'Scannez avec votre téléphone approuvé'}
+                          {qrMode === 'camera'
+                            ? (isAr ? 'امسح بكاميرا الهاتف للموافقة' : isEn ? 'Scan with Phone Camera' : 'Scannez avec la caméra du smartphone')
+                            : (isAr ? 'امسح بتطبيق Authenticator' : isEn ? 'Scan with Authenticator App' : 'Scannez avec Authenticator')}
                         </h4>
                         <p className="text-[11px] text-slate-300 leading-relaxed">
-                          {isAr
-                            ? 'افتح كاميرا الهاتف أو تطبيق ScholarChina أو Google Authenticator لمسح الرمز والموافقة الفورية.'
-                            : isEn
-                            ? 'Open your phone camera, ScholarChina app, or Google Authenticator to scan and approve instantly.'
-                            : 'Ouvrez votre appareil photo, application ScholarChina ou Google Authenticator pour approuver.'}
+                          {qrMode === 'camera'
+                            ? (isAr
+                                ? 'وجه كاميرا هاتفك الذكي نحو الرمز لفتح صفحة الموافقة المباشرة في ثوانٍ.'
+                                : isEn
+                                ? 'Point your smartphone camera at this QR code to open the one-click instant approval page.'
+                                : 'Pointez la caméra de votre smartphone vers ce QR code pour ouvrir la page d’approbation 1-clic.')
+                            : (isAr
+                                ? 'افتح تطبيق Google Authenticator لمسح الرمز وإضافة حسابك.'
+                                : isEn
+                                ? 'Open Google Authenticator or Microsoft Authenticator to add your account.'
+                                : 'Ouvrez Google Authenticator ou Microsoft Authenticator pour ajouter votre compte.')}
                         </p>
                       </div>
 
@@ -567,24 +629,44 @@ export default function TwoFactorAuthModal({
                         </span>
                       </button>
 
-                      {/* Secret Code text */}
-                      <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-700/80 text-[10px] text-slate-400 flex items-center justify-between">
-                        <span className="truncate font-mono">
-                          Clé secrète: <span className="text-amber-300">{qrSession?.secret || 'JBSWY3DPEHPK3PXP'}</span>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (qrSession?.secret) {
-                              navigator.clipboard.writeText(qrSession.secret);
-                            }
-                          }}
-                          className="text-cyan-400 hover:text-cyan-300 ml-1 shrink-0"
-                          title="Copier la clé"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
+                      {/* Direct mobile link for easy testing */}
+                      {qrMode === 'camera' && qrSession?.approvalUrl && (
+                        <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900/80 border border-slate-700/80 text-[10px] text-slate-300">
+                          <span className="truncate text-cyan-300 font-mono">
+                            auth/approve/?s={qrSession.sessionId}
+                          </span>
+                          <a
+                            href={qrSession.approvalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-cyan-400 hover:text-cyan-300 font-bold shrink-0 flex items-center gap-1 underline"
+                          >
+                            <span>Ouvrir lien</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      )}
+
+                      {/* Secret Code text for TOTP */}
+                      {qrMode === 'authenticator' && (
+                        <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-700/80 text-[10px] text-slate-400 flex items-center justify-between">
+                          <span className="truncate font-mono">
+                            Clé secrète: <span className="text-amber-300">{qrSession?.secret || 'JBSWY3DPEHPK3PXP'}</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (qrSession?.secret) {
+                                navigator.clipboard.writeText(qrSession.secret);
+                              }
+                            }}
+                            className="text-cyan-400 hover:text-cyan-300 ml-1 shrink-0"
+                            title="Copier la clé"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
