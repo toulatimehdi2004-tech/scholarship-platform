@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { getToken } from "@/lib/api";
 import LiveCommunicationWidget from "@/components/LiveCommunicationWidget";
 import MandatoryChoiceGateModal from "@/components/MandatoryChoiceGateModal";
+import NotificationToastContainer from "@/components/NotificationToastContainer";
 
 interface PortalGateProps {
   navbar: React.ReactNode;
@@ -60,6 +61,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         <main>{children}</main>
         <MandatoryChoiceGateModal />
         <LiveCommunicationWidget />
+        <NotificationToastContainer />
       </>
     );
   }
@@ -72,6 +74,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         <main className="relative z-10 pt-16 min-h-[calc(100vh-4rem)]">{children}</main>
         {footer}
         <LiveCommunicationWidget />
+        <NotificationToastContainer />
       </>
     );
   }
@@ -107,6 +110,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         <main className="relative z-10 min-h-screen bg-transparent">{children}</main>
         <MandatoryChoiceGateModal />
         <LiveCommunicationWidget />
+        <NotificationToastContainer />
       </>
     );
   }
@@ -117,6 +121,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
       <>
         <main className="relative z-10 min-h-screen">{children}</main>
         <LiveCommunicationWidget />
+        <NotificationToastContainer />
       </>
     );
   }
@@ -129,6 +134,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
       <MandatoryChoiceGateModal />
       {footer}
       <LiveCommunicationWidget />
+      <NotificationToastContainer />
     </>
   );
 }

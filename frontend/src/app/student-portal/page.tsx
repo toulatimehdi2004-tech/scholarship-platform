@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import StudentSidebar from "@/components/StudentSidebar";
+import NotificationCenterDropdown from "@/components/NotificationCenterDropdown";
 import { useApplicationMode } from "@/lib/ApplicationModeContext";
 import { getToken, getCurrentUser, clearToken, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
@@ -208,11 +209,8 @@ export default function StudentPortalPage() {
 
           {/* User Profile & Notification Bell Capsule */}
           <div className="flex items-center gap-3 self-end sm:self-auto">
-            {/* Notification Bell with red pulse dot */}
-            <div className="relative p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-colors cursor-pointer">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            </div>
+            {/* Notification Center Bell with active unread counter & dropdown */}
+            <NotificationCenterDropdown variant="portal" />
 
             {/* Profile Capsule */}
             <Link

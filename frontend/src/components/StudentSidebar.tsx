@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -31,6 +31,7 @@ import {
 import Logo from "@/components/Logo";
 import { useLang } from "@/lib/i18n";
 import { useApplicationMode } from "@/lib/ApplicationModeContext";
+import { getUnreadNotificationCount } from "@/lib/notificationEngine";
 import { motion, AnimatePresence } from "framer-motion";
 
 export type SidebarActiveTab =
@@ -71,6 +72,22 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
   const { lang } = useLang();
   const { mode, setMode, openChoiceModal } = useApplicationMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+
+  useEffect(() => {
+    setUnreadNotifs(getUnreadNotificationCount());
+    const handler = () => setUnreadNotifs(getUnreadNotificationCount());
+    if (typeof window !== "undefined") {
+      window.addEventListener("scholarchina_notifications_updated", handler);
+      window.addEventListener("scholarchina_notification_received", handler);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("scholarchina_notifications_updated", handler);
+        window.removeEventListener("scholarchina_notification_received", handler);
+      }
+    };
+  }, []);
 
   const handleOpenLiveChat = () => {
     if (typeof window !== "undefined") {
@@ -180,7 +197,7 @@ export default function StudentSidebar({ activeTab = "home" }: StudentSidebarPro
       href: "/ai-chat",
       label: lang === "ar" ? "المستشار والرسائل" : "Advisors & Messages",
       icon: MessageSquare,
-      badge: "LIVE",
+      badge: unreadNotifs > 0 ? `${unreadNotifs} NEW` : "LIVE",
     },
     {
       id: "profile",

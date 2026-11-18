@@ -34,6 +34,7 @@ import { useLang } from "@/lib/i18n";
 import { getToken, getCurrentUser, type User as UserType } from "@/lib/api";
 import MarkdownContent from "@/components/MarkdownContent";
 import { analyzeChatImage, generateAiChatResponse, speakText, stopSpeaking } from "@/lib/aiChatEngine";
+import { addStudentNotification } from "@/lib/notificationEngine";
 
 interface ChatMessage {
   id: string;
@@ -289,13 +290,18 @@ export default function LiveCommunicationWidget() {
       }
 
       // Global custom event listener to open live chat from anywhere
-      const handleOpenCustom = () => {
+      const handleOpenCustom = (e?: Event) => {
         setIsOpen(true);
+        setActiveTab("chat");
         setHasUnread(false);
         setShowGreetingBubble(false);
+        if (e && (e as CustomEvent).detail?.initialMessage) {
+          setInputMessage((e as CustomEvent).detail.initialMessage);
+        }
         setTimeout(() => inputRef.current?.focus(), 300);
       };
       window.addEventListener("open_live_chat", handleOpenCustom);
+      window.addEventListener("scholarchina_open_advisor_chat", handleOpenCustom);
 
       // Show gentle greeting pill after 4 seconds if chat hasn't been opened
       const timer = setTimeout(() => {
@@ -309,6 +315,7 @@ export default function LiveCommunicationWidget() {
       return () => {
         clearTimeout(timer);
         window.removeEventListener("open_live_chat", handleOpenCustom);
+        window.removeEventListener("scholarchina_open_advisor_chat", handleOpenCustom);
       };
     }
   }, [lang]);
@@ -409,6 +416,45 @@ export default function LiveCommunicationWidget() {
       if (soundEnabled && !isOpen) {
         playAdvisorPing();
         setHasUnread(true);
+        addStudentNotification({
+          category: "message",
+          priority: "normal",
+          sender: {
+            name: "Dr. Wei Chen (Scholar AI)",
+            role: "Conseiller Académique Chine",
+            avatar: "AI",
+            avatarBg: "from-blue-600 to-cyan-500",
+            verified: true,
+            organization: "ScholarChina Advisor Desk",
+          },
+          title: {
+            en: "New Advisor Reply Received",
+            fr: "Nouveau message de votre Conseiller ScholarChina",
+            ar: "رسالة جديدة من مستشارك الأكاديمي",
+          },
+          snippet: {
+            en: replyText.slice(0, 110) + (replyText.length > 110 ? "..." : ""),
+            fr: replyText.slice(0, 110) + (replyText.length > 110 ? "..." : ""),
+            ar: replyText.slice(0, 110) + (replyText.length > 110 ? "..." : ""),
+          },
+          fullMessage: {
+            en: replyText,
+            fr: replyText,
+            ar: replyText,
+          },
+          actionUrl: "/ai-chat",
+          actionLabel: {
+            en: "Open Advisor Chat",
+            fr: "Ouvrir le Chat",
+            ar: "فتح المحادثة",
+          },
+        }, {
+          playSound: false, // Already pinged above
+          showToast: true,
+          sendBrowserPush: true,
+          username: user?.username,
+          lang: lang as any,
+        });
       } else if (soundEnabled && isOpen) {
         playAdvisorPing();
       }

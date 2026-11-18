@@ -29,6 +29,7 @@ import Logo from "@/components/Logo";
 import { getCurrentUser, getToken, clearToken, type User } from "@/lib/api";
 import LifetimePassModal from "@/components/LifetimePassModal";
 import AuthGateModal from "@/components/AuthGateModal";
+import NotificationCenterDropdown from "@/components/NotificationCenterDropdown";
 
 interface NavItem {
   href: string;
@@ -251,6 +252,8 @@ export default function Navbar() {
               >
                 {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
+
+              <NotificationCenterDropdown variant="navbar" />
 
               {user ? (
                 <div className="flex items-center gap-2.5">
