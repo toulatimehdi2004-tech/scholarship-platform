@@ -29,6 +29,11 @@ import {
   ShieldCheck,
   Languages,
   Bookmark,
+  Laptop,
+  Smartphone,
+  QrCode,
+  KeyRound,
+  RefreshCw,
 } from "lucide-react";
 import {
   getToken,
@@ -41,6 +46,8 @@ import {
 import LifetimePassModal from "@/components/LifetimePassModal";
 import StudentSidebar from "@/components/StudentSidebar";
 import StudentVisaProcessCard from "@/components/StudentVisaProcessCard";
+import TwoFactorAuthModal from "@/components/TwoFactorAuthModal";
+import { getCurrentDeviceInfo, isDeviceTrusted, revokeCurrentDeviceTrust, trustCurrentDevice } from "@/lib/deviceTrust";
 
 const MOROCCAN_CITIES = [
   "Casablanca",
@@ -74,12 +81,15 @@ const EDUCATION_LEVELS = [
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"profile" | "visa" | "services">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "visa" | "services" | "security">("profile");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
+  const [show2FAModalInProfile, setShow2FAModalInProfile] = useState(false);
+  const [deviceIsTrusted, setDeviceIsTrusted] = useState(false);
+  const [securityStatusMsg, setSecurityStatusMsg] = useState("");
 
   // Role Access Isolation: providers or universities cannot see private student pages
   const [restrictedRole, setRestrictedRole] = useState<string | null>(null);
@@ -124,6 +134,9 @@ export default function ProfilePage() {
         setFirstName(userRes.data.first_name || "");
         setLastName(userRes.data.last_name || "");
         setEmail(userRes.data.email || "");
+        if (typeof window !== "undefined") {
+          setDeviceIsTrusted(isDeviceTrusted(userRes.data.username));
+        }
       }
 
       if (profileRes.data) {
@@ -424,6 +437,18 @@ export default function ProfilePage() {
           >
             <Sparkles className="w-4 h-4 text-purple" />
             <span>My Services & Interested Hub</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("security")}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+              activeTab === "security"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                : "text-slate-600 dark:text-text-secondary hover:text-blue-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4 text-cyan-400" />
+            <span>Sécurité & 2FA (Double Authentification)</span>
           </button>
         </div>
 
@@ -955,6 +980,176 @@ export default function ProfilePage() {
             </div>
           </motion.div>
         )}
+
+        {/* Tab 4: Security & Two-Factor Authentication (2FA) */}
+        {activeTab === "security" && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Header banner */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-slate-900/60 border border-blue-500/30 backdrop-blur-md">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-lg shadow-cyan-500/20">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                      <span>Double Authentification (2FA)</span>
+                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold uppercase tracking-wider">
+                        Active & Protégé
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-1">
+                      Votre compte ScholarChina est protégé contre tout accès non autorisé depuis un autre appareil.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShow2FAModalInProfile(true)}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-blue-500/25 flex items-center gap-2 transition-all shrink-0 cursor-pointer"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  <span>Tester la Double Authentification</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Notification message feedback */}
+            {securityStatusMsg && (
+              <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{securityStatusMsg}</span>
+              </div>
+            )}
+
+            {/* Two Verification Methods Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Method 1: QR Code Card */}
+              <div className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 hover:border-cyan-500/30 transition-all space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-cyan-300">
+                    <QrCode className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-cyan-300 border border-blue-400/30">
+                    Option 1 : Instantané
+                  </span>
+                </div>
+                <h4 className="text-sm font-bold text-white">Scanner avec Code QR</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Connectez-vous instantanément depuis un nouvel appareil en scannant le code QR dynamique avec votre téléphone connecté ou une application d'authentification (Google Authenticator).
+                </p>
+                <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Prêt pour tout appareil
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShow2FAModalInProfile(true)}
+                    className="text-cyan-400 hover:text-cyan-300 font-bold transition-colors cursor-pointer"
+                  >
+                    Voir mon QR Code →
+                  </button>
+                </div>
+              </div>
+
+              {/* Method 2: Email Code Card */}
+              <div className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 hover:border-indigo-500/30 transition-all space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-300">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+                    Option 2 : Code 6 chiffres
+                  </span>
+                </div>
+                <h4 className="text-sm font-bold text-white">Code de sécurité par Email</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Recevez un code de vérification unique à 6 chiffres envoyé directement sur votre boîte email (<span className="text-white font-mono">{email || "votre email"}</span>) valable 5 minutes.
+                </p>
+                <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Envoi sécurisé
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShow2FAModalInProfile(true)}
+                    className="text-cyan-400 hover:text-cyan-300 font-bold transition-colors cursor-pointer"
+                  >
+                    Tester le code email →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Device & Trust Management */}
+            <div className="p-5 rounded-2xl bg-slate-900/80 border border-white/10 space-y-4">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <Laptop className="w-4 h-4 text-cyan-400" />
+                <span>Appareils Reconnus & Sessions de Confiance</span>
+              </h4>
+
+              <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-cyan-300">
+                    <Laptop className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white flex items-center gap-2">
+                      <span>{typeof window !== "undefined" ? getCurrentDeviceInfo().name : "Navigateur Web"}</span>
+                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                        Appareil Actuel
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      {deviceIsTrusted
+                        ? "✓ Appareil de confiance enregistré (2FA non requis sur ce navigateur pendant 30 jours)"
+                        : "⚠️ Appareil non mémorisé (2FA sera demandé à chaque connexion)"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {deviceIsTrusted ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (user?.username) {
+                          revokeCurrentDeviceTrust(user.username);
+                          setDeviceIsTrusted(false);
+                          setSecurityStatusMsg("Trust révoqué : La double authentification (2FA) sera exigée lors de votre prochaine connexion !");
+                          setTimeout(() => setSecurityStatusMsg(""), 5000);
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold transition-all cursor-pointer"
+                    >
+                      Révoquer cet appareil
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (user?.username) {
+                          trustCurrentDevice(user.username, 30);
+                          setDeviceIsTrusted(true);
+                          setSecurityStatusMsg("Appareil mémorisé avec succès pour 30 jours !");
+                          setTimeout(() => setSecurityStatusMsg(""), 5000);
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition-all cursor-pointer"
+                    >
+                      Mémoriser pendant 30 jours
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       <LifetimePassModal
@@ -966,6 +1161,24 @@ export default function ProfilePage() {
           });
         }}
       />
+
+      {/* 2FA TEST MODAL IN PROFILE */}
+      {show2FAModalInProfile && (
+        <TwoFactorAuthModal
+          isOpen={show2FAModalInProfile}
+          username={user?.username || "Student"}
+          email={email || user?.email || "student@scholar.ma"}
+          role="student"
+          lang="fr"
+          onSuccess={(trusted) => {
+            setDeviceIsTrusted(trusted);
+            setShow2FAModalInProfile(false);
+            setSecurityStatusMsg("Double authentification validée avec succès !");
+            setTimeout(() => setSecurityStatusMsg(""), 5000);
+          }}
+          onCancel={() => setShow2FAModalInProfile(false)}
+        />
+      )}
       </div>
     </div>
   );

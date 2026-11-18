@@ -23,6 +23,8 @@ import {
 import { loginUser, registerUser, setToken } from '@/lib/api';
 import { useLang } from '@/lib/i18n';
 import { ACCREDITED_UNIVERSITIES, verifyUniversityEmail } from '@/lib/universityRegistry';
+import TwoFactorAuthModal from './TwoFactorAuthModal';
+import { isDeviceTrusted, trustCurrentDevice } from '@/lib/deviceTrust';
 
 export type PortalAuthRole = 'student' | 'university' | 'provider';
 
@@ -78,6 +80,15 @@ export default function AuthGateModal({
   const [selectedUniId, setSelectedUniId] = useState<number | null>(4); // Default to PKU (Peking Univ)
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [force2FATest, setForce2FATest] = useState(false);
+  const [pendingAuthData, setPendingAuthData] = useState<{
+    token: string;
+    user: any;
+    role: string;
+    username: string;
+    email: string;
+  } | null>(null);
 
   useEffect(() => {
     setActiveRole('student');
@@ -172,6 +183,67 @@ export default function AuthGateModal({
   const modalSubtitle = (subtitle && activeRole === role) ? subtitle : roleConfig.defaultSubtitle;
   const RoleIcon = roleConfig.icon;
 
+  const completeLoginSession = (data: {
+    token: string;
+    user: any;
+    role?: string;
+  }) => {
+    try {
+      localStorage.removeItem('is_premium');
+      localStorage.removeItem('vip_pass');
+      localStorage.removeItem('vip_pass_1');
+    } catch {}
+    setToken(data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    const effectiveRole = data.role || activeRole || 'student';
+    localStorage.setItem('portal_role', effectiveRole);
+    if (effectiveRole === 'student') {
+      try {
+        localStorage.removeItem('student_application_mode_chosen');
+        sessionStorage.setItem('require_application_choice', 'true');
+        window.dispatchEvent(new CustomEvent('require_application_choice'));
+      } catch {}
+    }
+    try {
+      const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
+      registry[data.user.username.trim().toLowerCase()] = effectiveRole;
+      localStorage.setItem('user_role_registry', JSON.stringify(registry));
+    } catch {}
+    if (activeRole === 'university') {
+      const matchedUni = liveVerification?.university || ACCREDITED_UNIVERSITIES.find((u) => u.id === selectedUniId);
+      if (matchedUni) {
+        localStorage.setItem('university_accredited', JSON.stringify(matchedUni));
+      }
+    }
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      onClose();
+      router.push('/student-portal');
+    }
+  };
+
+  const handle2FASuccess = (trusted: boolean) => {
+    if (pendingAuthData) {
+      if (trusted) {
+        trustCurrentDevice(pendingAuthData.username, 30);
+      }
+      completeLoginSession({
+        token: pendingAuthData.token,
+        user: pendingAuthData.user,
+        role: pendingAuthData.role,
+      });
+      setShow2FAModal(false);
+      setPendingAuthData(null);
+    }
+  };
+
+  const handle2FACancel = () => {
+    setShow2FAModal(false);
+    setPendingAuthData(null);
+    setLoading(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -232,68 +304,46 @@ export default function AuthGateModal({
           university_id: selectedUniId || undefined,
         });
 
-        if (res.data) {
-          try {
-            localStorage.removeItem('is_premium');
-            localStorage.removeItem('vip_pass');
-            localStorage.removeItem('vip_pass_1');
-          } catch {}
-          setToken(res.data.token);
-          localStorage.setItem('user', JSON.stringify(res.data.user));
-          const effectiveRole = res.data.role || activeRole || 'student';
-          localStorage.setItem('portal_role', effectiveRole);
-          if (effectiveRole === 'student') {
-            try {
-              localStorage.removeItem("student_application_mode_chosen");
-              sessionStorage.setItem("require_application_choice", "true");
-              window.dispatchEvent(new CustomEvent("require_application_choice"));
-            } catch {}
-          }
-          try {
-            const registry = JSON.parse(localStorage.getItem('user_role_registry') || '{}');
-            registry[username.trim().toLowerCase()] = effectiveRole;
-            localStorage.setItem('user_role_registry', JSON.stringify(registry));
-          } catch {}
-          if (activeRole === 'university') {
-            const matchedUni = liveVerification?.university || ACCREDITED_UNIVERSITIES.find((u) => u.id === selectedUniId);
-            if (matchedUni) {
-              localStorage.setItem('university_accredited', JSON.stringify(matchedUni));
-            }
-          }
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            onClose();
-            router.push('/student-portal');
-          }
-        } else if (res.error && (res.error.toLowerCase().includes('fetch') || res.error.toLowerCase().includes('network'))) {
-          // Seamless client fallback if offline
-          const effectiveRole = 'student';
-          const fallbackUser = {
+        const isOnlineSuccess = Boolean(res.data);
+        const isOfflineFallback = Boolean(res.error && (res.error.toLowerCase().includes('fetch') || res.error.toLowerCase().includes('network')));
+
+        if (isOnlineSuccess || isOfflineFallback) {
+          const targetUser = res.data?.user || {
             id: 1,
             username: cleanUsername,
             email: `${cleanUsername.toLowerCase()}@scholar.ma`,
             first_name: cleanUsername,
             last_name: '',
-            role: effectiveRole,
+            role: activeRole,
             student_profile: { is_premium: false },
           };
-          setToken(`token_${Date.now()}`);
-          localStorage.setItem('user', JSON.stringify(fallbackUser));
-          localStorage.setItem('portal_role', effectiveRole);
-          if (effectiveRole === 'student') {
-            try {
-              localStorage.removeItem("student_application_mode_chosen");
-              sessionStorage.setItem("require_application_choice", "true");
-              window.dispatchEvent(new CustomEvent("require_application_choice"));
-            } catch {}
+          const targetToken = res.data?.token || `token_${Date.now()}`;
+          const targetRole = res.data?.role || activeRole || 'student';
+          const targetEmail = targetUser.email || (cleanUsername.includes('@') ? cleanUsername : `${cleanUsername.toLowerCase()}@scholar.ma`);
+
+          // Double Authentication (2FA) Check for New / Another Device
+          const isTrusted = isDeviceTrusted(cleanUsername);
+          const needs2FA = force2FATest || !isTrusted;
+
+          if (needs2FA) {
+            setPendingAuthData({
+              token: targetToken,
+              user: targetUser,
+              role: targetRole,
+              username: cleanUsername,
+              email: targetEmail,
+            });
+            setShow2FAModal(true);
+            setLoading(false);
+            return;
           }
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            onClose();
-            router.push('/student-portal');
-          }
+
+          // Directly log in if device is already trusted
+          completeLoginSession({
+            token: targetToken,
+            user: targetUser,
+            role: targetRole,
+          });
         } else {
           setError(res.error || 'Identifiants invalides. Veuillez vérifier vos accès.');
         }
@@ -936,6 +986,40 @@ export default function AuthGateModal({
               />
             </div>
 
+            {/* 2FA NEW DEVICE SECURITY INDICATOR */}
+            {tab === 'login' && (
+              <div className="p-2.5 rounded-xl bg-slate-800/90 border border-slate-700/80 text-xs flex items-center justify-between shadow-inner">
+                <div className="flex items-center gap-1.5 text-slate-300">
+                  <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <span className="text-[11px] font-medium text-slate-200">
+                    {lang === 'ar'
+                      ? 'التحقق بخطوتين (2FA) للأجهزة الجديدة'
+                      : lang === 'en'
+                      ? '2FA Protection for new devices'
+                      : 'Double Authentification (2FA) pour nouvel appareil'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setForce2FATest(!force2FATest)}
+                  className={`text-[10px] px-2 py-0.5 rounded-lg font-semibold transition-all border ${
+                    force2FATest
+                      ? 'bg-blue-600/30 text-cyan-300 border-cyan-400/50 shadow-sm'
+                      : 'bg-slate-700/60 text-slate-400 hover:text-white border-slate-600'
+                  }`}
+                  title={
+                    lang === 'ar'
+                      ? 'محاكاة تسجيل الدخول من جهاز جديد لعرض خيارات QR Code والبريد'
+                      : 'Simuler un nouvel appareil pour tester les choix QR Code et Email'
+                  }
+                >
+                  {force2FATest
+                    ? (lang === 'ar' ? '✓ محاكاة مفعلة' : lang === 'en' ? '✓ Simulated' : '✓ Simulé')
+                    : (lang === 'ar' ? 'تجربة 2FA' : lang === 'en' ? 'Test 2FA' : 'Tester 2FA')}
+                </button>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading || (activeRole === 'university' && isEmailFormat && liveVerification?.isVerified === false)}
@@ -965,6 +1049,19 @@ export default function AuthGateModal({
           </div>
         </motion.div>
       </div>
+
+      {/* DOUBLE AUTHENTICATION (2FA) GATE FOR NEW / ANOTHER DEVICE */}
+      {show2FAModal && pendingAuthData && (
+        <TwoFactorAuthModal
+          isOpen={show2FAModal}
+          username={pendingAuthData.username}
+          email={pendingAuthData.email}
+          role={pendingAuthData.role}
+          lang={lang}
+          onSuccess={handle2FASuccess}
+          onCancel={handle2FACancel}
+        />
+      )}
     </AnimatePresence>
   );
 }
