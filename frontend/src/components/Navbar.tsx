@@ -298,8 +298,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
-                      clearToken();
-                      redirectToRoot();
+                      setShowAuthGate(true);
                     }}
                     className="btn-gradient text-xs sm:text-sm px-4 py-2 rounded-xl font-bold cursor-pointer"
                   >
@@ -527,7 +526,7 @@ export default function Navbar() {
         subtitle="Gateway to 100+ Chinese Universities & CSC Full Scholarships"
         onSuccess={() => {
           setShowAuthGate(false);
-          router.push("/dashboard");
+          router.push("/profile");
         }}
       />
     </>

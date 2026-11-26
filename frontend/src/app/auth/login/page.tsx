@@ -36,10 +36,13 @@ export default function LoginPage() {
       localStorage.setItem("user", JSON.stringify(response.data.user));
       localStorage.setItem("portal_role", "student");
       try {
-        localStorage.removeItem("student_application_mode_chosen");
-        sessionStorage.setItem("require_application_choice", "true");
+        // Who already have an account with us: no need to refill application questionnaire!
+        localStorage.setItem("student_orientation_done_v3", "true");
+        localStorage.setItem("student_application_mode_chosen", "true");
+        sessionStorage.removeItem("require_application_choice");
       } catch {}
-      router.push("/student-portal/");
+      // Take them directly to their profile!
+      router.push("/profile");
     } else {
       // Check if needs verification
       const errData = response as any;

@@ -199,9 +199,10 @@ export default function AuthGateModal({
     localStorage.setItem('portal_role', effectiveRole);
     if (effectiveRole === 'student') {
       try {
-        localStorage.removeItem('student_application_mode_chosen');
-        sessionStorage.setItem('require_application_choice', 'true');
-        window.dispatchEvent(new CustomEvent('require_application_choice'));
+        // Who already have an account with us: no need to refill application questionnaire!
+        localStorage.setItem('student_orientation_done_v3', 'true');
+        localStorage.setItem('student_application_mode_chosen', 'true');
+        sessionStorage.removeItem('require_application_choice');
       } catch {}
     }
     try {
@@ -219,7 +220,8 @@ export default function AuthGateModal({
       onSuccess();
     } else {
       onClose();
-      router.push('/student-portal');
+      // Take them directly to their profile!
+      router.push('/profile');
     }
   };
 
@@ -380,9 +382,9 @@ export default function AuthGateModal({
           localStorage.setItem('portal_role', effectiveRole);
           if (effectiveRole === 'student') {
             try {
-              localStorage.removeItem("student_application_mode_chosen");
-              sessionStorage.setItem("require_application_choice", "true");
-              window.dispatchEvent(new CustomEvent("require_application_choice"));
+              localStorage.setItem('student_orientation_done_v3', 'true');
+              localStorage.setItem('student_application_mode_chosen', 'true');
+              sessionStorage.removeItem('require_application_choice');
             } catch {}
           }
           try {
@@ -400,7 +402,7 @@ export default function AuthGateModal({
             onSuccess();
           } else {
             onClose();
-            router.push('/student-portal');
+            router.push('/profile');
           }
         } else if (res.error && (res.error.toLowerCase().includes('fetch') || res.error.toLowerCase().includes('network'))) {
           // Seamless client fallback if offline
@@ -419,16 +421,16 @@ export default function AuthGateModal({
           localStorage.setItem('portal_role', effectiveRole);
           if (effectiveRole === 'student') {
             try {
-              localStorage.removeItem("student_application_mode_chosen");
-              sessionStorage.setItem("require_application_choice", "true");
-              window.dispatchEvent(new CustomEvent("require_application_choice"));
+              localStorage.setItem('student_orientation_done_v3', 'true');
+              localStorage.setItem('student_application_mode_chosen', 'true');
+              sessionStorage.removeItem('require_application_choice');
             } catch {}
           }
           if (onSuccess) {
             onSuccess();
           } else {
             onClose();
-            router.push('/student-portal');
+            router.push('/profile');
           }
         } else {
           setError(res.error || "Échec de l'enregistrement. L'adresse email ou le nom d'utilisateur est peut-être déjà utilisé.");
@@ -452,9 +454,9 @@ export default function AuthGateModal({
       localStorage.setItem('portal_role', effectiveRole);
       if (effectiveRole === 'student') {
         try {
-          localStorage.removeItem("student_application_mode_chosen");
-          sessionStorage.setItem("require_application_choice", "true");
-          window.dispatchEvent(new CustomEvent("require_application_choice"));
+          localStorage.setItem('student_orientation_done_v3', 'true');
+          localStorage.setItem('student_application_mode_chosen', 'true');
+          sessionStorage.removeItem('require_application_choice');
         } catch {}
       }
       if (effectiveRole === 'university') {
@@ -467,7 +469,7 @@ export default function AuthGateModal({
         onSuccess();
       } else {
         onClose();
-        router.push('/student-portal');
+        router.push('/profile');
       }
     } finally {
       setLoading(false);

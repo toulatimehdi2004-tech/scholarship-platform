@@ -98,11 +98,21 @@ export default function MandatoryChoiceGateModal() {
 
   if (!showChoiceModal) return null;
 
-  // Imposed: User cannot close if orientation is not completed yet
+  // Check if user already has an account
+  const hasAccount =
+    typeof window !== "undefined" &&
+    Boolean(
+      localStorage.getItem("token") ||
+      localStorage.getItem("auth_token") ||
+      localStorage.getItem("user")
+    );
+
+  // Imposed ONLY for new visitors without an account who have not chosen yet
   const isImposed =
-    !hasChosenMode ||
-    (typeof window !== "undefined" &&
-      localStorage.getItem("student_orientation_done_v3") !== "true");
+    !hasAccount &&
+    (!hasChosenMode ||
+      (typeof window !== "undefined" &&
+        localStorage.getItem("student_orientation_done_v3") !== "true"));
 
   const handleSelectLang = (selectedLang: Lang) => {
     setLang(selectedLang);

@@ -107,11 +107,12 @@ function VerifyForm() {
       localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("portal_role", "student");
       try {
-        localStorage.removeItem("student_application_mode_chosen");
-        sessionStorage.setItem("require_application_choice", "true");
+        localStorage.setItem("student_orientation_done_v3", "true");
+        localStorage.setItem("student_application_mode_chosen", "true");
+        sessionStorage.removeItem("require_application_choice");
       } catch {}
-      setSuccess("Email verified! Redirecting to student portal...");
-      setTimeout(() => router.push("/student-portal/"), 1000);
+      setSuccess("Email verified! Redirecting to your profile...");
+      setTimeout(() => router.push("/profile"), 800);
     } else {
       setError(res.error || "Verification failed.");
     }

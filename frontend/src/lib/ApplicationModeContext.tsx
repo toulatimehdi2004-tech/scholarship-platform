@@ -59,20 +59,35 @@ export function ApplicationModeProvider({
           localStorage.setItem(STORAGE_KEY, "assisted");
         }
 
-        setHasChosenMode(orientationDone);
+        const hasAccount = Boolean(
+          localStorage.getItem("token") ||
+          localStorage.getItem("auth_token") ||
+          localStorage.getItem("user")
+        );
 
-        // If orientation is not done yet, or explicitly requested, impose on student paths
-        const isStudentPath =
-          pathname === "/student-portal" ||
-          pathname?.startsWith("/student-portal") ||
-          pathname?.startsWith("/scholarships") ||
-          pathname?.startsWith("/assisted-service") ||
-          pathname?.startsWith("/tracker") ||
-          pathname?.startsWith("/universities");
+        if (hasAccount) {
+          // Who already have an account with us: no need to refill the application!
+          setHasChosenMode(true);
+          setShowChoiceModal(false);
+          try {
+            sessionStorage.removeItem("require_application_choice");
+          } catch {}
+        } else {
+          setHasChosenMode(orientationDone);
 
-        if (!orientationDone || requireChoice) {
-          if (isStudentPath || (pathname === "/" && role === "student")) {
-            setShowChoiceModal(true);
+          // If orientation is not done yet, or explicitly requested, impose on student paths
+          const isStudentPath =
+            pathname === "/student-portal" ||
+            pathname?.startsWith("/student-portal") ||
+            pathname?.startsWith("/scholarships") ||
+            pathname?.startsWith("/assisted-service") ||
+            pathname?.startsWith("/tracker") ||
+            pathname?.startsWith("/universities");
+
+          if (!orientationDone || requireChoice) {
+            if (isStudentPath || (pathname === "/" && role === "student")) {
+              setShowChoiceModal(true);
+            }
           }
         }
       } catch {}
@@ -94,7 +109,14 @@ export function ApplicationModeProvider({
       };
 
       const handleRequireChoice = () => {
-        setShowChoiceModal(true);
+        const hasAccount = Boolean(
+          localStorage.getItem("token") ||
+          localStorage.getItem("auth_token") ||
+          localStorage.getItem("user")
+        );
+        if (!hasAccount) {
+          setShowChoiceModal(true);
+        }
       };
 
       window.addEventListener("storage", handleStorage);

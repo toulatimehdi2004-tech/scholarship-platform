@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   GraduationCap,
@@ -30,6 +31,7 @@ export default function PortalChooser({
   onSelectRole,
   currentRole,
 }: PortalChooserProps) {
+  const router = useRouter();
   const { theme, toggle } = useTheme();
   const { lang } = useLang();
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -419,14 +421,8 @@ export default function PortalChooser({
         subtitle="Sign in to access your customized ScholarChina workspace."
         onSuccess={() => {
           setAuthModalOpen(false);
-          let finalRole: PortalRole = chosenRoleForAuth;
-          try {
-            const stored = localStorage.getItem("portal_role") as PortalRole | null;
-            if (stored === "university" || stored === "provider" || stored === "student") {
-              finalRole = stored;
-            }
-          } catch {}
-          onSelectRole(finalRole);
+          // Who already have an account with us: taken directly to their profile!
+          router.push("/profile");
         }}
       />
     </div>

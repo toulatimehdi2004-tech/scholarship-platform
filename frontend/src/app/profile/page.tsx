@@ -161,6 +161,25 @@ export default function ProfilePage() {
         if (p.city) setCity(p.city);
         if (p.education_level) setEducationLevel(p.education_level);
         if (p.field_of_study) setFieldOfStudy(p.field_of_study);
+      } else if (typeof window !== "undefined") {
+        // Offline / client session fallback
+        try {
+          const stored = localStorage.getItem("user");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            setUser(parsed);
+            setFirstName(parsed.first_name || parsed.username || "");
+            setLastName(parsed.last_name || "");
+            setEmail(parsed.email || "");
+            if (parsed.student_profile) {
+              const p = parsed.student_profile;
+              if (p.phone) setPhone(p.phone);
+              if (p.city) setCity(p.city);
+              if (p.education_level) setEducationLevel(p.education_level);
+              if (p.field_of_study) setFieldOfStudy(p.field_of_study);
+            }
+          }
+        } catch {}
       }
 
       setLoading(false);
