@@ -642,14 +642,14 @@ export default function ProfilePage() {
                           type="button"
                           onClick={() => {
                             sendWelcomePhoneMessage({
-                              phone: phone.trim() || "+212 661-234567",
-                              email: email.trim(),
+                              email: email.trim() || user?.email,
+                              phone: phone.trim(),
                               name: firstName.trim() || user?.username,
                             });
                           }}
-                          className="text-[10px] font-bold text-cyan hover:underline"
+                          className="text-[10px] font-bold text-cyan hover:underline flex items-center gap-1"
                         >
-                          Tester l&apos;envoi SMS
+                          ✉️ Tester l&apos;envoi automatique par email
                         </button>
                       </div>
                     </div>

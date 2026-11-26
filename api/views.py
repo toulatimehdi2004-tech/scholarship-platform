@@ -1293,25 +1293,90 @@ def send_welcome_message_view(request):
     sms_sent = False
     sms_error = None
 
-    # 1. Send real email if email is provided
+    # 1. Send real automatic email if email is provided
     if email:
         try:
+            student_name = name if name and name != 'Étudiant' else 'Cher(e) candidat(e)'
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Bienvenue sur ScholarChina</title>
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #0b1329; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e2e8f0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0b1329; padding: 30px 15px;">
+                <tr>
+                  <td align="center">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #0f1d38; border: 1px solid #1e293b; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #0284c7, #06b6d4, #10b981); padding: 25px; text-align: center;">
+                          <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">🎓 ScholarChina Admissions</h1>
+                          <p style="margin: 6px 0 0; color: #f0fdf4; font-size: 13px; font-weight: 500;">Portail Officiel des Bourses Universitaires en Chine 2026/2027</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 30px 25px;">
+                          <h2 style="margin: 0 0 15px; color: #ffffff; font-size: 19px; font-weight: 700;">Bonjour {student_name},</h2>
+                          <p style="margin: 0 0 18px; color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+                            Nous vous confirmons que vos coordonnées ont été enregistrées avec succès dans notre système officiel d'admissions pour les bourses d'études en Chine.
+                          </p>
+
+                          <div style="background-color: rgba(2, 132, 199, 0.1); border-left: 4px solid #06b6d4; padding: 16px; border-radius: 8px; margin-bottom: 22px;">
+                            <h3 style="margin: 0 0 8px; color: #38bdf8; font-size: 14px; font-weight: 700;">🌟 Vos Opportunités de Bourses Éligibles :</h3>
+                            <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+                              <li><strong>Bourse Complète du Gouvernement Chinois (CSC Type A / B)</strong> : 100% frais de scolarité offerts, logement universitaire inclus et allocation mensuelle de 3 000 à 3 500 RMB.</li>
+                              <li><strong>Préparation Intensive CSCA</strong> : Accompagnement complet pour l'examen d'évaluation académique standardisé.</li>
+                              <li><strong>Légalisation & Visa JW202 / X1</strong> : Prise en charge des démarches consulaires et des documents officiels.</li>
+                            </ul>
+                          </div>
+
+                          <p style="margin: 0 0 25px; color: #94a3b8; font-size: 13px; line-height: 1.6;">
+                            Votre conseiller académique dédié examine dès à présent votre profil pour vous orienter vers les meilleures universités partenaires.
+                          </p>
+
+                          <div style="text-align: center; margin: 30px 0;">
+                            <a href="https://toulatimehdi2004-tech.github.io/scholarship-platform/profile" style="background: linear-gradient(135deg, #06b6d4, #0284c7); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.35);">
+                              Accéder à mon Espace Candidat →
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #081124; padding: 20px 25px; border-top: 1px solid #1e293b; text-align: center; color: #64748b; font-size: 11px; line-height: 1.5;">
+                          <p style="margin: 0 0 4px;">ScholarChina Admissions Gateway • Bureau de Rabat & Beijing</p>
+                          <p style="margin: 0;">Cet email automatique a été généré suite à votre inscription sur la plateforme.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+            """
+
+            plain_message = (
+                f"Bonjour {student_name},\n\n"
+                "Bienvenue sur ScholarChina, la passerelle officielle pour les bourses universitaires en Chine 2026/2027 !\n\n"
+                "Votre contact a été enregistré avec succès dans notre système d'admissions.\n\n"
+                "Opportunités éligibles :\n"
+                "- Bourse complète du Gouvernement Chinois (CSC Type A / B) : 100% frais de scolarité, logement et allocation de 3 000 à 3 500 RMB/mois.\n"
+                "- Préparation au test CSCA et légalisation des documents officiels.\n"
+                "- Accompagnement pour l'obtention du visa d'études JW202 / X1.\n\n"
+                "Accédez à votre espace étudiant : https://toulatimehdi2004-tech.github.io/scholarship-platform/profile\n\n"
+                "L'équipe ScholarChina Admissions\n"
+                "Bureau de Rabat & Beijing"
+            )
+
             send_mail(
-                subject='🎓 Bienvenue sur ScholarChina — Bourses d\'études en Chine 2026/2027',
-                message=(
-                    f"Bonjour {name},\n\n"
-                    "Bienvenue sur ScholarChina, la passerelle officielle pour les bourses universitaires en Chine !\n\n"
-                    "Votre contact a été enregistré avec succès. Votre conseiller académique dédié est à votre disposition "
-                    "pour vous accompagner vers la bourse complète du Gouvernement Chinois (CSC Type A / B), "
-                    "la préparation du test CSCA et la légalisation de vos documents.\n\n"
-                    "Accédez à votre espace étudiant pour découvrir vos universités partenaires éligibles.\n\n"
-                    "Bonne chance dans vos démarches !\n\n"
-                    "L'équipe ScholarChina Admissions\n"
-                    "Bureau de Rabat & Beijing"
-                ),
+                subject="🎓 Bienvenue sur ScholarChina — Bourses d'études en Chine 2026/2027",
+                message=plain_message,
+                html_message=html_content,
                 from_email=None,
                 recipient_list=[email],
-                fail_silently=True,
+                fail_silently=False,
             )
             email_sent = True
         except Exception:

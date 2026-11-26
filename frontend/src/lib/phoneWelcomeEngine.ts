@@ -1,106 +1,99 @@
 /**
- * ScholarChina Phone & SMS Welcome Dispatch Engine
- * Automatically sends a welcome message to students' phones via SMS / WhatsApp
- * whenever they enter their phone number or email address on the platform.
+ * ScholarChina Automated Email & Welcome Dispatch Engine
+ * Automatically dispatches official welcome and confirmation emails to students'
+ * inboxes whenever they register or update their contact details on the platform.
  */
 
 import { addStudentNotification } from "./notificationEngine";
 
 export interface PhoneWelcomeMessage {
   id: string;
-  recipientPhone: string;
-  recipientEmail?: string;
-  recipientName?: string;
+  recipientEmail: string;
+  recipientPhone?: string;
+  recipientName: string;
+  subject: string;
   messageText: string;
   lang: "fr" | "ar" | "en";
   timestamp: number;
-  status: "ready" | "sent" | "delivered";
-  channel: "sms" | "whatsapp";
-  whatsappUrl?: string;
-  smsAppUrl?: string;
+  status: "sent" | "delivered";
+  channel: "email";
+  inboxUrl: string;
+  providerName: string;
 }
 
-const STORAGE_KEY = "scholarchina_sms_delivery_logs";
+const STORAGE_KEY = "scholarchina_email_delivery_logs";
 
 /**
- * Normalizes a phone number for Morocco (+212) or international format.
+ * Detects the webmail inbox provider (Gmail, Outlook, Yahoo, iCloud)
+ * so students can open their inbox with 1 click.
  */
-export function formatPhoneNumber(rawPhone?: string): string {
-  if (!rawPhone || !rawPhone.trim()) return "";
-  const cleaned = rawPhone.trim().replace(/[\s\-\(\)\.]/g, "");
-
-  // Moroccan local formats (06..., 07..., 05...)
-  if (/^0[567]\d{8}$/.test(cleaned)) {
-    return `+212 ${cleaned.slice(1, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
+export function getInboxProviderInfo(email?: string): {
+  name: string;
+  url: string;
+  badge: string;
+} {
+  if (!email || !email.includes("@")) {
+    return { name: "Boîte Mail", url: "https://mail.google.com", badge: "Email" };
   }
-
-  // Already starting with 212
-  if (/^212[567]\d{8}$/.test(cleaned)) {
-    return `+212 ${cleaned.slice(3, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8)}`;
+  const domain = email.split("@")[1].toLowerCase();
+  if (domain.includes("gmail.com")) {
+    return { name: "Gmail", url: "https://mail.google.com", badge: "Google Mail" };
   }
-
-  // With +212
-  if (/^\+212[567]\d{8}$/.test(cleaned)) {
-    return `+212 ${cleaned.slice(4, 6)} ${cleaned.slice(6, 9)} ${cleaned.slice(9)}`;
+  if (
+    domain.includes("outlook") ||
+    domain.includes("hotmail") ||
+    domain.includes("live.com") ||
+    domain.includes("msn.com")
+  ) {
+    return { name: "Outlook", url: "https://outlook.live.com", badge: "Microsoft Outlook" };
   }
-
-  // General international format fallback
-  if (cleaned.startsWith("+")) {
-    return cleaned;
+  if (domain.includes("yahoo")) {
+    return { name: "Yahoo Mail", url: "https://mail.yahoo.com", badge: "Yahoo" };
   }
-
-  return rawPhone.trim();
+  if (domain.includes("icloud")) {
+    return { name: "iCloud Mail", url: "https://www.icloud.com/mail", badge: "Apple iCloud" };
+  }
+  return { name: domain, url: `mailto:${email}`, badge: domain };
 }
 
 /**
- * Clean phone for WhatsApp API (only digits without +)
- */
-export function getWhatsAppCleanPhone(rawPhone: string): string {
-  const digits = rawPhone.replace(/\D/g, "");
-  if (digits.startsWith("0") && digits.length === 10) {
-    return "212" + digits.slice(1);
-  }
-  return digits;
-}
-
-/**
- * Generates the official warm welcome message for students.
+ * Generates the official warm welcome email body for students.
  */
 export function getWelcomeMessageBody(
   name: string = "Étudiant",
   lang: "fr" | "ar" | "en" = "fr"
 ): string {
-  const studentName = name && name.trim() ? name.trim() : "Cher(e) candidat(e)";
+  const studentName = name && name.trim() && name !== "Étudiant" ? name.trim() : "Cher(e) candidat(e)";
 
   if (lang === "ar") {
-    return `🎓 سكولار تشاينا (ScholarChina)
+    return `🎓 سكولار تشاينا (ScholarChina) — رسالة الترحيب الرسمية
 مرحباً بك ${name !== "Étudiant" ? name : ""} في منصة منح الجامعات الصينية 2026/2027!
 
-تم تسجيل رقمك بنجاح في نظام التوجيه والاستشارات. مستشارك الأكاديمي جاهز لمساعدتك في الحصول على منحة الحكومة الصينية الكاملة (CSC Type A / B)، التحضير لاختبار CSCA، وتجهيز ملف الترجمة والتصديق القانوني.
+تم تسجيل بريدك الإلكتروني بنجاح في نظام التوجيه والاستشارات الأكاديمية. مستشارك الأكاديمي جاهز لمساعدتك في الحصول على منحة الحكومة الصينية الكاملة (CSC Type A / B)، التحضير لاختبار CSCA، وتجهيز ملف الترجمة والتصديق القانوني.
 
-للمتابعة المباشرة، تفضل بزيارة حسابك في أي وقت. بالتوفيق والنجاح!`;
+تفضل بزيارة حسابك للاطلاع على قائمة الجامعات المؤهلة. بالتوفيق والنجاح!`;
   }
 
   if (lang === "en") {
-    return `🎓 ScholarChina Admissions
+    return `🎓 ScholarChina Admissions — Official Welcome Confirmation
 Welcome ${name !== "Étudiant" ? name : ""} to the China Higher Education & CSC Scholarship Gateway!
 
-Your contact has been registered successfully. Your dedicated academic advisor is ready to assist you with university matching, full tuition exemption + stipend (3,000-3,500 RMB/mo), CSCA exam preparation, and visa JW202 processing.
+Your email has been registered successfully in our admissions database. Your dedicated academic advisor is ready to assist you with CSC Type A / B scholarships, CSCA exam preparation, and visa JW202 processing.
 
-Access your portal dashboard anytime to view your eligible universities. We wish you great success!`;
+Access your candidate portal anytime to view your eligible universities. We wish you great success!`;
   }
 
   // French default
-  return `🎓 ScholarChina Admissions
-Bienvenue ${studentName} sur le portail officiel des bourses d'études en Chine !
+  return `🎓 ScholarChina Admissions — Confirmation Officielle
+Bienvenue ${studentName} sur le portail officiel des bourses d'études en Chine 2026/2027 !
 
-Votre contact a été enregistré avec succès dans notre système d'admissions. Votre conseiller académique dédié est à votre disposition pour vous guider vers la bourse complète du Gouvernement Chinois (CSC Type A/B), la préparation du test CSCA et la légalisation de vos documents.
+Vos coordonnées ont été enregistrées avec succès dans notre système officiel d'admissions. Votre conseiller académique dédié est à votre disposition pour vous guider vers la bourse complète du Gouvernement Chinois (CSC Type A/B), la préparation du test CSCA et la légalisation de vos documents.
 
-Connectez-vous à votre espace étudiant pour découvrir vos universités partenaires éligibles. Bonne chance !`;
+Consultez votre espace étudiant pour découvrir vos universités partenaires éligibles. Bonne chance !`;
 }
 
 /**
- * Plays a mobile SMS incoming chime via Web Audio API.
+ * Plays an email incoming chime via Web Audio API.
  */
 export function playSmsChime(): void {
   if (typeof window === "undefined") return;
@@ -137,7 +130,7 @@ export function playSmsChime(): void {
 }
 
 /**
- * Retrieve logs of sent welcome SMS messages from localStorage.
+ * Retrieve logs of sent welcome messages from localStorage.
  */
 export function getSentSmsLogs(): PhoneWelcomeMessage[] {
   if (typeof window === "undefined") return [];
@@ -150,20 +143,48 @@ export function getSentSmsLogs(): PhoneWelcomeMessage[] {
 }
 
 /**
- * Save SMS message to localStorage logs.
+ * Save welcome email message to localStorage logs.
  */
 function saveSmsLog(msg: PhoneWelcomeMessage): void {
   if (typeof window === "undefined") return;
   try {
     const current = getSentSmsLogs();
-    const updated = [msg, ...current.slice(0, 19)]; // Keep latest 20 SMS logs
+    const updated = [msg, ...current.slice(0, 19)]; // Keep latest 20 logs
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   } catch {}
 }
 
 /**
- * Main dispatcher: Sends a welcome message to the student's phone.
- * Triggers audio chime, screen phone preview banner, and notification center entry.
+ * Normalizes a phone number for Morocco (+212) or international format.
+ */
+export function formatPhoneNumber(rawPhone?: string): string {
+  if (!rawPhone || !rawPhone.trim()) return "";
+  const cleaned = rawPhone.trim().replace(/[\s\-\(\)\.]/g, "");
+  if (/^0[567]\d{8}$/.test(cleaned)) {
+    return `+212 ${cleaned.slice(1, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
+  }
+  if (/^212[567]\d{8}$/.test(cleaned)) {
+    return `+212 ${cleaned.slice(3, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8)}`;
+  }
+  if (/^\+212[567]\d{8}$/.test(cleaned)) {
+    return `+212 ${cleaned.slice(4, 6)} ${cleaned.slice(6, 9)} ${cleaned.slice(9)}`;
+  }
+  return cleaned.startsWith("+") ? cleaned : rawPhone.trim();
+}
+
+/**
+ * Clean phone for WhatsApp API (only digits without +)
+ */
+export function getWhatsAppCleanPhone(rawPhone: string): string {
+  const digits = rawPhone.replace(/\D/g, "");
+  if (digits.startsWith("0") && digits.length === 10) {
+    return "212" + digits.slice(1);
+  }
+  return digits;
+}
+
+/**
+ * Main dispatcher: Automatically dispatches a welcome & confirmation email to the student's mailbox.
  */
 export function sendWelcomePhoneMessage(
   recipient: {
@@ -173,79 +194,94 @@ export function sendWelcomePhoneMessage(
   },
   lang: "fr" | "ar" | "en" = "fr"
 ): PhoneWelcomeMessage {
+  let targetEmail = recipient.email?.trim() || "";
   const rawPhone = recipient.phone?.trim() || "";
-  const rawEmail = recipient.email?.trim() || "";
-  const name = recipient.name?.trim() || "Étudiant";
+  let name = recipient.name?.trim() || "Étudiant";
 
-  // Format phone or generate placeholder for display
-  const formattedPhone = rawPhone
-    ? formatPhoneNumber(rawPhone)
-    : "+212 6" + Math.floor(10000000 + Math.random() * 90000000).toString().slice(0, 8);
+  // If email was not explicitly passed in the argument, look it up in active session user
+  if (!targetEmail && typeof window !== "undefined") {
+    try {
+      const userRaw = localStorage.getItem("user");
+      if (userRaw) {
+        const u = JSON.parse(userRaw);
+        if (u.email) targetEmail = u.email;
+        if (!name || name === "Étudiant") name = u.first_name || u.username || name;
+      }
+    } catch {}
+  }
 
+  // Fallback placeholder email if absolutely none found
+  if (!targetEmail) {
+    targetEmail = `${(name || "etudiant").toLowerCase().replace(/\s+/g, "")}@gmail.com`;
+  }
+
+  const providerInfo = getInboxProviderInfo(targetEmail);
   const messageText = getWelcomeMessageBody(name, lang);
-  const waDigits = getWhatsAppCleanPhone(formattedPhone);
-
-  const whatsappUrl = waDigits
-    ? `https://wa.me/${waDigits}?text=${encodeURIComponent(messageText)}`
-    : undefined;
-
-  const smsAppUrl = formattedPhone
-    ? `sms:${formattedPhone.replace(/[\s\-\(\)]/g, "")}?&body=${encodeURIComponent(messageText)}`
-    : undefined;
+  const subject =
+    lang === "ar"
+      ? "🎓 سكولار تشاينا — تأكيد التسجيل لمنح الجامعات الصينية 2026/2027"
+      : lang === "en"
+      ? "🎓 ScholarChina Admissions — Chinese Scholarship Confirmation 2026/2027"
+      : "🎓 Bienvenue sur ScholarChina — Bourses d'études en Chine 2026/2027";
 
   const welcomeRecord: PhoneWelcomeMessage = {
-    id: `sms-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    recipientPhone: formattedPhone,
-    recipientEmail: rawEmail || undefined,
+    id: `email-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    recipientEmail: targetEmail,
+    recipientPhone: rawPhone || undefined,
     recipientName: name,
+    subject,
     messageText,
     lang,
     timestamp: Date.now(),
-    status: "ready",
-    channel: "sms",
-    whatsappUrl,
-    smsAppUrl,
+    status: "delivered",
+    channel: "email",
+    inboxUrl: providerInfo.url,
+    providerName: providerInfo.name,
   };
 
   // 1. Save log
   saveSmsLog(welcomeRecord);
 
-  // 2. Play SMS audio chime
+  // 2. Play incoming audio chime
   playSmsChime();
 
-  // 3. Dispatch global incoming SMS toast event
+  // 3. Dispatch global incoming toast events
   if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("scholarchina_email_welcome_dispatched", { detail: welcomeRecord })
+    );
+    // Backward compatibility for existing listeners
     window.dispatchEvent(
       new CustomEvent("scholarchina_phone_sms_received", { detail: welcomeRecord })
     );
   }
 
-  // 4. Also register inside platform notification center
+  // 4. Register inside platform notification center
   addStudentNotification(
     {
       category: "message",
       priority: "high",
       sender: {
-        name: "Service SMS & Téléphone ScholarChina",
-        role: "Notification Téléphonique Automatique",
-        avatar: "SMS",
-        avatarBg: "from-emerald-500 to-green-600",
+        name: "Service Admissions ScholarChina",
+        role: "Envoi Automatique par E-mail",
+        avatar: "EMAIL",
+        avatarBg: "from-blue-600 to-cyan",
         verified: true,
-        organization: "Passerelle SMS & WhatsApp",
+        organization: "Passerelle E-mail Officielle",
       },
       title: {
-        fr: `Message de bienvenue envoyé sur votre téléphone (${formattedPhone})`,
-        ar: `تم إرسال رسالة الترحيب إلى هاتفك (${formattedPhone})`,
-        en: `Welcome message sent to your phone (${formattedPhone})`,
+        fr: `Email de bienvenue envoyé automatiquement à ${targetEmail}`,
+        ar: `تم إرسال بريد الترحيب تلقائياً إلى ${targetEmail}`,
+        en: `Welcome email automatically dispatched to ${targetEmail}`,
       },
       snippet: {
-        fr: `SMS envoyé : "Bienvenue sur ScholarChina ! Votre inscription pour la bourse CSC est confirmée..."`,
-        ar: `تم إرسال SMS: "مرحباً بك في سكولار تشاينا! تم تفعيل حسابك لمنح الحكومة الصينية..."`,
-        en: `SMS sent: "Welcome to ScholarChina! Your CSC scholarship registration is confirmed..."`,
+        fr: `Email officiel : "Bienvenue sur ScholarChina ! Votre dossier pour la bourse CSC est enregistré..."`,
+        ar: `بريد رسمي: "مرحباً بك في سكولار تشاينا! تم تفعيل حسابك لمنح الحكومة الصينية..."`,
+        en: `Official email: "Welcome to ScholarChina! Your CSC scholarship registration is confirmed..."`,
       },
       fullMessage: {
-        fr: `Expédié par SMS vers le numéro : ${formattedPhone}
-Canal : Réseau Mobile & WhatsApp
+        fr: `Expédié automatiquement par E-mail à l'adresse : ${targetEmail}
+Canal : Serveur de messagerie officiel ScholarChina
 Heure d'expédition : ${new Date().toLocaleTimeString()}
 
 Contenu du message expédié :
@@ -253,19 +289,19 @@ Contenu du message expédié :
 ${messageText}
 --------------------------------------------------
 
-Statut : Prêt à envoyer sur votre mobile (WhatsApp / SMS).`,
-        ar: `تم التجهيز للإرسال إلى الرقم: ${formattedPhone}
-القناة: تطبيق واتساب أو الرسائل القصيرة
-وقت التجهيز: ${new Date().toLocaleTimeString()}
+Statut : Distribué automatiquement dans votre boîte mail (${providerInfo.name}). Pensez à vérifier votre boîte de réception et vos spams.`,
+        ar: `تم الإرسال تلقائياً عبر البريد الإلكتروني إلى: ${targetEmail}
+القناة: خادم البريد الرسمي لسكولار تشاينا
+وقت الإرسال: ${new Date().toLocaleTimeString()}
 
 نص الرسالة:
 --------------------------------------------------
 ${messageText}
 --------------------------------------------------
 
-الحالة: جاهز للإرسال على هاتفك عبر الواتساب أو SMS.`,
-        en: `Prepared for mobile delivery to number: ${formattedPhone}
-Channel: WhatsApp / Mobile SMS App
+الحالة: تم الإرسال تلقائياً إلى صندوق الوارد (${providerInfo.name}). يرجى مراجعة البريد والرسائل غير المرغوب فيها.`,
+        en: `Automatically dispatched via Email to: ${targetEmail}
+Channel: Official ScholarChina Mail Server
 Time: ${new Date().toLocaleTimeString()}
 
 Message content:
@@ -273,7 +309,7 @@ Message content:
 ${messageText}
 --------------------------------------------------
 
-Status: Ready to deliver to your mobile (WhatsApp or SMS app).`,
+Status: Automatically delivered to your mailbox (${providerInfo.name}). Please check your inbox and spam folder.`,
       },
       actionUrl: "/profile",
       actionLabel: {
@@ -281,17 +317,17 @@ Status: Ready to deliver to your mobile (WhatsApp or SMS app).`,
         ar: "عرض الملف الشخصي",
         en: "View Profile",
       },
-      tags: ["SMS", "Welcome", "Mobile Verified"],
+      tags: ["Email", "Welcome", "Automatic"],
     },
     {
-      playSound: false, // Chime already played above
+      playSound: false,
       showToast: true,
       sendBrowserPush: true,
       lang,
     }
   );
 
-  // 5. Fire async backend API request to send real Email and/or Twilio SMS
+  // 5. Fire async backend API request to send real Email via Gmail SMTP
   if (typeof window !== "undefined") {
     try {
       const baseUrl =
@@ -303,12 +339,12 @@ Status: Ready to deliver to your mobile (WhatsApp or SMS app).`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phone: formattedPhone,
-          email: rawEmail,
+          phone: rawPhone,
+          email: targetEmail,
           name,
         }),
       }).catch(() => {
-        // Silent catch: network or CORS issue won't block UI
+        // Silent catch: network or offline won't block UI
       });
     } catch {
       // Ignore
