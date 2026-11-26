@@ -1,19 +1,21 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Lock, User, UserPlus } from "lucide-react";
+import { Mail, Lock, User, UserPlus, Phone } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser, sendVerificationCode } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import Logo from "@/components/Logo";
+import { sendWelcomePhoneMessage } from "@/lib/phoneWelcomeEngine";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { t, lang } = useLang();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -42,6 +44,18 @@ export default function RegisterPage() {
     const response = await registerUser({ username, email, password });
 
     if (response.data) {
+      // Send welcome SMS/WhatsApp message to student's phone
+      if (phone.trim() || email.trim()) {
+        sendWelcomePhoneMessage(
+          {
+            phone: phone.trim(),
+            email: email.trim(),
+            name: username.trim(),
+          },
+          (lang as any) || "fr"
+        );
+      }
+
       // Send verification code to email
       await sendVerificationCode(email);
       // Redirect to verify page
@@ -122,6 +136,23 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
+                className="w-full glass rounded-xl py-3 pl-11 pr-4 text-text-primary placeholder:text-text-muted outline-none input-glow"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-text-secondary mb-2 block flex items-center justify-between">
+              <span>{lang === "ar" ? "رقم الهاتف / الواتساب" : "Phone / WhatsApp (Optional)"}</span>
+              <span className="text-xs text-emerald-400 font-semibold">{lang === "ar" ? "تأكيد SMS ترحيبي" : "Welcome SMS included"}</span>
+            </label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+212 600 000 000"
                 className="w-full glass rounded-xl py-3 pl-11 pr-4 text-text-primary placeholder:text-text-muted outline-none input-glow"
               />
             </div>

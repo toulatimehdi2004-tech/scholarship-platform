@@ -48,6 +48,7 @@ import StudentSidebar from "@/components/StudentSidebar";
 import StudentVisaProcessCard from "@/components/StudentVisaProcessCard";
 import TwoFactorAuthModal from "@/components/TwoFactorAuthModal";
 import { getCurrentDeviceInfo, isDeviceTrusted, revokeCurrentDeviceTrust, trustCurrentDevice } from "@/lib/deviceTrust";
+import { sendWelcomePhoneMessage } from "@/lib/phoneWelcomeEngine";
 
 const MOROCCAN_CITIES = [
   "Casablanca",
@@ -225,6 +226,16 @@ export default function ProfilePage() {
             localStorage.setItem("user", JSON.stringify(u.data));
           } catch {}
         }
+
+        // Send welcome message to student's phone via SMS / WhatsApp
+        if (phone.trim() || email.trim()) {
+          sendWelcomePhoneMessage({
+            phone: phone.trim(),
+            email: email.trim(),
+            name: firstName.trim() || user?.username,
+          });
+        }
+
         setTimeout(() => setSaveSuccess(false), 4000);
       } else {
         setSaveError(res.error || "Failed to save profile. Please check the fields.");
@@ -551,6 +562,25 @@ export default function ProfilePage() {
                           placeholder="+212 600 000 000"
                           className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-glass text-sm text-text-primary focus:outline-none focus:border-cyan input-glow"
                         />
+                      </div>
+                      <div className="flex items-center justify-between mt-1.5 px-0.5">
+                        <span className="text-[10px] text-text-muted flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <span>SMS de bienvenue envoyé sur votre téléphone</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sendWelcomePhoneMessage({
+                              phone: phone.trim() || "+212 661-234567",
+                              email: email.trim(),
+                              name: firstName.trim() || user?.username,
+                            });
+                          }}
+                          className="text-[10px] font-bold text-cyan hover:underline"
+                        >
+                          Tester l&apos;envoi SMS
+                        </button>
                       </div>
                     </div>
                   </div>

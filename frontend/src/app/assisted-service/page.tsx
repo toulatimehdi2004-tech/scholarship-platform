@@ -37,6 +37,7 @@ import StudentSidebar from "@/components/StudentSidebar";
 import { useApplicationMode } from "@/lib/ApplicationModeContext";
 import { useLang } from "@/lib/i18n";
 import { getToken, getCurrentUser, type User as ApiUser } from "@/lib/api";
+import { sendWelcomePhoneMessage } from "@/lib/phoneWelcomeEngine";
 
 type AssistedTab = "overview" | "apply" | "tracker" | "packages" | "advisor";
 
@@ -231,6 +232,19 @@ export default function AssistedServicePage() {
       try {
         localStorage.setItem("assisted_dossiers_data", JSON.stringify(updated));
       } catch {}
+
+      // Send welcome SMS message to the student's phone
+      if (phone.trim() || email.trim()) {
+        sendWelcomePhoneMessage(
+          {
+            phone: phone.trim(),
+            email: email.trim(),
+            name: fullName.trim() || "Étudiant",
+          },
+          (lang as any) || "fr"
+        );
+      }
+
       setSubmitting(false);
       setActiveTab("tracker");
     }, 1000);

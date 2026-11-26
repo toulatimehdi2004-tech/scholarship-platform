@@ -25,6 +25,7 @@ import { useLang } from '@/lib/i18n';
 import { ACCREDITED_UNIVERSITIES, verifyUniversityEmail } from '@/lib/universityRegistry';
 import TwoFactorAuthModal from './TwoFactorAuthModal';
 import { isDeviceTrusted, trustCurrentDevice } from '@/lib/deviceTrust';
+import { sendWelcomePhoneMessage } from '@/lib/phoneWelcomeEngine';
 
 export type PortalAuthRole = 'student' | 'university' | 'provider';
 
@@ -74,6 +75,7 @@ export default function AuthGateModal({
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [city, setCity] = useState('Casablanca');
@@ -398,6 +400,19 @@ export default function AuthGateModal({
               localStorage.setItem('university_accredited', JSON.stringify(matchedUni));
             }
           }
+
+          // Send welcome phone message via SMS / WhatsApp
+          if (phone.trim() || email.trim()) {
+            sendWelcomePhoneMessage(
+              {
+                phone: phone.trim(),
+                email: email.trim(),
+                name: fullName.trim() || username.trim(),
+              },
+              (lang as any) || 'fr'
+            );
+          }
+
           if (onSuccess) {
             onSuccess();
           } else {
@@ -895,6 +910,23 @@ export default function AuthGateModal({
                       : 'your.email@example.com'
                   }
                   className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-400 text-sm"
+                />
+              </div>
+            )}
+
+            {/* Optional Phone Field for Student Registration */}
+            {tab === 'register' && activeRole === 'student' && (
+              <div>
+                <label className="block text-xs font-semibold text-white/80 mb-1.5 flex items-center justify-between">
+                  <span>{lang === "ar" ? "رقم الهاتف / الواتساب" : "Numéro de Téléphone / WhatsApp"}</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">{lang === "ar" ? "تأكيد SMS ترحيبي" : "SMS de bienvenue inclus"}</span>
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+212 600 000 000"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-cyan text-sm"
                 />
               </div>
             )}

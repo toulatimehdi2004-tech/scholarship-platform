@@ -6,6 +6,7 @@ import { getToken } from "@/lib/api";
 import LiveCommunicationWidget from "@/components/LiveCommunicationWidget";
 import MandatoryChoiceGateModal from "@/components/MandatoryChoiceGateModal";
 import NotificationToastContainer from "@/components/NotificationToastContainer";
+import PhoneWelcomeToast from "@/components/PhoneWelcomeToast";
 
 interface PortalGateProps {
   navbar: React.ReactNode;
@@ -62,6 +63,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         <MandatoryChoiceGateModal />
         <LiveCommunicationWidget />
         <NotificationToastContainer />
+        <PhoneWelcomeToast />
       </>
     );
   }
@@ -75,6 +77,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         {footer}
         <LiveCommunicationWidget />
         <NotificationToastContainer />
+        <PhoneWelcomeToast />
       </>
     );
   }
@@ -111,6 +114,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         <MandatoryChoiceGateModal />
         <LiveCommunicationWidget />
         <NotificationToastContainer />
+        <PhoneWelcomeToast />
       </>
     );
   }
@@ -122,6 +126,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
         <main className="relative z-10 min-h-screen">{children}</main>
         <LiveCommunicationWidget />
         <NotificationToastContainer />
+        <PhoneWelcomeToast />
       </>
     );
   }
@@ -135,6 +140,7 @@ export default function PortalGate({ navbar, children, footer }: PortalGateProps
       {footer}
       <LiveCommunicationWidget />
       <NotificationToastContainer />
+      <PhoneWelcomeToast />
     </>
   );
 }

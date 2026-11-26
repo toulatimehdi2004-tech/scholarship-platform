@@ -35,6 +35,7 @@ import { getToken, getCurrentUser, type User as UserType } from "@/lib/api";
 import MarkdownContent from "@/components/MarkdownContent";
 import { analyzeChatImage, generateAiChatResponse, speakText, stopSpeaking } from "@/lib/aiChatEngine";
 import { addStudentNotification } from "@/lib/notificationEngine";
+import { sendWelcomePhoneMessage } from "@/lib/phoneWelcomeEngine";
 
 interface ChatMessage {
   id: string;
@@ -516,6 +517,17 @@ export default function LiveCommunicationWidget() {
 
     setCallbackSubmitted(true);
 
+    // Send instant welcome & confirmation SMS to student's phone
+    if (callbackPhone.trim()) {
+      sendWelcomePhoneMessage(
+        {
+          phone: callbackPhone.trim(),
+          name: callbackName.trim() || user?.username,
+        },
+        (lang as any) || "fr"
+      );
+    }
+
     // Also add confirmation to the chat thread
     const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const ticketMsg: ChatMessage = {
@@ -576,6 +588,17 @@ export default function LiveCommunicationWidget() {
 
     setWhatsappSubmitted(true);
     setWhatsappSubmittedTicket(ticketNumber);
+
+    // Send instant welcome message to the student's phone via SMS & WhatsApp
+    if (cleanPhone.trim()) {
+      sendWelcomePhoneMessage(
+        {
+          phone: cleanPhone.trim(),
+          name: whatsappName.trim() || user?.username,
+        },
+        (lang as any) || "fr"
+      );
+    }
 
     // Also add confirmation to the chat thread
     const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
