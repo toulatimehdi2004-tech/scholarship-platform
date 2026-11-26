@@ -337,7 +337,10 @@ Status: Automatically delivered to your mailbox (${providerInfo.name}). Please c
 
       fetch(`${baseUrl}/send-welcome-message/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({
           phone: rawPhone,
           email: targetEmail,
