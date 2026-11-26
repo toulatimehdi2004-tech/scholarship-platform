@@ -14,9 +14,10 @@ export interface PhoneWelcomeMessage {
   messageText: string;
   lang: "fr" | "ar" | "en";
   timestamp: number;
-  status: "sent" | "delivered";
+  status: "ready" | "sent" | "delivered";
   channel: "sms" | "whatsapp";
   whatsappUrl?: string;
+  smsAppUrl?: string;
 }
 
 const STORAGE_KEY = "scholarchina_sms_delivery_logs";
@@ -73,7 +74,7 @@ export function getWelcomeMessageBody(
 
   if (lang === "ar") {
     return `🎓 سكولار تشاينا (ScholarChina)
-مرحباً بك ${name !== "Étudiant" ? name : ""} في منصة منح الجامعات الصينية 2026/2027! 🇲🇦🇨🇳
+مرحباً بك ${name !== "Étudiant" ? name : ""} في منصة منح الجامعات الصينية 2026/2027!
 
 تم تسجيل رقمك بنجاح في نظام التوجيه والاستشارات. مستشارك الأكاديمي جاهز لمساعدتك في الحصول على منحة الحكومة الصينية الكاملة (CSC Type A / B)، التحضير لاختبار CSCA، وتجهيز ملف الترجمة والتصديق القانوني.
 
@@ -82,7 +83,7 @@ export function getWelcomeMessageBody(
 
   if (lang === "en") {
     return `🎓 ScholarChina Admissions
-Welcome ${name !== "Étudiant" ? name : ""} to the China Higher Education & CSC Scholarship Gateway! 🇲🇦🇨🇳
+Welcome ${name !== "Étudiant" ? name : ""} to the China Higher Education & CSC Scholarship Gateway!
 
 Your contact has been registered successfully. Your dedicated academic advisor is ready to assist you with university matching, full tuition exemption + stipend (3,000-3,500 RMB/mo), CSCA exam preparation, and visa JW202 processing.
 
@@ -91,7 +92,7 @@ Access your portal dashboard anytime to view your eligible universities. We wish
 
   // French default
   return `🎓 ScholarChina Admissions
-Bienvenue ${studentName} sur le portail officiel des bourses d'études en Chine ! 🇲🇦🇨🇳
+Bienvenue ${studentName} sur le portail officiel des bourses d'études en Chine !
 
 Votre contact a été enregistré avec succès dans notre système d'admissions. Votre conseiller académique dédié est à votre disposition pour vous guider vers la bourse complète du Gouvernement Chinois (CSC Type A/B), la préparation du test CSCA et la légalisation de vos documents.
 
@@ -185,7 +186,11 @@ export function sendWelcomePhoneMessage(
   const waDigits = getWhatsAppCleanPhone(formattedPhone);
 
   const whatsappUrl = waDigits
-    ? `https://api.whatsapp.com/send?phone=${waDigits}&text=${encodeURIComponent(messageText)}`
+    ? `https://wa.me/${waDigits}?text=${encodeURIComponent(messageText)}`
+    : undefined;
+
+  const smsAppUrl = formattedPhone
+    ? `sms:${formattedPhone.replace(/[\s\-\(\)]/g, "")}?&body=${encodeURIComponent(messageText)}`
     : undefined;
 
   const welcomeRecord: PhoneWelcomeMessage = {
@@ -196,9 +201,10 @@ export function sendWelcomePhoneMessage(
     messageText,
     lang,
     timestamp: Date.now(),
-    status: "delivered",
+    status: "ready",
     channel: "sms",
     whatsappUrl,
+    smsAppUrl,
   };
 
   // 1. Save log
@@ -247,27 +253,27 @@ Contenu du message expédié :
 ${messageText}
 --------------------------------------------------
 
-Statut : Distribué avec succès sur votre téléphone.`,
-        ar: `تم الإرسال عبر SMS إلى الرقم: ${formattedPhone}
-القناة: شبكة الهاتف الجوال والواتساب
-وقت الإرسال: ${new Date().toLocaleTimeString()}
+Statut : Prêt à envoyer sur votre mobile (WhatsApp / SMS).`,
+        ar: `تم التجهيز للإرسال إلى الرقم: ${formattedPhone}
+القناة: تطبيق واتساب أو الرسائل القصيرة
+وقت التجهيز: ${new Date().toLocaleTimeString()}
 
-نص الرسالة المرسلة:
+نص الرسالة:
 --------------------------------------------------
 ${messageText}
 --------------------------------------------------
 
-الحالة: تم التسليم بنجاح على هاتفك.`,
-        en: `Dispatched via SMS to number: ${formattedPhone}
-Channel: Mobile Network & WhatsApp
-Delivery Time: ${new Date().toLocaleTimeString()}
+الحالة: جاهز للإرسال على هاتفك عبر الواتساب أو SMS.`,
+        en: `Prepared for mobile delivery to number: ${formattedPhone}
+Channel: WhatsApp / Mobile SMS App
+Time: ${new Date().toLocaleTimeString()}
 
-Message content delivered:
+Message content:
 --------------------------------------------------
 ${messageText}
 --------------------------------------------------
 
-Status: Successfully delivered to your phone.`,
+Status: Ready to deliver to your mobile (WhatsApp or SMS app).`,
       },
       actionUrl: "/profile",
       actionLabel: {
@@ -284,6 +290,30 @@ Status: Successfully delivered to your phone.`,
       lang,
     }
   );
+
+  // 5. Fire async backend API request to send real Email and/or Twilio SMS
+  if (typeof window !== "undefined") {
+    try {
+      const baseUrl =
+        window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+          ? "http://localhost:8000/api"
+          : (process.env.NEXT_PUBLIC_API_URL || "https://proofing-harmless-mulled.ngrok-free.dev/api");
+
+      fetch(`${baseUrl}/send-welcome-message/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: formattedPhone,
+          email: rawEmail,
+          name,
+        }),
+      }).catch(() => {
+        // Silent catch: network or CORS issue won't block UI
+      });
+    } catch {
+      // Ignore
+    }
+  }
 
   return welcomeRecord;
 }

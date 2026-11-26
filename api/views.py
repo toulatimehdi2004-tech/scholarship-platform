@@ -1274,3 +1274,79 @@ def provider_pickup_application_view(request):
         'pickup_phone': provider.pickup_phone if provider else '',
     })
 
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def send_welcome_message_view(request):
+    """
+    POST /api/send-welcome-message/
+    Dispatches real welcome message via:
+    1. Email (via configured Gmail SMTP) if email is provided
+    2. Real SMS (via Twilio if TWILIO_ACCOUNT_SID configured in environment)
+    """
+    import os
+    email = request.data.get('email', '').strip()
+    phone = request.data.get('phone', '').strip()
+    name = request.data.get('name', 'Étudiant').strip()
+
+    email_sent = False
+    sms_sent = False
+    sms_error = None
+
+    # 1. Send real email if email is provided
+    if email:
+        try:
+            send_mail(
+                subject='🎓 Bienvenue sur ScholarChina — Bourses d\'études en Chine 2026/2027',
+                message=(
+                    f"Bonjour {name},\n\n"
+                    "Bienvenue sur ScholarChina, la passerelle officielle pour les bourses universitaires en Chine !\n\n"
+                    "Votre contact a été enregistré avec succès. Votre conseiller académique dédié est à votre disposition "
+                    "pour vous accompagner vers la bourse complète du Gouvernement Chinois (CSC Type A / B), "
+                    "la préparation du test CSCA et la légalisation de vos documents.\n\n"
+                    "Accédez à votre espace étudiant pour découvrir vos universités partenaires éligibles.\n\n"
+                    "Bonne chance dans vos démarches !\n\n"
+                    "L'équipe ScholarChina Admissions\n"
+                    "Bureau de Rabat & Beijing"
+                ),
+                from_email=None,
+                recipient_list=[email],
+                fail_silently=True,
+            )
+            email_sent = True
+        except Exception:
+            pass
+
+    # 2. Send real SMS via Twilio if configured
+    twilio_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+    twilio_token = os.environ.get('TWILIO_AUTH_TOKEN')
+    twilio_from = os.environ.get('TWILIO_FROM_NUMBER')
+
+    if phone and twilio_sid and twilio_token and twilio_from:
+        try:
+            from twilio.rest import Client
+            client = Client(twilio_sid, twilio_token)
+            clean_p = phone.replace(' ', '').replace('-', '')
+            if clean_p.startswith('0'):
+                clean_p = '+212' + clean_p[1:]
+            elif not clean_p.startswith('+'):
+                clean_p = '+212' + clean_p
+
+            client.messages.create(
+                body=f"🎓 ScholarChina : Bienvenue {name} ! Votre inscription pour la bourse CSC en Chine est confirmée. Votre conseiller est en ligne sur votre portail.",
+                from_=twilio_from,
+                to=clean_p,
+            )
+            sms_sent = True
+        except Exception as e:
+            sms_error = str(e)
+    elif phone:
+        sms_error = "Twilio credentials not configured in .env. Use WhatsApp direct delivery or SMS app link."
+
+    return Response({
+        'success': True,
+        'email_sent': email_sent,
+        'sms_sent': sms_sent,
+        'sms_error': sms_error,
+    })
+

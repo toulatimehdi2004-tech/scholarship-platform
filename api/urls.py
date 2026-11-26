@@ -52,6 +52,9 @@ urlpatterns = [
     path('provider/payout-request/', views.provider_request_payout_view, name='api-provider-payout-request'),
     path('provider/pickup/', views.provider_pickup_application_view, name='api-provider-pickup'),
 
+    # Welcome message (Email & Twilio SMS)
+    path('send-welcome-message/', views.send_welcome_message_view, name='api-send-welcome-message'),
+
     # Router-generated routes
     path('', include(router.urls)),
 ]
