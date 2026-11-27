@@ -67,6 +67,8 @@ export default function StudentPortalPage() {
         getCurrentUser().then((res) => {
           if (res.data) setUser(res.data);
         });
+      } else if (!stored) {
+        router.push("/");
       }
     }
   }, []);

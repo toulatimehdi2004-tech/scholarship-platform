@@ -107,12 +107,14 @@ export default function MandatoryChoiceGateModal() {
       localStorage.getItem("user")
     );
 
-  // Imposed ONLY for new visitors without an account who have not chosen yet
+  // Never ask a user without an account to fill the form without logging in first!
+  if (!hasAccount) return null;
+
+  // Imposed ONLY if orientation has not been completed yet
   const isImposed =
-    !hasAccount &&
-    (!hasChosenMode ||
-      (typeof window !== "undefined" &&
-        localStorage.getItem("student_orientation_done_v3") !== "true"));
+    !hasChosenMode ||
+    (typeof window !== "undefined" &&
+      localStorage.getItem("student_orientation_done_v3") !== "true");
 
   const handleSelectLang = (selectedLang: Lang) => {
     setLang(selectedLang);

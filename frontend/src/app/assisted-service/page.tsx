@@ -135,6 +135,12 @@ export default function AssistedServicePage() {
     if (typeof window !== "undefined") {
       try {
         const u = localStorage.getItem("user");
+        const token = localStorage.getItem("token") || localStorage.getItem("auth_token");
+        if (!u && !token) {
+          router.push("/");
+          return;
+        }
+
         if (u) {
           const parsed = JSON.parse(u);
           setUser(parsed);

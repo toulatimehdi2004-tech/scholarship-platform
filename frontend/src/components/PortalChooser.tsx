@@ -112,7 +112,21 @@ export default function PortalChooser({
     try {
       localStorage.setItem("portal_role", role);
     } catch {}
-    onSelectRole(role);
+
+    const hasAccount =
+      typeof window !== "undefined" &&
+      Boolean(
+        localStorage.getItem("token") ||
+        localStorage.getItem("auth_token") ||
+        localStorage.getItem("user")
+      );
+
+    if (hasAccount) {
+      router.push("/profile");
+    } else {
+      // First thing: require login or registration before entering portal or filling forms!
+      setAuthModalOpen(true);
+    }
   }
 
   function handleSignInClick() {
@@ -296,7 +310,11 @@ export default function PortalChooser({
                   {/* Bottom Continue Row */}
                   <div className="relative z-10 flex items-center justify-between pt-2 border-t border-white/5">
                     <span className={`text-xs sm:text-sm font-bold ${r.btnTextColor}`}>
-                      {lang === "ar" ? "متابعة كطالب" : "Continuer"}
+                      {lang === "ar"
+                        ? "تسجيل الدخول / الدخول كطالب"
+                        : lang === "fr"
+                        ? "Connexion / Accéder au portail"
+                        : "Sign In / Enter Portal"}
                     </span>
                     <div
                       className={`w-8 h-8 rounded-full ${r.btnArrowBg} flex items-center justify-center transition-all duration-300`}
@@ -413,12 +431,24 @@ export default function PortalChooser({
         role={chosenRoleForAuth}
         title={
           chosenRoleForAuth === "student"
-            ? "Student Sign In"
+            ? lang === "ar"
+              ? "تسجيل الدخول / إنشاء حساب طالب"
+              : lang === "fr"
+              ? "Connexion / Inscription Étudiant"
+              : "Student Sign In & Registration"
             : chosenRoleForAuth === "university"
             ? "University Admissions Sign In"
             : "Service Provider Sign In"
         }
-        subtitle="Sign in to access your customized ScholarChina workspace."
+        subtitle={
+          chosenRoleForAuth === "student"
+            ? lang === "ar"
+              ? "يرجى تسجيل الدخول أو إنشاء حسابك الرسمي أولاً للوصول إلى المنح والتقديم."
+              : lang === "fr"
+              ? "Veuillez vous connecter ou créer votre compte officiel pour accéder aux bourses et postuler."
+              : "Please log in or create your official student account to access scholarships and apply."
+            : "Sign in to access your customized ScholarChina workspace."
+        }
         onSuccess={() => {
           setAuthModalOpen(false);
           // Who already have an account with us: taken directly to their profile!

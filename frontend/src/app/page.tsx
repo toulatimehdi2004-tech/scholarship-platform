@@ -3,12 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PortalChooser, { type PortalRole } from "@/components/PortalChooser";
-import { useApplicationMode } from "@/lib/ApplicationModeContext";
 
 export default function RootPage() {
   const router = useRouter();
   const [currentRole, setCurrentRole] = useState<PortalRole | null>(null);
-  const { openChoiceModal } = useApplicationMode();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -32,7 +30,7 @@ export default function RootPage() {
       localStorage.setItem("portal_role", "student");
     } catch {}
 
-    // If user already has an account with us: no need to refill application, go directly to profile!
+    // If user already has an account with us: go directly to profile!
     const token =
       typeof window !== "undefined"
         ? localStorage.getItem("auth_token") || localStorage.getItem("token")
@@ -40,11 +38,7 @@ export default function RootPage() {
     const user = typeof window !== "undefined" ? localStorage.getItem("user") : null;
     if (token || user) {
       router.push("/profile");
-      return;
     }
-
-    // New student without an account: show orientation questionnaire
-    openChoiceModal();
   }
 
   return (

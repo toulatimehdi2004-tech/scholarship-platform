@@ -73,22 +73,9 @@ export function ApplicationModeProvider({
             sessionStorage.removeItem("require_application_choice");
           } catch {}
         } else {
-          setHasChosenMode(orientationDone);
-
-          // If orientation is not done yet, or explicitly requested, impose on student paths
-          const isStudentPath =
-            pathname === "/student-portal" ||
-            pathname?.startsWith("/student-portal") ||
-            pathname?.startsWith("/scholarships") ||
-            pathname?.startsWith("/assisted-service") ||
-            pathname?.startsWith("/tracker") ||
-            pathname?.startsWith("/universities");
-
-          if (!orientationDone || requireChoice) {
-            if (isStudentPath || (pathname === "/" && role === "student")) {
-              setShowChoiceModal(true);
-            }
-          }
+          // No account yet: do not impose orientation form without logging in first
+          setHasChosenMode(false);
+          setShowChoiceModal(false);
         }
       } catch {}
 
