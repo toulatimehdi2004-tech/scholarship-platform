@@ -43,6 +43,7 @@ import {
   getLocalBackupSnapshot,
   restoreAccountFromSnapshot,
 } from "@/lib/accountBackupVault";
+import { saveAcademicProfile, convertGpaTo100, type GpaScale } from "@/lib/academicProfile";
 import {
   getToken,
   getCurrentUser,
@@ -121,7 +122,7 @@ export default function ProfilePage() {
   const [educationLevel, setEducationLevel] = useState("bachelor");
   const [fieldOfStudy, setFieldOfStudy] = useState("");
   const [gpa, setGpa] = useState("");
-  const [gpaScale, setGpaScale] = useState<"20" | "4">("20");
+  const [gpaScale, setGpaScale] = useState<"20" | "100" | "4">("20");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -342,6 +343,22 @@ export default function ProfilePage() {
         localStorage.setItem("user", JSON.stringify(u));
         localStorage.setItem("student_profile", JSON.stringify(u.student_profile));
         setUser(u);
+
+        // Also update unified academic profile for scholarship match badges
+        const scaleMap: Record<string, GpaScale> = {
+          "20": "SCALE_20",
+          "100": "SCALE_100",
+          "4": "SCALE_4",
+        };
+        saveAcademicProfile({
+          gpaRaw: gpa.trim() || "15.0",
+          gpaScale: scaleMap[gpaScale] || "SCALE_20",
+          currentDegree: (educationLevel as any) || "bachelor",
+          nationality: "Morocco",
+          age: dateOfBirth ? Math.max(16, new Date().getFullYear() - new Date(dateOfBirth).getFullYear()) : 22,
+          birthDate: dateOfBirth || undefined,
+          fieldOfStudy: fieldOfStudy.trim(),
+        });
       } catch {}
     }
 
@@ -837,6 +854,16 @@ export default function ProfilePage() {
                         <span>|</span>
                         <button
                           type="button"
+                          onClick={() => setGpaScale("100")}
+                          className={`px-2 py-0.5 rounded cursor-pointer ${
+                            gpaScale === "100" ? "bg-cyan text-white" : "text-text-muted hover:text-text-primary"
+                          }`}
+                        >
+                          / 100 (%)
+                        </button>
+                        <span>|</span>
+                        <button
+                          type="button"
                           onClick={() => setGpaScale("4")}
                           className={`px-2 py-0.5 rounded cursor-pointer ${
                             gpaScale === "4" ? "bg-cyan text-white" : "text-text-muted hover:text-text-primary"
@@ -852,18 +879,40 @@ export default function ProfilePage() {
                         type="number"
                         step="0.01"
                         min="0"
-                        max={gpaScale === "20" ? "20" : "4.0"}
+                        max={gpaScale === "20" ? "20" : gpaScale === "4" ? "4.0" : "100"}
                         value={gpa}
                         onChange={(e) => setGpa(e.target.value)}
-                        placeholder={gpaScale === "20" ? "e.g. 15.5" : "e.g. 3.5"}
+                        placeholder={
+                          gpaScale === "20"
+                            ? "e.g. 15.5"
+                            : gpaScale === "4"
+                            ? "e.g. 3.5"
+                            : "e.g. 82"
+                        }
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-glass text-sm text-text-primary focus:outline-none focus:border-cyan input-glow"
                       />
                     </div>
                     {gpa && !isNaN(Number(gpa)) && (
-                      <p className="text-[11px] text-text-muted mt-1">
-                        {gpaScale === "20"
-                          ? `≈ ${(Number(gpa) / 5).toFixed(2)} on 4.0 scale`
-                          : `≈ ${(Number(gpa) * 5).toFixed(1)} / 20 on Moroccan scale`}
+                      <p className="text-[11px] text-text-muted mt-1 flex items-center justify-between">
+                        <span>
+                          {gpaScale === "20"
+                            ? `≈ ${(Number(gpa) / 5).toFixed(2)} on 4.0 scale`
+                            : gpaScale === "4"
+                            ? `≈ ${(Number(gpa) * 5).toFixed(1)} / 20 on Moroccan scale`
+                            : `≈ ${(Number(gpa) / 5).toFixed(1)} / 20 • ${(Number(gpa) / 25).toFixed(2)} / 4.0`}
+                        </span>
+                        <span className="text-cyan font-bold">
+                          Normalized:{" "}
+                          {convertGpaTo100(
+                            gpa,
+                            gpaScale === "20"
+                              ? "SCALE_20"
+                              : gpaScale === "4"
+                              ? "SCALE_4"
+                              : "SCALE_100"
+                          )}
+                          /100
+                        </span>
                       </p>
                     )}
                   </div>

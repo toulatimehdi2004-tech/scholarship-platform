@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import type { Scholarship } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { toggleCompareId, getCompareIds } from "@/lib/compare";
+import ScholarshipMatchBadge from "@/components/ScholarshipMatchBadge";
 
 interface ScholarshipCardProps {
   scholarship: Scholarship;
@@ -96,13 +97,16 @@ export default function ScholarshipCard({
         href={`/scholarships/${scholarship.id}`}
         className="glass rounded-2xl p-6 card-hover cursor-pointer group h-full flex flex-col border border-border-glass relative overflow-hidden block"
       >
-        <div className="flex items-start justify-between mb-3.5">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-bold border ${badgeClass} uppercase tracking-wider`}
-          >
-            {typeLabels[scholarship.type] || scholarship.type}
-          </span>
-          <span className="text-xs text-text-muted flex items-center gap-1 font-medium">
+        <div className="flex items-start justify-between mb-3.5 gap-2">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-bold border ${badgeClass} uppercase tracking-wider`}
+            >
+              {typeLabels[scholarship.type] || scholarship.type}
+            </span>
+            <ScholarshipMatchBadge scholarship={scholarship} size="sm" />
+          </div>
+          <span className="text-xs text-text-muted flex items-center gap-1 font-medium flex-shrink-0">
             <Clock className="w-3.5 h-3.5 text-text-muted" />
             {deadline}
           </span>

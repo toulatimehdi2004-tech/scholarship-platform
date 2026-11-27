@@ -52,6 +52,8 @@ import {
 } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { REAL_SCHOLARSHIPS } from "@/data/scholarshipsData";
+import ScholarshipMatchBadge from "@/components/ScholarshipMatchBadge";
+import AcademicProfileBanner from "@/components/AcademicProfileBanner";
 
 const FREE_TRIAL_LIMIT = 4;
 
@@ -821,6 +823,9 @@ export default function ScholarshipsPage() {
               </Link>
             </div>
           </motion.div>
+
+          {/* Academic Profile & Real-time GPA Matcher */}
+          <AcademicProfileBanner className="mt-3" />
         </div>
 
         {/* ─────────────────────────────────────────────────────────────
@@ -1524,11 +1529,14 @@ export default function ScholarshipsPage() {
                               <ScholarshipEmblem themeKey={theme.key} size={54} />
 
                               <div>
-                                <span
-                                  className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${theme.badgeClass}`}
-                                >
-                                  {theme.badgeLabel}
-                                </span>
+                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                  <span
+                                    className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${theme.badgeClass}`}
+                                  >
+                                    {theme.badgeLabel}
+                                  </span>
+                                  <ScholarshipMatchBadge scholarship={sch} size="sm" />
+                                </div>
                                 <p className="text-xs text-slate-400 font-medium mt-0.5">
                                   {theme.name}
                                 </p>
