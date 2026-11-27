@@ -26,6 +26,7 @@ import { ACCREDITED_UNIVERSITIES, verifyUniversityEmail } from '@/lib/university
 import TwoFactorAuthModal from './TwoFactorAuthModal';
 import { isDeviceTrusted, trustCurrentDevice } from '@/lib/deviceTrust';
 import { sendWelcomePhoneMessage } from '@/lib/phoneWelcomeEngine';
+import CountryPhoneInput from './CountryPhoneInput';
 
 export type PortalAuthRole = 'student' | 'university' | 'provider';
 
@@ -918,15 +919,13 @@ export default function AuthGateModal({
             {tab === 'register' && activeRole === 'student' && (
               <div>
                 <label className="block text-xs font-semibold text-white/80 mb-1.5 flex items-center justify-between">
-                  <span>{lang === "ar" ? "رقم الهاتف / الواتساب" : "Numéro de Téléphone / WhatsApp"}</span>
-                  <span className="text-[10px] text-emerald-400 font-bold">{lang === "ar" ? "تأكيد SMS ترحيبي" : "SMS de bienvenue inclus"}</span>
+                  <span>{lang === "ar" ? "رقم الهاتف / الواتساب الدولي" : "Numéro de Téléphone International"}</span>
+                  <span className="text-[10px] text-cyan font-bold">{lang === "ar" ? "اختر الدولة تلقائياً" : "Sélectionnez votre pays"}</span>
                 </label>
-                <input
-                  type="tel"
+                <CountryPhoneInput
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+212 600 000 000"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-cyan text-sm"
+                  onChange={setPhone}
+                  placeholder={lang === "ar" ? "رقم الهاتف المحلي (مثال: 600000000)" : "Ex: 6 00 00 00 00"}
                 />
               </div>
             )}

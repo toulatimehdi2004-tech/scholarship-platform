@@ -9,6 +9,7 @@ import { registerUser, sendVerificationCode } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import Logo from "@/components/Logo";
 import { sendWelcomePhoneMessage } from "@/lib/phoneWelcomeEngine";
+import CountryPhoneInput from "@/components/CountryPhoneInput";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -143,19 +144,14 @@ export default function RegisterPage() {
 
           <div>
             <label className="text-sm font-medium text-text-secondary mb-2 block flex items-center justify-between">
-              <span>{lang === "ar" ? "رقم الهاتف / الواتساب" : "Phone / WhatsApp (Optional)"}</span>
-              <span className="text-xs text-emerald-400 font-semibold">{lang === "ar" ? "تأكيد SMS ترحيبي" : "Welcome SMS included"}</span>
+              <span>{lang === "ar" ? "رقم الهاتف الدولي / الواتساب" : "International Phone / WhatsApp"}</span>
+              <span className="text-xs text-cyan font-semibold">{lang === "ar" ? "اختر الدولة تلقائياً" : "Sélection du pays"}</span>
             </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+212 600 000 000"
-                className="w-full glass rounded-xl py-3 pl-11 pr-4 text-text-primary placeholder:text-text-muted outline-none input-glow"
-              />
-            </div>
+            <CountryPhoneInput
+              value={phone}
+              onChange={setPhone}
+              placeholder={lang === "ar" ? "رقم الهاتف المحلي" : "Numéro de téléphone"}
+            />
           </div>
 
           <div>
