@@ -78,6 +78,7 @@ def send_resilient_email(subject, plain_message, recipient_list, html_message=No
 
 from students.models import Student, StudentProfile, EmailVerification, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship
+from scholarships.services import GpaConversionService, EligibilityService
 from documents.models import Document
 from ai_assistant.models import (
     ApplicationTracker, ScholarshipMatch, AISuggestion
@@ -573,6 +574,152 @@ class ScholarshipViewSet(viewsets.ReadOnlyModelViewSet):
             qs = qs.filter(university_id=university)
 
         return qs.order_by('-is_featured', '-created_at').distinct()
+
+    @action(detail=True, methods=['get'], url_path='eligibility', permission_classes=[AllowAny])
+    def eligibility(self, request, pk=None):
+        """
+        GET /api/scholarships/{id}/eligibility/
+        Evaluates a candidate profile against this specific scholarship.
+        """
+        scholarship = self.get_object()
+        candidate_data = get_candidate_data_from_request(request)
+        result = EligibilityService.evaluate(candidate_data, scholarship)
+        return Response(result)
+
+    @action(detail=False, methods=['get'], url_path='recommended', permission_classes=[AllowAny])
+    def recommended(self, request):
+        """
+        GET /api/scholarships/recommended/
+        Returns scholarships evaluated and sorted descending by match score.
+        """
+        return scholarships_recommended_view(request._request)
+
+
+def get_candidate_data_from_request(request):
+    """Helper to collect candidate profile from authenticated user or query params."""
+    data = {}
+    user = getattr(request, 'user', None)
+    if user and user.is_authenticated:
+        # Check dedicated StudentProfile
+        acad = getattr(user, 'student_academic_profile', None)
+        if acad:
+            data.update({
+                'nationality': acad.nationality,
+                'birth_date': acad.birth_date,
+                'current_degree': acad.current_degree,
+                'gpa_raw': acad.gpa_raw,
+                'gpa_scale': acad.gpa_scale,
+                'gpa_normalized_100': acad.gpa_normalized_100,
+                'english_test_type': acad.english_test_type,
+                'english_score': acad.english_score,
+                'hsk_level': acad.hsk_level,
+            })
+        # Check standard Student profile
+        stud = getattr(user, 'student_profile', None)
+        if stud:
+            if not data.get('nationality'):
+                data['nationality'] = stud.country
+            if not data.get('birth_date'):
+                data['birth_date'] = stud.date_of_birth
+            if not data.get('current_degree'):
+                data['current_degree'] = stud.education_level
+            if not data.get('gpa_raw') and stud.gpa:
+                data['gpa_raw'] = str(stud.gpa)
+            if not data.get('field_of_study'):
+                data['field_of_study'] = stud.field_of_study
+
+    # Allow query parameter overrides
+    qp = getattr(request, 'query_params', None) or getattr(request, 'GET', {})
+    if qp.get('nationality'):
+        data['nationality'] = qp.get('nationality')
+    elif qp.get('country'):
+        data['nationality'] = qp.get('country')
+
+    if qp.get('birth_date'):
+        data['birth_date'] = qp.get('birth_date')
+    elif qp.get('date_of_birth'):
+        data['birth_date'] = qp.get('date_of_birth')
+
+    if qp.get('current_degree'):
+        data['current_degree'] = qp.get('current_degree')
+    elif qp.get('degree'):
+        data['current_degree'] = qp.get('degree')
+
+    if qp.get('gpa'):
+        data['gpa_raw'] = qp.get('gpa')
+    elif qp.get('gpa_raw'):
+        data['gpa_raw'] = qp.get('gpa_raw')
+
+    if qp.get('gpa_scale'):
+        data['gpa_scale'] = qp.get('gpa_scale')
+
+    if qp.get('english_score'):
+        data['english_score'] = qp.get('english_score')
+    if qp.get('english_test_type'):
+        data['english_test_type'] = qp.get('english_test_type')
+
+    if qp.get('hsk_level'):
+        data['hsk_level'] = qp.get('hsk_level')
+    elif qp.get('hsk'):
+        data['hsk_level'] = qp.get('hsk')
+
+    if qp.get('field_of_study'):
+        data['field_of_study'] = qp.get('field_of_study')
+
+    # Default fallback country if unspecified
+    if not data.get('nationality'):
+        data['nationality'] = 'Morocco'
+
+    return data
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def scholarship_eligibility_view(request, pk):
+    """GET /api/scholarships/{id}/eligibility"""
+    try:
+        scholarship = Scholarship.objects.select_related('university').get(pk=pk)
+    except Scholarship.DoesNotExist:
+        return Response({'error': f'Scholarship with ID {pk} not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    candidate_data = get_candidate_data_from_request(request)
+    result = EligibilityService.evaluate(candidate_data, scholarship)
+    return Response(result)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def scholarships_recommended_view(request):
+    """GET /api/scholarships/recommended"""
+    candidate_data = get_candidate_data_from_request(request)
+    qs = Scholarship.objects.select_related('university').filter(is_active=True)
+
+    qp = getattr(request, 'query_params', None) or getattr(request, 'GET', {})
+    eligible_only = str(qp.get('eligible_only', '')).lower() in ('true', '1')
+    try:
+        limit = int(qp.get('limit', 50))
+    except (ValueError, TypeError):
+        limit = 50
+
+    evaluated_list = []
+    for s in qs:
+        eval_res = EligibilityService.evaluate(candidate_data, s)
+        if eligible_only and not eval_res['isEligible']:
+            continue
+
+        item = ScholarshipListSerializer(s).data
+        item['matchScore'] = eval_res['matchScore']
+        item['isEligible'] = eval_res['isEligible']
+        item['passedRules'] = eval_res['passedRules']
+        item['failedReasons'] = eval_res['failedReasons']
+        item['evaluationDetails'] = eval_res['details']
+        evaluated_list.append(item)
+
+    evaluated_list.sort(
+        key=lambda x: (1 if x['isEligible'] else 0, x['matchScore'], 1 if x.get('is_featured') else 0),
+        reverse=True
+    )
+    return Response(evaluated_list[:limit])
 
 
 # ── Universities ─────────────────────────────────────────────

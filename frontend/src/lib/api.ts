@@ -77,9 +77,41 @@ export interface Scholarship {
   application_link?: string | null;
   total_seats?: number | null;
   seats_filled?: number | null;
+  target_degree?: string | null;
+  max_age?: number | null;
+  min_gpa_100?: number | null;
+  min_english_score?: number | null;
+  min_hsk_level?: number | null;
+  eligible_countries?: string[];
+  excluded_countries?: string[];
   is_active: boolean;
   is_featured: boolean;
   created_at: string;
+}
+
+export interface EligibilityResult {
+  isEligible: boolean;
+  matchScore: number;
+  passedRules: string[];
+  failedReasons: string[];
+  details?: {
+    scholarshipId?: number;
+    scholarshipTitle?: string;
+    studentNationality?: string;
+    studentAge?: number;
+    normalizedGpa100?: number;
+    englishScore?: number;
+    englishTestType?: string;
+    hskLevel?: number;
+  };
+}
+
+export interface RecommendedScholarship extends Scholarship {
+  matchScore: number;
+  isEligible: boolean;
+  passedRules: string[];
+  failedReasons: string[];
+  evaluationDetails?: any;
 }
 
 export interface ScholarshipDetail {
@@ -822,6 +854,21 @@ export async function getScholarship(
   id: number
 ): Promise<ApiResponse<ScholarshipDetail>> {
   return fetchApi<ScholarshipDetail>(`/scholarships/${id}/`);
+}
+
+export async function getScholarshipEligibility(
+  id: number,
+  params?: Record<string, any>
+): Promise<ApiResponse<EligibilityResult>> {
+  const query = params ? "?" + new URLSearchParams(params).toString() : "";
+  return fetchApi<EligibilityResult>(`/scholarships/${id}/eligibility/${query}`);
+}
+
+export async function getRecommendedScholarships(
+  params?: Record<string, any>
+): Promise<ApiResponse<RecommendedScholarship[]>> {
+  const query = params ? "?" + new URLSearchParams(params).toString() : "";
+  return fetchApi<RecommendedScholarship[]>(`/scholarships/recommended/${query}`);
 }
 
 // ── Universities API ───────────────────────────────────────

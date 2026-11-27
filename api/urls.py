@@ -38,6 +38,12 @@ urlpatterns = [
     # Student profile
     path('students/profile/', views.StudentProfileView.as_view(), name='api-student-profile'),
 
+    # Scholarship Eligibility & Recommendation
+    path('scholarships/<int:pk>/eligibility/', views.scholarship_eligibility_view, name='api-scholarship-eligibility'),
+    path('scholarships/<int:pk>/eligibility', views.scholarship_eligibility_view),
+    path('scholarships/recommended/', views.scholarships_recommended_view, name='api-scholarships-recommended'),
+    path('scholarships/recommended', views.scholarships_recommended_view),
+
     # AI
     path('ai/chat/', views.AIChatView.as_view(), name='api-ai-chat'),
     path('ai/chat/stream/', views.AIChatStreamView.as_view(), name='api-ai-chat-stream'),
