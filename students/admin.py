@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, EmailVerification
+from .models import Student, StudentProfile, EmailVerification
 
 
 class StudentAdmin(admin.ModelAdmin):
@@ -39,3 +39,11 @@ class EmailVerificationAdmin(admin.ModelAdmin):
 
 admin.site.register(Student, StudentAdmin)
 admin.site.register(EmailVerification, EmailVerificationAdmin)
+
+class StudentProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'nationality', 'current_degree', 'gpa_raw', 'gpa_scale', 'gpa_normalized_100', 'english_test_type', 'english_score', 'hsk_level')
+    list_filter = ('gpa_scale', 'english_test_type', 'hsk_level', 'nationality')
+    search_fields = ('user__username', 'user__email', 'nationality', 'current_degree')
+    readonly_fields = ('created_at', 'updated_at')
+
+admin.site.register(StudentProfile, StudentProfileAdmin)

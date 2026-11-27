@@ -8,6 +8,7 @@ from students.views import StudentApplicationTrackerViewSet
 router = DefaultRouter()
 router.register(r'scholarships', views.ScholarshipViewSet, basename='scholarship')
 router.register(r'universities', views.UniversityViewSet, basename='university')
+router.register(r'student-profiles', views.StudentProfileViewSet, basename='student-profile')
 router.register(r'tracker', StudentApplicationTrackerViewSet, basename='tracker')
 router.register(r'applications', views.ApplicationTrackerViewSet, basename='application')
 router.register(r'suggestions', views.AISuggestionViewSet, basename='suggestion')

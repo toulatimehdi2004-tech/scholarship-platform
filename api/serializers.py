@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from students.models import Student, SuccessStory, ExperienceReview
+from students.models import Student, StudentProfile, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship, CampusLandmark, AdmissionAnnouncement
 from ai_assistant.models import (
     AIConversation, ApplicationTracker, ScholarshipMatch, AISuggestion
@@ -68,6 +68,21 @@ class StudentSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class StudentProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = StudentProfile
+        fields = [
+            'id', 'user', 'username', 'nationality', 'birth_date',
+            'current_degree', 'gpa_raw', 'gpa_scale', 'gpa_normalized_100',
+            'english_test_type', 'english_score', 'hsk_level',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
 # ── Scholarships & Universities ──────────────────────────────
 
 class CampusLandmarkSerializer(serializers.ModelSerializer):
@@ -125,6 +140,8 @@ class ScholarshipListSerializer(serializers.ModelSerializer):
             'university_city', 'university_country', 'type', 'level',
             'amount', 'currency', 'application_deadline', 'application_link', 'is_active',
             'is_featured', 'created_at', 'duration', 'total_seats', 'seats_filled',
+            'target_degree', 'max_age', 'min_gpa_100', 'min_english_score', 'min_hsk_level',
+            'eligible_countries', 'excluded_countries',
         ]
 
 
@@ -141,6 +158,8 @@ class ScholarshipDetailSerializer(serializers.ModelSerializer):
             'total_seats', 'seats_filled', 'seats_available',
             'application_deadline', 'start_date', 'end_date',
             'eligibility_criteria', 'required_education_level',
+            'target_degree', 'max_age', 'min_gpa_100', 'min_english_score', 'min_hsk_level',
+            'eligible_countries', 'excluded_countries',
             'minimum_gpa', 'required_fields_of_study',
             'application_fee', 'application_link', 'required_documents',
             'application_instructions',

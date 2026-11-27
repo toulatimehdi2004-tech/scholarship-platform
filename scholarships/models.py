@@ -100,7 +100,14 @@ class Scholarship(models.Model):
     # Eligibility
     eligibility_criteria = models.TextField(help_text="List eligibility requirements")
     required_education_level = models.CharField(max_length=100, blank=True, null=True)
+    target_degree = models.CharField(max_length=100, blank=True, null=True, help_text="Target academic degree e.g. Bachelor, Master, PhD")
+    max_age = models.PositiveIntegerField(blank=True, null=True, help_text="Maximum applicant age in years")
     minimum_gpa = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True)
+    min_gpa_100 = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Minimum normalized GPA (0-100 scale)")
+    min_english_score = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Minimum English test score")
+    min_hsk_level = models.PositiveSmallIntegerField(default=0, help_text="Minimum HSK level (0-6)")
+    eligible_countries = models.JSONField(default=list, blank=True, help_text="List of eligible country codes or names")
+    excluded_countries = models.JSONField(default=list, blank=True, help_text="List of excluded country codes or names")
     required_fields_of_study = models.JSONField(default=list, blank=True, help_text="List of accepted fields of study")
     
     # Application details

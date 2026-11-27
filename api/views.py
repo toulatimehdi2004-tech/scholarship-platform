@@ -76,7 +76,7 @@ def send_resilient_email(subject, plain_message, recipient_list, html_message=No
 
     return False, "failed"
 
-from students.models import Student, EmailVerification, SuccessStory, ExperienceReview
+from students.models import Student, StudentProfile, EmailVerification, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship
 from documents.models import Document
 from ai_assistant.models import (
@@ -86,7 +86,7 @@ from ai_assistant.chatbot import generate_response
 
 from .serializers import (
     UserSerializer, RegisterSerializer,
-    StudentSerializer,
+    StudentSerializer, StudentProfileSerializer,
     UniversityListSerializer, UniversityDetailSerializer,
     ScholarshipListSerializer, ScholarshipDetailSerializer,
     ApplicationTrackerSerializer, ScholarshipMatchSerializer,
@@ -506,6 +506,23 @@ class StudentProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         profile, _ = Student.objects.get_or_create(user=self.request.user)
         return profile
+
+
+class StudentProfileViewSet(viewsets.ModelViewSet):
+    """
+    CRUD /api/student-profiles/
+    Full REST interface for the student_profiles table.
+    """
+    serializer_class = StudentProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return StudentProfile.objects.all()
+        return StudentProfile.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 # ── Scholarships ─────────────────────────────────────────────

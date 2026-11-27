@@ -25,7 +25,12 @@ class ScholarshipAdmin(admin.ModelAdmin):
             'fields': ('application_deadline', 'start_date', 'end_date')
         }),
         ('Eligibility', {
-            'fields': ('eligibility_criteria', 'required_education_level', 'minimum_gpa', 'required_fields_of_study')
+            'fields': (
+                'eligibility_criteria', 'required_education_level', 'target_degree',
+                'max_age', 'minimum_gpa', 'min_gpa_100', 'min_english_score',
+                'min_hsk_level', 'eligible_countries', 'excluded_countries',
+                'required_fields_of_study'
+            )
         }),
         ('Application', {
             'fields': ('application_fee', 'application_link', 'required_documents', 'application_instructions')
