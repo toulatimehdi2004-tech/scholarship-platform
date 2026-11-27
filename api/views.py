@@ -2,7 +2,8 @@ import uuid
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives, get_connection
+from django.conf import settings
 from django.db.models import Q
 from django.http import StreamingHttpResponse
 from django.utils import timezone
@@ -12,6 +13,68 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+
+def send_resilient_email(subject, plain_message, recipient_list, html_message=None):
+    """
+    Sends email with automatic multi-tier backup account fail-safe:
+    1. Primary Gmail SMTP (EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
+    2. Secondary Backup Gmail / SMTP (BACKUP_EMAIL_HOST_USER, BACKUP_EMAIL_HOST_PASSWORD)
+    3. Graceful fallback recording so dispatch never crashes the system
+    """
+    import os, logging
+    logger = logging.getLogger(__name__)
+
+    if isinstance(recipient_list, str):
+        recipient_list = [recipient_list]
+
+    # Try 1: Primary SMTP
+    try:
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None)
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=from_email,
+            to=recipient_list,
+        )
+        if html_message:
+            msg.attach_alternative(html_message, "text/html")
+        msg.send(fail_silently=False)
+        return True, "primary"
+    except Exception as e_pri:
+        logger.warning(f"Primary email dispatch to {recipient_list} failed ({e_pri}). Trying backup SMTP...")
+
+    # Try 2: Secondary / Backup SMTP Account
+    backup_user = getattr(settings, 'BACKUP_EMAIL_HOST_USER', os.environ.get('BACKUP_EMAIL_HOST_USER', '')).strip()
+    backup_pass = getattr(settings, 'BACKUP_EMAIL_HOST_PASSWORD', os.environ.get('BACKUP_EMAIL_HOST_PASSWORD', '')).strip()
+    backup_host = getattr(settings, 'BACKUP_EMAIL_HOST', os.environ.get('BACKUP_EMAIL_HOST', 'smtp.gmail.com')).strip()
+    backup_port = getattr(settings, 'BACKUP_EMAIL_PORT', int(os.environ.get('BACKUP_EMAIL_PORT', 587)))
+
+    if backup_user and backup_pass:
+        try:
+            conn = get_connection(
+                'django.core.mail.backends.smtp.EmailBackend',
+                host=backup_host,
+                port=backup_port,
+                username=backup_user,
+                password=backup_pass,
+                use_tls=True,
+                fail_silently=False,
+            )
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_message,
+                from_email=f"ScholarChina Backup Gateway <{backup_user}>",
+                to=recipient_list,
+                connection=conn,
+            )
+            if html_message:
+                msg.attach_alternative(html_message, "text/html")
+            msg.send(fail_silently=False)
+            return True, "backup_smtp"
+        except Exception as e_bak:
+            logger.error(f"Backup SMTP dispatch failed: {e_bak}")
+
+    return False, "failed"
 
 from students.models import Student, EmailVerification, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship
@@ -183,17 +246,14 @@ def send_verification_code(request):
     code = EmailVerification.generate_code()
     EmailVerification.objects.create(email=email, code=code)
 
-    try:
-        send_mail(
-            subject='Your Verification Code — Scholarship Platform',
-            message=f'Your verification code is: {code}\n\nThis code expires in 5 minutes.\n\nIf you didn\'t request this, ignore this email.',
-            from_email=None,
-            recipient_list=[email],
-            fail_silently=False,
-        )
-        return Response({'message': 'Verification code sent to ' + email})
-    except Exception as e:
-        return Response({'error': 'Failed to send email. Please try again.'}, status=500)
+    sent, mode = send_resilient_email(
+        subject='Your Verification Code — Scholarship Platform',
+        plain_message=f'Your verification code is: {code}\n\nThis code expires in 5 minutes.\n\nIf you didn\'t request this, ignore this email.',
+        recipient_list=[email],
+    )
+    if sent:
+        return Response({'message': 'Verification code sent to ' + email, 'mode': mode})
+    return Response({'error': 'Failed to send email. Please try again.'}, status=500)
 
 
 @api_view(['POST'])
@@ -254,17 +314,14 @@ def resend_verification_code(request):
     code = EmailVerification.generate_code()
     EmailVerification.objects.create(email=email, code=code)
 
-    try:
-        send_mail(
-            subject='Your Verification Code — Scholarship Platform',
-            message=f'Your verification code is: {code}\n\nThis code expires in 5 minutes.\n\nIf you didn\'t request this, ignore this email.',
-            from_email=None,
-            recipient_list=[email],
-            fail_silently=False,
-        )
-        return Response({'message': 'Verification code sent to ' + email})
-    except Exception as e:
-        return Response({'error': 'Failed to send email. Please try again.'}, status=500)
+    sent, mode = send_resilient_email(
+        subject='Your Verification Code — Scholarship Platform',
+        plain_message=f'Your verification code is: {code}\n\nThis code expires in 5 minutes.\n\nIf you didn\'t request this, ignore this email.',
+        recipient_list=[email],
+    )
+    if sent:
+        return Response({'message': 'Verification code sent to ' + email, 'mode': mode})
+    return Response({'error': 'Failed to send email. Please try again.'}, status=500)
 
 
 @api_view(['POST'])
@@ -286,16 +343,11 @@ def forgot_password(request):
     code = EmailVerification.generate_code()
     EmailVerification.objects.create(email=email, code=code)
 
-    try:
-        send_mail(
-            subject='Password Reset Code — Scholarship Platform',
-            message=f'Your password reset code is: {code}\n\nThis code expires in 5 minutes.\n\nIf you didn\'t request this, ignore this email.',
-            from_email=None,
-            recipient_list=[email],
-            fail_silently=False,
-        )
-    except Exception:
-        pass
+    send_resilient_email(
+        subject='Password Reset Code — Scholarship Platform',
+        plain_message=f'Your password reset code is: {code}\n\nThis code expires in 5 minutes.\n\nIf you didn\'t request this, ignore this email.',
+        recipient_list=[email],
+    )
 
     return Response({'message': 'If an account exists with this email, a reset code has been sent.'})
 
@@ -1290,6 +1342,7 @@ def send_welcome_message_view(request):
     name = request.data.get('name', 'Étudiant').strip()
 
     email_sent = False
+    email_sender_mode = "none"
     sms_sent = False
     sms_error = None
 
@@ -1370,17 +1423,15 @@ def send_welcome_message_view(request):
                 "Bureau de Rabat & Beijing"
             )
 
-            send_mail(
+            email_sent, email_sender_mode = send_resilient_email(
                 subject="🎓 Bienvenue sur ScholarChina — Bourses d'études en Chine 2026/2027",
-                message=plain_message,
-                html_message=html_content,
-                from_email=None,
+                plain_message=plain_message,
                 recipient_list=[email],
-                fail_silently=False,
+                html_message=html_content,
             )
-            email_sent = True
         except Exception:
-            pass
+            email_sent = False
+            email_sender_mode = "error"
 
     # 2. Send real SMS via Twilio if configured
     twilio_sid = os.environ.get('TWILIO_ACCOUNT_SID')
@@ -1411,6 +1462,7 @@ def send_welcome_message_view(request):
     return Response({
         'success': True,
         'email_sent': email_sent,
+        'email_sender_mode': email_sender_mode,
         'sms_sent': sms_sent,
         'sms_error': sms_error,
     })

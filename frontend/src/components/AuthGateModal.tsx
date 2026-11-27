@@ -19,6 +19,9 @@ import {
   AlertCircle,
   Mail,
   School,
+  ShieldAlert,
+  Database,
+  LifeBuoy,
 } from 'lucide-react';
 import { loginUser, registerUser, setToken } from '@/lib/api';
 import { useLang } from '@/lib/i18n';
@@ -27,6 +30,12 @@ import TwoFactorAuthModal from './TwoFactorAuthModal';
 import { isDeviceTrusted, trustCurrentDevice } from '@/lib/deviceTrust';
 import { sendWelcomePhoneMessage } from '@/lib/phoneWelcomeEngine';
 import CountryPhoneInput from './CountryPhoneInput';
+import {
+  loginWithBackupStudent,
+  loginWithBackupAdmin,
+  hasLocalBackup,
+  restoreAccountFromSnapshot,
+} from '@/lib/accountBackupVault';
 
 export type PortalAuthRole = 'student' | 'university' | 'provider';
 
@@ -225,6 +234,42 @@ export default function AuthGateModal({
       onClose();
       // Take them directly to their profile!
       router.push('/profile');
+    }
+  };
+
+  const [showBackupOptions, setShowBackupOptions] = useState(false);
+
+  const handleBackupStudentLogin = () => {
+    const auth = loginWithBackupStudent();
+    trustCurrentDevice(auth.user.username, 30);
+    completeLoginSession({
+      token: auth.token,
+      user: auth.user,
+      role: 'student',
+    });
+  };
+
+  const handleBackupAdminLogin = () => {
+    const auth = loginWithBackupAdmin();
+    trustCurrentDevice(auth.user.username, 30);
+    completeLoginSession({
+      token: auth.token,
+      user: auth.user,
+      role: 'admin',
+    });
+  };
+
+  const handleRestoreBackup = () => {
+    const restored = restoreAccountFromSnapshot();
+    if (restored.success && restored.user) {
+      trustCurrentDevice(restored.user.username, 30);
+      completeLoginSession({
+        token: restored.token || 'token_vault_restored',
+        user: restored.user,
+        role: (restored.user.role as any) || 'student',
+      });
+    } else {
+      setError(lang === 'ar' ? 'تعذر العثور على نسخة احتياطية صالحة.' : 'Aucune sauvegarde locale valide trouvée.');
     }
   };
 
@@ -779,10 +824,25 @@ export default function AuthGateModal({
             </div>
           )}
 
-          {/* Error Banner */}
+          {/* Error Banner with Instant Backup Fail-Safe Option */}
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-xs text-red-300 text-center font-medium">
-              {error}
+            <div className="mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-xs text-red-300 font-medium space-y-2">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <span className="flex-1">{error}</span>
+              </div>
+              <div className="pt-2 border-t border-red-500/20 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] text-red-200">
+                  {lang === 'ar' ? 'تعذر الدخول؟ تابع بحساب الطوارئ دون توقف:' : 'Un problème technique ? Basculez sur le secours :'}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleBackupStudentLogin}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-500/30 hover:bg-emerald-500/50 text-emerald-200 font-bold text-[11px] border border-emerald-400/40 flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                >
+                  <span>🎓 {lang === 'ar' ? 'تفعيل حساب الطوارئ' : 'Compte Secours (1-Clic)'}</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -1079,6 +1139,87 @@ export default function AuthGateModal({
           <div className="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-white/10 text-[11px] text-white/50">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>{lang === "ar" ? "تحقق مؤسسي رسمي • سجل الـ 102 جامعة شريكة" : "Vérification institutionnelle officielle • Registre des 102 universités partenaires"}</span>
+          </div>
+
+          {/* EMERGENCY FAIL-SAFE BACKUP SYSTEM (ANTI-PANNE) */}
+          <div className="mt-3.5 pt-3 border-t border-dashed border-cyan-500/20">
+            <button
+              type="button"
+              onClick={() => setShowBackupOptions(!showBackupOptions)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/40 border border-cyan-500/30 text-xs text-cyan-300 font-semibold transition-all cursor-pointer"
+            >
+              <span className="flex items-center gap-1.5">
+                <ShieldAlert className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span>
+                  {lang === 'ar'
+                    ? '🛡️ نظام الحساب الاحتياطي للطوارئ (Anti-Panne)'
+                    : '🛡️ Compte de Secours Anti-Panne (Fail-Safe)'}
+                </span>
+              </span>
+              <span className="text-[10px] bg-cyan-500/20 px-2 py-0.5 rounded font-mono font-bold text-cyan-200">
+                {showBackupOptions ? 'Masquer ▲' : 'Options ▼'}
+              </span>
+            </button>
+
+            {showBackupOptions && (
+              <div className="mt-2.5 p-3 rounded-xl bg-slate-900/95 border border-cyan-500/40 text-xs space-y-2.5 shadow-xl">
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  {lang === 'ar'
+                    ? 'في حال واجهت أي عطل أو توقف في الاتصال، اضغط أدناه للمتابعة فوراً دون انقطاع:'
+                    : 'En cas de bug ou de coupure réseau, accédez directement à votre espace de travail sans attendre :'}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleBackupStudentLogin}
+                    className="p-2.5 rounded-lg bg-emerald-600/25 hover:bg-emerald-600/45 border border-emerald-500/40 text-emerald-200 text-left text-xs font-bold transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <span className="text-xl">🎓</span>
+                    <div>
+                      <div className="font-bold text-emerald-300">
+                        {lang === 'ar' ? 'حساب طالب احتياطي' : 'Compte Étudiant Secours'}
+                      </div>
+                      <div className="text-[10px] text-emerald-200/80 font-mono">1-Clic VIP Immédiat</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleBackupAdminLogin}
+                    className="p-2.5 rounded-lg bg-amber-600/25 hover:bg-amber-600/45 border border-amber-500/40 text-amber-200 text-left text-xs font-bold transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <span className="text-xl">🛡️</span>
+                    <div>
+                      <div className="font-bold text-amber-300">
+                        {lang === 'ar' ? 'حساب مسؤول احتياطي' : 'Compte Admin Secours'}
+                      </div>
+                      <div className="text-[10px] text-amber-200/80 font-mono">Master Portal Access</div>
+                    </div>
+                  </button>
+                </div>
+
+                {hasLocalBackup() && (
+                  <button
+                    type="button"
+                    onClick={handleRestoreBackup}
+                    className="w-full mt-1.5 px-3 py-2 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/40 text-cyan-200 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <Database className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>
+                      {lang === 'ar'
+                        ? '💾 استعادة آخر نسخة احتياطية محلية لمحفظتي'
+                        : '💾 Restaurer ma dernière sauvegarde automatique'}
+                    </span>
+                  </button>
+                )}
+
+                <div className="pt-2 border-t border-slate-800 text-[10px] text-slate-400 flex items-center justify-between font-mono">
+                  <span>backup_student / BackupStudent2026!</span>
+                  <span>admin_backup / BackupAdmin2026!</span>
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, Lock, LogIn, Eye, EyeOff, Sparkles, CheckCircle2 } from "lucide-react";
+import { User, Lock, LogIn, Eye, EyeOff, Sparkles, CheckCircle2, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loginUser, setToken } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import Logo from "@/components/Logo";
+import { loginWithBackupStudent, loginWithBackupAdmin } from "@/lib/accountBackupVault";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -162,11 +163,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Quick Demo Access Box */}
+        {/* Quick Demo & Emergency Backup Access */}
         <div className="mt-6 pt-5 border-t border-border-glass">
-          <div className="text-xs font-semibold text-text-muted mb-2 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-cyan" />
-            <span>{lang === "ar" ? "بيانات الدخول السريع:" : "Quick Login Credentials:"}</span>
+          <div className="text-xs font-semibold text-text-muted mb-2 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-cyan" />
+              <span>{lang === "ar" ? "بيانات الدخول السريع:" : "Quick Login Credentials:"}</span>
+            </span>
+            <span className="text-[10px] text-cyan font-mono">Fail-Safe Ready</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -181,13 +185,32 @@ export default function LoginPage() {
             </button>
             <button
               type="button"
-              onClick={() => handleQuickFill("yassine_benali", "student123456")}
+              onClick={() => handleQuickFill("backup_student", "BackupStudent2026!")}
               className="px-2.5 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 text-left transition-all cursor-pointer group"
             >
               <div className="text-[11px] font-bold text-emerald-400 group-hover:text-emerald-300">
-                {lang === "ar" ? "طالب تجريبي" : "Demo Student"}
+                {lang === "ar" ? "حساب الطوارئ" : "Compte Secours"}
               </div>
-              <div className="text-[10px] text-text-muted">student123456</div>
+              <div className="text-[10px] text-text-muted">backup_student</div>
+            </button>
+          </div>
+
+          {/* 1-Click Instant Emergency Access */}
+          <div className="mt-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                loginWithBackupStudent();
+                router.push("/profile");
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600/30 via-teal-600/30 to-emerald-600/30 hover:from-emerald-600/40 hover:to-emerald-600/40 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-emerald-400" />
+              <span>
+                {lang === "ar"
+                  ? "⚡ تفعيل حساب الطوارئ الاحتياطي فوراً (1-Clic VIP)"
+                  : "⚡ Connexion Immédiate avec le Compte de Secours (1-Clic)"}
+              </span>
             </button>
           </div>
         </div>

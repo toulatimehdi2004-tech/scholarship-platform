@@ -146,14 +146,21 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-# Email — Gmail SMTP
+# Email — Gmail SMTP with Multi-Tier Backup Account Support
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = 'Scholarship Platform <' + EMAIL_HOST_USER + '>'
+DEFAULT_FROM_EMAIL = 'ScholarChina Admissions <' + EMAIL_HOST_USER + '>' if EMAIL_HOST_USER else 'ScholarChina Admissions <admissions@scholarchina.org>'
+
+# Secondary / Backup Email SMTP Account
+BACKUP_EMAIL_HOST = os.getenv('BACKUP_EMAIL_HOST', 'smtp.gmail.com')
+BACKUP_EMAIL_PORT = int(os.getenv('BACKUP_EMAIL_PORT', '587'))
+BACKUP_EMAIL_USE_TLS = os.getenv('BACKUP_EMAIL_USE_TLS', 'True').lower() in ('true', '1')
+BACKUP_EMAIL_HOST_USER = os.getenv('BACKUP_EMAIL_HOST_USER', '')
+BACKUP_EMAIL_HOST_PASSWORD = os.getenv('BACKUP_EMAIL_HOST_PASSWORD', '')
 # Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

@@ -34,7 +34,15 @@ import {
   QrCode,
   KeyRound,
   RefreshCw,
+  Database,
+  Download,
+  ShieldAlert,
 } from "lucide-react";
+import {
+  saveAccountSnapshot,
+  getLocalBackupSnapshot,
+  restoreAccountFromSnapshot,
+} from "@/lib/accountBackupVault";
 import {
   getToken,
   getCurrentUser,
@@ -94,6 +102,8 @@ export default function ProfilePage() {
   const [show2FAModalInProfile, setShow2FAModalInProfile] = useState(false);
   const [deviceIsTrusted, setDeviceIsTrusted] = useState(false);
   const [securityStatusMsg, setSecurityStatusMsg] = useState("");
+  const [backupVaultStatus, setBackupVaultStatus] = useState("");
+  const [lastBackupTime, setLastBackupTime] = useState("");
 
   // Role Access Isolation: providers or universities cannot see private student pages
   const [restrictedRole, setRestrictedRole] = useState<string | null>(null);
@@ -216,6 +226,75 @@ export default function ProfilePage() {
 
     loadData();
   }, [router]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const snap = getLocalBackupSnapshot();
+      if (snap?.formattedDate) {
+        setLastBackupTime(snap.formattedDate);
+      }
+    }
+  }, []);
+
+  const handleCreateManualBackup = () => {
+    if (!user) return;
+    const currentProfile = {
+      phone,
+      city,
+      date_of_birth: dateOfBirth,
+      education_level: educationLevel,
+      field_of_study: fieldOfStudy,
+      gpa,
+      is_premium: user.student_profile?.is_premium || false,
+    };
+    saveAccountSnapshot(
+      {
+        ...user,
+        first_name: firstName,
+        last_name: lastName,
+        email,
+      },
+      { profile: currentProfile as any }
+    );
+    const now = new Date().toLocaleTimeString();
+    setLastBackupTime(now);
+    setBackupVaultStatus("✓ Copie de secours sauvegardée dans le coffre-fort local !");
+    setTimeout(() => setBackupVaultStatus(""), 4000);
+  };
+
+  const handleRestoreFromVault = () => {
+    const res = restoreAccountFromSnapshot();
+    if (res.success && res.user) {
+      setUser(res.user);
+      setFirstName(res.user.first_name || "");
+      setLastName(res.user.last_name || "");
+      setEmail(res.user.email || "");
+      if (res.user.student_profile) {
+        setPhone(res.user.student_profile.phone || "");
+        setCity(res.user.student_profile.city || "Casablanca");
+        setEducationLevel(res.user.student_profile.education_level || "bachelor");
+        setFieldOfStudy(res.user.student_profile.field_of_study || "");
+        if (res.user.student_profile.gpa) setGpa(String(res.user.student_profile.gpa));
+      }
+      setBackupVaultStatus("✓ Données restaurées depuis la sauvegarde de secours avec succès !");
+      setTimeout(() => setBackupVaultStatus(""), 4000);
+    } else {
+      setBackupVaultStatus("⚠️ Aucune sauvegarde valide trouvée dans le coffre-fort.");
+      setTimeout(() => setBackupVaultStatus(""), 4000);
+    }
+  };
+
+  const handleExportBackupJson = () => {
+    const snap = getLocalBackupSnapshot();
+    if (!snap) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(snap, null, 2));
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `scholarchina_backup_${user?.username || "account"}_${Date.now()}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1264,6 +1343,80 @@ export default function ProfilePage() {
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
+
+            {/* Fail-Safe Account Backup Vault (Anti-Bug & Disaster Recovery) */}
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-slate-900/80 to-blue-950/40 border border-cyan-500/30 space-y-4 shadow-xl">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
+                    <Database className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>Coffre-Fort & Sauvegarde de Secours (Anti-Panne)</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-bold">
+                        Auto-Vault
+                      </span>
+                    </h4>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      En cas de bug ou de coupure réseau, vos données sont conservées dans votre coffre-fort local sécurisé.
+                    </p>
+                  </div>
+                </div>
+
+                {lastBackupTime && (
+                  <span className="text-[11px] font-mono text-cyan-300/80 bg-cyan-950/60 px-3 py-1 rounded-lg border border-cyan-500/30">
+                    Dernière sauvegarde : {lastBackupTime}
+                  </span>
+                )}
+              </div>
+
+              {backupVaultStatus && (
+                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{backupVaultStatus}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={handleCreateManualBackup}
+                  className="px-3.5 py-2.5 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/40 text-cyan-200 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Save className="w-4 h-4 text-cyan-400" />
+                  <span>Sauvegarder Maintenant</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleRestoreFromVault}
+                  className="px-3.5 py-2.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-200 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <RefreshCw className="w-4 h-4 text-blue-400" />
+                  <span>Restaurer Sauvegarde</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportBackupJson}
+                  className="px-3.5 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-200 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Download className="w-4 h-4 text-indigo-400" />
+                  <span>Télécharger Copie (.JSON)</span>
+                </button>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Comptes de secours pré-enregistrés disponibles pour test :</span>
+                </span>
+                <span className="font-mono text-cyan-300 text-[10px]">
+                  backup_student (Étudiant VIP) • admin_backup (Master Admin)
+                </span>
               </div>
             </div>
           </motion.div>
