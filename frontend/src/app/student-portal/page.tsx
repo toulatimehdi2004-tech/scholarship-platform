@@ -36,6 +36,7 @@ import {
 import Logo from "@/components/Logo";
 import StudentSidebar from "@/components/StudentSidebar";
 import NotificationCenterDropdown from "@/components/NotificationCenterDropdown";
+import MyDocumentVaultSection from "@/components/MyDocumentVaultSection";
 import { useApplicationMode } from "@/lib/ApplicationModeContext";
 import { getToken, getCurrentUser, clearToken, type User } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
@@ -406,6 +407,9 @@ export default function StudentPortalPage() {
             </div>
           </Link>
         </section>
+
+        {/* ── My Document Vault Section (Valid 🟢, Expiring Soon 🟠, Expired 🔴) ── */}
+        <MyDocumentVaultSection variant="embedded" />
 
         {/* ─────────────────────────────────────────────────────────────
             3. "RECOMMENDED FOR YOU" SECTION (Image 3)

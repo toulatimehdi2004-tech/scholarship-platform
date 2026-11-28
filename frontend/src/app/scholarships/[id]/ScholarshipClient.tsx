@@ -66,6 +66,7 @@ import ScholarshipEmblem, {
 } from "@/components/ScholarshipEmblem";
 import FinancialHonestyLedger from "@/components/FinancialHonestyLedger";
 import LanguageHonestySelector from "@/components/LanguageHonestySelector";
+import ScholarshipDualDeadlineBadge from "@/components/ScholarshipDualDeadlineBadge";
 import AdmissionAnnouncements, {
   type Announcement,
 } from "@/components/AdmissionAnnouncements";
@@ -610,20 +611,17 @@ export default function ScholarshipClient() {
                 </div>
               </div>
 
-              {/* Right Side: Deadline & Availability Capsule */}
+              {/* Right Side: Dual Deadline & Availability Capsule */}
               <div className="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-3 flex-shrink-0">
-                {/* Deadline pill */}
-                <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-3 sm:px-4 text-left">
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    <Clock className="w-3.5 h-3.5 text-cyan" />
-                    <span>Date Limite</span>
-                  </div>
-                  <div className="text-sm font-extrabold text-white">{deadlineFormatted}</div>
-                  {showCountdown && (
-                    <div className="text-[11px] text-amber-400 font-semibold mt-0.5">
-                      ⏳ {daysLeft > 0 ? `${daysLeft} jours restants` : "Clôture imminente"}
-                    </div>
-                  )}
+                {/* Dual Deadlines (Embassy & University with Beijing & Local Times) */}
+                <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-3 sm:px-4 text-left max-w-md w-full">
+                  <ScholarshipDualDeadlineBadge
+                    embassyDeadline={scholarship.embassy_deadline}
+                    universityDeadline={scholarship.university_deadline}
+                    generalDeadline={scholarship.application_deadline}
+                    hostTimezone={scholarship.host_timezone || "Asia/Shanghai"}
+                    variant="badge"
+                  />
                 </div>
 
                 {/* Seat availability */}
@@ -788,6 +786,15 @@ export default function ScholarshipClient() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-6"
             >
+              {/* Dual Deadlines Banner (Home Country/Embassy & University Deadlines in Beijing & Local Time) */}
+              <ScholarshipDualDeadlineBadge
+                embassyDeadline={scholarship.embassy_deadline}
+                universityDeadline={scholarship.university_deadline}
+                generalDeadline={scholarship.application_deadline}
+                hostTimezone={scholarship.host_timezone || "Asia/Shanghai"}
+                variant="hero"
+              />
+
               {/* Program Quick Facts */}
               <div className="rounded-3xl bg-[#0c1424]/80 backdrop-blur-xl border border-white/10 p-6">
                 <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">

@@ -53,6 +53,8 @@ import {
 import { useLang } from "@/lib/i18n";
 import { REAL_SCHOLARSHIPS } from "@/data/scholarshipsData";
 import ScholarshipMatchBadge from "@/components/ScholarshipMatchBadge";
+import ScholarshipDualDeadlineBadge from "@/components/ScholarshipDualDeadlineBadge";
+
 import AcademicProfileBanner from "@/components/AcademicProfileBanner";
 
 const FREE_TRIAL_LIMIT = 4;
@@ -1596,7 +1598,7 @@ export default function ScholarshipsPage() {
                           </div>
 
                           {/* Honest Transparency Out-of-Pocket Pill */}
-                          <div className="mb-4">
+                          <div className="mb-3">
                             {sch.type === "full" ? (
                               <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between text-xs">
                                 <span className="font-bold text-emerald-300 flex items-center gap-1.5 text-[11px]">
@@ -1616,6 +1618,17 @@ export default function ScholarshipsPage() {
                                 </span>
                               </div>
                             )}
+                          </div>
+
+                          {/* Dual Deadlines: Embassy / Home Country & University Portal with Local Time */}
+                          <div className="mb-3">
+                            <ScholarshipDualDeadlineBadge
+                              embassyDeadline={sch.embassy_deadline}
+                              universityDeadline={sch.university_deadline}
+                              generalDeadline={sch.application_deadline}
+                              hostTimezone={sch.host_timezone || "Asia/Shanghai"}
+                              variant="badge"
+                            />
                           </div>
 
                           {/* CSCA Status Indicator */}

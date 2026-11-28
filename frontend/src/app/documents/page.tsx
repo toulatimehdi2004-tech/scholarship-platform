@@ -39,6 +39,8 @@ import {
 import { DeadlineTimezoneUtil } from "@/lib/DeadlineTimezoneUtil";
 import { syncDocumentExpiryWarnings } from "@/lib/notificationEngine";
 import { useLang } from "@/lib/i18n";
+import MyDocumentVaultSection from "@/components/MyDocumentVaultSection";
+
 
 const OFFICIAL_DOC_TYPES: { value: StudentDocType; label: string; validity: string; badge: string }[] = [
   { value: "POLICE_CLEARANCE", label: "Police Clearance / Casier Judiciaire (6 Mois)", validity: "6 months", badge: "Strict 6M" },
@@ -617,164 +619,11 @@ export default function DocumentsPage() {
             </motion.div>
           )}
 
-          {/* Document Cards List */}
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="glass rounded-2xl p-6 h-48 animate-pulse">
-                  <div className="h-4 bg-white/10 rounded w-20 mb-4" />
-                  <div className="h-5 bg-white/10 rounded w-3/4 mb-3" />
-                  <div className="h-4 bg-white/10 rounded w-full" />
-                </div>
-              ))}
-            </div>
-          ) : documents.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="glass rounded-2xl p-16 text-center"
-            >
-              <FileText className="w-12 h-12 text-text-muted mx-auto mb-4" />
-              <p className="text-text-secondary text-lg mb-2 font-bold">
-                No documents in vault yet
-              </p>
-              <p className="text-text-muted text-xs sm:text-sm mb-6 max-w-md mx-auto">
-                Add your Police Clearance, Foreigner Physical Exam, Passport, and Transcripts. The system will automatically warn you before deadlines.
-              </p>
-              <button
-                onClick={() => setShowUpload(true)}
-                className="btn-gradient text-xs sm:text-sm px-6 py-2.5 rounded-xl font-bold cursor-pointer"
-              >
-                <span>Upload First Document</span>
-              </button>
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {documents.map((doc, i) => {
-                const isConflict = (doc.tracked_conflicts && doc.tracked_conflicts.length > 0);
-                const isExpired = doc.is_expired;
-                const isExpiringSoon = doc.is_expiring_soon;
-
-                return (
-                  <motion.div
-                    key={doc.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, delay: i * 0.05 }}
-                    className={`glass rounded-2xl p-5 border transition-all flex flex-col justify-between ${
-                      isConflict
-                        ? "border-rose-500/50 bg-rose-950/10 hover:border-rose-400"
-                        : isExpired
-                        ? "border-red-500/40 bg-red-950/10 hover:border-red-400"
-                        : isExpiringSoon
-                        ? "border-amber-500/40 bg-amber-950/10 hover:border-amber-400"
-                        : "border-border-glass hover:border-cyan/40"
-                    }`}
-                  >
-                    <div>
-                      {/* Top Badges */}
-                      <div className="flex items-center justify-between gap-2 mb-2.5">
-                        <span className="text-[11px] font-bold text-cyan bg-cyan/10 px-2.5 py-0.5 rounded-full">
-                          {doc.doc_type_display || doc.doc_type}
-                        </span>
-
-                        {isConflict ? (
-                          <span className="text-[10px] font-extrabold text-white bg-rose-600 px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
-                            <AlertTriangle className="w-3 h-3" />
-                            <span>Deadline Conflict</span>
-                          </span>
-                        ) : isExpired ? (
-                          <span className="text-[10px] font-bold text-red-300 bg-red-500/20 px-2 py-0.5 rounded-full">
-                            Expired ⛔
-                          </span>
-                        ) : isExpiringSoon ? (
-                          <span className="text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full">
-                            {doc.days_until_expiry}d left ⚠️
-                          </span>
-                        ) : doc.expiry_date ? (
-                          <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full">
-                            Valid ✅
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded-full">
-                            Permanent
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="text-sm sm:text-base font-bold text-text-primary mb-2 line-clamp-1">
-                        {doc.title || doc.doc_type_display || "Official Document"}
-                      </h3>
-
-                      {/* Metadata */}
-                      <div className="space-y-1.5 text-[11px] text-text-muted mb-3">
-                        {doc.issue_date && (
-                          <p className="flex items-center gap-1.5">
-                            <span className="text-slate-400">Issued:</span>
-                            <span className="text-slate-200 font-mono">{doc.issue_date}</span>
-                          </p>
-                        )}
-                        {doc.expiry_date ? (
-                          <p className="flex items-center gap-1.5">
-                            <span className="text-slate-400">Expires:</span>
-                            <span className={`font-mono font-bold ${isConflict || isExpired ? "text-rose-400" : isExpiringSoon ? "text-amber-400" : "text-emerald-400"}`}>
-                              {doc.expiry_date} ({doc.days_until_expiry ?? 0} days)
-                            </span>
-                          </p>
-                        ) : (
-                          <p className="text-slate-500">No expiration date</p>
-                        )}
-                        {doc.notes && (
-                          <p className="text-slate-300 italic line-clamp-2 pt-1 border-t border-white/5">
-                            "{doc.notes}"
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Tracked Conflict Details */}
-                      {isConflict && doc.tracked_conflicts && (
-                        <div className="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-[11px] text-rose-200 mb-3 space-y-1">
-                          <p className="font-extrabold text-white flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
-                            <span>Expires before tracked scholarship!</span>
-                          </p>
-                          {doc.tracked_conflicts.map((tc, k) => (
-                            <p key={k} className="text-rose-300">
-                              • <span className="font-bold text-white">{tc.scholarship_title}</span> ({tc.deadline_label}: {tc.host_deadline})
-                            </p>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 pt-3 border-t border-border-glass mt-2">
-                      {doc.file_url && (
-                        <a
-                          href={getFullFileUrl(doc.file_url)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs text-cyan hover:bg-cyan/10 transition-all font-semibold"
-                        >
-                          <Eye className="w-3 h-3" />
-                          <span>View Scan</span>
-                        </a>
-                      )}
-                      <button
-                        onClick={() => handleDeleteDocument(doc.id)}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
-                        title="Delete document"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
+          {/* ── My Document Vault Section (Valid 🟢, Expiring Soon 🟠, Expired 🔴 Badges) ── */}
+          <MyDocumentVaultSection
+            onOpenUpload={() => setShowUpload(true)}
+            variant="full"
+          />
         </div>
       </div>
     </div>

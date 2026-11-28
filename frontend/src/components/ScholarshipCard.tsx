@@ -9,6 +9,8 @@ import type { Scholarship } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import { toggleCompareId, getCompareIds } from "@/lib/compare";
 import ScholarshipMatchBadge from "@/components/ScholarshipMatchBadge";
+import ScholarshipDualDeadlineBadge from "@/components/ScholarshipDualDeadlineBadge";
+
 
 interface ScholarshipCardProps {
   scholarship: Scholarship;
@@ -142,7 +144,7 @@ export default function ScholarshipCard({
         </h3>
 
         {/* Financial Honesty Badge */}
-        <div className="mb-3">
+        <div className="mb-2.5">
           {scholarship.type === "full" ? (
             <div className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg flex items-center justify-between">
               <span>👑 Bourse Complète (Full Ride)</span>
@@ -154,6 +156,17 @@ export default function ScholarshipCard({
               <span className="text-[10px] uppercase font-black">Vie à prévoir</span>
             </div>
           )}
+        </div>
+
+        {/* Dual Deadline (Embassy / University & Local Time) */}
+        <div className="mb-3">
+          <ScholarshipDualDeadlineBadge
+            embassyDeadline={scholarship.embassy_deadline}
+            universityDeadline={scholarship.university_deadline}
+            generalDeadline={scholarship.application_deadline}
+            hostTimezone={scholarship.host_timezone || "Asia/Shanghai"}
+            variant="badge"
+          />
         </div>
 
         <div className="flex items-center justify-between pt-3.5 border-t border-border-glass mt-auto">
