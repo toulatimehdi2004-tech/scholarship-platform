@@ -335,7 +335,7 @@ class AIChatRequestSerializer(serializers.Serializer):
 
 # ── Documents ────────────────────────────────────────────────
 
-from documents.models import Document, DocumentScan, StudentDocument
+from documents.models import Document, DocumentScan, StudentDocument, DocumentExpiryAlert
 
 class DocumentScanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -350,23 +350,128 @@ class StudentDocumentSerializer(serializers.ModelSerializer):
     doc_type_display = serializers.CharField(source='get_doc_type_display', read_only=True)
     is_expired = serializers.SerializerMethodField()
     days_until_expiry = serializers.SerializerMethodField()
+    is_expiring_soon = serializers.SerializerMethodField()
+    expiry_status = serializers.SerializerMethodField()
     username = serializers.CharField(source='user.username', read_only=True)
+    file_url = serializers.SerializerMethodField()
+    tracked_conflicts = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentDocument
         fields = [
-            'id', 'user', 'username', 'doc_type', 'doc_type_display',
-            'issue_date', 'expiry_date', 'notes', 'file',
-            'is_verified', 'is_expired', 'days_until_expiry',
-            'created_at', 'updated_at',
+            'id', 'user', 'username', 'title', 'doc_type', 'doc_type_display',
+            'issue_date', 'expiry_date', 'notes', 'file', 'file_url',
+            'file_name', 'file_size', 'is_verified', 'is_expired',
+            'days_until_expiry', 'is_expiring_soon', 'expiry_status',
+            'tracked_conflicts', 'created_at', 'updated_at',
         ]
-        read_only_fields = ['user', 'is_verified', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'is_verified', 'created_at', 'updated_at', 'file_name', 'file_size']
+
+    def to_internal_value(self, data):
+        ret_data = data.copy() if hasattr(data, 'copy') else dict(data)
+        if 'document_type' in ret_data and 'doc_type' not in ret_data:
+            dt = str(ret_data.get('document_type', '')).upper()
+            mapping = {
+                'PASSPORT': 'PASSPORT',
+                'POLICE_CLEARANCE': 'POLICE_CLEARANCE',
+                'MEDICAL_EXAM': 'MEDICAL_EXAM',
+                'LANGUAGE_CERT': 'LANGUAGE_CERT',
+                'DIPLOMA': 'DIPLOMA',
+                'TRANSCRIPT': 'TRANSCRIPT',
+                'RECOMMENDATION': 'RECOMMENDATION_LETTER',
+                'MOTIVATION': 'STUDY_PLAN',
+                'ID_CARD': 'OTHER',
+                'CV': 'OTHER',
+                'TRANSLATION': 'OTHER',
+                'APOSTILLE': 'OTHER',
+            }
+            ret_data['doc_type'] = mapping.get(dt, 'OTHER')
+        return super().to_internal_value(ret_data)
 
     def get_is_expired(self, obj):
         return obj.is_expired()
 
     def get_days_until_expiry(self, obj):
         return obj.days_until_expiry()
+
+    def get_is_expiring_soon(self, obj):
+        return obj.is_expiring_soon(days=30)
+
+    def get_expiry_status(self, obj):
+        if not obj.expiry_date:
+            return 'NO_EXPIRY'
+        if obj.is_expired():
+            return 'EXPIRED'
+        if obj.is_expiring_soon(days=30):
+            return 'EXPIRING_SOON'
+        return 'VALID'
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
+
+    def get_tracked_conflicts(self, obj):
+        if not obj.expiry_date:
+            return []
+        try:
+            from students.models import ApplicationTracker
+            from documents.timezone_utils import DeadlineTimezoneUtil
+            active_apps = ApplicationTracker.objects.filter(
+                student__user=obj.user,
+                status__in=['wishlist', 'preparing_docs', 'submitted', 'interview']
+            ).select_related('scholarship')
+            conflicts = []
+            for app in active_apps:
+                sch = app.scholarship
+                deadlines = []
+                if sch.embassy_deadline:
+                    deadlines.append(('Embassy Deadline', sch.embassy_deadline))
+                if sch.university_deadline:
+                    deadlines.append(('University Deadline', sch.university_deadline))
+                if not deadlines and sch.application_deadline:
+                    deadlines.append(('Application Deadline', sch.application_deadline))
+                for label, dead in deadlines:
+                    eval_res = DeadlineTimezoneUtil.evaluate_doc_against_deadline(obj.expiry_date, dead)
+                    if eval_res.get('has_conflict') and eval_res.get('severity') == 'critical':
+                        tz_conv = DeadlineTimezoneUtil.convert_deadline(
+                            dead,
+                            host_timezone_name=sch.host_timezone or 'Asia/Shanghai',
+                            user_timezone_name='Africa/Casablanca'
+                        )
+                        conflicts.append({
+                            'scholarship_id': sch.id,
+                            'scholarship_title': sch.title,
+                            'deadline_label': label,
+                            'days_difference': eval_res.get('days_difference'),
+                            'host_deadline': tz_conv.get('host', {}).get('formatted'),
+                            'user_deadline': tz_conv.get('user', {}).get('formatted'),
+                        })
+            return conflicts
+        except Exception:
+            return []
+
+
+class DocumentExpiryAlertSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    doc_title = serializers.CharField(source='document.get_title', read_only=True)
+    scholarship_title = serializers.CharField(source='scholarship.title', read_only=True)
+
+    class Meta:
+        model = DocumentExpiryAlert
+        fields = [
+            'id', 'user', 'username', 'document', 'doc_title',
+            'scholarship', 'scholarship_title', 'alert_type', 'severity',
+            'title', 'title_fr', 'title_ar', 'message', 'message_fr', 'message_ar',
+            'expiry_date', 'deadline_utc', 'host_deadline_str', 'user_deadline_str',
+            'days_until_expiry', 'days_difference', 'is_resolved', 'is_read',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = fields
+
 
 
 class DocumentSerializer(serializers.ModelSerializer):

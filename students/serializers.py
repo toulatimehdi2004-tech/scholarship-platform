@@ -17,7 +17,8 @@ class ScholarshipSummarySerializer(serializers.ModelSerializer):
         model = Scholarship
         fields = [
             'id', 'title', 'type', 'level', 'amount', 'currency',
-            'application_deadline', 'application_link', 'required_documents',
+            'application_deadline', 'embassy_deadline', 'university_deadline', 'host_timezone',
+            'application_link', 'required_documents',
             'university_id', 'university_name', 'university_city', 'university_country',
             'days_until_deadline', 'is_deadline_urgent', 'is_deadline_passed',
         ]

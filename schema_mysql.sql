@@ -312,10 +312,71 @@ SELECT
     CASE 
         WHEN sd.`expiry_date` IS NULL THEN 'NO EXPIRY (DIPLOMA/TRANSCRIPT) ✅'
         WHEN sd.`expiry_date` < CURDATE() THEN 'EXPIRED! MUST RENEW 🚨'
-        WHEN DATEDIFF(sd.`expiry_date`, CURDATE()) < 60 THEN 'EXPIRING SOON (< 60 DAYS) ⚠️'
+        WHEN DATEDIFF(sd.`expiry_date`, CURDATE()) <= 30 THEN 'EXPIRING SOON (<= 30 DAYS) ⚠️'
         ELSE 'VALID FOR SUBMISSION ✅'
     END AS document_validity_status
 FROM `student_documents` sd
 WHERE sd.`user_id` = 1;
 
+
+-- -----------------------------------------------------------------------------
+-- 7. Document Expiry Alerts Table (Scheduled Daily Validity & Deadline Watch)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `document_expiry_alerts` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `document_id` BIGINT NOT NULL,
+    `scholarship_id` INT NULL,
+    `alert_type` VARCHAR(40) NOT NULL DEFAULT 'EXPIRING_SOON_30D',
+    `severity` VARCHAR(20) NOT NULL DEFAULT 'warning',
+    `title` VARCHAR(255) NOT NULL,
+    `title_fr` VARCHAR(255) NOT NULL DEFAULT '',
+    `title_ar` VARCHAR(255) NOT NULL DEFAULT '',
+    `message` TEXT NOT NULL,
+    `message_fr` TEXT NOT NULL,
+    `message_ar` TEXT NOT NULL,
+    `expiry_date` DATE NULL,
+    `deadline_utc` DATETIME(6) NULL,
+    `host_deadline_str` VARCHAR(120) NOT NULL DEFAULT '',
+    `user_deadline_str` VARCHAR(120) NOT NULL DEFAULT '',
+    `days_until_expiry` INT NULL,
+    `days_difference` INT NULL,
+    `is_resolved` TINYINT(1) NOT NULL DEFAULT 0,
+    `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT `fk_dea_user` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_dea_document` FOREIGN KEY (`document_id`) REFERENCES `student_documents` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_dea_scholarship` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarships_scholarship` (`id`) ON DELETE SET NULL,
+    INDEX `idx_dea_user_resolved` (`user_id`, `is_resolved`),
+    INDEX `idx_dea_alert_type` (`alert_type`),
+    INDEX `idx_dea_severity` (`severity`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Daily Check SQL Audit: Find documents expiring <= 30 days or expiring before tracked scholarship deadlines
+SELECT 
+    sd.`id` AS doc_id,
+    sd.`user_id`,
+    u.`username`,
+    sd.`doc_type`,
+    sd.`expiry_date`,
+    DATEDIFF(sd.`expiry_date`, CURDATE()) AS days_left,
+    s.`title` AS tracked_scholarship,
+    s.`embassy_deadline`,
+    s.`university_deadline`,
+    CASE
+        WHEN sd.`expiry_date` < CURDATE() THEN 'EXPIRED_CRITICAL'
+        WHEN sd.`expiry_date` < DATE(COALESCE(s.`embassy_deadline`, s.`university_deadline`, s.`application_deadline`)) THEN 'EXPIRES_BEFORE_DEADLINE_CRITICAL'
+        WHEN DATEDIFF(sd.`expiry_date`, CURDATE()) <= 30 THEN 'EXPIRING_SOON_30D_WARNING'
+        ELSE 'VALID'
+    END AS audit_status
+FROM `student_documents` sd
+JOIN `auth_user` u ON sd.`user_id` = u.`id`
+LEFT JOIN `students_student` st ON st.`user_id` = u.`id`
+LEFT JOIN `students_applicationtracker` at ON at.`student_id` = st.`id` AND at.`status` IN ('wishlist', 'preparing_docs', 'submitted', 'interview')
+LEFT JOIN `scholarships_scholarship` s ON at.`scholarship_id` = s.`id`
+WHERE sd.`expiry_date` IS NOT NULL
+HAVING audit_status != 'VALID';
+
 SET FOREIGN_KEY_CHECKS = 1;
+

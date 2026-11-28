@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Document, DocumentScan, StudentDocument
+from .models import Document, DocumentScan, StudentDocument, DocumentExpiryAlert
 
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ('title', 'student', 'document_type', 'status', 'is_verified', 'created_at')
@@ -31,11 +31,24 @@ class DocumentScanAdmin(admin.ModelAdmin):
     readonly_fields = ('processed_at',)
 
 class StudentDocumentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'doc_type', 'issue_date', 'expiry_date', 'is_verified', 'created_at')
+    list_display = ('user', 'get_title', 'doc_type', 'issue_date', 'expiry_date', 'days_until_expiry', 'is_verified', 'created_at')
     list_filter = ('doc_type', 'is_verified', 'expiry_date')
-    search_fields = ('user__username', 'user__email', 'notes')
+    search_fields = ('user__username', 'user__email', 'title', 'notes')
     readonly_fields = ('created_at', 'updated_at')
+
+    def days_until_expiry(self, obj):
+        return obj.days_until_expiry()
+    days_until_expiry.short_description = 'Days to Expiry'
+
+
+class DocumentExpiryAlertAdmin(admin.ModelAdmin):
+    list_display = ('user', 'title', 'alert_type', 'severity', 'expiry_date', 'scholarship', 'is_resolved', 'created_at')
+    list_filter = ('alert_type', 'severity', 'is_resolved', 'created_at')
+    search_fields = ('user__username', 'title', 'message')
+    readonly_fields = ('created_at', 'updated_at')
+
 
 admin.site.register(Document, DocumentAdmin)
 admin.site.register(DocumentScan, DocumentScanAdmin)
 admin.site.register(StudentDocument, StudentDocumentAdmin)
+admin.site.register(DocumentExpiryAlert, DocumentExpiryAlertAdmin)

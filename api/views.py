@@ -79,7 +79,9 @@ def send_resilient_email(subject, plain_message, recipient_list, html_message=No
 from students.models import Student, StudentProfile, EmailVerification, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship, CityLivingCost
 from scholarships.services import GpaConversionService, EligibilityService, CostCalculatorService
-from documents.models import Document, StudentDocument
+from documents.models import Document, StudentDocument, DocumentExpiryAlert
+from documents.timezone_utils import DeadlineTimezoneUtil
+from documents.services import DocumentExpiryCheckService
 from ai_assistant.models import (
     ApplicationTracker, ScholarshipMatch, AISuggestion
 )
@@ -95,7 +97,7 @@ from .serializers import (
     AIChatRequestSerializer, DocumentSerializer,
     ServiceOrderSerializer, SuccessStorySerializer,
     ExperienceReviewSerializer, CityLivingCostSerializer,
-    StudentDocumentSerializer,
+    StudentDocumentSerializer, DocumentExpiryAlertSerializer,
 )
 
 
@@ -1322,43 +1324,15 @@ def sop_export_view(request):
     return resp
 
 
-# ── Documents ────────────────────────────────────────────────
+# ── Documents & Expiry Compliance ─────────────────────────────
 
 class DocumentViewSet(viewsets.ModelViewSet):
     """
     CRUD /api/documents/
-    """
-    serializer_class = DocumentSerializer
-    permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
-
-    def get_queryset(self):
-        return Document.objects.filter(
-            student__user=self.request.user
-        ).order_by('-created_at')
-
-    def perform_create(self, serializer):
-        from students.models import Student
-        student, _ = Student.objects.get_or_create(user=self.request.user)
-        uploaded_file = self.request.FILES.get('file')
-        title = serializer.validated_data.get('title')
-        if not title and uploaded_file:
-            title = uploaded_file.name.rsplit('.', 1)[0].replace('_', ' ').replace('-', ' ').title()
-        elif not title:
-            title = 'Uploaded Document'
-        doc = serializer.save(student=student, title=title)
-        if doc.file:
-            doc.file_name = doc.file.name.split('/')[-1]
-            doc.file_size = doc.file.size
-            doc.save(update_fields=['file_name', 'file_size'])
-
-
-class StudentDocumentViewSet(viewsets.ModelViewSet):
-    """
-    CRUD /api/student-documents/
-    Stores official student admission & visa documents:
-    PASSPORT, POLICE_CLEARANCE, MEDICAL_EXAM, LANGUAGE_CERT, etc.
-    Tracks issue_date, expiry_date, notes.
+    Unified documents portal handling official student admission & visa documents:
+    PASSPORT, POLICE_CLEARANCE, MEDICAL_EXAM, LANGUAGE_CERT, DIPLOMA, TRANSCRIPT, etc.
+    Tracks issue_date, expiry_date, notes, and audits validity against 30-day thresholds
+    and tracked scholarship deadlines.
     """
     serializer_class = StudentDocumentSerializer
     permission_classes = [AllowAny]
@@ -1366,16 +1340,209 @@ class StudentDocumentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        qs = StudentDocument.objects.all().select_related('user')
         if user and user.is_authenticated:
-            return StudentDocument.objects.filter(user=user).order_by('-created_at')
-        uid = self.request.query_params.get('user_id')
-        if uid:
-            return StudentDocument.objects.filter(user_id=uid).order_by('-created_at')
-        return StudentDocument.objects.all().order_by('-created_at')
+            qs = qs.filter(user=user)
+        else:
+            uid = self.request.query_params.get('user_id')
+            if uid:
+                qs = qs.filter(user_id=uid)
+
+        # Filters
+        doc_type = self.request.query_params.get('doc_type')
+        if doc_type:
+            qs = qs.filter(doc_type=doc_type.upper())
+
+        is_expired = self.request.query_params.get('is_expired')
+        if is_expired is not None:
+            today = timezone.now().date()
+            if is_expired.lower() in ['1', 'true', 'yes']:
+                qs = qs.filter(expiry_date__lt=today)
+            elif is_expired.lower() in ['0', 'false', 'no']:
+                qs = qs.filter(expiry_date__gte=today)
+
+        return qs.order_by('-created_at')
 
     def perform_create(self, serializer):
         user = self.request.user if (self.request.user and self.request.user.is_authenticated) else User.objects.first()
-        serializer.save(user=user)
+        uploaded_file = self.request.FILES.get('file')
+        title = serializer.validated_data.get('title')
+        if not title and uploaded_file:
+            clean_title = uploaded_file.name.rsplit('.', 1)[0].replace('_', ' ').replace('-', ' ').title()
+            title = clean_title
+        elif not title:
+            doc_type = serializer.validated_data.get('doc_type', 'Document')
+            title = dict(StudentDocument.DOC_TYPE_CHOICES).get(doc_type, doc_type)
+
+        doc = serializer.save(user=user, title=title)
+        if uploaded_file:
+            doc.file_name = uploaded_file.name.split('/')[-1]
+            doc.file_size = uploaded_file.size
+            doc.save(update_fields=['file_name', 'file_size'])
+
+        # Auto-trigger audit for this user
+        try:
+            DocumentExpiryCheckService.run_daily_expiry_check(target_user=user)
+        except Exception as e:
+            logger.warning(f"Auto-audit after doc upload failed: {e}")
+
+    def perform_update(self, serializer):
+        uploaded_file = self.request.FILES.get('file')
+        doc = serializer.save()
+        if uploaded_file:
+            doc.file_name = uploaded_file.name.split('/')[-1]
+            doc.file_size = uploaded_file.size
+            doc.save(update_fields=['file_name', 'file_size'])
+
+        try:
+            DocumentExpiryCheckService.run_daily_expiry_check(target_user=doc.user)
+        except Exception:
+            pass
+
+    @action(detail=False, methods=['get'], url_path='expiry-warnings')
+    def expiry_warnings(self, request):
+        """
+        GET /api/documents/expiry-warnings/
+        Returns live document expiry warnings for the current user:
+        1. Documents expiring within 30 days (or expired).
+        2. Documents expiring BEFORE tracked scholarship deadlines.
+        """
+        user = request.user if (request.user and request.user.is_authenticated) else User.objects.first()
+        user_tz = request.query_params.get('timezone') or request.headers.get('X-User-Timezone') or 'Africa/Casablanca'
+        warnings = DocumentExpiryCheckService.get_user_expiry_warnings(user=user, user_tz=user_tz)
+        return Response({
+            'user': user.username if user else 'anonymous',
+            'user_timezone': user_tz,
+            'warnings_count': len(warnings),
+            'has_critical_conflicts': any(w.get('severity') == 'critical' for w in warnings),
+            'warnings': warnings,
+        })
+
+    @action(detail=False, methods=['post'], url_path='run-daily-check')
+    def run_daily_check(self, request):
+        """
+        POST /api/documents/run-daily-check/
+        Triggers the @scheduled daily audit engine immediately.
+        Audits all documents across students or for current user.
+        """
+        target_username = request.data.get('username') or request.query_params.get('username')
+        target_user = None
+        if target_username:
+            target_user = User.objects.filter(username=target_username).first()
+        elif request.user and request.user.is_authenticated and not request.user.is_staff:
+            target_user = request.user
+
+        result = DocumentExpiryCheckService.run_daily_expiry_check(target_user=target_user)
+        return Response(result, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='alerts')
+    def list_alerts(self, request):
+        """
+        GET /api/documents/alerts/
+        Returns persistent DocumentExpiryAlert records for the user.
+        """
+        user = request.user if (request.user and request.user.is_authenticated) else User.objects.first()
+        alerts = DocumentExpiryAlert.objects.filter(user=user).select_related('document', 'scholarship')
+        serializer = DocumentExpiryAlertSerializer(alerts, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='resolve-alert')
+    def resolve_alert(self, request, pk=None):
+        """
+        POST /api/documents/{id}/resolve-alert/
+        Marks a specific alert as resolved.
+        """
+        user = request.user if (request.user and request.user.is_authenticated) else None
+        qs = DocumentExpiryAlert.objects.all()
+        if user:
+            qs = qs.filter(user=user)
+        alert = get_object_or_404(qs, pk=pk)
+        alert.is_resolved = True
+        alert.save(update_fields=['is_resolved'])
+        return Response({'success': True, 'id': alert.id, 'is_resolved': True})
+
+    @action(detail=False, methods=['get'], url_path='deadlines-summary')
+    def deadlines_summary(self, request):
+        """
+        GET /api/documents/deadlines-summary/
+        Returns all scholarships tracked by the student with their deadlines
+        converted into both the host university timezone and user's browser timezone,
+        and evaluated against their uploaded documents.
+        """
+        user = request.user if (request.user and request.user.is_authenticated) else User.objects.first()
+        user_tz = request.query_params.get('timezone') or request.headers.get('X-User-Timezone') or 'Africa/Casablanca'
+
+        from students.models import ApplicationTracker
+        active_apps = ApplicationTracker.objects.filter(
+            student__user=user
+        ).select_related('scholarship')
+
+        user_docs = StudentDocument.objects.filter(user=user)
+
+        summary = []
+        for app in active_apps:
+            sch = app.scholarship
+            host_tz = sch.host_timezone or 'Asia/Shanghai'
+
+            embassy_conv = DeadlineTimezoneUtil.convert_deadline(
+                sch.embassy_deadline, host_timezone_name=host_tz, user_timezone_name=user_tz
+            ) if sch.embassy_deadline else None
+
+            university_conv = DeadlineTimezoneUtil.convert_deadline(
+                sch.university_deadline, host_timezone_name=host_tz, user_timezone_name=user_tz
+            ) if sch.university_deadline else None
+
+            app_conv = DeadlineTimezoneUtil.convert_deadline(
+                sch.application_deadline, host_timezone_name=host_tz, user_timezone_name=user_tz
+            ) if sch.application_deadline else None
+
+            # Compare user's documents against earliest deadline
+            earliest_dt = sch.embassy_deadline or sch.university_deadline or sch.application_deadline
+            doc_compliances = []
+            if earliest_dt:
+                for d in user_docs:
+                    if d.expiry_date:
+                        eval_res = DeadlineTimezoneUtil.evaluate_doc_against_deadline(d.expiry_date, earliest_dt)
+                        doc_compliances.append({
+                            'doc_id': d.id,
+                            'doc_title': d.get_title(),
+                            'doc_type': d.doc_type,
+                            'expiry_date': str(d.expiry_date),
+                            'has_conflict': eval_res.get('has_conflict', False),
+                            'severity': eval_res.get('severity', 'ok'),
+                            'message': eval_res.get('message_en', ''),
+                        })
+
+            summary.append({
+                'application_id': app.id,
+                'status': app.status,
+                'scholarship_id': sch.id,
+                'scholarship_title': sch.title,
+                'host_timezone': host_tz,
+                'user_timezone': user_tz,
+                'embassy_deadline': embassy_conv,
+                'university_deadline': university_conv,
+                'general_deadline': app_conv,
+                'document_compliances': doc_compliances,
+                'has_document_conflicts': any(dc['has_conflict'] for dc in doc_compliances),
+            })
+
+        return Response({
+            'user': user.username if user else 'anonymous',
+            'user_timezone': user_tz,
+            'tracked_scholarships_count': len(summary),
+            'applications': summary,
+        })
+
+
+class StudentDocumentViewSet(DocumentViewSet):
+    """
+    CRUD /api/student-documents/
+    Maintains full compatibility with /api/student-documents/
+    inheriting from DocumentViewSet.
+    """
+    pass
+
 
 
 

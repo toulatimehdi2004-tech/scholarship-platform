@@ -54,6 +54,8 @@ import {
   type ApplicationTrackerItem,
   type TrackerResponse,
 } from "@/lib/api";
+import { DeadlineTimezoneUtil } from "@/lib/DeadlineTimezoneUtil";
+
 
 type StageKey = "wishlist" | "preparing_docs" | "submitted" | "interview" | "accepted" | "rejected";
 
@@ -868,30 +870,50 @@ export default function ApplicationTrackerPage() {
                             </Link>
                           </h4>
 
-                          {/* Deadline tag */}
-                          <div className="flex items-center justify-between text-[11px] mb-3">
-                            <span className="text-slate-500 dark:text-text-muted flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              <span>{lang === "ar" ? "الموعد النهائي:" : lang === "fr" ? "Limite :" : "Deadline:"}</span>
-                            </span>
-                            <span
-                              className={`font-semibold ${
-                                isUrgent
-                                  ? "text-red-600 dark:text-red-400 font-bold"
-                                  : isUpcoming
-                                  ? "text-amber-600 dark:text-amber-400"
-                                  : isPassed
-                                  ? "text-slate-400 dark:text-text-muted"
-                                  : "text-slate-600 dark:text-text-secondary"
-                              }`}
-                            >
-                              {days !== null
-                                ? isPassed
-                                  ? (lang === "ar" ? "منتهي" : lang === "fr" ? "Expiré" : "Expired")
-                                  : (lang === "ar" ? `متبقي ${days} يوم` : lang === "fr" ? `J-${days} jours` : `${days} days left`)
-                                : (lang === "ar" ? "جاري" : lang === "fr" ? "En cours" : "Ongoing")}
-                            </span>
-                          </div>
+                          {/* Deadline tag with Multi-Timezone conversion */}
+                          {(() => {
+                            const rawDeadline = app.scholarship.embassy_deadline || app.scholarship.university_deadline || app.scholarship.application_deadline;
+                            const tzData = rawDeadline ? DeadlineTimezoneUtil.convertDeadline(rawDeadline, app.scholarship.host_timezone || "Asia/Shanghai") : null;
+
+                            return (
+                              <div className="text-[11px] mb-3 space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-slate-500 dark:text-text-muted flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    <span>{lang === "ar" ? "الموعد النهائي:" : lang === "fr" ? "Limite :" : "Deadline:"}</span>
+                                  </span>
+                                  <span
+                                    className={`font-semibold ${
+                                      isUrgent
+                                        ? "text-red-600 dark:text-red-400 font-bold"
+                                        : isUpcoming
+                                        ? "text-amber-600 dark:text-amber-400"
+                                        : isPassed
+                                        ? "text-slate-400 dark:text-text-muted"
+                                        : "text-slate-600 dark:text-text-secondary"
+                                    }`}
+                                  >
+                                    {days !== null
+                                      ? isPassed
+                                        ? (lang === "ar" ? "منتهي" : lang === "fr" ? "Expiré" : "Expired")
+                                        : (lang === "ar" ? `متبقي ${days} يوم` : lang === "fr" ? `J-${days} jours` : `${days} days left`)
+                                      : (lang === "ar" ? "جاري" : lang === "fr" ? "En cours" : "Ongoing")}
+                                  </span>
+                                </div>
+
+                                {tzData && tzData.isSet && (
+                                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-400 pt-0.5">
+                                    <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-blue-600 dark:text-cyan font-mono" title="Beijing / Host University Time">
+                                      🇨🇳 {tzData.host.dateStr} {tzData.host.timeStr} (UTC+8)
+                                    </span>
+                                    <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-emerald-600 dark:text-emerald-400 font-mono" title="Your Browser Local Time">
+                                      🇲🇦 {tzData.user.dateStr} {tzData.user.timeStr} ({tzData.user.offsetStr})
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
 
                           {/* Checklist Progress Bar */}
                           {docEntries.length > 0 && (

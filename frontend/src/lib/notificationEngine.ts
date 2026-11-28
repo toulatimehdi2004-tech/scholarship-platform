@@ -819,3 +819,150 @@ Dr. Wei Chen, Conseiller Senior`,
     ...customPayload,
   });
 }
+
+// ── Document Expiration & Tracked Deadline Watch Integration ──
+
+export interface ExpiryWarningPayload {
+  id?: string;
+  rule: "EXPIRED" | "EXPIRING_SOON_30D" | "EXPIRES_BEFORE_DEADLINE";
+  severity: "critical" | "warning";
+  doc_id?: number;
+  doc_title: string;
+  doc_type?: string;
+  expiry_date: string;
+  days_until_expiry?: number;
+  scholarship_id?: number;
+  scholarship_title?: string;
+  deadline_label?: string;
+  host_deadline?: string;
+  user_deadline?: string;
+  days_difference?: number;
+  title?: string;
+  message?: string;
+}
+
+/**
+ * Integrates document-expiry warnings into the active notification engine.
+ * Receives warnings from backend or evaluates local documents,
+ * preventing duplicates and triggering audio alerts, badges & push notifications.
+ */
+export function dispatchDocumentExpiryNotification(
+  warning: ExpiryWarningPayload,
+  username?: string
+): StudentNotification | null {
+  if (typeof window === "undefined") return null;
+
+  const notifId = `doc-alert-${warning.rule}-${warning.doc_id || warning.doc_title.replace(/\s+/g, "_")}-${warning.scholarship_id || "gen"}`;
+
+  // Check if this alert was already dispatched recently to prevent spam
+  const existing = getStudentNotifications(username);
+  const alreadyNotified = existing.some(
+    (n) => n.id === notifId && Date.now() - n.timestamp < 1000 * 60 * 60 * 24 // 24 hours
+  );
+  if (alreadyNotified) return null;
+
+  const isConflict = warning.rule === "EXPIRES_BEFORE_DEADLINE";
+  const isExpired = warning.rule === "EXPIRED";
+
+  const titleEn = isConflict
+    ? `🚨 Deadline Conflict: ${warning.doc_title} expires BEFORE ${warning.scholarship_title || "Scholarship"}`
+    : isExpired
+    ? `⛔ Document Expired: ${warning.doc_title}`
+    : `⚠️ Expiry Warning: ${warning.doc_title} (${warning.days_until_expiry ?? 30} days remaining)`;
+
+  const titleFr = isConflict
+    ? `🚨 Conflit de Date : ${warning.doc_title} expire AVANT ${warning.scholarship_title || "la bourse"}`
+    : isExpired
+    ? `⛔ Document Expiré : ${warning.doc_title}`
+    : `⚠️ Alerte Expiration : ${warning.doc_title} (${warning.days_until_expiry ?? 30} jours restants)`;
+
+  const titleAr = isConflict
+    ? `🚨 تعارض في الموعد: تنتهي صلاحية ${warning.doc_title} قبل موعد ${warning.scholarship_title || "المنحة"}`
+    : isExpired
+    ? `⛔ وثيقة منتهية الصلاحية: ${warning.doc_title}`
+    : `⚠️ تنبيه اقتراب الانتهاء: ${warning.doc_title} (متبقي ${warning.days_until_expiry ?? 30} يوم)`;
+
+  const msgEn = isConflict
+    ? `CRITICAL ALERT: Your ${warning.doc_title} expires on ${warning.expiry_date}, which is ${Math.abs(warning.days_difference || 0)} day(s) before the ${warning.deadline_label || "deadline"} for "${warning.scholarship_title}" (${warning.host_deadline || "Host Timezone"}). Chinese embassies and universities require valid documents through visa issuance. Please renew immediately!`
+    : isExpired
+    ? `Your ${warning.doc_title} expired on ${warning.expiry_date}. Submitting an expired document will lead to immediate rejection by CSC and Chinese university portals. Please upload a renewed certificate.`
+    : `Your ${warning.doc_title} will expire on ${warning.expiry_date} (${warning.days_until_expiry} days left). For 6-month documents (Medical Exam and Police Clearance), start renewal procedures now to prevent deadline lockouts.`;
+
+  const msgFr = isConflict
+    ? `ALERTE CRITIQUE : Votre document "${warning.doc_title}" expire le ${warning.expiry_date}, soit ${Math.abs(warning.days_difference || 0)} jour(s) avant la date limite (${warning.deadline_label || "date"}) de "${warning.scholarship_title}" (${warning.host_deadline || "Heure de Pékin"}). Le consulat et l'université exigent des pièces strictement valides. Renouvelez-le d'urgence !`
+    : isExpired
+    ? `Votre document "${warning.doc_title}" a expiré le ${warning.expiry_date}. Les dossiers contenant des pièces périmées sont automatiquement rejetés par le CSC. Téléversez un document renouvelé.`
+    : `Votre document "${warning.doc_title}" expire le ${warning.expiry_date} (${warning.days_until_expiry} jours restants). Pour le Casier Judiciaire et la Visite Médicale (validité 6 mois), anticipez votre renouvellement sans tarder.`;
+
+  const msgAr = isConflict
+    ? `تحذير هام جداً: تنتهي صلاحية "${warning.doc_title}" في ${warning.expiry_date}، أي قبل الموعد النهائي لمنحة "${warning.scholarship_title}" بـ ${Math.abs(warning.days_difference || 0)} يوم (${warning.host_deadline || "بتوقيت بكين"}). تشترط السفارات الصينية والجامعات وثائق سارية المفعول بالكامل. يرجى التجديد الفوري!`
+    : isExpired
+    ? `انتهت صلاحية وثيقتك "${warning.doc_title}" في ${warning.expiry_date}. يتم رفض أي ملف يحتوي على وثائق منتهية من قبل مجلس المنح CSC. يرجى تجديدها فوراً.`
+    : `تنتهي صلاحية "${warning.doc_title}" في ${warning.expiry_date} (متبقي ${warning.days_until_expiry} يوم). بالنسبة للفحص الطبي وحسن السيرة (6 أشهر صلاحية)، ابدأ إجراءات التجديد تفادياً لضياع فرصة التقديم.`;
+
+  return addStudentNotification(
+    {
+      id: notifId,
+      category: "document",
+      priority: warning.severity === "critical" ? "urgent" : "high",
+      sender: {
+        name: "ScholarChina Compliance Watch",
+        role: "Automated Document Validity Engine",
+        avatar: "VAL",
+        avatarBg: warning.severity === "critical" ? "from-rose-600 to-red-800" : "from-amber-600 to-orange-700",
+        verified: true,
+        organization: "Ministry of Education & CSC Compliance Desk",
+      },
+      title: { en: titleEn, fr: titleFr, ar: titleAr },
+      snippet: {
+        en: warning.message || titleEn,
+        fr: msgFr.slice(0, 110) + "...",
+        ar: msgAr.slice(0, 110) + "...",
+      },
+      fullMessage: { en: msgEn, fr: msgFr, ar: msgAr },
+      actionUrl: "/documents",
+      actionLabel: {
+        en: "Review Document Vault",
+        fr: "Vérifier le Coffre-fort Documents",
+        ar: "مراجعة قسم الوثائق",
+      },
+      tags: ["Document Expiry", "Deadline Alert", warning.rule],
+    },
+    {
+      playSound: true,
+      showToast: true,
+      sendBrowserPush: true,
+      username,
+    }
+  );
+}
+
+/**
+ * Polls or syncs document expiration warnings from backend and triggers notifications.
+ */
+export async function syncDocumentExpiryWarnings(apiUrl?: string, username?: string): Promise<number> {
+  if (typeof window === "undefined") return 0;
+  try {
+    const base = apiUrl || (localStorage.getItem("custom_api_url") || "http://localhost:8000/api");
+    const token = localStorage.getItem("auth_token") || localStorage.getItem("token");
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Token ${token}`;
+
+    const res = await fetch(`${base}/documents/expiry-warnings/`, { headers });
+    if (!res.ok) return 0;
+
+    const data = await res.json();
+    const warnings: ExpiryWarningPayload[] = data.warnings || [];
+    let dispatched = 0;
+
+    for (const w of warnings) {
+      const result = dispatchDocumentExpiryNotification(w, username);
+      if (result) dispatched++;
+    }
+
+    return dispatched;
+  } catch {
+    return 0;
+  }
+}
+

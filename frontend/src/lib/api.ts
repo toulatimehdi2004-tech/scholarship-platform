@@ -1211,6 +1211,9 @@ export interface ApplicationTrackerItem {
     amount?: string;
     currency?: string;
     application_deadline: string;
+    embassy_deadline?: string | null;
+    university_deadline?: string | null;
+    host_timezone?: string;
     application_link?: string;
     required_documents?: string[];
     university_id?: number;
@@ -1359,7 +1362,7 @@ export async function submitExperienceReview(
   });
 }
 
-// ── Student Official Documents API (student_documents) ───────
+// ── Student Official Documents API (/api/documents & /api/student-documents) ──
 export type StudentDocType =
   | "PASSPORT"
   | "POLICE_CLEARANCE"
@@ -1371,58 +1374,221 @@ export type StudentDocType =
   | "RECOMMENDATION_LETTER"
   | "OTHER";
 
+export interface TrackedDeadlineConflict {
+  scholarship_id: number;
+  scholarship_title: string;
+  deadline_label: string;
+  days_difference: number;
+  host_deadline: string;
+  user_deadline: string;
+}
+
 export interface StudentDocument {
   id: number;
   user: number;
   username?: string;
+  title?: string | null;
   doc_type: StudentDocType;
   doc_type_display?: string;
   issue_date?: string | null;
   expiry_date?: string | null;
   notes?: string | null;
   file?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_size?: number | null;
   is_verified: boolean;
   is_expired?: boolean;
   days_until_expiry?: number | null;
+  is_expiring_soon?: boolean;
+  expiry_status?: "VALID" | "EXPIRING_SOON" | "EXPIRED" | "NO_EXPIRY";
+  tracked_conflicts?: TrackedDeadlineConflict[];
   created_at: string;
   updated_at: string;
 }
 
-export async function getStudentDocuments(
-  userId?: number
-): Promise<ApiResponse<StudentDocument[]>> {
-  const query = userId ? `?user_id=${userId}` : "";
-  return fetchApi<StudentDocument[]>(`/student-documents/${query}`);
+export interface DocumentExpiryWarningItem {
+  id: string;
+  rule: "EXPIRED" | "EXPIRING_SOON_30D" | "EXPIRES_BEFORE_DEADLINE";
+  severity: "critical" | "warning";
+  doc_id: number;
+  doc_title: string;
+  doc_type: string;
+  doc_type_display?: string;
+  expiry_date: string;
+  days_until_expiry?: number;
+  is_expired?: boolean;
+  scholarship_id?: number;
+  scholarship_title?: string;
+  deadline_label?: string;
+  deadline_utc?: string;
+  host_deadline?: string;
+  user_deadline?: string;
+  days_difference?: number;
+  title: string;
+  message: string;
 }
 
-export async function createStudentDocument(
+export interface ExpiryWarningsResponse {
+  user: string;
+  user_timezone: string;
+  warnings_count: number;
+  has_critical_conflicts: boolean;
+  warnings: DocumentExpiryWarningItem[];
+}
+
+export interface DailyCheckAuditResponse {
+  checked_documents: number;
+  alerts_created: number;
+  alerts_updated: number;
+  total_warnings: number;
+  warnings: any[];
+  timestamp: string;
+}
+
+export interface DocumentComplianceItem {
+  doc_id: number;
+  doc_title: string;
+  doc_type: string;
+  expiry_date: string;
+  has_conflict: boolean;
+  severity: "critical" | "warning" | "ok";
+  message: string;
+}
+
+export interface DeadlinesSummaryApplication {
+  application_id: number;
+  status: string;
+  scholarship_id: number;
+  scholarship_title: string;
+  host_timezone: string;
+  user_timezone: string;
+  embassy_deadline?: any;
+  university_deadline?: any;
+  general_deadline?: any;
+  document_compliances: DocumentComplianceItem[];
+  has_document_conflicts: boolean;
+}
+
+export interface DeadlinesSummaryResponse {
+  user: string;
+  user_timezone: string;
+  tracked_scholarships_count: number;
+  applications: DeadlinesSummaryApplication[];
+}
+
+export interface DocumentExpiryAlertItem {
+  id: number;
+  user: number;
+  username: string;
+  document: number;
+  doc_title: string;
+  scholarship?: number | null;
+  scholarship_title?: string | null;
+  alert_type: string;
+  severity: string;
+  title: string;
+  title_fr: string;
+  title_ar: string;
+  message: string;
+  message_fr: string;
+  message_ar: string;
+  expiry_date?: string | null;
+  deadline_utc?: string | null;
+  host_deadline_str?: string;
+  user_deadline_str?: string;
+  days_until_expiry?: number | null;
+  days_difference?: number | null;
+  is_resolved: boolean;
+  is_read: boolean;
+  created_at: string;
+}
+
+// ── CRUD /api/documents/ ──
+
+export async function getDocuments(
+  params?: Record<string, any>
+): Promise<ApiResponse<StudentDocument[]>> {
+  const query = params ? "?" + new URLSearchParams(params).toString() : "";
+  return fetchApi<StudentDocument[]>(`/documents/${query}`);
+}
+
+export async function getDocument(
+  id: number
+): Promise<ApiResponse<StudentDocument>> {
+  return fetchApi<StudentDocument>(`/documents/${id}/`);
+}
+
+export async function createDocument(
   data: FormData | Partial<StudentDocument>
 ): Promise<ApiResponse<StudentDocument>> {
   if (typeof FormData !== "undefined" && data instanceof FormData) {
-    return uploadApi<StudentDocument>("/student-documents/", data);
+    return uploadApi<StudentDocument>("/documents/", data);
   }
-  return fetchApi<StudentDocument>("/student-documents/", {
+  return fetchApi<StudentDocument>("/documents/", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export async function updateStudentDocument(
+export async function updateDocument(
   id: number,
   data: Partial<StudentDocument>
 ): Promise<ApiResponse<StudentDocument>> {
-  return fetchApi<StudentDocument>(`/student-documents/${id}/`, {
+  return fetchApi<StudentDocument>(`/documents/${id}/`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
 }
 
-export async function deleteStudentDocument(
+export async function deleteDocument(
   id: number
 ): Promise<ApiResponse<{ detail?: string }>> {
-  return fetchApi<{ detail?: string }>(`/student-documents/${id}/`, {
+  return fetchApi<{ detail?: string }>(`/documents/${id}/`, {
     method: "DELETE",
   });
 }
+
+export async function getDocumentExpiryWarnings(
+  userTimezone?: string
+): Promise<ApiResponse<ExpiryWarningsResponse>> {
+  const query = userTimezone ? `?timezone=${encodeURIComponent(userTimezone)}` : "";
+  return fetchApi<ExpiryWarningsResponse>(`/documents/expiry-warnings/${query}`);
+}
+
+export async function runDocumentDailyCheck(
+  username?: string
+): Promise<ApiResponse<DailyCheckAuditResponse>> {
+  return fetchApi<DailyCheckAuditResponse>("/documents/run-daily-check/", {
+    method: "POST",
+    body: JSON.stringify(username ? { username } : {}),
+  });
+}
+
+export async function getDocumentAlerts(): Promise<ApiResponse<DocumentExpiryAlertItem[]>> {
+  return fetchApi<DocumentExpiryAlertItem[]>("/documents/alerts/");
+}
+
+export async function resolveDocumentAlert(
+  id: number
+): Promise<ApiResponse<{ success: boolean; id: number }>> {
+  return fetchApi<{ success: boolean; id: number }>(`/documents/${id}/resolve-alert/`, {
+    method: "POST",
+  });
+}
+
+export async function getDocumentDeadlinesSummary(
+  userTimezone?: string
+): Promise<ApiResponse<DeadlinesSummaryResponse>> {
+  const query = userTimezone ? `?timezone=${encodeURIComponent(userTimezone)}` : "";
+  return fetchApi<DeadlinesSummaryResponse>(`/documents/deadlines-summary/${query}`);
+}
+
+// Aliases for /api/student-documents/
+export const getStudentDocuments = getDocuments;
+export const createStudentDocument = createDocument;
+export const updateStudentDocument = updateDocument;
+export const deleteStudentDocument = deleteDocument;
+
 
 

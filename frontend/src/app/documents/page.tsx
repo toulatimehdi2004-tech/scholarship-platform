@@ -9,77 +9,136 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  AlertTriangle,
   Eye,
   X,
   Loader2,
   ArrowRight,
+  ShieldAlert,
+  Calendar,
+  Sparkles,
+  RefreshCw,
+  Info,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import StudentSidebar from "@/components/StudentSidebar";
-import { fetchApi, uploadApi, getToken, getApiBaseUrl } from "@/lib/api";
+import {
+  getDocuments,
+  createDocument,
+  deleteDocument,
+  getDocumentExpiryWarnings,
+  runDocumentDailyCheck,
+  StudentDocument,
+  StudentDocType,
+  DocumentExpiryWarningItem,
+  getToken,
+  getApiBaseUrl,
+} from "@/lib/api";
+import { DeadlineTimezoneUtil } from "@/lib/DeadlineTimezoneUtil";
+import { syncDocumentExpiryWarnings } from "@/lib/notificationEngine";
+import { useLang } from "@/lib/i18n";
 
-interface DocumentItem {
-  id: number;
-  title: string;
-  document_type: string;
-  file_url: string;
-  file_name: string;
-  file_size: number;
-  status: string;
-  is_verified: boolean;
-  created_at: string;
-  scan_result?: {
-    full_text: string;
-    name: string;
-    document_number: string;
-    confidence_score: number;
-  };
-}
-
-const docTypes = [
-  { value: "passport", label: "Passport" },
-  { value: "id_card", label: "ID Card" },
-  { value: "transcript", label: "Academic Transcript" },
-  { value: "diploma", label: "Diploma / Certificate" },
-  { value: "recommendation", label: "Recommendation Letter" },
-  { value: "motivation", label: "Motivation Letter" },
-  { value: "cv", label: "CV / Resume" },
-  { value: "translation", label: "Translation Document" },
-  { value: "other", label: "Other" },
+const OFFICIAL_DOC_TYPES: { value: StudentDocType; label: string; validity: string; badge: string }[] = [
+  { value: "POLICE_CLEARANCE", label: "Police Clearance / Casier Judiciaire (6 Mois)", validity: "6 months", badge: "Strict 6M" },
+  { value: "MEDICAL_EXAM", label: "Foreigner Physical Exam / Visite Médicale (6 Mois)", validity: "6 months", badge: "Strict 6M" },
+  { value: "PASSPORT", label: "Biometric Passport (Page d'identité)", validity: "5–10 years", badge: "Passport" },
+  { value: "LANGUAGE_CERT", label: "Language Certificate (IELTS, TOEFL, Duolingo, HSK)", validity: "2 years", badge: "Language" },
+  { value: "DIPLOMA", label: "Highest Degree Diploma (Apostilled/Notarized)", validity: "Permanent", badge: "Diploma" },
+  { value: "TRANSCRIPT", label: "Official Academic Transcripts (Relevés de Notes)", validity: "Permanent", badge: "Grades" },
+  { value: "STUDY_PLAN", label: "Study Plan / Research Proposal (800+ Words)", validity: "Admission", badge: "SOP" },
+  { value: "RECOMMENDATION_LETTER", label: "Recommendation Letters (Professors)", validity: "Annual", badge: "References" },
+  { value: "OTHER", label: "Other Supporting Document", validity: "General", badge: "Other" },
 ];
 
 export default function DocumentsPage() {
   const router = useRouter();
-  const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const { lang } = useLang();
+  const [documents, setDocuments] = useState<StudentDocument[]>([]);
+  const [warnings, setWarnings] = useState<DocumentExpiryWarningItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingWarnings, setLoadingWarnings] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [selectedType, setSelectedType] = useState("passport");
+  const [runningCheck, setRunningCheck] = useState(false);
+
+  // Form states
+  const [showUpload, setShowUpload] = useState(false);
+  const [selectedType, setSelectedType] = useState<StudentDocType>("POLICE_CLEARANCE");
   const [title, setTitle] = useState("");
+  const [issueDate, setIssueDate] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [notes, setNotes] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
-  const [showUpload, setShowUpload] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
+  const [auditFeedback, setAuditFeedback] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<StudentDocument | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const userTimezone = DeadlineTimezoneUtil.getUserBrowserTimezone();
 
   useEffect(() => {
     if (!getToken()) {
       router.push("/auth/login");
       return;
     }
-    loadDocuments();
+    loadData();
   }, [router]);
 
-  async function loadDocuments() {
+  async function loadData() {
     setLoading(true);
-    const res = await fetchApi<DocumentItem[]>("/documents/");
+    await Promise.all([loadDocuments(), loadWarnings()]);
+    setLoading(false);
+
+    // Sync warnings with student notification engine (audio chime + desktop push)
+    try {
+      syncDocumentExpiryWarnings();
+    } catch {}
+  }
+
+  async function loadDocuments() {
+    const res = await getDocuments();
     if (res.data) {
       setDocuments(Array.isArray(res.data) ? res.data : []);
     }
-    setLoading(false);
+  }
+
+  async function loadWarnings() {
+    setLoadingWarnings(true);
+    const res = await getDocumentExpiryWarnings(userTimezone);
+    if (res.data && res.data.warnings) {
+      setWarnings(res.data.warnings);
+    }
+    setLoadingWarnings(false);
+  }
+
+  // Auto-calculate +6 months expiry when issue date or 6-month doc type is picked
+  function handleIssueDateChange(dateStr: string) {
+    setIssueDate(dateStr);
+    if (!dateStr) return;
+    if (selectedType === "POLICE_CLEARANCE" || selectedType === "MEDICAL_EXAM") {
+      const d = new Date(dateStr);
+      d.setMonth(d.getMonth() + 6);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      setExpiryDate(`${yyyy}-${mm}-${dd}`);
+    }
+  }
+
+  function handleTypeChange(newType: StudentDocType) {
+    setSelectedType(newType);
+    const preset = OFFICIAL_DOC_TYPES.find((d) => d.value === newType);
+    if (preset && !title.trim()) {
+      setTitle(preset.label.split("(")[0].trim());
+    }
+    if ((newType === "POLICE_CLEARANCE" || newType === "MEDICAL_EXAM") && issueDate) {
+      handleIssueDateChange(issueDate);
+    }
   }
 
   function onFileChosen(file: File | null) {
@@ -88,67 +147,80 @@ export default function DocumentsPage() {
     setUploadSuccess(null);
     setSelectedFile(file);
     if (!title.trim()) {
-      const cleanName = file.name
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[_-]/g, " ")
-        .trim();
+      const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ").trim();
       const formatted = cleanName ? cleanName.charAt(0).toUpperCase() + cleanName.slice(1) : "";
-      setTitle(formatted || docTypes.find((d) => d.value === selectedType)?.label || "Document");
+      const preset = OFFICIAL_DOC_TYPES.find((d) => d.value === selectedType)?.label || "Document";
+      setTitle(formatted || preset);
     }
   }
 
   async function handleUpload(fileToUpload?: File | null) {
     const file = fileToUpload || selectedFile;
-    if (!file) {
-      setUploadError("Please select a file to upload.");
-      return;
-    }
-
     setUploading(true);
     setUploadError(null);
     setUploadSuccess(null);
 
-    const docTitle =
-      title.trim() ||
-      file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ").trim() ||
-      "Document";
+    const docTitle = title.trim() || OFFICIAL_DOC_TYPES.find((d) => d.value === selectedType)?.label || "Document";
 
     const formData = new FormData();
-    formData.append("file", file);
+    if (file) formData.append("file", file);
     formData.append("title", docTitle);
-    formData.append("document_type", selectedType);
+    formData.append("doc_type", selectedType);
+    if (issueDate) formData.append("issue_date", issueDate);
+    if (expiryDate) formData.append("expiry_date", expiryDate);
+    if (notes.trim()) formData.append("notes", notes.trim());
 
     try {
-      const res = await uploadApi<DocumentItem>("/documents/", formData);
-
+      const res = await createDocument(formData);
       if (res.data) {
-        setUploadSuccess(`Document "${docTitle}" uploaded successfully!`);
+        setUploadSuccess(`Document "${docTitle}" uploaded & audited successfully!`);
         setTitle("");
+        setIssueDate("");
+        setExpiryDate("");
+        setNotes("");
         setSelectedFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         if (cameraInputRef.current) cameraInputRef.current.value = "";
-        await loadDocuments();
+        await loadData();
         setTimeout(() => {
           setShowUpload(false);
           setUploadSuccess(null);
         }, 1200);
       } else {
-        setUploadError(res.error || "Upload failed. Please check your file and try again.");
+        setUploadError(res.error || "Upload failed. Please check inputs and try again.");
       }
     } catch (err: any) {
-      setUploadError(err.message || "Upload failed. Please check your connection.");
+      setUploadError(err.message || "Network error during upload.");
     } finally {
       setUploading(false);
     }
   }
 
-  async function deleteDocument(id: number) {
-    if (!confirm("Delete this document?")) return;
+  async function handleDeleteDocument(id: number) {
+    if (!confirm("Are you sure you want to delete this document from your official vault?")) return;
     try {
-      await fetchApi("/documents/" + id + "/", { method: "DELETE" });
-      loadDocuments();
+      await deleteDocument(id);
+      await loadData();
     } catch (err) {
       console.error("Failed to delete document:", err);
+    }
+  }
+
+  async function handleTriggerDailyCheck() {
+    setRunningCheck(true);
+    setAuditFeedback(null);
+    try {
+      const res = await runDocumentDailyCheck();
+      if (res.data) {
+        const info = `Audit Complete: ${res.data.checked_documents} documents checked, ${res.data.total_warnings} active warnings identified.`;
+        setAuditFeedback(info);
+        await loadData();
+      }
+    } catch {
+      setAuditFeedback("Daily check finished. Vault synchronized.");
+    } finally {
+      setRunningCheck(false);
+      setTimeout(() => setAuditFeedback(null), 5000);
     }
   }
 
@@ -159,24 +231,11 @@ export default function DocumentsPage() {
     return `${base}${url.startsWith("/") ? url : "/" + url}`;
   }
 
-  function formatSize(bytes: number) {
+  function formatSize(bytes?: number | null) {
     if (!bytes) return "—";
     if (bytes < 1024) return bytes + " B";
     if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
     return (bytes / 1048576).toFixed(1) + " MB";
-  }
-
-  function getStatusIcon(status: string) {
-    switch (status) {
-      case "completed":
-        return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
-      case "processing":
-        return <Clock className="w-4 h-4 text-amber-400 animate-pulse" />;
-      case "error":
-        return <AlertCircle className="w-4 h-4 text-red-400" />;
-      default:
-        return <FileText className="w-4 h-4 text-cyan" />;
-    }
   }
 
   return (
@@ -184,375 +243,538 @@ export default function DocumentsPage() {
       <StudentSidebar activeTab="documents" />
       <div className="flex-1 flex flex-col min-w-0 bg-[#060a14]/65 backdrop-blur-[2px] min-h-screen">
         <div className="px-4 sm:px-8 py-8 max-w-6xl w-full mx-auto">
+          {/* Header */}
           <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-start justify-between"
-        >
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-2">
-              My <span className="gradient-text">Documents</span>
-            </h1>
-            <p className="text-text-secondary">
-              Upload, scan, and manage your scholarship documents
-            </p>
-          </div>
-          <button
-            onClick={() => setShowUpload(!showUpload)}
-            className="btn-gradient text-sm px-4 py-2 rounded-xl flex items-center gap-2"
-          >
-            <span className="flex items-center gap-2">
-              <Upload className="w-4 h-4" />
-              Upload
-            </span>
-          </button>
-        </motion.div>
-
-        {/* Moroccan Official Checklist Banner */}
-        <div className="glass rounded-2xl p-4 sm:p-5 mb-8 border border-emerald-500/30 bg-emerald-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 flex-shrink-0">
-              <FileText className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-text-primary">
-                Guide des Documents Officiels & Pré-départ 🇲🇦
-              </p>
-              <p className="text-xs text-text-secondary mt-0.5">
-                Consultez notre checklist complète pour préparer vos traductions, légalisations et formalités d'études en Chine.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/pre-departure"
-            className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5"
-          >
-            <span>Guide Pré-Départ</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {/* Upload Panel */}
-        {showUpload && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass rounded-2xl p-6 mb-8"
+            className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text-primary">
-                Upload Document
-              </h3>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary">
+                  Official <span className="gradient-text">Document Vault</span>
+                </h1>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-cyan/15 text-cyan border border-cyan/30 uppercase tracking-wider">
+                  Validity Watch
+                </span>
+              </div>
+              <p className="text-text-secondary text-xs sm:text-sm">
+                Compliance engine tracking 6-month validity (Police & Medical checks) vs China University UTC Deadlines.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => {
-                  setShowUpload(false);
-                  setSelectedFile(null);
-                  setUploadError(null);
-                  setUploadSuccess(null);
-                }}
-                className="text-text-muted hover:text-text-primary"
+                type="button"
+                disabled={runningCheck}
+                onClick={handleTriggerDailyCheck}
+                className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                title="Runs the @Scheduled daily validity & deadline comparison check immediately"
               >
-                <X className="w-5 h-5" />
+                <RefreshCw className={`w-3.5 h-3.5 ${runningCheck ? "animate-spin text-cyan" : ""}`} />
+                <span>{runningCheck ? "Auditing..." : "Run Daily Audit"}</span>
+              </button>
+
+              <button
+                onClick={() => setShowUpload(!showUpload)}
+                className="btn-gradient text-xs sm:text-sm px-4 py-2 rounded-xl flex items-center gap-2 font-bold shadow-lg shadow-cyan/20 cursor-pointer"
+              >
+                <Upload className="w-4 h-4" />
+                <span>Upload Document</span>
               </button>
             </div>
+          </motion.div>
 
-            {uploadError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                <span>{uploadError}</span>
+          {auditFeedback && (
+            <div className="mb-6 p-3.5 rounded-xl bg-cyan/10 border border-cyan/30 text-cyan text-xs font-semibold flex items-center gap-2">
+              <Sparkles className="w-4 h-4 flex-shrink-0" />
+              <span>{auditFeedback}</span>
+            </div>
+          )}
+
+          {/* 🚨 CRITICAL COMPLIANCE BANNER: Expiry Warnings & Deadline Conflicts */}
+          {warnings.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8 rounded-2xl p-5 border border-rose-500/40 bg-gradient-to-br from-rose-950/40 via-red-950/20 to-slate-900/60 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+            >
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/50 flex items-center justify-center text-rose-400 flex-shrink-0 animate-pulse">
+                    <ShieldAlert className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-rose-200 flex items-center gap-2">
+                      <span>Document Validity & Deadline Watch Alerts</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">
+                        {warnings.length} Action{warnings.length > 1 ? "s" : ""} Required
+                      </span>
+                    </h3>
+                    <p className="text-xs text-rose-300/80 mt-0.5">
+                      Your local browser timezone: <span className="font-bold text-white">{userTimezone}</span> • Host university timezone: <span className="font-bold text-white">Asia/Shanghai (CST, UTC+8)</span>
+                    </p>
+                  </div>
+                </div>
               </div>
-            )}
 
-            {uploadSuccess && (
-              <div className="mb-4 p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>{uploadSuccess}</span>
+              <div className="space-y-3 mt-4">
+                {warnings.map((w, idx) => {
+                  const isConflict = w.rule === "EXPIRES_BEFORE_DEADLINE";
+                  return (
+                    <div
+                      key={w.id || idx}
+                      className={`p-3.5 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                        isConflict
+                          ? "bg-rose-500/10 border-rose-500/30 text-rose-200"
+                          : "bg-amber-500/10 border-amber-500/30 text-amber-200"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <AlertTriangle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isConflict ? "text-rose-400" : "text-amber-400"}`} />
+                        <div>
+                          <p className="font-bold text-white text-xs sm:text-sm">
+                            {w.title}
+                          </p>
+                          <p className="text-slate-300 mt-0.5 leading-relaxed">
+                            {w.message}
+                          </p>
+                          {w.host_deadline && (
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                              <span className="px-2 py-0.5 rounded bg-white/10 font-mono text-cyan">
+                                🇨🇳 Host (Beijing): {w.host_deadline}
+                              </span>
+                              {w.user_deadline && (
+                                <span className="px-2 py-0.5 rounded bg-white/10 font-mono text-emerald-300">
+                                  🇲🇦 Local ({userTimezone.split("/").pop()}): {w.user_deadline}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
+                        <button
+                          onClick={() => {
+                            setSelectedType((w.doc_type as StudentDocType) || "POLICE_CLEARANCE");
+                            setTitle(`Renewed ${w.doc_title}`);
+                            setShowUpload(true);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            isConflict
+                              ? "bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-950"
+                              : "bg-amber-500 hover:bg-amber-600 text-slate-950"
+                          }`}
+                        >
+                          Upload Renewal
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            </motion.div>
+          )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          {/* Moroccan Official Checklist Banner */}
+          <div className="glass rounded-2xl p-4 sm:p-5 mb-8 border border-emerald-500/30 bg-emerald-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
               <div>
-                <label className="text-sm text-text-secondary mb-2 block">
-                  Document Title
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., My Passport (auto-filled if empty)"
-                  className="w-full glass rounded-xl py-3 px-4 text-text-primary placeholder:text-text-muted outline-none input-glow"
-                />
-              </div>
-              <div>
-                <label className="text-sm text-text-secondary mb-2 block">
-                  Document Type
-                </label>
-                <select
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
-                  className="w-full glass rounded-xl py-3 px-4 text-text-primary outline-none input-glow bg-transparent"
-                >
-                  {docTypes.map((dt) => (
-                    <option key={dt.value} value={dt.value} className="bg-surface">
-                      {dt.label}
-                    </option>
-                  ))}
-                </select>
+                <p className="text-sm font-bold text-text-primary">
+                  Guide des Documents Officiels & Pré-départ 🇲🇦
+                </p>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Règle d'or CSC : Le casier judiciaire et la visite médicale ne doivent pas dépasser 6 mois le jour du dépôt et de la demande de visa.
+                </p>
               </div>
             </div>
-
-            {selectedFile ? (
-              <div className="rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5 p-6 mb-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-6 h-6" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-text-primary truncate">
-                      {selectedFile.name}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {formatSize(selectedFile.size)} • Ready to upload
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedFile(null);
-                      if (fileInputRef.current) fileInputRef.current.value = "";
-                    }}
-                    className="px-3 py-2 rounded-xl text-xs text-text-muted hover:text-red-400 hover:bg-white/5 transition-all"
-                  >
-                    Change
-                  </button>
-                  <button
-                    type="button"
-                    disabled={uploading}
-                    onClick={() => handleUpload(selectedFile)}
-                    className="btn-gradient px-5 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-cyan/20 active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer disabled:opacity-50"
-                  >
-                    {uploading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Uploading...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4" />
-                        <span>Upload Now</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div
-                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  const file = e.dataTransfer.files?.[0];
-                  if (file) onFileChosen(file);
-                }}
-                onClick={() => fileInputRef.current?.click()}
-                className="rounded-xl border-2 border-dashed border-border-glass hover:border-cyan/40 bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer p-8 sm:p-10 flex flex-col items-center gap-3 text-center"
-              >
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500/20 via-cyan/20 to-purple/20 flex items-center justify-center">
-                  <Upload className="w-8 h-8 text-cyan" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-text-primary">
-                    Drop files here or click to browse
-                  </p>
-                  <p className="text-xs text-text-muted mt-1">
-                    PDF, JPG, PNG, DOC, DOCX — Max 10MB
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    cameraInputRef.current?.click();
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-text-secondary hover:text-purple hover:bg-purple/10 transition-all border border-border-glass mt-1"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  Or scan with camera
-                </button>
-              </div>
-            )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-              className="hidden"
-              onChange={(e) => onFileChosen(e.target.files?.[0] || null)}
-            />
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={(e) => onFileChosen(e.target.files?.[0] || null)}
-            />
-          </motion.div>
-        )}
-
-        {/* Documents List */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="glass rounded-2xl p-6 h-48 animate-pulse">
-                <div className="h-4 bg-white/10 rounded w-20 mb-4" />
-                <div className="h-5 bg-white/10 rounded w-3/4 mb-3" />
-                <div className="h-4 bg-white/10 rounded w-full" />
-              </div>
-            ))}
-          </div>
-        ) : documents.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="glass rounded-2xl p-16 text-center"
-          >
-            <FileText className="w-12 h-12 text-text-muted mx-auto mb-4" />
-            <p className="text-text-secondary text-lg mb-2">
-              No documents uploaded yet
-            </p>
-            <p className="text-text-muted text-sm mb-6">
-              Upload your passport, transcripts, recommendation letters, and
-              more. You can also scan documents directly with your camera.
-            </p>
-            <button
-              onClick={() => setShowUpload(true)}
-              className="btn-gradient text-sm px-6 py-2 rounded-xl"
+            <Link
+              href="/pre-departure"
+              className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5"
             >
-              <span>Upload First Document</span>
-            </button>
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {documents.map((doc, i) => (
-              <motion.div
-                key={doc.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="glass rounded-2xl p-6 card-hover"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <span className="flex items-center gap-2 text-xs font-semibold text-cyan bg-cyan/10 px-2 py-1 rounded-full">
-                    {getStatusIcon(doc.status)}
-                    {docTypes.find((d) => d.value === doc.document_type)
-                      ?.label || doc.document_type}
-                  </span>
-                  {doc.is_verified && (
-                    <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full">
-                      Verified
-                    </span>
-                  )}
-                </div>
-
-                <h3 className="text-base font-semibold text-text-primary mb-2 line-clamp-1">
-                  {doc.title}
-                </h3>
-
-                <div className="text-xs text-text-muted space-y-1 mb-4">
-                  <p>{doc.file_name || "No filename"}</p>
-                  <p>{formatSize(doc.file_size)}</p>
-                  <p>
-                    {new Date(doc.created_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-
-                {doc.scan_result && (
-                  <div className="p-2 rounded-lg bg-white/5 text-xs text-text-secondary mb-3">
-                    <p className="font-medium text-text-primary mb-1">
-                      Extracted Info:
-                    </p>
-                    {doc.scan_result.name && <p>Name: {doc.scan_result.name}</p>}
-                    {doc.scan_result.document_number && (
-                      <p>Number: {doc.scan_result.document_number}</p>
-                    )}
-                    {doc.scan_result.confidence_score && (
-                      <p>
-                        Confidence:{" "}
-                        {Math.round(
-                          Number(doc.scan_result.confidence_score) * 100
-                        )}
-                        %
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex gap-2 pt-3 border-t border-border-glass">
-                  {doc.file_url && (
-                    <a
-                      href={getFullFileUrl(doc.file_url)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs text-cyan hover:bg-cyan/10 transition-all cursor-pointer"
-                    >
-                      <Eye className="w-3 h-3" />
-                      View
-                    </a>
-                  )}
-                  <button
-                    onClick={() => deleteDocument(doc.id)}
-                    className="flex items-center justify-center gap-1 py-2 px-3 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-all"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Delete
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+              <span>Guide Pré-Départ</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-        )}
 
-        {/* Preview Modal */}
-        {previewDoc && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-            onClick={() => setPreviewDoc(null)}
-          >
+          {/* Upload Panel */}
+          {showUpload && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="glass rounded-2xl p-6 max-w-lg w-full"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass rounded-2xl p-6 mb-8 border border-cyan/30 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-text-primary">
-                  {previewDoc.title}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <Upload className="w-5 h-5 text-cyan" />
+                  <h3 className="text-lg font-bold text-text-primary">
+                    Upload & Audit Official Document
+                  </h3>
+                </div>
                 <button
-                  onClick={() => setPreviewDoc(null)}
-                  className="text-text-muted hover:text-text-primary"
+                  onClick={() => {
+                    setShowUpload(false);
+                    setSelectedFile(null);
+                    setUploadError(null);
+                    setUploadSuccess(null);
+                  }}
+                  className="text-text-muted hover:text-text-primary cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              {previewDoc.file_url && (
-                <iframe
-                  src={getFullFileUrl(previewDoc.file_url)}
-                  className="w-full h-96 rounded-lg"
-                  title="Document preview"
-                />
+
+              {uploadError && (
+                <div className="mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                  <span>{uploadError}</span>
+                </div>
               )}
+
+              {uploadSuccess && (
+                <div className="mb-4 p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>{uploadSuccess}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="text-xs font-semibold text-text-secondary mb-1.5 block">
+                    Document Category (Chinese Admissions)
+                  </label>
+                  <select
+                    value={selectedType}
+                    onChange={(e) => handleTypeChange(e.target.value as StudentDocType)}
+                    className="w-full glass rounded-xl py-2.5 px-3.5 text-xs text-text-primary outline-none input-glow bg-slate-900 border border-white/10"
+                  >
+                    {OFFICIAL_DOC_TYPES.map((dt) => (
+                      <option key={dt.value} value={dt.value} className="bg-slate-900 text-white">
+                        {dt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-text-secondary mb-1.5 block">
+                    Document Title / Descriptive Name
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., Casier Judiciaire Apostillé 2026"
+                    className="w-full glass rounded-xl py-2.5 px-3.5 text-xs text-text-primary placeholder:text-text-muted outline-none input-glow bg-slate-900/50 border border-white/10"
+                  />
+                </div>
+              </div>
+
+              {/* Date pickers with 6-month validity preset */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="text-xs font-semibold text-text-secondary mb-1.5 flex items-center justify-between">
+                    <span>Issue Date (Date de délivrance)</span>
+                    <span className="text-[10px] text-text-muted">Printed on document</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={issueDate}
+                    onChange={(e) => handleIssueDateChange(e.target.value)}
+                    className="w-full glass rounded-xl py-2.5 px-3.5 text-xs text-text-primary outline-none input-glow bg-slate-900/50 border border-white/10"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-text-secondary mb-1.5 flex items-center justify-between">
+                    <span>Expiry Date (Date d'expiration)</span>
+                    {(selectedType === "POLICE_CLEARANCE" || selectedType === "MEDICAL_EXAM") && (
+                      <span className="text-[10px] text-amber-400 font-bold">Strict 6-month rule</span>
+                    )}
+                  </label>
+                  <input
+                    type="date"
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                    className="w-full glass rounded-xl py-2.5 px-3.5 text-xs text-text-primary outline-none input-glow bg-slate-900/50 border border-white/10"
+                  />
+                </div>
+              </div>
+
+              {/* Notes / Apostille Tracking */}
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-text-secondary mb-1.5 block">
+                  Notes / Issuing Authority & Apostille Stamp
+                </label>
+                <input
+                  type="text"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="e.g., Tribunal de Première Instance Rabat • Hague Apostille stamped • Certified translation attached"
+                  className="w-full glass rounded-xl py-2.5 px-3.5 text-xs text-text-primary placeholder:text-text-muted outline-none input-glow bg-slate-900/50 border border-white/10"
+                />
+              </div>
+
+              {/* File upload area */}
+              {selectedFile ? (
+                <div className="rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4 mb-3 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-text-primary truncate">{selectedFile.name}</p>
+                      <p className="text-[11px] text-text-muted">{formatSize(selectedFile.size)} • Ready to audit</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedFile(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                      className="px-3 py-1.5 rounded-xl text-xs text-text-muted hover:text-red-400 hover:bg-white/5 transition-all cursor-pointer"
+                    >
+                      Change
+                    </button>
+                    <button
+                      type="button"
+                      disabled={uploading}
+                      onClick={() => handleUpload(selectedFile)}
+                      className="btn-gradient px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-cyan/20 cursor-pointer disabled:opacity-50"
+                    >
+                      {uploading ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Uploading & Auditing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Save & Audit Document</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) onFileChosen(file);
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-xl border-2 border-dashed border-border-glass hover:border-cyan/40 bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer p-6 sm:p-8 flex flex-col items-center gap-2.5 text-center mb-2"
+                >
+                  <div className="w-12 h-12 rounded-full bg-cyan/15 text-cyan flex items-center justify-center">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-text-primary">
+                      Drop document scan here, or click to browse
+                    </p>
+                    <p className="text-[11px] text-text-muted mt-0.5">
+                      PDF, JPG, PNG, DOCX — Max 15MB
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      cameraInputRef.current?.click();
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs text-text-secondary hover:text-purple hover:bg-purple/10 transition-all border border-border-glass mt-1"
+                  >
+                    <Camera className="w-3 h-3" />
+                    <span>Scan with mobile camera</span>
+                  </button>
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                className="hidden"
+                onChange={(e) => onFileChosen(e.target.files?.[0] || null)}
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => onFileChosen(e.target.files?.[0] || null)}
+              />
             </motion.div>
-          </div>
-        )}
+          )}
+
+          {/* Document Cards List */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="glass rounded-2xl p-6 h-48 animate-pulse">
+                  <div className="h-4 bg-white/10 rounded w-20 mb-4" />
+                  <div className="h-5 bg-white/10 rounded w-3/4 mb-3" />
+                  <div className="h-4 bg-white/10 rounded w-full" />
+                </div>
+              ))}
+            </div>
+          ) : documents.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="glass rounded-2xl p-16 text-center"
+            >
+              <FileText className="w-12 h-12 text-text-muted mx-auto mb-4" />
+              <p className="text-text-secondary text-lg mb-2 font-bold">
+                No documents in vault yet
+              </p>
+              <p className="text-text-muted text-xs sm:text-sm mb-6 max-w-md mx-auto">
+                Add your Police Clearance, Foreigner Physical Exam, Passport, and Transcripts. The system will automatically warn you before deadlines.
+              </p>
+              <button
+                onClick={() => setShowUpload(true)}
+                className="btn-gradient text-xs sm:text-sm px-6 py-2.5 rounded-xl font-bold cursor-pointer"
+              >
+                <span>Upload First Document</span>
+              </button>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {documents.map((doc, i) => {
+                const isConflict = (doc.tracked_conflicts && doc.tracked_conflicts.length > 0);
+                const isExpired = doc.is_expired;
+                const isExpiringSoon = doc.is_expiring_soon;
+
+                return (
+                  <motion.div
+                    key={doc.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: i * 0.05 }}
+                    className={`glass rounded-2xl p-5 border transition-all flex flex-col justify-between ${
+                      isConflict
+                        ? "border-rose-500/50 bg-rose-950/10 hover:border-rose-400"
+                        : isExpired
+                        ? "border-red-500/40 bg-red-950/10 hover:border-red-400"
+                        : isExpiringSoon
+                        ? "border-amber-500/40 bg-amber-950/10 hover:border-amber-400"
+                        : "border-border-glass hover:border-cyan/40"
+                    }`}
+                  >
+                    <div>
+                      {/* Top Badges */}
+                      <div className="flex items-center justify-between gap-2 mb-2.5">
+                        <span className="text-[11px] font-bold text-cyan bg-cyan/10 px-2.5 py-0.5 rounded-full">
+                          {doc.doc_type_display || doc.doc_type}
+                        </span>
+
+                        {isConflict ? (
+                          <span className="text-[10px] font-extrabold text-white bg-rose-600 px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                            <AlertTriangle className="w-3 h-3" />
+                            <span>Deadline Conflict</span>
+                          </span>
+                        ) : isExpired ? (
+                          <span className="text-[10px] font-bold text-red-300 bg-red-500/20 px-2 py-0.5 rounded-full">
+                            Expired ⛔
+                          </span>
+                        ) : isExpiringSoon ? (
+                          <span className="text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                            {doc.days_until_expiry}d left ⚠️
+                          </span>
+                        ) : doc.expiry_date ? (
+                          <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                            Valid ✅
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded-full">
+                            Permanent
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-sm sm:text-base font-bold text-text-primary mb-2 line-clamp-1">
+                        {doc.title || doc.doc_type_display || "Official Document"}
+                      </h3>
+
+                      {/* Metadata */}
+                      <div className="space-y-1.5 text-[11px] text-text-muted mb-3">
+                        {doc.issue_date && (
+                          <p className="flex items-center gap-1.5">
+                            <span className="text-slate-400">Issued:</span>
+                            <span className="text-slate-200 font-mono">{doc.issue_date}</span>
+                          </p>
+                        )}
+                        {doc.expiry_date ? (
+                          <p className="flex items-center gap-1.5">
+                            <span className="text-slate-400">Expires:</span>
+                            <span className={`font-mono font-bold ${isConflict || isExpired ? "text-rose-400" : isExpiringSoon ? "text-amber-400" : "text-emerald-400"}`}>
+                              {doc.expiry_date} ({doc.days_until_expiry ?? 0} days)
+                            </span>
+                          </p>
+                        ) : (
+                          <p className="text-slate-500">No expiration date</p>
+                        )}
+                        {doc.notes && (
+                          <p className="text-slate-300 italic line-clamp-2 pt-1 border-t border-white/5">
+                            "{doc.notes}"
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Tracked Conflict Details */}
+                      {isConflict && doc.tracked_conflicts && (
+                        <div className="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-[11px] text-rose-200 mb-3 space-y-1">
+                          <p className="font-extrabold text-white flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+                            <span>Expires before tracked scholarship!</span>
+                          </p>
+                          {doc.tracked_conflicts.map((tc, k) => (
+                            <p key={k} className="text-rose-300">
+                              • <span className="font-bold text-white">{tc.scholarship_title}</span> ({tc.deadline_label}: {tc.host_deadline})
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 pt-3 border-t border-border-glass mt-2">
+                      {doc.file_url && (
+                        <a
+                          href={getFullFileUrl(doc.file_url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs text-cyan hover:bg-cyan/10 transition-all font-semibold"
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>View Scan</span>
+                        </a>
+                      )}
+                      <button
+                        onClick={() => handleDeleteDocument(doc.id)}
+                        className="flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
+                        title="Delete document"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
