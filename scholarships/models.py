@@ -111,7 +111,14 @@ class Scholarship(models.Model):
     required_fields_of_study = models.JSONField(default=list, blank=True, help_text="List of accepted fields of study")
     
     # Application details
-    application_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    application_fee = models.DecimalField(max_digits=8, decimal_places=2, default=0, help_text="Official application / registration fee")
+    covers_tuition = models.BooleanField(default=True, help_text="Whether tuition is 100% covered")
+    covers_dorm = models.BooleanField(default=True, help_text="Whether free on-campus dormitory accommodation is provided")
+    covers_flight = models.BooleanField(default=False, help_text="Whether round-trip international airfare is covered")
+    covers_insurance = models.BooleanField(default=True, help_text="Whether comprehensive medical insurance is covered (800 RMB/yr)")
+    monthly_stipend = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, blank=True, null=True, help_text="Monthly cash living allowance e.g. 2500, 3000, 3500 RMB")
+    stipend_currency = models.CharField(max_length=10, default='CNY', help_text="Currency for monthly living stipend e.g. CNY")
+    estimated_visa_medical_docs_cost = models.DecimalField(max_digits=10, decimal_places=2, default=1500.00, blank=True, null=True, help_text="Estimated out-of-pocket costs for JW202, visa, medical exam, notarization")
     application_link = models.URLField(blank=True, null=True, help_text="Link to apply")
     required_documents = models.JSONField(default=list, blank=True, help_text="List of required documents")
     application_instructions = models.TextField(blank=True, null=True)
@@ -178,3 +185,38 @@ class AdmissionAnnouncement(models.Model):
 
     def __str__(self):
         return f"{self.university.name}: {self.title[:60]}"
+
+
+class CityLivingCost(models.Model):
+    """
+    City Living Costs model tracking baseline expenses across university cities:
+    dormitory rent, off-campus housing, and food/transport expenses.
+    """
+    country = models.CharField(max_length=100, default='China', help_text="Country name e.g. China")
+    city_name = models.CharField(max_length=100, db_index=True, help_text="City name in English e.g. Beijing, Shanghai, Hangzhou")
+    currency = models.CharField(max_length=10, default='CNY', help_text="Local currency e.g. CNY")
+    monthly_dorm_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Average monthly on-campus dorm cost (RMB)")
+    monthly_offcampus_rent = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Average monthly off-campus single apartment/room rent (RMB)")
+    monthly_food_transport = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Average monthly food, dining, and transit expense (RMB)")
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'city_living_costs'
+        ordering = ['country', 'city_name']
+        unique_together = ['country', 'city_name']
+        verbose_name = 'City Living Cost'
+        verbose_name_plural = 'City Living Costs'
+
+    def __str__(self):
+        return f"{self.city_name}, {self.country} ({self.currency})"
+
+    @property
+    def total_monthly_oncampus(self):
+        """Total monthly living expense when staying in university dorm."""
+        return (self.monthly_dorm_cost or 0) + (self.monthly_food_transport or 0)
+
+    @property
+    def total_monthly_offcampus(self):
+        """Total monthly living expense when renting an off-campus apartment."""
+        return (self.monthly_offcampus_rent or 0) + (self.monthly_food_transport or 0)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import University, Scholarship
+from .models import University, Scholarship, CityLivingCost, AdmissionAnnouncement
 
 class UniversityAdmin(admin.ModelAdmin):
     list_display = ('name', 'country', 'city', 'is_verified', 'created_at')
@@ -8,8 +8,8 @@ class UniversityAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
 
 class ScholarshipAdmin(admin.ModelAdmin):
-    list_display = ('title', 'university', 'type', 'level', 'application_deadline', 'is_active', 'is_featured')
-    list_filter = ('type', 'level', 'is_active', 'is_featured', 'university')
+    list_display = ('title', 'university', 'type', 'level', 'covers_tuition', 'covers_dorm', 'monthly_stipend', 'application_deadline', 'is_active', 'is_featured')
+    list_filter = ('type', 'level', 'covers_tuition', 'covers_dorm', 'covers_flight', 'is_active', 'is_featured', 'university')
     search_fields = ('title', 'university__name', 'description')
     readonly_fields = ('view_count', 'created_at', 'updated_at')
    # filter_horizontal = ('required_fields_of_study',)
@@ -18,8 +18,14 @@ class ScholarshipAdmin(admin.ModelAdmin):
         ('Basic Information', {
             'fields': ('title', 'university', 'description', 'type', 'level')
         }),
-        ('Financial Details', {
-            'fields': ('amount', 'currency', 'duration')
+        ('Financial Details & Coverage', {
+            'fields': (
+                'amount', 'currency', 'duration',
+                'application_fee',
+                'covers_tuition', 'covers_dorm', 'covers_flight', 'covers_insurance',
+                'monthly_stipend', 'stipend_currency',
+                'estimated_visa_medical_docs_cost',
+            )
         }),
         ('Dates', {
             'fields': ('application_deadline', 'start_date', 'end_date')
@@ -33,7 +39,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
             )
         }),
         ('Application', {
-            'fields': ('application_fee', 'application_link', 'required_documents', 'application_instructions')
+            'fields': ('application_link', 'required_documents', 'application_instructions')
         }),
         ('Contact', {
             'fields': ('contact_email', 'contact_phone', 'language')
@@ -46,5 +52,12 @@ class ScholarshipAdmin(admin.ModelAdmin):
         }),
     )
 
+class CityLivingCostAdmin(admin.ModelAdmin):
+    list_display = ('city_name', 'country', 'currency', 'monthly_dorm_cost', 'monthly_offcampus_rent', 'monthly_food_transport', 'updated_at')
+    list_filter = ('country', 'currency')
+    search_fields = ('city_name', 'country')
+    ordering = ('country', 'city_name')
+
 admin.site.register(University, UniversityAdmin)
 admin.site.register(Scholarship, ScholarshipAdmin)
+admin.site.register(CityLivingCost, CityLivingCostAdmin)

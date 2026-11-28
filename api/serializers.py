@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from students.models import Student, StudentProfile, SuccessStory, ExperienceReview
-from scholarships.models import University, Scholarship, CampusLandmark, AdmissionAnnouncement
+from scholarships.models import University, Scholarship, CampusLandmark, AdmissionAnnouncement, CityLivingCost
 from ai_assistant.models import (
     AIConversation, ApplicationTracker, ScholarshipMatch, AISuggestion
 )
@@ -142,6 +142,8 @@ class ScholarshipListSerializer(serializers.ModelSerializer):
             'is_featured', 'created_at', 'duration', 'total_seats', 'seats_filled',
             'target_degree', 'max_age', 'min_gpa_100', 'min_english_score', 'min_hsk_level',
             'eligible_countries', 'excluded_countries',
+            'application_fee', 'covers_tuition', 'covers_dorm', 'covers_flight', 'covers_insurance',
+            'monthly_stipend', 'stipend_currency', 'estimated_visa_medical_docs_cost',
         ]
 
 
@@ -161,7 +163,9 @@ class ScholarshipDetailSerializer(serializers.ModelSerializer):
             'target_degree', 'max_age', 'min_gpa_100', 'min_english_score', 'min_hsk_level',
             'eligible_countries', 'excluded_countries',
             'minimum_gpa', 'required_fields_of_study',
-            'application_fee', 'application_link', 'required_documents',
+            'application_fee', 'covers_tuition', 'covers_dorm', 'covers_flight', 'covers_insurance',
+            'monthly_stipend', 'stipend_currency', 'estimated_visa_medical_docs_cost',
+            'application_link', 'required_documents',
             'application_instructions',
             'contact_email', 'contact_phone', 'language',
             'is_active', 'is_featured', 'view_count',
@@ -173,6 +177,20 @@ class ScholarshipDetailSerializer(serializers.ModelSerializer):
 
     def get_seats_available(self, obj):
         return obj.seats_left()
+
+
+class CityLivingCostSerializer(serializers.ModelSerializer):
+    total_monthly_oncampus = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    total_monthly_offcampus = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = CityLivingCost
+        fields = [
+            'id', 'country', 'city_name', 'currency',
+            'monthly_dorm_cost', 'monthly_offcampus_rent', 'monthly_food_transport',
+            'total_monthly_oncampus', 'total_monthly_offcampus',
+            'created_at', 'updated_at',
+        ]
 
 
 # ── AI Assistant ─────────────────────────────────────────────

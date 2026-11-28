@@ -84,6 +84,14 @@ export interface Scholarship {
   min_hsk_level?: number | null;
   eligible_countries?: string[];
   excluded_countries?: string[];
+  application_fee?: string | number | null;
+  covers_tuition?: boolean;
+  covers_dorm?: boolean;
+  covers_flight?: boolean;
+  covers_insurance?: boolean;
+  monthly_stipend?: string | number | null;
+  stipend_currency?: string;
+  estimated_visa_medical_docs_cost?: string | number | null;
   is_active: boolean;
   is_featured: boolean;
   created_at: string;
@@ -139,6 +147,13 @@ export interface ScholarshipDetail {
   minimum_gpa: number;
   required_fields_of_study: string;
   application_fee: string;
+  covers_tuition?: boolean;
+  covers_dorm?: boolean;
+  covers_flight?: boolean;
+  covers_insurance?: boolean;
+  monthly_stipend?: string | number | null;
+  stipend_currency?: string;
+  estimated_visa_medical_docs_cost?: string | number | null;
   application_link: string;
   required_documents: string[];
   application_instructions: string;
@@ -181,6 +196,20 @@ export interface University {
   tier?: "c9" | "985" | "211" | "national";
   tierLabel?: string;
   scholarships_count?: number;
+}
+
+export interface CityLivingCost {
+  id: number;
+  country: string;
+  city_name: string;
+  currency: string;
+  monthly_dorm_cost: string | number;
+  monthly_offcampus_rent: string | number;
+  monthly_food_transport: string | number;
+  total_monthly_oncampus?: string | number;
+  total_monthly_offcampus?: string | number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ChatMessage {
@@ -874,6 +903,14 @@ export async function getRecommendedScholarships(
 // ── Universities API ───────────────────────────────────────
 export async function getUniversities(): Promise<ApiResponse<University[]>> {
   return fetchApi<University[]>("/universities/");
+}
+
+// ── City Living Costs API ──────────────────────────────────
+export async function getCityLivingCosts(
+  params?: Record<string, string>
+): Promise<ApiResponse<CityLivingCost[]>> {
+  const query = params ? "?" + new URLSearchParams(params).toString() : "";
+  return fetchApi<CityLivingCost[]>(`/city-costs/${query}`);
 }
 
 // ── AI Chat API ────────────────────────────────────────────

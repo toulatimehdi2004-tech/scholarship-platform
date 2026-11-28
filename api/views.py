@@ -77,7 +77,7 @@ def send_resilient_email(subject, plain_message, recipient_list, html_message=No
     return False, "failed"
 
 from students.models import Student, StudentProfile, EmailVerification, SuccessStory, ExperienceReview
-from scholarships.models import University, Scholarship
+from scholarships.models import University, Scholarship, CityLivingCost
 from scholarships.services import GpaConversionService, EligibilityService
 from documents.models import Document
 from ai_assistant.models import (
@@ -94,7 +94,7 @@ from .serializers import (
     AISuggestionSerializer, AIConversationSerializer,
     AIChatRequestSerializer, DocumentSerializer,
     ServiceOrderSerializer, SuccessStorySerializer,
-    ExperienceReviewSerializer,
+    ExperienceReviewSerializer, CityLivingCostSerializer,
 )
 
 
@@ -739,6 +739,29 @@ class UniversityViewSet(viewsets.ModelViewSet):
         return UniversityListSerializer
 
 
+class CityLivingCostViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    GET /api/city-costs/
+    Query parameters:
+      ?city=<city_name>
+      ?country=<country>
+    """
+    queryset = CityLivingCost.objects.all()
+    serializer_class = CityLivingCostSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        city = self.request.query_params.get('city') or self.request.query_params.get('city_name')
+        if city:
+            qs = qs.filter(city_name__iexact=city.strip())
+        country = self.request.query_params.get('country')
+        if country:
+            qs = qs.filter(country__iexact=country.strip())
+        return qs
+
+
+
 # ── Application Tracker ──────────────────────────────────────
 
 class ApplicationTrackerViewSet(viewsets.ModelViewSet):
@@ -1037,7 +1060,7 @@ def translate_view(request):
 @permission_classes([AllowAny])
 def stats_view(request):
     """GET /api/stats/ — Public platform counts for the homepage."""
-    from scholarships.models import University, Scholarship
+    from scholarships.models import University, Scholarship, CityLivingCost
     cities = {
         u.city for u in University.objects.exclude(city__isnull=True).exclude(city='')
     }

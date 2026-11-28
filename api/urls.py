@@ -16,6 +16,7 @@ router.register(r'documents', views.DocumentViewSet, basename='document')
 router.register(r'service-orders', views.ServiceOrderViewSet, basename='service-order')
 router.register(r'stories', views.SuccessStoryViewSet, basename='story')
 router.register(r'reviews', views.ExperienceReviewViewSet, basename='review')
+router.register(r'city-costs', views.CityLivingCostViewSet, basename='city-cost')
 
 urlpatterns = [
     # Auth
