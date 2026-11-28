@@ -74,6 +74,9 @@ export interface Scholarship {
   currency: string;
   duration: string;
   application_deadline: string;
+  embassy_deadline?: string | null;
+  university_deadline?: string | null;
+  host_timezone?: string;
   application_link?: string | null;
   total_seats?: number | null;
   seats_filled?: number | null;
@@ -196,6 +199,9 @@ export interface ScholarshipDetail {
   seats_filled?: number | null;
   seats_available?: number | null;
   application_deadline: string;
+  embassy_deadline?: string | null;
+  university_deadline?: string | null;
+  host_timezone?: string;
   start_date: string;
   end_date: string;
   eligibility_criteria: string;
@@ -1352,4 +1358,71 @@ export async function submitExperienceReview(
     body: JSON.stringify(data),
   });
 }
+
+// ── Student Official Documents API (student_documents) ───────
+export type StudentDocType =
+  | "PASSPORT"
+  | "POLICE_CLEARANCE"
+  | "MEDICAL_EXAM"
+  | "LANGUAGE_CERT"
+  | "DIPLOMA"
+  | "TRANSCRIPT"
+  | "STUDY_PLAN"
+  | "RECOMMENDATION_LETTER"
+  | "OTHER";
+
+export interface StudentDocument {
+  id: number;
+  user: number;
+  username?: string;
+  doc_type: StudentDocType;
+  doc_type_display?: string;
+  issue_date?: string | null;
+  expiry_date?: string | null;
+  notes?: string | null;
+  file?: string | null;
+  is_verified: boolean;
+  is_expired?: boolean;
+  days_until_expiry?: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getStudentDocuments(
+  userId?: number
+): Promise<ApiResponse<StudentDocument[]>> {
+  const query = userId ? `?user_id=${userId}` : "";
+  return fetchApi<StudentDocument[]>(`/student-documents/${query}`);
+}
+
+export async function createStudentDocument(
+  data: FormData | Partial<StudentDocument>
+): Promise<ApiResponse<StudentDocument>> {
+  if (typeof FormData !== "undefined" && data instanceof FormData) {
+    return uploadApi<StudentDocument>("/student-documents/", data);
+  }
+  return fetchApi<StudentDocument>("/student-documents/", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateStudentDocument(
+  id: number,
+  data: Partial<StudentDocument>
+): Promise<ApiResponse<StudentDocument>> {
+  return fetchApi<StudentDocument>(`/student-documents/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteStudentDocument(
+  id: number
+): Promise<ApiResponse<{ detail?: string }>> {
+  return fetchApi<{ detail?: string }>(`/student-documents/${id}/`, {
+    method: "DELETE",
+  });
+}
+
 

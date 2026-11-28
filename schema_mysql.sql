@@ -59,12 +59,50 @@ CREATE TABLE IF NOT EXISTS `city_living_costs` (
 
 
 -- -----------------------------------------------------------------------------
--- 3. Alter Table: scholarships (Adding Eligibility & Financial Coverage Columns)
+-- 3. Table: student_documents (Applicant Admission & Visa Documents Vault)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `student_documents` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT NOT NULL,
+    `doc_type` ENUM(
+        'PASSPORT',
+        'POLICE_CLEARANCE',
+        'MEDICAL_EXAM',
+        'LANGUAGE_CERT',
+        'DIPLOMA',
+        'TRANSCRIPT',
+        'STUDY_PLAN',
+        'RECOMMENDATION_LETTER',
+        'OTHER'
+    ) NOT NULL DEFAULT 'PASSPORT' COMMENT 'Standardized document classification',
+    `issue_date` DATE DEFAULT NULL COMMENT 'Date the document was officially issued',
+    `expiry_date` DATE DEFAULT NULL COMMENT 'Document expiration date (passport validity, 6-month validity for police & medical exams)',
+    `notes` TEXT DEFAULT NULL COMMENT 'Issuing authority, Apostille reference, or remarks',
+    `file` VARCHAR(255) DEFAULT NULL COMMENT 'Stored document file path',
+    `is_verified` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Verification status by admissions desk',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_student_documents_user` (`user_id`),
+    KEY `idx_student_documents_doc_type` (`doc_type`),
+    KEY `idx_student_documents_expiry` (`expiry_date`),
+    CONSTRAINT `fk_student_documents_user`
+        FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- -----------------------------------------------------------------------------
+-- 4. Alter Table: scholarships (Adding Eligibility, Financial & UTC Deadlines)
 -- -----------------------------------------------------------------------------
 -- Note: Applies to both Django-prefixed `scholarships_scholarship` and custom `scholarships`
 
 -- For Django table naming: scholarships_scholarship
 ALTER TABLE `scholarships_scholarship`
+    ADD COLUMN IF NOT EXISTS `embassy_deadline` DATETIME DEFAULT NULL COMMENT 'Home-country dispatching agency / embassy deadline in UTC' AFTER `application_deadline`,
+    ADD COLUMN IF NOT EXISTS `university_deadline` DATETIME DEFAULT NULL COMMENT 'Host university portal deadline in UTC' AFTER `embassy_deadline`,
+    ADD COLUMN IF NOT EXISTS `host_timezone` VARCHAR(50) NOT NULL DEFAULT 'Asia/Shanghai' COMMENT 'Host institution timezone e.g. Asia/Shanghai (UTC+8)' AFTER `university_deadline`,
     ADD COLUMN IF NOT EXISTS `target_degree` VARCHAR(100) DEFAULT NULL COMMENT 'e.g. Bachelor, Master, PhD, Language' AFTER `required_education_level`,
     ADD COLUMN IF NOT EXISTS `max_age` INT UNSIGNED DEFAULT NULL COMMENT 'Max age limit in years' AFTER `target_degree`,
     ADD COLUMN IF NOT EXISTS `min_gpa_100` DECIMAL(5, 2) DEFAULT NULL COMMENT 'Minimum GPA normalized to 0-100' AFTER `max_age`,
@@ -82,6 +120,9 @@ ALTER TABLE `scholarships_scholarship`
 
 -- Standalone table name variant (if deployed without Django app prefix)
 ALTER TABLE `scholarships`
+    ADD COLUMN IF NOT EXISTS `embassy_deadline` DATETIME DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `university_deadline` DATETIME DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `host_timezone` VARCHAR(50) NOT NULL DEFAULT 'Asia/Shanghai',
     ADD COLUMN IF NOT EXISTS `covers_tuition` TINYINT(1) NOT NULL DEFAULT 1,
     ADD COLUMN IF NOT EXISTS `covers_dorm` TINYINT(1) NOT NULL DEFAULT 1,
     ADD COLUMN IF NOT EXISTS `covers_flight` TINYINT(1) NOT NULL DEFAULT 0,
@@ -91,6 +132,8 @@ ALTER TABLE `scholarships`
     ADD COLUMN IF NOT EXISTS `estimated_visa_medical_docs_cost` DECIMAL(10, 2) DEFAULT 1500.00;
 
 -- Create index on eligibility & financial fields for high-performance matching
+CREATE INDEX IF NOT EXISTS `idx_scholarships_embassy_deadline` ON `scholarships_scholarship` (`embassy_deadline`);
+CREATE INDEX IF NOT EXISTS `idx_scholarships_uni_deadline` ON `scholarships_scholarship` (`university_deadline`);
 CREATE INDEX IF NOT EXISTS `idx_scholarships_eligibility_target_degree` ON `scholarships_scholarship` (`target_degree`);
 CREATE INDEX IF NOT EXISTS `idx_scholarships_eligibility_min_gpa` ON `scholarships_scholarship` (`min_gpa_100`);
 CREATE INDEX IF NOT EXISTS `idx_scholarships_eligibility_max_age` ON `scholarships_scholarship` (`max_age`);
@@ -229,5 +272,50 @@ FROM `scholarships_scholarship` s
 CROSS JOIN `student_profiles` sp
 WHERE sp.`user_id` = 1
 LIMIT 10;
+
+-- Example 4: Inserting Student Documents into student_documents
+INSERT INTO `student_documents` (
+    `user_id`,
+    `doc_type`,
+    `issue_date`,
+    `expiry_date`,
+    `notes`,
+    `is_verified`
+) VALUES
+    (1, 'PASSPORT', '2024-01-10', '2029-01-09', 'Moroccan biometric passport, valid for 5 years', 1),
+    (1, 'POLICE_CLEARANCE', '2026-10-01', '2027-04-01', 'Fiche anthropométrique issued by DGSN Morocco, apostilled (6-month validity)', 1),
+    (1, 'MEDICAL_EXAM', '2026-11-15', '2027-05-15', 'Official Foreigner Physical Exam form with hospital stamp & chest X-ray', 1),
+    (1, 'LANGUAGE_CERT', '2025-06-20', '2027-06-19', 'IELTS Academic overall band 7.5 (IDP Rabat)', 1),
+    (1, 'DIPLOMA', '2024-07-05', NULL, 'Bachelor of Science in Software Engineering, apostilled', 1)
+ON DUPLICATE KEY UPDATE
+    `issue_date` = VALUES(`issue_date`),
+    `expiry_date` = VALUES(`expiry_date`),
+    `notes` = VALUES(`notes`);
+
+
+-- Example 5: Updating Scholarship UTC Deadlines (Embassy & University Portals)
+UPDATE `scholarships_scholarship`
+SET
+    `embassy_deadline` = '2027-02-15 15:59:00',     -- UTC (equivalent to Feb 15, 23:59 Beijing Time)
+    `university_deadline` = '2027-03-31 15:59:00',  -- UTC (equivalent to March 31, 23:59 Beijing Time)
+    `host_timezone` = 'Asia/Shanghai'
+WHERE `title` LIKE '%Chinese Government Scholarship%' OR `title` LIKE '%CSC%'
+LIMIT 1;
+
+
+-- Example 6: Querying Expiring Documents vs Scholarship Deadline
+SELECT 
+    sd.`doc_type`,
+    sd.`issue_date`,
+    sd.`expiry_date`,
+    DATEDIFF(sd.`expiry_date`, CURDATE()) AS days_validity_remaining,
+    CASE 
+        WHEN sd.`expiry_date` IS NULL THEN 'NO EXPIRY (DIPLOMA/TRANSCRIPT) ✅'
+        WHEN sd.`expiry_date` < CURDATE() THEN 'EXPIRED! MUST RENEW 🚨'
+        WHEN DATEDIFF(sd.`expiry_date`, CURDATE()) < 60 THEN 'EXPIRING SOON (< 60 DAYS) ⚠️'
+        ELSE 'VALID FOR SUBMISSION ✅'
+    END AS document_validity_status
+FROM `student_documents` sd
+WHERE sd.`user_id` = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;

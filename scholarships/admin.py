@@ -27,8 +27,11 @@ class ScholarshipAdmin(admin.ModelAdmin):
                 'estimated_visa_medical_docs_cost',
             )
         }),
-        ('Dates', {
-            'fields': ('application_deadline', 'start_date', 'end_date')
+        ('Dates & Deadlines (UTC)', {
+            'fields': (
+                'application_deadline', 'embassy_deadline', 'university_deadline',
+                'host_timezone', 'start_date', 'end_date'
+            )
         }),
         ('Eligibility', {
             'fields': (

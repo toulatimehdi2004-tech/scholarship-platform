@@ -99,3 +99,54 @@ class DocumentScan(models.Model):
     
     def __str__(self):
         return f"Scan for {self.document.title}"
+
+
+class StudentDocument(models.Model):
+    """
+    Standardized Student Documents table storing official admission & visa documents:
+    PASSPORT, POLICE_CLEARANCE, MEDICAL_EXAM, LANGUAGE_CERT, etc.,
+    tracking issuing date, expiration date, and apostille/verification notes.
+    """
+    DOC_TYPE_CHOICES = [
+        ('PASSPORT', 'Passport (Regular International)'),
+        ('POLICE_CLEARANCE', 'Police Clearance / Non-Criminal Record'),
+        ('MEDICAL_EXAM', 'Foreigner Physical Examination Record'),
+        ('LANGUAGE_CERT', 'Language Certificate (IELTS, TOEFL, Duolingo, HSK)'),
+        ('DIPLOMA', 'Highest Completed Degree Diploma (Apostilled/Notarized)'),
+        ('TRANSCRIPT', 'Official Academic Transcripts'),
+        ('STUDY_PLAN', 'Study Plan / Research Proposal (800+ words)'),
+        ('RECOMMENDATION_LETTER', 'Academic Recommendation Letters (Professors)'),
+        ('OTHER', 'Other Supporting Document'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='academic_documents')
+    doc_type = models.CharField(max_length=50, choices=DOC_TYPE_CHOICES, default='PASSPORT')
+    issue_date = models.DateField(null=True, blank=True, help_text="Date the document was officially issued")
+    expiry_date = models.DateField(null=True, blank=True, help_text="Expiration date for validity compliance")
+    notes = models.TextField(blank=True, null=True, help_text="Issuing authority, apostille tracking, or remarks")
+    file = models.FileField(upload_to='student_documents/', null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'student_documents'
+        ordering = ['user', 'doc_type']
+        verbose_name = 'Student Document'
+        verbose_name_plural = 'Student Documents'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_doc_type_display()}"
+
+    def is_expired(self):
+        """Check if document validity has expired."""
+        if not self.expiry_date:
+            return False
+        return timezone.now().date() > self.expiry_date
+
+    def days_until_expiry(self):
+        """Returns days until document expiration."""
+        if not self.expiry_date:
+            return None
+        delta = self.expiry_date - timezone.now().date()
+        return delta.days

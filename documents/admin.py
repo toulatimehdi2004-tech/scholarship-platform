@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Document, DocumentScan
+from .models import Document, DocumentScan, StudentDocument
 
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ('title', 'student', 'document_type', 'status', 'is_verified', 'created_at')
@@ -30,5 +30,12 @@ class DocumentScanAdmin(admin.ModelAdmin):
     search_fields = ('name', 'document_number', 'nationality')
     readonly_fields = ('processed_at',)
 
+class StudentDocumentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'doc_type', 'issue_date', 'expiry_date', 'is_verified', 'created_at')
+    list_filter = ('doc_type', 'is_verified', 'expiry_date')
+    search_fields = ('user__username', 'user__email', 'notes')
+    readonly_fields = ('created_at', 'updated_at')
+
 admin.site.register(Document, DocumentAdmin)
 admin.site.register(DocumentScan, DocumentScanAdmin)
+admin.site.register(StudentDocument, StudentDocumentAdmin)

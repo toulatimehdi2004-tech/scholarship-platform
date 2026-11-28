@@ -138,7 +138,8 @@ class ScholarshipListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'university', 'university_name', 'university_website',
             'university_city', 'university_country', 'type', 'level',
-            'amount', 'currency', 'application_deadline', 'application_link', 'is_active',
+            'amount', 'currency', 'application_deadline', 'embassy_deadline', 'university_deadline',
+            'host_timezone', 'application_link', 'is_active',
             'is_featured', 'created_at', 'duration', 'total_seats', 'seats_filled',
             'target_degree', 'max_age', 'min_gpa_100', 'min_english_score', 'min_hsk_level',
             'eligible_countries', 'excluded_countries',
@@ -158,7 +159,8 @@ class ScholarshipDetailSerializer(serializers.ModelSerializer):
             'id', 'title', 'university', 'description', 'type', 'level',
             'amount', 'currency', 'duration', 'tuition_info',
             'total_seats', 'seats_filled', 'seats_available',
-            'application_deadline', 'start_date', 'end_date',
+            'application_deadline', 'embassy_deadline', 'university_deadline', 'host_timezone',
+            'start_date', 'end_date',
             'eligibility_criteria', 'required_education_level',
             'target_degree', 'max_age', 'min_gpa_100', 'min_english_score', 'min_hsk_level',
             'eligible_countries', 'excluded_countries',
@@ -333,7 +335,7 @@ class AIChatRequestSerializer(serializers.Serializer):
 
 # ── Documents ────────────────────────────────────────────────
 
-from documents.models import Document, DocumentScan
+from documents.models import Document, DocumentScan, StudentDocument
 
 class DocumentScanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -342,6 +344,29 @@ class DocumentScanSerializer(serializers.ModelSerializer):
                   'issued_date', 'expiry_date', 'nationality', 'address',
                   'extracted_entities', 'confidence_score', 'processed_at']
         read_only_fields = fields
+
+
+class StudentDocumentSerializer(serializers.ModelSerializer):
+    doc_type_display = serializers.CharField(source='get_doc_type_display', read_only=True)
+    is_expired = serializers.SerializerMethodField()
+    days_until_expiry = serializers.SerializerMethodField()
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = StudentDocument
+        fields = [
+            'id', 'user', 'username', 'doc_type', 'doc_type_display',
+            'issue_date', 'expiry_date', 'notes', 'file',
+            'is_verified', 'is_expired', 'days_until_expiry',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['user', 'is_verified', 'created_at', 'updated_at']
+
+    def get_is_expired(self, obj):
+        return obj.is_expired()
+
+    def get_days_until_expiry(self, obj):
+        return obj.days_until_expiry()
 
 
 class DocumentSerializer(serializers.ModelSerializer):

@@ -92,8 +92,20 @@ class Scholarship(models.Model):
     total_seats = models.PositiveIntegerField(default=0, help_text="Total places for this scholarship (0 = unknown)")
     seats_filled = models.PositiveIntegerField(default=0, help_text="Places already taken")
     
-    # Dates
-    application_deadline = models.DateTimeField()
+    # Dates (Stored in UTC)
+    application_deadline = models.DateTimeField(help_text="Primary unified application deadline in UTC")
+    embassy_deadline = models.DateTimeField(
+        blank=True, null=True,
+        help_text="Home-country dispatching agency / embassy deadline in UTC (e.g. Type A bilateral programs)"
+    )
+    university_deadline = models.DateTimeField(
+        blank=True, null=True,
+        help_text="Host university portal application deadline in UTC (e.g. Type B direct admissions)"
+    )
+    host_timezone = models.CharField(
+        max_length=50, default='Asia/Shanghai',
+        help_text="Timezone of the host institution/portal e.g. Asia/Shanghai (CST, UTC+8)"
+    )
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     

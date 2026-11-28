@@ -79,7 +79,7 @@ def send_resilient_email(subject, plain_message, recipient_list, html_message=No
 from students.models import Student, StudentProfile, EmailVerification, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship, CityLivingCost
 from scholarships.services import GpaConversionService, EligibilityService, CostCalculatorService
-from documents.models import Document
+from documents.models import Document, StudentDocument
 from ai_assistant.models import (
     ApplicationTracker, ScholarshipMatch, AISuggestion
 )
@@ -95,6 +95,7 @@ from .serializers import (
     AIChatRequestSerializer, DocumentSerializer,
     ServiceOrderSerializer, SuccessStorySerializer,
     ExperienceReviewSerializer, CityLivingCostSerializer,
+    StudentDocumentSerializer,
 )
 
 
@@ -1350,6 +1351,32 @@ class DocumentViewSet(viewsets.ModelViewSet):
             doc.file_name = doc.file.name.split('/')[-1]
             doc.file_size = doc.file.size
             doc.save(update_fields=['file_name', 'file_size'])
+
+
+class StudentDocumentViewSet(viewsets.ModelViewSet):
+    """
+    CRUD /api/student-documents/
+    Stores official student admission & visa documents:
+    PASSPORT, POLICE_CLEARANCE, MEDICAL_EXAM, LANGUAGE_CERT, etc.
+    Tracks issue_date, expiry_date, notes.
+    """
+    serializer_class = StudentDocumentSerializer
+    permission_classes = [AllowAny]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user and user.is_authenticated:
+            return StudentDocument.objects.filter(user=user).order_by('-created_at')
+        uid = self.request.query_params.get('user_id')
+        if uid:
+            return StudentDocument.objects.filter(user_id=uid).order_by('-created_at')
+        return StudentDocument.objects.all().order_by('-created_at')
+
+    def perform_create(self, serializer):
+        user = self.request.user if (self.request.user and self.request.user.is_authenticated) else User.objects.first()
+        serializer.save(user=user)
+
 
 
 # ── Success Stories & Testimonials ────────────────────────────
