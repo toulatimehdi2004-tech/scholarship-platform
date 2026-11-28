@@ -122,6 +122,62 @@ export interface RecommendedScholarship extends Scholarship {
   evaluationDetails?: any;
 }
 
+export interface CostBreakdownItem {
+  id: string;
+  name: string;
+  amount_cny: number;
+  amount_mad: number;
+  is_covered: boolean;
+  note: string;
+}
+
+export interface CostBreakdownResult {
+  scholarship_id: number;
+  scholarship_title: string;
+  university_name: string;
+  city: string;
+  parameters: {
+    includeFlight: boolean;
+    liveOnCampus: boolean;
+  };
+  financial_coverage: {
+    covers_tuition: boolean;
+    covers_dorm: boolean;
+    covers_flight: boolean;
+    covers_insurance: boolean;
+    monthly_stipend_cny: number;
+    monthly_stipend_mad: number;
+    application_fee_cny: number;
+  };
+  upfront_out_of_pocket: {
+    total_cny: number;
+    total_mad: number;
+    total_usd: number;
+    summary: string;
+    breakdown: CostBreakdownItem[];
+  };
+  monthly_living_balance: {
+    stipend_cny: number;
+    stipend_mad: number;
+    total_expenses_cny: number;
+    total_expenses_mad: number;
+    balance_cny: number;
+    balance_mad: number;
+    balance_usd: number;
+    status: "surplus" | "deficit";
+    status_label: string;
+    status_description: string;
+    living_mode: string;
+    breakdown: CostBreakdownItem[];
+  };
+  city_baseline: {
+    city_name: string;
+    monthly_dorm_cost_cny: number;
+    monthly_offcampus_rent_cny: number;
+    monthly_food_transport_cny: number;
+  };
+}
+
 export interface ScholarshipDetail {
   id: number;
   title: string;
@@ -898,6 +954,21 @@ export async function getRecommendedScholarships(
 ): Promise<ApiResponse<RecommendedScholarship[]>> {
   const query = params ? "?" + new URLSearchParams(params).toString() : "";
   return fetchApi<RecommendedScholarship[]>(`/scholarships/recommended/${query}`);
+}
+
+export async function getScholarshipCostBreakdown(
+  id: number,
+  params?: { includeFlight?: boolean; liveOnCampus?: boolean }
+): Promise<ApiResponse<CostBreakdownResult>> {
+  const queryParts: string[] = [];
+  if (params?.includeFlight !== undefined) {
+    queryParts.push(`includeFlight=${params.includeFlight}`);
+  }
+  if (params?.liveOnCampus !== undefined) {
+    queryParts.push(`liveOnCampus=${params.liveOnCampus}`);
+  }
+  const query = queryParts.length > 0 ? "?" + queryParts.join("&") : "";
+  return fetchApi<CostBreakdownResult>(`/scholarships/${id}/cost-breakdown/${query}`);
 }
 
 // ── Universities API ───────────────────────────────────────

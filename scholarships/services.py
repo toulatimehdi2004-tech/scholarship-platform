@@ -8,6 +8,10 @@ ScholarChina Academic Evaluation & Matching Services
 2. EligibilityService:
    Performs rigorous rule-based evaluation of a student profile against
    scholarship criteria, returning matchScore, isEligible, passedRules, and failedReasons.
+
+3. CostCalculatorService:
+   Calculates upfront out-of-pocket cash needed before arriving and monthly living balance
+   comparing stipend against city living costs and accommodation coverage.
 """
 
 from datetime import date, datetime
@@ -529,3 +533,243 @@ class EligibilityService:
                 score += 5.0
 
         return int(min(100, round(score)))
+
+
+class CostCalculatorService:
+    """
+    Cost & Living Expense Calculator for Scholarships.
+    Calculates:
+      1) Upfront Out-of-Pocket Cash Needed Before Arriving
+         (application fee + visa/medical/legalization fees + flight estimate if not covered)
+      2) Monthly Living Balance
+         (monthly_stipend minus city living cost, subtracting rent if dorm is already covered)
+    """
+
+    CNY_TO_MAD_RATE = 1.40
+    CNY_TO_USD_RATE = 0.139
+    USD_TO_CNY_RATE = 7.20
+    DEFAULT_FLIGHT_COST_CNY = 5500.00  # Casablanca/International to China one-way
+    DEFAULT_VISA_MEDICAL_DOCS_CNY = 1500.00  # JW202, visa, foreigner physical exam, Apostille
+
+    # Fallback city costs by tier if city not in CityLivingCost table
+    TIER_DEFAULTS = {
+        'tier1': {
+            'dorm': 900.00,
+            'offcampus': 3500.00,
+            'food_transport': 1800.00,
+        },
+        'tier2': {
+            'dorm': 550.00,
+            'offcampus': 1800.00,
+            'food_transport': 1200.00,
+        },
+    }
+
+    @classmethod
+    def calculate(
+        cls,
+        scholarship: Any,
+        include_flight: bool = True,
+        live_on_campus: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Calculates upfront cash requirement and monthly living balance.
+        """
+        # 1. Resolve university and city
+        university = getattr(scholarship, 'university', None)
+        uni_name = university.name if university else "Chinese University"
+        city_name = (university.city if university else "") or "General China"
+
+        # 2. Look up CityLivingCost
+        city_cost_obj = None
+        try:
+            from scholarships.models import CityLivingCost
+            if city_name:
+                city_cost_obj = CityLivingCost.objects.filter(city_name__iexact=city_name.strip()).first()
+        except Exception:
+            city_cost_obj = None
+
+        if city_cost_obj:
+            dorm_cost = float(city_cost_obj.monthly_dorm_cost or 0)
+            offcampus_cost = float(city_cost_obj.monthly_offcampus_rent or 0)
+            food_transport_cost = float(city_cost_obj.monthly_food_transport or 0)
+        else:
+            tier_key = 'tier1' if any(t in city_name.lower() for t in ['beijing', 'shanghai', 'guangzhou', 'shenzhen']) else 'tier2'
+            dorm_cost = cls.TIER_DEFAULTS[tier_key]['dorm']
+            offcampus_cost = cls.TIER_DEFAULTS[tier_key]['offcampus']
+            food_transport_cost = cls.TIER_DEFAULTS[tier_key]['food_transport']
+
+        # 3. Upfront Costs Calculation
+        # Application fee
+        raw_app_fee = float(getattr(scholarship, 'application_fee', 0) or 0)
+        curr = (getattr(scholarship, 'currency', 'USD') or 'USD').upper()
+        if curr == 'USD':
+            app_fee_cny = round(raw_app_fee * cls.USD_TO_CNY_RATE, 2)
+        else:
+            app_fee_cny = round(raw_app_fee, 2)
+
+        # Visa / Medical / Legalization
+        visa_docs_cny = float(getattr(scholarship, 'estimated_visa_medical_docs_cost', None) or cls.DEFAULT_VISA_MEDICAL_DOCS_CNY)
+
+        # Flight estimate
+        covers_flight = bool(getattr(scholarship, 'covers_flight', False))
+        if covers_flight:
+            flight_cny = 0.0
+            flight_status = "Covered by Scholarship (Free Airfare Provided)"
+        elif include_flight:
+            flight_cny = cls.DEFAULT_FLIGHT_COST_CNY
+            flight_status = "Not covered (Applicant pays estimated international flight)"
+        else:
+            flight_cny = 0.0
+            flight_status = "Excluded from upfront cash (Applicant manages flight separately)"
+
+        total_upfront_cny = round(app_fee_cny + visa_docs_cny + flight_cny, 2)
+        total_upfront_mad = round(total_upfront_cny * cls.CNY_TO_MAD_RATE, 2)
+        total_upfront_usd = round(total_upfront_cny * cls.CNY_TO_USD_RATE, 2)
+
+        upfront_items = [
+            {
+                "id": "application_fee",
+                "name": "University Application & Processing Fee",
+                "amount_cny": app_fee_cny,
+                "amount_mad": round(app_fee_cny * cls.CNY_TO_MAD_RATE, 2),
+                "is_covered": app_fee_cny == 0,
+                "note": "0 RMB / Free Application" if app_fee_cny == 0 else f"{raw_app_fee:.2f} {curr} registration fee",
+            },
+            {
+                "id": "visa_medical_docs",
+                "name": "X1 Visa, Medical Checkup & Legalization (Apostille)",
+                "amount_cny": visa_docs_cny,
+                "amount_mad": round(visa_docs_cny * cls.CNY_TO_MAD_RATE, 2),
+                "is_covered": False,
+                "note": "Official JW202 / DQ form, Foreigner Physical Exam stamp, Apostille & translation",
+            },
+        ]
+
+        if include_flight or covers_flight:
+            upfront_items.append({
+                "id": "flight_ticket",
+                "name": "International Flight Ticket (e.g. Morocco to China)",
+                "amount_cny": flight_cny,
+                "amount_mad": round(flight_cny * cls.CNY_TO_MAD_RATE, 2),
+                "is_covered": covers_flight,
+                "note": flight_status,
+            })
+
+        # 4. Monthly Living Balance Calculation
+        monthly_stipend_cny = float(getattr(scholarship, 'monthly_stipend', 0) or 0)
+        covers_dorm = bool(getattr(scholarship, 'covers_dorm', True))
+        covers_tuition = bool(getattr(scholarship, 'covers_tuition', True))
+        covers_insurance = bool(getattr(scholarship, 'covers_insurance', True))
+
+        monthly_items = []
+
+        if live_on_campus:
+            if covers_dorm:
+                rent_cost = 0.0
+                rent_note = f"100% Free on-campus dormitory provided by scholarship (Value: ~{dorm_cost:.0f} RMB/mo)"
+                is_rent_covered = True
+            else:
+                rent_cost = dorm_cost
+                rent_note = f"On-campus student dormitory in {city_name}"
+                is_rent_covered = False
+
+            monthly_items.append({
+                "id": "dorm_rent",
+                "name": "University On-Campus Dormitory",
+                "amount_cny": rent_cost,
+                "amount_mad": round(rent_cost * cls.CNY_TO_MAD_RATE, 2),
+                "is_covered": is_rent_covered,
+                "note": rent_note,
+            })
+        else:
+            rent_cost = offcampus_cost
+            monthly_items.append({
+                "id": "offcampus_rent",
+                "name": f"Private Off-Campus Apartment Rental ({city_name})",
+                "amount_cny": rent_cost,
+                "amount_mad": round(rent_cost * cls.CNY_TO_MAD_RATE, 2),
+                "is_covered": False,
+                "note": f"Estimated single-room / studio rent in {city_name}",
+            })
+
+        # Food & transport
+        monthly_items.append({
+            "id": "food_transport",
+            "name": f"Food, Campus Dining & Public Transit ({city_name})",
+            "amount_cny": food_transport_cost,
+            "amount_mad": round(food_transport_cost * cls.CNY_TO_MAD_RATE, 2),
+            "is_covered": False,
+            "note": "Standard university canteen meals & public metro/bus",
+        })
+
+        total_monthly_expenses_cny = round(rent_cost + food_transport_cost, 2)
+        total_monthly_expenses_mad = round(total_monthly_expenses_cny * cls.CNY_TO_MAD_RATE, 2)
+
+        monthly_balance_cny = round(monthly_stipend_cny - total_monthly_expenses_cny, 2)
+        monthly_balance_mad = round(monthly_balance_cny * cls.CNY_TO_MAD_RATE, 2)
+        monthly_balance_usd = round(monthly_balance_cny * cls.CNY_TO_USD_RATE, 2)
+
+        is_surplus = monthly_balance_cny >= 0
+        if is_surplus:
+            status = "surplus"
+            status_label = "Monthly Savings (Surplus)"
+            status_description = (
+                f"Your scholarship stipend fully covers your daily life with "
+                f"+{monthly_balance_cny:.2f} CNY/month (+{monthly_balance_mad:.2f} MAD/month) in pocket savings."
+            )
+        else:
+            status = "deficit"
+            status_label = "Out-of-Pocket Monthly Support Needed"
+            status_description = (
+                f"You will need ~{abs(monthly_balance_cny):.2f} CNY/month "
+                f"(~{abs(monthly_balance_mad):.2f} MAD/month) to cover remaining housing and living expenses."
+            )
+
+        return {
+            "scholarship_id": getattr(scholarship, 'id', None),
+            "scholarship_title": getattr(scholarship, 'title', ''),
+            "university_name": uni_name,
+            "city": city_name,
+            "parameters": {
+                "includeFlight": include_flight,
+                "liveOnCampus": live_on_campus,
+            },
+            "financial_coverage": {
+                "covers_tuition": covers_tuition,
+                "covers_dorm": covers_dorm,
+                "covers_flight": covers_flight,
+                "covers_insurance": covers_insurance,
+                "monthly_stipend_cny": monthly_stipend_cny,
+                "monthly_stipend_mad": round(monthly_stipend_cny * cls.CNY_TO_MAD_RATE, 2),
+                "application_fee_cny": app_fee_cny,
+            },
+            "upfront_out_of_pocket": {
+                "total_cny": total_upfront_cny,
+                "total_mad": total_upfront_mad,
+                "total_usd": total_upfront_usd,
+                "summary": f"{total_upfront_cny:,.2f} CNY (~{total_upfront_mad:,.2f} MAD / ~${total_upfront_usd:,.2f} USD)",
+                "breakdown": upfront_items,
+            },
+            "monthly_living_balance": {
+                "stipend_cny": monthly_stipend_cny,
+                "stipend_mad": round(monthly_stipend_cny * cls.CNY_TO_MAD_RATE, 2),
+                "total_expenses_cny": total_monthly_expenses_cny,
+                "total_expenses_mad": total_monthly_expenses_mad,
+                "balance_cny": monthly_balance_cny,
+                "balance_mad": monthly_balance_mad,
+                "balance_usd": monthly_balance_usd,
+                "status": status,
+                "status_label": status_label,
+                "status_description": status_description,
+                "living_mode": "On-Campus Dormitory" if live_on_campus else "Private Off-Campus Rental",
+                "breakdown": monthly_items,
+            },
+            "city_baseline": {
+                "city_name": city_name,
+                "monthly_dorm_cost_cny": dorm_cost,
+                "monthly_offcampus_rent_cny": offcampus_cost,
+                "monthly_food_transport_cny": food_transport_cost,
+            },
+        }
+

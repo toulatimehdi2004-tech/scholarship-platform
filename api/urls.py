@@ -44,6 +44,8 @@ urlpatterns = [
     path('scholarships/<int:pk>/eligibility', views.scholarship_eligibility_view),
     path('scholarships/recommended/', views.scholarships_recommended_view, name='api-scholarships-recommended'),
     path('scholarships/recommended', views.scholarships_recommended_view),
+    path('scholarships/<int:pk>/cost-breakdown/', views.scholarship_cost_breakdown_view, name='api-scholarship-cost-breakdown'),
+    path('scholarships/<int:pk>/cost-breakdown', views.scholarship_cost_breakdown_view),
 
     # AI
     path('ai/chat/', views.AIChatView.as_view(), name='api-ai-chat'),

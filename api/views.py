@@ -78,7 +78,7 @@ def send_resilient_email(subject, plain_message, recipient_list, html_message=No
 
 from students.models import Student, StudentProfile, EmailVerification, SuccessStory, ExperienceReview
 from scholarships.models import University, Scholarship, CityLivingCost
-from scholarships.services import GpaConversionService, EligibilityService
+from scholarships.services import GpaConversionService, EligibilityService, CostCalculatorService
 from documents.models import Document
 from ai_assistant.models import (
     ApplicationTracker, ScholarshipMatch, AISuggestion
@@ -594,6 +594,17 @@ class ScholarshipViewSet(viewsets.ReadOnlyModelViewSet):
         """
         return scholarships_recommended_view(request._request)
 
+    @action(detail=True, methods=['get'], url_path='cost-breakdown', permission_classes=[AllowAny])
+    def cost_breakdown(self, request, pk=None):
+        """
+        GET /api/scholarships/{id}/cost-breakdown/
+        Query params:
+          ?includeFlight=true
+          ?liveOnCampus=true
+        """
+        scholarship = self.get_object()
+        return scholarship_cost_breakdown_view(request._request, scholarship.pk)
+
 
 def get_candidate_data_from_request(request):
     """Helper to collect candidate profile from authenticated user or query params."""
@@ -720,6 +731,47 @@ def scholarships_recommended_view(request):
         reverse=True
     )
     return Response(evaluated_list[:limit])
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def scholarship_cost_breakdown_view(request, pk):
+    """
+    GET /api/scholarships/{id}/cost-breakdown
+    Calculates upfront cash needed before arriving and monthly living balance.
+    Query params:
+      ?includeFlight=true&liveOnCampus=true
+    """
+    try:
+        scholarship = Scholarship.objects.select_related('university').get(pk=pk)
+    except Scholarship.DoesNotExist:
+        return Response({'error': f'Scholarship with ID {pk} not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    qp = getattr(request, 'query_params', None) or getattr(request, 'GET', {})
+
+    def parse_bool(val, default=True):
+        if val is None:
+            return default
+        s = str(val).lower().strip()
+        if s in ('true', '1', 'yes', 't'):
+            return True
+        if s in ('false', '0', 'no', 'f'):
+            return False
+        return default
+
+    flight_param = qp.get('includeFlight') or qp.get('include_flight') or qp.get('include-flight')
+    include_flight = parse_bool(flight_param, default=True)
+
+    campus_param = qp.get('liveOnCampus') or qp.get('live_on_campus') or qp.get('live-on-campus')
+    live_on_campus = parse_bool(campus_param, default=True)
+
+    result = CostCalculatorService.calculate(
+        scholarship=scholarship,
+        include_flight=include_flight,
+        live_on_campus=live_on_campus
+    )
+    return Response(result)
+
 
 
 # ── Universities ─────────────────────────────────────────────
