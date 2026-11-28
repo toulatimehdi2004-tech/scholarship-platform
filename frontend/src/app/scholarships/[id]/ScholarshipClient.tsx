@@ -38,6 +38,7 @@ import {
   ChevronDown,
   User as UserIcon,
   SlidersHorizontal,
+  Calculator,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -71,6 +72,7 @@ import AdmissionAnnouncements, {
 import ContactInformationCard from "@/components/ContactInformationCard";
 import FundingBreakdownCard from "@/components/FundingBreakdownCard";
 import AcceptanceOddsMeter from "@/components/AcceptanceOddsMeter";
+import RealCostCalculatorTab from "@/components/RealCostCalculatorTab";
 
 const ANN_STOP = new Set([
   "the", "a", "an", "at", "for", "of", "and", "in", "on", "to",
@@ -245,7 +247,7 @@ function parseApplicationInstructions(text: string): ParsedStep[] {
   return steps;
 }
 
-type DetailTab = "overview" | "eligibility" | "documents" | "roadmap" | "contact";
+type DetailTab = "overview" | "calculator" | "eligibility" | "documents" | "roadmap" | "contact";
 
 export default function ScholarshipClient() {
   const params = useParams();
@@ -752,6 +754,7 @@ export default function ScholarshipClient() {
           <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-6 overflow-x-auto scrollbar-none">
             {[
               { id: "overview", label: "🌟 Aperçu & Financement", icon: DollarSign },
+              { id: "calculator", label: "💰 Real Cost Calculator", icon: Calculator },
               { id: "eligibility", label: "🎯 Critères d'Éligibilité", icon: CheckCircle2 },
               { id: "documents", label: `📋 Pièces & Dossier (${docs.length})`, icon: FileText },
               { id: "roadmap", label: "🗺️ Étapes de Candidature", icon: Send },
@@ -840,6 +843,19 @@ export default function ScholarshipClient() {
                 type={scholarship.type}
                 stipendAmount={scholarship.stipend_amount}
               />
+            </motion.div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────
+              TAB: REAL COST CALCULATOR (Cash Needed & Monthly Balance)
+          ───────────────────────────────────────────────────────────── */}
+          {activeTab === "calculator" && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <RealCostCalculatorTab scholarship={scholarship} />
             </motion.div>
           )}
 
